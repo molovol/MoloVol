@@ -1,10 +1,9 @@
-#ifndef __BASE_H
+#ifndef BASE_H
 
-#define __BASE_H
+#define BASE_H
 
 #include <wx/filectrl.h>
 #include <wx/wfstream.h>
-#include "test.h"
 
 class MainApp: public wxApp
 {
@@ -22,7 +21,7 @@ class MainFrame: public wxFrame
 
     wxPanel *browsePanel;
     wxButton *browseButton;
-    wxTextCtrl *filenameText;
+    wxTextCtrl *filepathText;
 
     // methods to initialise gui
     void InitTopLevel();
@@ -36,6 +35,12 @@ class MainFrame: public wxFrame
     void OnBrowse(wxCommandEvent& event);
     
     DECLARE_EVENT_TABLE()
+
+    // other methods
+    void clearOutput();
+    void printToOutput(std::string& text);
+    void appendOutput(std::string& text);
+
 };
 
 enum
@@ -51,10 +56,12 @@ enum
 };
 
 //DECLARE_APP(MainApp)
-
+/*
 void printToOutput(MainFrame* myFrame, std::string& toPrint){
   myFrame->outputText->SetLabel(toPrint);
 }
+*/
+
 
 
 #endif

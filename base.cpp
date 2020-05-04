@@ -1,8 +1,13 @@
 #include <wx/wxprec.h>
+#include <vector>
+
 #ifndef WX_PRECOMP
 #  include <wx/wx.h>
 #endif
+
 #include "base.h"
+#include "test.h"
+#include "filereading.h"
 
 IMPLEMENT_APP(MainApp)
 
@@ -50,7 +55,7 @@ void MainFrame::InitBrowsePanel(){
   wxBoxSizer *browserSizer = new wxBoxSizer(wxHORIZONTAL);
   // widgets to sizer
   browserSizer->Add(browseButton,1,wxALIGN_LEFT | wxALIGN_CENTRE_VERTICAL | wxALL,10);
-  browserSizer->Add(filenameText,5,wxALIGN_RIGHT | wxALL,10);
+  browserSizer->Add(filepathText,5,wxALIGN_RIGHT | wxALL,10);
   // set sizer
   browsePanel->SetSizer(browserSizer);
 }
@@ -62,6 +67,23 @@ void MainFrame::InitSandr(){
 
   sandrPanel->SetSizer(sandrSizer);
 }
+
+//////////////////////////////////
+// METHODS FOR MANIPULATING GUI //
+//////////////////////////////////
+
+void MainFrame::clearOutput(){
+  outputText->SetLabel("");
+}
+
+void MainFrame::printToOutput(std::string& text){
+  outputText->SetLabel(text);
+}
+
+void MainFrame::appendOutput(std::string& text){
+  outputText->SetLabel(outputText->GetLabel() + text);
+}
+
 
 ////////////////////////////
 // MAIN FRAME CONSTRUCTOR //
@@ -104,10 +126,10 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
      wxDefaultSize, 
      0,
      wxDefaultValidator,
-     "browse filename"
+     "browse filepath"
     );
 
-  filenameText = new wxTextCtrl
+  filepathText = new wxTextCtrl
     (browsePanel,
      TEXT_Filename,
      wxEmptyString,
@@ -117,28 +139,10 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
      wxDefaultValidator,
      "file to use"
     );
-  //filenameText->SetDefaultStyle(wxTextAttr(wxNullColour, *wxWHITE));
-  filenameText->SetBackgroundColour(wxColour(255,255,255));
+  //filepathText->SetDefaultStyle(wxTextAttr(wxNullColour, *wxWHITE));
+  filepathText->SetBackgroundColour(wxColour(255,255,255));
 
   InitBrowsePanel();
-
-/*  
-  browseFile = new wxFileCtrl
-    (browsePanel,
-     FILE_Browse,
-     wxEmptyString,
-     wxEmptyString,
-     wxFileSelectorDefaultWildcardStr,
-     wxFC_DEFAULT_STYLE,
-     wxDefaultPosition,
-     wxDefaultSize,
-     wxFileCtrlNameStr
-    );
-
-  InitFileBrowser();
-*/
-  
-
 
   // Text and Button in Panel 
   calcButton = new wxButton
@@ -180,16 +184,23 @@ void MainFrame::OnExit(wxCommandEvent& event)
 void MainFrame::OnPrint(wxCommandEvent& event)
 {
   std::string text = "fuck you";
-  printToOutput(this,text);
+  printToOutput(text);
   return;
 }
 
 void MainFrame::OnCalc(wxCommandEvent& event){
-  int a = 1;
-  int b = 2;
-  int c = calcSum(a, b);
-  std::string c_str = std::to_string(c); 
-  printToOutput(this,c_str);
+  std::string filepath = (filepathText->GetValue()).ToStdString();
+  printToOutput(filepath);
+  
+  // so far only xyz files allowed
+  std::vector<Atom> atoms = readAtomsFromFile(filepath);
+  
+  clearOutput();
+  for (int i = 0; i< atoms.size(); i++){
+    std::string out = "Atom " + std::to_string(i) + ": " + atoms[i].symbol + "\n";
+    appendOutput(out);
+  }
+
   return;
 }
 
@@ -212,12 +223,12 @@ void MainFrame::OnBrowse(wxCommandEvent& event){
     
   // proceed loading the file chosen by the user;
   wxFileInputStream input_stream(openFileDialog.GetPath());
-  // if filename is invalid
+  // if filepath is invalid
   if (!input_stream.IsOk())
   {
     wxLogError("Cannot open file '%s'.", openFileDialog.GetPath());
     return;
   }
-  filenameText->SetLabel(openFileDialog.GetPath());
+  filepathText->SetLabel(openFileDialog.GetPath());
   return;
 }
