@@ -62,7 +62,7 @@ void MainFrame::InitBrowsePanel(){
 
 void MainFrame::InitSandr(){
   wxBoxSizer *sandrSizer = new wxBoxSizer(wxHORIZONTAL);
-  sandrSizer->Add(outputText,3,wxALIGN_LEFT | wxALL,10);
+  sandrSizer->Add(outputText,5,wxALIGN_LEFT | wxALL,10);
   sandrSizer->Add(calcButton,1,wxALIGN_RIGHT | wxALIGN_CENTRE_VERTICAL | wxALL,10);
 
   sandrPanel->SetSizer(sandrSizer);
@@ -73,15 +73,15 @@ void MainFrame::InitSandr(){
 //////////////////////////////////
 
 void MainFrame::clearOutput(){
-  outputText->SetLabel("");
+  outputText->SetValue("");
 }
 
 void MainFrame::printToOutput(std::string& text){
-  outputText->SetLabel(text);
+  outputText->SetValue(text);
 }
 
 void MainFrame::appendOutput(std::string& text){
-  outputText->SetLabel(outputText->GetLabel() + text);
+  outputText->SetValue(outputText->GetValue() + text);
 }
 
 
@@ -156,16 +156,17 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
      "begin calculation"
     );
 
-  outputText = new wxStaticText
+  outputText = new wxTextCtrl
     (sandrPanel,
      TEXT_Output,
-     "Output",
+     _("Output"),
      wxDefaultPosition,
-     wxSize(250,60),
-     0,
+     wxSize(-1,90), // height of the output text control
+     wxTE_MULTILINE | wxTE_READONLY,
+     wxDefaultValidator,
      "output result"
     );
-  outputText->SetBackgroundColour(wxColour(255,255,255));
+  outputText->SetBackgroundColour(wxColour(125,125,125));
   
   InitSandr();  
 
@@ -190,6 +191,7 @@ void MainFrame::OnPrint(wxCommandEvent& event)
 
 void MainFrame::OnCalc(wxCommandEvent& event){
   std::string filepath = (filepathText->GetValue()).ToStdString();
+  outputText->SetLabel(filepath);
   printToOutput(filepath);
   
   // so far only xyz files allowed

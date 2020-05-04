@@ -15,13 +15,13 @@ class MainFrame: public wxFrame
 {
   public:
     MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
-    wxPanel *sandrPanel;
-    wxStaticText *outputText;
-    wxButton *calcButton;
+    wxPanel* sandrPanel;
+    wxTextCtrl* outputText;
+    wxButton* calcButton;
 
-    wxPanel *browsePanel;
-    wxButton *browseButton;
-    wxTextCtrl *filepathText;
+    wxPanel* browsePanel;
+    wxButton* browseButton;
+    wxTextCtrl* filepathText;
 
     // methods to initialise gui
     void InitTopLevel();
@@ -56,11 +56,6 @@ enum
 };
 
 //DECLARE_APP(MainApp)
-/*
-void printToOutput(MainFrame* myFrame, std::string& toPrint){
-  myFrame->outputText->SetLabel(toPrint);
-}
-*/
 
 
 
