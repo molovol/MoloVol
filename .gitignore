@@ -2,5 +2,6 @@ Makefile
 MakefileOld
 ballpit
 *.o
+*.swp
 inputfile/*
 .DS_store
