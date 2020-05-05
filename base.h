@@ -14,6 +14,11 @@ class MainApp: public wxApp
 class MainFrame: public wxFrame
 {
   public:
+    // methods for controller communication
+    void clearOutput();
+    void printToOutput(std::string& text);
+    void appendOutput(std::string& text);
+
     MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
     wxPanel* sandrPanel;
     wxTextCtrl* outputText;
@@ -37,9 +42,6 @@ class MainFrame: public wxFrame
     DECLARE_EVENT_TABLE()
 
     // other methods
-    void clearOutput();
-    void printToOutput(std::string& text);
-    void appendOutput(std::string& text);
 
 };
 

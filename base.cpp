@@ -1,13 +1,12 @@
 #include <wx/wxprec.h>
-#include <vector>
 
 #ifndef WX_PRECOMP
 #  include <wx/wx.h>
 #endif
 
 #include "base.h"
-#include "test.h"
-#include "filereading.h"
+#include "controller.h"
+#include <vector>
 
 IMPLEMENT_APP(MainApp)
 
@@ -18,7 +17,7 @@ IMPLEMENT_APP(MainApp)
 bool MainApp::OnInit()
 {
   // initialise a new MainFrame object and have MainWin point to that object
-  MainFrame *MainWin = new MainFrame(_("Hello World!"), wxDefaultPosition, wxDefaultSize);
+  MainFrame* MainWin = new MainFrame(_("Hello World!"), wxDefaultPosition, wxDefaultSize);
   // call member function of the MainFrame object to set visibility
   MainWin->Show(true);
   SetTopWindow(MainWin);
@@ -84,7 +83,6 @@ void MainFrame::appendOutput(std::string& text){
   outputText->SetValue(outputText->GetValue() + text);
 }
 
-
 ////////////////////////////
 // MAIN FRAME CONSTRUCTOR //
 ////////////////////////////
@@ -92,6 +90,8 @@ void MainFrame::appendOutput(std::string& text){
 MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size)
   : wxFrame((wxFrame*) NULL, -1, title, pos, size)
 {
+  Ctrl::getInstance()->registerView(this);
+
   // Panel in Frame
   // construct file browser panel
   browsePanel = new wxPanel
@@ -156,53 +156,54 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
      "begin calculation"
     );
 
-  outputText = new wxTextCtrl
-    (sandrPanel,
-     TEXT_Output,
-     _("Output"),
-     wxDefaultPosition,
-     wxSize(-1,90), // height of the output text control
-     wxTE_MULTILINE | wxTE_READONLY,
-     wxDefaultValidator,
-     "output result"
-    );
-  outputText->SetBackgroundColour(wxColour(125,125,125));
-  
-  InitSandr();  
+    outputText = new wxTextCtrl
+      (sandrPanel,
+       TEXT_Output,
+       _("Output"),
+       wxDefaultPosition,
+       wxSize(-1,90), // height of the output text control
+       wxTE_MULTILINE | wxTE_READONLY,
+       wxDefaultValidator,
+       "output result"
+      );
+    outputText->SetBackgroundColour(wxColour(125,125,125));
+    
+    InitSandr();  
 
 
-};
+  };
 
-////////////////////////////////
-// METHODS FOR EVENT HANDLING //
-////////////////////////////////
+  ////////////////////////////////
+  // METHODS FOR EVENT HANDLING //
+  ////////////////////////////////
 
-void MainFrame::OnExit(wxCommandEvent& event)
-{
-  this->Close(TRUE);
-}
+  void MainFrame::OnExit(wxCommandEvent& event)
+  {
+    this->Close(TRUE);
+  }
 
-void MainFrame::OnPrint(wxCommandEvent& event)
-{
-  std::string text = "fuck you";
-  printToOutput(text);
-  return;
-}
+  void MainFrame::OnPrint(wxCommandEvent& event)
+  {
+    std::string text = "fuck you";
+    printToOutput(text);
+    return;
+  }
 
-void MainFrame::OnCalc(wxCommandEvent& event){
-  std::string filepath = (filepathText->GetValue()).ToStdString();
-  outputText->SetLabel(filepath);
-  printToOutput(filepath);
-  
-  // so far only xyz files allowed
-  std::vector<Atom> atoms = readAtomsFromFile(filepath);
-  
+  void MainFrame::OnCalc(wxCommandEvent& event){
+      
+    std::string filepath = (filepathText->GetValue()).ToStdString();
+    printToOutput(filepath);
+    
+    // so far only xyz files allowed
+    Ctrl::getInstance()->runCalculation(filepath);
+//  std::vector<Atom> atoms = readAtomsFromFile(filepath);
+  /*
   clearOutput();
   for (int i = 0; i< atoms.size(); i++){
     std::string out = "Atom " + std::to_string(i) + ": " + atoms[i].symbol + "\n";
     appendOutput(out);
   }
-
+*/
   return;
 }
 
