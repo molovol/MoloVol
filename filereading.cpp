@@ -1,10 +1,11 @@
+#include "model.h"
+#include "atom.h"
 #include <string>
 #include <vector>
 #include <iostream>
 #include <fstream>
 #include <sstream> // stringstream
 #include <cassert>
-#include "filereading.h"
 
 // split line into substrings when separated by whitespaces
 static inline std::vector<std::string> splitLine(std::string& line){ 
@@ -13,7 +14,8 @@ static inline std::vector<std::string> splitLine(std::string& line){
   return substrings;
 }
 
-std::vector<Atom> readAtomsFromFile(std::string& filepath){
+//std::vector<Atom> readAtomsFromFile(std::string& filepath){
+void Model::readAtomsFromFile(std::string& filepath){
 
   int n_atom;
   std::vector<Atom> list_of_atoms; // will contain the atoms
@@ -49,6 +51,7 @@ std::vector<Atom> readAtomsFromFile(std::string& filepath){
   inp_file.close();
   // check if number of atoms matches size of the vector containing the atoms
   assert(n_atom == list_of_atoms.size());
+  this->atoms = list_of_atoms;
   
-  return list_of_atoms;
+  return;
 }
