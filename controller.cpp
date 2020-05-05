@@ -1,7 +1,7 @@
 
 #include "controller.h"
 #include "base.h"
-#include "atom.h"
+#include "atom.h" // i don't know why
 #include "model.h"
 #include <vector>
 
