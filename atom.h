@@ -2,7 +2,8 @@
 
 #define ATOM_H
 
-#include<array>
+#include <array>
+#include <iostream>
 
 static inline unsigned int symbol_to_number(const std::string& symbol);
 
