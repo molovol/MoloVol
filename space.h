@@ -15,7 +15,7 @@ class Space{
     std::array <double,3> cart_min;
     std::array <double,3> cart_max;
     // member function for constructor
-    inline void findMinMaxFromAtoms(std::vector<Atom> &atoms,std::array<double,3> &cart_min, std::array<double,3> &cart_max);
+    void findMinMaxFromAtoms(std::vector<Atom> &atoms,std::array<double,3> &cart_min, std::array<double,3> &cart_max);
 };
 
 #endif

@@ -33,12 +33,14 @@ bool Ctrl::runCalculation(std::string& filepath){
   
   // read atoms from file and save a vector containing the atoms
   current_calculation->readAtomsFromFile(filepath);
-  
+  std::string radii_file = "./inputfile/radii.txt"; //* this has to be generalised
+//  current_calculation->lookUpRadii(radii_file);
+
   // set space size (size of unit cell/ box containing all atoms)
-  const double grid_size = 0.1;
-  // find min and max of coordinates
   current_calculation->defineCell();
-//  current_calculation->debug();
+  
+  const double grid_size = 0.1;
+  
 
   // display to user
   std::string text = "Done";

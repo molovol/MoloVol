@@ -19,7 +19,7 @@ std::array<double,3> Space::getMax(){
 // member function loops through all atoms (previously extracted
 // from file) and saves the minimum and maximum positions in all
 // three cartesian directions out of all atoms.
-inline void Space::findMinMaxFromAtoms
+void Space::findMinMaxFromAtoms
   (std::vector<Atom> &atoms,
    std::array<double,3> &cart_min, 
    std::array<double,3> &cart_max)

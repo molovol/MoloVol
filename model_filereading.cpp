@@ -55,3 +55,8 @@ void Model::readAtomsFromFile(std::string& filepath){
   
   return;
 }
+
+/*void Model::lookUpRadii(std::string& filepath){
+  
+  return;
+}*/
