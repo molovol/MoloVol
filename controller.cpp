@@ -28,12 +28,18 @@ Ctrl* Ctrl::getInstance(){
 }
     
 bool Ctrl::runCalculation(std::string& filepath){
+  // controller receives:
+  //  filepath to xyz file
+  //  filepath to radii file
+
   // create an instance of the model class
   current_calculation = new Model();
   
   // read atoms from file and save a vector containing the atoms
+  std::string radii_file = "./inputfile/radii.txt"; //* this has to be generalised. maybe file selection for user?
+  
+  current_calculation->readRadiiFromFile(radii_file);
   current_calculation->readAtomsFromFile(filepath);
-  std::string radii_file = "./inputfile/radii.txt"; //* this has to be generalised
 //  current_calculation->lookUpRadii(radii_file);
 
   // set space size (size of unit cell/ box containing all atoms)

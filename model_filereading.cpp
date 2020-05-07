@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream> // stringstream
 #include <cassert>
+#include <exception>
 
 // split line into substrings when separated by whitespaces
 static inline std::vector<std::string> splitLine(std::string& line){ 
@@ -14,7 +15,43 @@ static inline std::vector<std::string> splitLine(std::string& line){
   return substrings;
 }
 
-//std::vector<Atom> readAtomsFromFile(std::string& filepath){
+// reads radii from a file specified by the filepath and 
+// stores them in an unordered map that is an attribute of
+// the Model object
+void Model::readRadiiFromFile(std::string& filepath){
+ 
+  //* add case handling for when file has already been read
+  //* if map empty: ask user via dialog boy if they want to
+  //* reimport the file
+  //* make a function "consultUser(string)"
+  //if(radii.empty()){std::cout << "empty" << std::endl;}
+
+  std::string line;
+  std::ifstream inp_file(filepath);
+
+  while(getline(inp_file,line)){
+    std::vector<std::string> substrings = splitLine(line);
+    if(substrings.size() == 2){
+      radii[substrings[0]] = std::stod(substrings[1]);
+    }
+  }
+  return;
+}
+
+// returns the radius of an atom with a given symbol
+inline double Model::findRadiusOfAtom(const std::string& symbol){
+  //* add exception handling for when no radius was found:
+  //if(radii[symbol == 0]){
+  //  throw ...;
+  //}
+  //else{ return...;}
+  return radii[symbol];
+}
+
+inline double Model::findRadiusOfAtom(const Atom& at){
+  return findRadiusOfAtom(at.symbol);
+}
+
 void Model::readAtomsFromFile(std::string& filepath){
 
   int n_atom;
@@ -41,8 +78,12 @@ void Model::readAtomsFromFile(std::string& filepath){
     else { // subsequent lines contain atom positional data
       std::vector<std::string> substrings = splitLine(line);
 
-      // create new atom and add to storage vector (assumes format: Element_Symbol x y z)
-      Atom at = Atom(std::stod(substrings[1]), std::stod(substrings[2]), std::stod(substrings[3]), substrings[0]);
+      // create new atom and add to storage vector (assumes file format: Element_Symbol x y z)
+      Atom at = Atom(std::stod(substrings[1]), 
+                     std::stod(substrings[2]), 
+                     std::stod(substrings[3]), 
+                     substrings[0], 
+                     radii[substrings[0]]);
       list_of_atoms.push_back(at);
     }
     line_counter++;

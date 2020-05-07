@@ -8,11 +8,11 @@
 static inline unsigned int symbolToNumber(const std::string& symbol);
 
 struct Atom{
-  Atom(const double& x_inp, const double& y_inp, const double& z_inp, const std::string& symbol_inp)
+  Atom(const double& x_inp, const double& y_inp, const double& z_inp, const std::string& symbol_inp, const double& rad_inp)
     : pos_x(x_inp), 
       pos_y(y_inp), 
       pos_z(z_inp), 
-      rad(0),
+      rad(rad_inp),
       number(symbolToNumber(symbol_inp)), 
       symbol(symbol_inp) {}
 
@@ -20,6 +20,7 @@ struct Atom{
   unsigned int number;
   std::string symbol;
 };
+
 
 static inline unsigned int symbolToNumber(const std::string& symbol){
   const std::array<std::string,18> element_symbols = {
