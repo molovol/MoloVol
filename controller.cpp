@@ -45,9 +45,9 @@ bool Ctrl::runCalculation(std::string& filepath){
   // set space size (size of unit cell/ box containing all atoms)
   current_calculation->defineCell();
   
-  const double grid_size = 0.1;
+  //const double grid_step = 0.1;
+  //current_calculation->calcVolume(grid_step);
   
-
   // display to user
   std::string text = "Done";
   gui->printToOutput(text);
