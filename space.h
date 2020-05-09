@@ -16,8 +16,11 @@ class Space{
     std::array <double,3> getMax();
     std::array <double,3> getSize();
 
-    Voxel getElement(const size_t &x, const size_t &y, const size_t &z);
-    Voxel getElement(const size_t &i);
+    Voxel& getElement(const size_t &x, const size_t &y, const size_t &z);
+    Voxel& getElement(const size_t &i);
+
+    void placeAtomsInGrid(const std::vector<Atom>&);
+    double getVolume();
     
   private:
     std::array <double,3> cart_min; // this is also the "origin" of the space
@@ -27,7 +30,11 @@ class Space{
 
     std::vector<Voxel> grid;
     std::array<size_t,3> n_gridsteps;
-    void setGrid(const double &grid_step, const int &depth);
+    void setGrid();
+    //void setGrid(const double &grid_step, const int &max_depth);
+
+    double grid_size;
+    int max_depth;
     
 };
 

@@ -4,29 +4,16 @@
 #include <array>
 //#include <cmath>
 
-void Model::defineCell(const double& grid_step, const int& depth){
-  cell = new Space(atoms, grid_step, depth);
+void Model::defineCell(const double& grid_step, const int& max_depth){
+  cell = new Space(atoms, grid_step, max_depth);
   return;
 }
 
-/*
-void Model::calcVolume(const double& grid_step){
-  //cell
-  //atoms
-  //grid_step
-  //octree_depth
-
-  // determine grid steps in all directions
-  std::array<size_t,3> = n_steps;
-  for(int dim = 0; dim < 3; dim++){
-    n_steps[dim] = std::ceil( (cell->getSize())[dim] / grid_step );
-  }
-  
-  
-
+void Model::calcVolume(){
+  cell->placeAtomsInGrid(atoms);
+  cell->getVolume();
   return;
 }
-*/
 
 void Model::debug(){
   std::array<double,3> cell_min = cell->getMin();

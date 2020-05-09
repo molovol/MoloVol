@@ -1,8 +1,41 @@
 
 #include "space.h"
 #include "atom.h"
+#include "voxel.h"
 #include <cmath>
 #include <cassert>
+
+/////////////////
+// VOLUME COMP //
+/////////////////
+
+void Space::placeAtomsInGrid(const std::vector<Atom> &atoms){
+  // calculate position of first voxel
+  std::array<double,3> vxl_origin = getOrigin();
+  // origin of the cell has to be offset by half the grid size
+  for(int dim = 0; dim < 3; dim++){
+    vxl_origin[dim] += grid_size/2;
+  }
+  
+  // calculate side length of top level voxel
+  double vxl_dist = grid_size * pow(2,max_depth);
+  
+  for(size_t x = 0; x < n_gridsteps[0]; x++){
+    for(size_t y = 0; y < n_gridsteps[1]; y++){
+      for(size_t z = 0; z < n_gridsteps[2]; z++){
+        Voxel& vxl = getElement(x,y,z);
+        std::array<double,3> vxl_pos = 
+          {vxl_origin[0] + vxl_dist * x, vxl_origin[1] + vxl_dist * y, vxl_origin[2] + vxl_dist * z};
+        vxl.determineType(atoms, vxl_pos, grid_size, max_depth);
+      }
+    }
+  }      
+  return;
+}
+
+double Space::getVolume(){
+  return 0;
+}
 
 //////////////////////
 // ACCESS FUNCTIONS //
@@ -28,12 +61,12 @@ std::array<double,3> Space::getSize(){
   return size;
 }
 
-Voxel Space::getElement(const size_t &i){
+Voxel& Space::getElement(const size_t &i){
   assert(i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]); // consider removing this for better performance
   return grid[i];
 }
 
-Voxel Space::getElement(const size_t &x, const size_t &y, const size_t &z){
+Voxel& Space::getElement(const size_t &x, const size_t &y, const size_t &z){
   // check if element is out of bounds
   assert(x < n_gridsteps[0]);
   assert(y < n_gridsteps[1]);
@@ -41,13 +74,15 @@ Voxel Space::getElement(const size_t &x, const size_t &y, const size_t &z){
   return grid[z * n_gridsteps[0] * n_gridsteps[1] + y * n_gridsteps[0] + x];
 }
 
+
 /////////////////
 // CONSTRUCTOR //
 /////////////////
 
-Space::Space(std::vector<Atom> &atoms, const double& grid_step, const int& depth){
+Space::Space(std::vector<Atom> &atoms, const double& bottom_level_voxel_dist, const int& depth)
+  :grid_size(bottom_level_voxel_dist), max_depth(depth){
   setBoundaries(atoms);
-  setGrid(grid_step, depth);
+  setGrid();
 }
 
 ///////////////////////////////
@@ -97,11 +132,13 @@ void Space::setBoundaries
   return;
 }
 
-void Space::setGrid(const double &grid_step, const int &depth){
+// based on the grid step and the octree max_depth, this function produces a
+// 3D grid (in form of a 1D vector) that contains all top level voxels.
+void Space::setGrid(){
   size_t n_voxels = 1;
   
   for(int dim = 0; dim < 3; dim++){
-    n_gridsteps[dim] = std::ceil (std::ceil( (getSize())[dim] / grid_step ) / std::pow(2,depth) );
+    n_gridsteps[dim] = std::ceil (std::ceil( (getSize())[dim] / grid_size ) / std::pow(2,max_depth) );
     n_voxels *= n_gridsteps[dim];
   }
   

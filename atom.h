@@ -19,6 +19,10 @@ struct Atom{
   double pos_x, pos_y, pos_z, rad;
   unsigned int number;
   std::string symbol;
+
+  std::array<double,3> getPos(){
+    return {pos_x, pos_y, pos_z};
+  }
 };
 
 
