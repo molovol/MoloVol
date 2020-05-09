@@ -1,6 +1,8 @@
 
 #include "space.h"
 #include "atom.h"
+#include <cmath>
+#include <cassert>
 
 //////////////////////
 // ACCESS FUNCTIONS //
@@ -26,12 +28,31 @@ std::array<double,3> Space::getSize(){
   return size;
 }
 
+Voxel Space::getElement(const size_t &i){
+  assert(i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]); // consider removing this for better performance
+  return grid[i];
+}
+
+Voxel Space::getElement(const size_t &x, const size_t &y, const size_t &z){
+  // check if element is out of bounds
+  assert(x < n_gridsteps[0]);
+  assert(y < n_gridsteps[1]);
+  assert(z < n_gridsteps[2]);
+  return grid[z * n_gridsteps[0] * n_gridsteps[1] + y * n_gridsteps[0] + x];
+}
+
 /////////////////
 // CONSTRUCTOR //
 /////////////////
 
-Space::Space(std::vector<Atom> &atoms){
+Space::Space(std::vector<Atom> &atoms, const double& grid_step, const int& depth){
   setBoundaries(atoms);
+  setGrid(grid_step, depth);
+}
+
+Space::Space(std::vector<Atom> &atoms){//, const double &grid_step){
+  setBoundaries(atoms);
+//  setGrid(grid_step);
 }
 
 ///////////////////////////////
@@ -74,11 +95,25 @@ void Space::setBoundaries
     }
   }
   // expand boundaries by a little more than the largest atom found
-  std::cout << "Max Radius: " << max_radius << std::endl;
   for(int dim = 0; dim < 3; dim++){ 
     cart_min[dim] -= (1.1 * max_radius);
     cart_max[dim] += (1.1 * max_radius);    
   }
+  return;
+}
+
+void Space::setGrid(const double &grid_step, const int &depth){
+  size_t n_voxels = 1;
+  
+  for(int dim = 0; dim < 3; dim++){
+    n_gridsteps[dim] = std::ceil (std::ceil( (getSize())[dim] / grid_step ) / std::pow(2,depth) );
+    n_voxels *= n_gridsteps[dim];
+  }
+  
+  for(size_t i = 0; i < n_voxels; i++){
+    grid.push_back(Voxel());
+  }
+  
   return;
 }
 

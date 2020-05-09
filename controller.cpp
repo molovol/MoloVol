@@ -40,12 +40,13 @@ bool Ctrl::runCalculation(std::string& filepath){
   
   current_calculation->readRadiiFromFile(radii_file);
   current_calculation->readAtomsFromFile(filepath);
-//  current_calculation->lookUpRadii(radii_file);
 
   // set space size (size of unit cell/ box containing all atoms)
-  current_calculation->defineCell();
+  const double grid_step = 0.1;
+  const int depth = 4;
+  current_calculation->defineCell(grid_step, depth);
+  //current_calculation->defineCell();
   
-  //const double grid_step = 0.1;
   //current_calculation->calcVolume(grid_step);
   
   // display to user
