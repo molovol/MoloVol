@@ -50,11 +50,6 @@ Space::Space(std::vector<Atom> &atoms, const double& grid_step, const int& depth
   setGrid(grid_step, depth);
 }
 
-Space::Space(std::vector<Atom> &atoms){//, const double &grid_step){
-  setBoundaries(atoms);
-//  setGrid(grid_step);
-}
-
 ///////////////////////////////
 // FUNCTIONS FOR CONSTRUCTOR //
 ///////////////////////////////

@@ -9,16 +9,12 @@ void Model::defineCell(const double& grid_step, const int& depth){
   return;
 }
 
-void Model::defineCell(){
-  cell = new Space(atoms);
-}
 /*
 void Model::calcVolume(const double& grid_step){
   //cell
   //atoms
   //grid_step
   //octree_depth
-  octree_depth = 4; // top_level_voxel.side_length = 2^4 * bottom_level_voxel.side_length
 
   // determine grid steps in all directions
   std::array<size_t,3> = n_steps;
