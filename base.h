@@ -37,6 +37,8 @@ class MainFrame: public wxFrame
     void InitTopLevel();
     void InitSandr();
     void InitBrowsePanel();
+    void InitAtomfilePanel(); 
+    void InitRadiusfilePanel();  
     void InitFilePanel(wxPanel* panel, wxButton* button, wxTextCtrl* text);
 
     // methods to handle events
@@ -71,7 +73,5 @@ enum
 };
 
 //DECLARE_APP(MainApp)
-
-
 
 #endif
