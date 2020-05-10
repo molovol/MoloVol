@@ -34,6 +34,17 @@ void Space::placeAtomsInGrid(const std::vector<Atom> &atoms){
 }
 
 double Space::getVolume(){
+ /* 
+  for(size_t z = 0; z < n_gridsteps[2]; z++){
+    for(size_t y = 0; y < n_gridsteps[1]; y++){
+      for(size_t x = 0; x < n_gridsteps[0]; x++){
+        std::cout << getElement(x,y,z).getType();
+      }
+      std::cout << std::endl;
+    }
+    std::cout << std::endl;
+  }
+  */
   return 0;
 }
 
