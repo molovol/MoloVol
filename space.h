@@ -18,6 +18,7 @@ class Space{
 
     Voxel& getElement(const size_t &x, const size_t &y, const size_t &z);
     Voxel& getElement(const size_t &i);
+    void printGrid();
 
     void placeAtomsInGrid(const std::vector<Atom>&);
     double getVolume();

@@ -91,3 +91,25 @@ void Voxel::determineType
   }
   return;
 }
+
+///////////
+// TALLY //
+///////////
+
+size_t Voxel::tallyVoxelsOfType(const char volume_type, const int max_depth){
+  // if voxel is of type "mixed" (i.e. data vector is not empty)
+  if(!data.empty()){
+    // then total number of voxels is given by tallying all subvoxels
+    size_t total = 0;
+    for(int i = 0; i < 8; i++){
+      total += data[i].tallyVoxelsOfType(volume_type, max_depth-1);
+    }
+    return total;
+  }
+  // if voxel is of the type of interest, tally the voxel in units of bottom level voxels
+  else if(type == volume_type){
+    return pow(pow(2,max_depth),3); // return number of bottom level voxels
+  }
+  // if neither empty nor of the type of interest, then the voxel doesn't count towards the total
+  return 0;
+}

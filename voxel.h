@@ -16,6 +16,7 @@ class Voxel{
        std::array<double,3> pos,
        const double& grid_size,
        const double max_depth);
+    size_t tallyVoxelsOfType(const char volume_type, const int max_depth);
 
   private:
     std::vector<Voxel> data; // empty or exactly 8 elements

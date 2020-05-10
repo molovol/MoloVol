@@ -34,18 +34,14 @@ void Space::placeAtomsInGrid(const std::vector<Atom> &atoms){
 }
 
 double Space::getVolume(){
- /* 
-  for(size_t z = 0; z < n_gridsteps[2]; z++){
-    for(size_t y = 0; y < n_gridsteps[1]; y++){
-      for(size_t x = 0; x < n_gridsteps[0]; x++){
-        std::cout << getElement(x,y,z).getType();
-      }
-      std::cout << std::endl;
-    }
-    std::cout << std::endl;
+  // calc Volume
+  size_t total = 0;
+  for(size_t i = 0; i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]; i++){ // loop through all top level voxels
+    // tally bottom level voxels
+    total += getElement(i).tallyVoxelsOfType('a',max_depth);
   }
-  */
-  return 0;
+  double unit_volume = pow(grid_size,3);
+  return unit_volume * total;
 }
 
 //////////////////////
@@ -83,6 +79,19 @@ Voxel& Space::getElement(const size_t &x, const size_t &y, const size_t &z){
   assert(y < n_gridsteps[1]);
   assert(z < n_gridsteps[2]);
   return grid[z * n_gridsteps[0] * n_gridsteps[1] + y * n_gridsteps[0] + x];
+}
+
+void Space::printGrid(){
+  for(size_t z = 0; z < n_gridsteps[2]; z++){
+    for(size_t y = 0; y < n_gridsteps[1]; y++){
+      for(size_t x = 0; x < n_gridsteps[0]; x++){
+        std::cout << getElement(x,y,z).getType();
+      }
+      std::cout << std::endl;
+    }
+    std::cout << std::endl;
+  }
+  return;
 }
 
 
