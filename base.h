@@ -4,6 +4,7 @@
 
 #include <wx/filectrl.h>
 #include <wx/wfstream.h>
+#include <iostream>
 
 class MainApp: public wxApp
 {
@@ -25,19 +26,27 @@ class MainFrame: public wxFrame
     wxButton* calcButton;
 
     wxPanel* browsePanel;
-    wxButton* browseButton;
-    wxTextCtrl* filepathText;
+      wxPanel* atomfilePanel;
+        wxButton* browseButton;
+        wxTextCtrl* filepathText;
+      wxPanel* radiusfilePanel;
+        wxButton* radiusButton;
+        wxTextCtrl* radiuspathText;
 
     // methods to initialise gui
     void InitTopLevel();
     void InitSandr();
     void InitBrowsePanel();
+    void InitFilePanel(wxPanel* panel, wxButton* button, wxTextCtrl* text);
 
     // methods to handle events
     void OnExit(wxCommandEvent& event);
     void OnPrint(wxCommandEvent& event);
     void OnCalc(wxCommandEvent& event);
-    void OnBrowse(wxCommandEvent& event);
+    //void OnBrowse(wxCommandEvent& event);
+    void OnAtomBrowse(wxCommandEvent& event);
+    void OnRadiusBrowse(wxCommandEvent& event);
+    void OnBrowse(std::string& filetype, wxTextCtrl* textbox);
     
     DECLARE_EVENT_TABLE()
 
@@ -52,9 +61,13 @@ enum
   BUTTON_Calc,
   PANEL_Sandr,
   //FILE_Browse,
-  BUTTON_Browse,
-  TEXT_Filename,
-  PANEL_Browse
+  PANEL_Browse,
+    PANEL_Atomfile,
+      BUTTON_Browse,
+      TEXT_Filename,
+    PANEL_Radiusfile,
+      BUTTON_Radius,
+      TEXT_Radius
 };
 
 //DECLARE_APP(MainApp)

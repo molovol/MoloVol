@@ -42,7 +42,7 @@ bool Ctrl::runCalculation(std::string& filepath){
   current_calculation->readAtomsFromFile(filepath);
   // set space size (size of unit cell/ box containing all atoms)
   const double grid_step = 0.1; // get from user
-  const int max_depth = 0; // get from user
+  const int max_depth = 4; // get from user
   current_calculation->defineCell(grid_step, max_depth);
   
   current_calculation->calcVolume();

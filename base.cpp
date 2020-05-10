@@ -31,7 +31,8 @@ bool MainApp::OnInit()
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   // assign a function to button Hello
   EVT_BUTTON(BUTTON_Calc, MainFrame::OnCalc)
-  EVT_BUTTON(BUTTON_Browse, MainFrame::OnBrowse)
+  EVT_BUTTON(BUTTON_Browse, MainFrame::OnAtomBrowse)
+  EVT_BUTTON(BUTTON_Radius, MainFrame::OnRadiusBrowse)
 END_EVENT_TABLE()
 
 ////////////////////////////////////
@@ -51,10 +52,10 @@ void MainFrame::InitTopLevel()
 
 void MainFrame::InitBrowsePanel(){
   // create new sizer
-  wxBoxSizer *browserSizer = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer *browserSizer = new wxBoxSizer(wxVERTICAL);
   // widgets to sizer
-  browserSizer->Add(browseButton,1,wxALIGN_LEFT | wxALIGN_CENTRE_VERTICAL | wxALL,10);
-  browserSizer->Add(filepathText,5,wxALIGN_RIGHT | wxALL,10);
+  browserSizer->Add(atomfilePanel,0,0,20);
+  browserSizer->Add(radiusfilePanel,0,0,20);
   // set sizer
   browsePanel->SetSizer(browserSizer);
 }
@@ -65,6 +66,16 @@ void MainFrame::InitSandr(){
   sandrSizer->Add(calcButton,1,wxALIGN_RIGHT | wxALIGN_CENTRE_VERTICAL | wxALL,10);
 
   sandrPanel->SetSizer(sandrSizer);
+}
+
+void MainFrame::InitFilePanel(wxPanel* panel, wxButton* button, wxTextCtrl* text){
+  // create new sizer
+  wxBoxSizer *fileSizer = new wxBoxSizer(wxHORIZONTAL);
+  // widgets to sizer
+  fileSizer->Add(button,1,wxALIGN_LEFT | wxALIGN_CENTRE_VERTICAL | wxALL,10);
+  fileSizer->Add(text,5,wxALIGN_RIGHT | wxALL,10);
+  // set sizer
+  panel->SetSizer(fileSizer);
 }
 
 //////////////////////////////////
@@ -91,9 +102,11 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
   : wxFrame((wxFrame*) NULL, -1, title, pos, size)
 {
   Ctrl::getInstance()->registerView(this);
-
-  // Panel in Frame
-  // construct file browser panel
+  
+  /////////////////////
+  // TOP LEVEL FRAME //
+  /////////////////////
+  
   browsePanel = new wxPanel
     (this,
      PANEL_Browse,
@@ -116,35 +129,46 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
   sandrPanel->SetBackgroundColour(wxColour(192,192,192));  
  
   InitTopLevel();
+
+  //////////////////
+  // BROWSE PANEL //
+  //////////////////
  
-  // button and text control in Panel 
+  atomfilePanel = new wxPanel(browsePanel, PANEL_Atomfile, wxDefaultPosition, wxDefaultSize, 0);
+  radiusfilePanel = new wxPanel(browsePanel, PANEL_Radiusfile, wxDefaultPosition, wxDefaultSize, 0);
+  
+  InitBrowsePanel();
+  
+  /////////////////////////
+  // ATOM FILE SELECTION //
+  /////////////////////////
+  
   browseButton = new wxButton
-    (browsePanel, 
-     BUTTON_Browse,
-     "Browse", 
-     wxDefaultPosition, 
-     wxDefaultSize, 
-     0,
-     wxDefaultValidator,
-     "browse filepath"
-    );
+    (atomfilePanel, BUTTON_Browse, "Browse", wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator);
 
   filepathText = new wxTextCtrl
-    (browsePanel,
-     TEXT_Filename,
-     wxEmptyString,
-     wxDefaultPosition,
-     wxDefaultSize,
-     0,
-     wxDefaultValidator,
-     "file to use"
-    );
-  //filepathText->SetDefaultStyle(wxTextAttr(wxNullColour, *wxWHITE));
+    (atomfilePanel, TEXT_Filename, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator);
   filepathText->SetBackgroundColour(wxColour(255,255,255));
 
-  InitBrowsePanel();
+  InitFilePanel(atomfilePanel, browseButton, filepathText);
 
-  // Text and Button in Panel 
+  ///////////////////////////
+  // RADIUS FILE SELECTION //
+  ///////////////////////////
+  
+  radiusButton = new wxButton
+    (radiusfilePanel, BUTTON_Radius, "Browse");
+
+  radiuspathText = new wxTextCtrl
+    (radiusfilePanel, TEXT_Radius, "./inputfile/radii.txt");
+  radiuspathText->SetBackgroundColour(wxColour(255,255,255));
+  
+  InitFilePanel(radiusfilePanel, radiusButton, radiuspathText);
+
+  ////////////////////////////
+  // SEND AND RECEIVE PANEL //
+  ////////////////////////////
+  
   calcButton = new wxButton
     (sandrPanel, 
      BUTTON_Calc,
@@ -207,13 +231,25 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
   return;
 }
 
-void MainFrame::OnBrowse(wxCommandEvent& event){
+void MainFrame::OnAtomBrowse(wxCommandEvent& event){
+  std::string filetype = "XYZ files (*.xyz)|*.xyz";
+  OnBrowse(filetype, filepathText);
+  return;
+}
+
+void MainFrame::OnRadiusBrowse(wxCommandEvent& event){
+  std::string filetype = "TXT files (*.txt)|*.txt";
+  OnBrowse(filetype, radiuspathText);
+  return;
+}
+
+void MainFrame::OnBrowse(std::string& filetype, wxTextCtrl* textbox){
   wxFileDialog openFileDialog
     (this, 
      _("Select File"), 
      "", 
      "",
-     "XYZ files (*.xyz)|*.xyz", 
+     filetype, 
      wxFD_OPEN|wxFD_FILE_MUST_EXIST,
      wxDefaultPosition,
      wxDefaultSize,
@@ -232,6 +268,6 @@ void MainFrame::OnBrowse(wxCommandEvent& event){
     wxLogError("Cannot open file '%s'.", openFileDialog.GetPath());
     return;
   }
-  filepathText->SetLabel(openFileDialog.GetPath());
+  textbox->SetLabel(openFileDialog.GetPath());
   return;
 }
