@@ -27,19 +27,20 @@ Ctrl* Ctrl::getInstance(){
   return instance;
 }
     
-bool Ctrl::runCalculation(std::string& filepath){
+bool Ctrl::runCalculation(std::string& atom_filepath){ //* std::string& radius_filepath
   // controller receives:
-  //  filepath to xyz file
-  //  filepath to radii file
+  // atom_filepath to xyz file
+  // radius_filepath to radii file
 
   // create an instance of the model class
   current_calculation = new Model();
   
   // read atoms from file and save a vector containing the atoms
-  std::string radii_file = "./inputfile/radii.txt"; //* this has to be generalised. maybe file selection for user?
+  //* remove this
+  std::string radius_filepath = "./inputfile/radii.txt"; //* this has to be generalised. maybe file selection for user?
   
-  current_calculation->readRadiiFromFile(radii_file);
-  current_calculation->readAtomsFromFile(filepath);
+  current_calculation->readRadiiFromFile(radius_filepath);
+  current_calculation->readAtomsFromFile(atom_filepath);
   // set space size (size of unit cell/ box containing all atoms)
   const double grid_step = 0.1; // get from user
   const int max_depth = 4; // get from user

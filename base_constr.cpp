@@ -23,7 +23,18 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
   InitAtomfilePanel();
 
   InitRadiusfilePanel();
+
+  //
+  InitParametersPanel();
   
+  InitGridPanel();
+
+  InitGridinputPanel();
+
+  InitDepthPanel();
+
+  //
+
   InitSandr();  
 };
 

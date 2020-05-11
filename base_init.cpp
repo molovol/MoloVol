@@ -40,6 +40,15 @@ void MainFrame::InitTopLevel(){
      "contains file browser"
     );
   browsePanel->SetBackgroundColour(wxColour(192,192,192));  
+  
+  // parameter Panel
+  //
+  
+  parameterPanel = new wxPanel(this, PANEL_Parameters, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+  parameterPanel->SetBackgroundColour(wxColour(192,192,192)); 
+
+  //
+
 
   // construct send and receive panel
   sandrPanel = new wxPanel
@@ -56,6 +65,9 @@ void MainFrame::InitTopLevel(){
   wxBoxSizer *topLevelSizer = new wxBoxSizer(wxVERTICAL);
   // widgets to sizer
   topLevelSizer->Add(browsePanel,0,wxEXPAND,20);
+  //
+  topLevelSizer->Add(parameterPanel,0,wxEXPAND,20);
+  //
   topLevelSizer->Add(sandrPanel,0,wxEXPAND,20);
   // set sizer
   this->SetSizer(topLevelSizer);
@@ -72,8 +84,8 @@ void MainFrame::InitBrowsePanel(){
   // create new sizer
   wxBoxSizer *browserSizer = new wxBoxSizer(wxVERTICAL);
   // widgets to sizer
-  browserSizer->Add(atomfilePanel,0,0,20);
-  browserSizer->Add(radiusfilePanel,0,0,20);
+  browserSizer->Add(atomfilePanel,0,wxEXPAND,0);
+  browserSizer->Add(radiusfilePanel,0,wxEXPAND,0);
   // set sizer
   browsePanel->SetSizer(browserSizer);
 }
@@ -152,4 +164,81 @@ void MainFrame::InitRadiusfilePanel(){
   
   InitFilePanel(radiusfilePanel, radiusButton, radiuspathText);
   
-}  
+}
+
+//
+void MainFrame::InitParametersPanel(){
+  // init gridsize and depth panels
+  gridsizePanel = new wxPanel(parameterPanel, PANEL_Grid, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+  gridsizePanel->SetBackgroundColour(wxColour(192,192,192)); 
+  
+  depthPanel = new wxPanel(parameterPanel, PANEL_Depth, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+  depthPanel->SetBackgroundColour(wxColour(192,192,192)); 
+  
+  // create new sizer
+  wxBoxSizer *paramSizer = new wxBoxSizer(wxVERTICAL);
+  // widgets to sizer
+  paramSizer->Add(gridsizePanel,0,wxEXPAND,20);
+  paramSizer->Add(depthPanel,0,wxEXPAND,20);
+  // set sizer
+  parameterPanel->SetSizer(paramSizer);
+
+  return;
+}
+
+void MainFrame::InitGridPanel(){
+  
+  // static text
+  
+  gridsizeText = new wxStaticText(gridsizePanel, TEXT_Grid, "Grid step size:");	
+
+  // panel
+  gridsizeInputPanel = new wxPanel(gridsizePanel, PANEL_Depth, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+  gridsizeInputPanel->SetBackgroundColour(wxColour(192,192,192));
+
+  // create sizer
+  wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
+  // widgets to sizer
+  sizer->Add(gridsizeText,0,wxALL | wxALIGN_CENTRE_VERTICAL,10);
+  sizer->Add(gridsizeInputPanel,0,0,0);
+  // set sizer
+  gridsizePanel->SetSizer(sizer);
+
+  return;
+}
+
+void MainFrame::InitGridinputPanel(){
+  
+  gridsizeInputText = new wxTextCtrl(gridsizeInputPanel, TEXT_Gridinput, "0.1");
+  gridsizeInputText->SetBackgroundColour(wxColour(255,255,255));
+  
+  gridsizeUnitText = new wxStaticText(gridsizeInputPanel, TEXT_Gridunit, "A");	
+  
+  // create sizer
+  wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
+  // widgets to sizer
+  sizer->Add(gridsizeInputText, 0, wxALL | wxALIGN_CENTRE_VERTICAL, 10);
+  sizer->Add(gridsizeUnitText, 0, wxALL | wxALIGN_CENTRE_VERTICAL, 10);
+  // set sizer
+  gridsizeInputPanel->SetSizer(sizer);
+  return;
+}
+
+void MainFrame::InitDepthPanel(){
+  
+  depthText = new wxStaticText(depthPanel, TEXT_Depth, "Maximum tree depth:");
+
+  depthInput = new wxSpinCtrl
+    (depthPanel, SPIN_Depthinput, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 20, 4);	
+
+  // create sizer
+  wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
+  // widgets to sizer
+  sizer->Add(depthText,0,wxALIGN_CENTRE_VERTICAL | wxALL,10);
+  sizer->Add(depthInput,0,wxALIGN_CENTRE_VERTICAL | wxALL,10);
+  // set sizer
+  depthPanel->SetSizer(sizer);
+  
+  return;
+}
+//
