@@ -10,6 +10,7 @@ class MainFrame;
 class Ctrl{
   public:
     bool runCalculation(std::string& filepath);
+    bool runCalculation();
     void registerView(MainFrame* inp_gui);
     static Ctrl* getInstance();
 

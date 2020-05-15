@@ -15,7 +15,7 @@ IMPLEMENT_APP(MainApp)
 bool MainApp::OnInit()
 {
   // initialise a new MainFrame object and have MainWin point to that object
-  MainFrame* MainWin = new MainFrame(_("Hello World!"), wxDefaultPosition, wxDefaultSize);
+  MainFrame* MainWin = new MainFrame(_("Ballpit"), wxDefaultPosition, wxDefaultSize);
   // call member function of the MainFrame object to set visibility
   MainWin->Show(true);
   SetTopWindow(MainWin);

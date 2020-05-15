@@ -20,6 +20,11 @@ class MainFrame: public wxFrame
     void clearOutput();
     void printToOutput(std::string& text);
     void appendOutput(std::string& text);
+    std::string getAtomFilepath();
+    std::string getRadiusFilepath();
+    double getGridsize();
+    int getDepth();
+
 
     MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
       wxPanel* browsePanel;
@@ -77,7 +82,6 @@ enum
   TEXT_Output = wxID_HIGHEST + 1,
     BUTTON_Calc,
     PANEL_Sandr,
-  //FILE_Browse,
   PANEL_Browse,
     PANEL_Atomfile,
       BUTTON_Browse,

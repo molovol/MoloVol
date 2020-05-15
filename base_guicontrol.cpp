@@ -5,6 +5,7 @@
 #endif
 
 #include "base.h"
+#include <string>
 
 //////////////////////////////////
 // METHODS FOR MANIPULATING GUI //
@@ -21,3 +22,20 @@ void MainFrame::printToOutput(std::string& text){
 void MainFrame::appendOutput(std::string& text){
   outputText->SetValue(outputText->GetValue() + text);
 }
+
+std::string MainFrame::getAtomFilepath(){
+  return filepathText->GetValue().ToStdString();
+}
+
+std::string MainFrame::getRadiusFilepath(){
+  return radiuspathText->GetValue().ToStdString();
+}
+
+double MainFrame::getGridsize(){
+  return std::stod(gridsizeInputText->GetValue().ToStdString());
+}
+
+int MainFrame::getDepth(){
+  return depthInput->GetValue();
+}
+

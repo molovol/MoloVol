@@ -39,11 +39,11 @@ void MainFrame::OnPrint(wxCommandEvent& event)
 // begin calculation
 void MainFrame::OnCalc(wxCommandEvent& event){
       
-  std::string filepath = (filepathText->GetValue()).ToStdString();
-  printToOutput(filepath);
+  //std::string filepath = (filepathText->GetValue()).ToStdString();
+//  printToOutput(filepath);
   
   // so far only xyz files allowed
-  Ctrl::getInstance()->runCalculation(filepath);
+  Ctrl::getInstance()->runCalculation();
   return;
 }
 
