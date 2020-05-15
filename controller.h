@@ -13,6 +13,7 @@ class Ctrl{
     bool runCalculation();
     void registerView(MainFrame* inp_gui);
     static Ctrl* getInstance();
+    void notifyUser(std::string str);
 
   private:
     Model* current_calculation;

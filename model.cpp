@@ -1,7 +1,9 @@
 
 #include "model.h"
 #include "space.h"
+#include "controller.h"
 #include <array>
+#include <string>
 
 void Model::defineCell(const double& grid_step, const int& max_depth){
   cell = new Space(atoms, grid_step, max_depth);
@@ -12,7 +14,7 @@ void Model::calcVolume(){
   cell->placeAtomsInGrid(atoms);
 
   double volume = cell->getVolume();
-  std::cout << volume << std::endl;
+  Ctrl::getInstance()->notifyUser("Van der Waals Volume: " + std::to_string(volume));
   return;
 }
 

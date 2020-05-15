@@ -34,7 +34,10 @@ bool Ctrl::runCalculation(std::string& atom_filepath){ //* std::string& radius_f
 bool Ctrl::runCalculation(){ 
   
   // create an instance of the model class
-  current_calculation = new Model();
+  // ensures, that there is only ever one instance of the model class
+  if(current_calculation == NULL){
+    current_calculation = new Model();
+  }
   
   std::string atom_filepath = gui->getAtomFilepath();
   std::string radius_filepath = gui->getRadiusFilepath();
@@ -42,17 +45,18 @@ bool Ctrl::runCalculation(){
   current_calculation->readRadiiFromFile(radius_filepath);
   current_calculation->readAtomsFromFile(atom_filepath);
   
-  const double grid_step = gui->getGridsize();//0.1; // get from user
-  const int max_depth = gui->getDepth();//4; // get from user
+  const double grid_step = gui->getGridsize();
+  const int max_depth = gui->getDepth();
   // set space size (size of unit cell/ box containing all atoms)
   current_calculation->defineCell(grid_step, max_depth);
   
   current_calculation->calcVolume();
   
-  // display to user
-  std::string text = "Done";
-  gui->printToOutput(text);
-
   return true;
+}
+
+void Ctrl::notifyUser(std::string str){
+  str = "\n" + str;
+  gui->appendOutput(str);
 }
 
