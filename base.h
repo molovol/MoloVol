@@ -25,8 +25,9 @@ class MainFrame: public wxFrame
     double getGridsize();
     int getDepth();
 
-
     MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
+    
+  private:
       wxPanel* browsePanel;
         wxPanel* atomfilePanel;
           wxButton* browseButton;
@@ -70,6 +71,11 @@ class MainFrame: public wxFrame
     void OnRadiusBrowse(wxCommandEvent& event);
     void OnBrowse(std::string& filetype, wxTextCtrl* textbox);
     
+    // colours
+    wxColour col_panel = wxColour(125,125,125);
+    wxColour col_output = wxColour(192,192,192);
+    wxColour col_white = wxColour(255,255,255);
+
     DECLARE_EVENT_TABLE()
 
     // other methods

@@ -15,7 +15,7 @@ IMPLEMENT_APP(MainApp)
 bool MainApp::OnInit()
 {
   // initialise a new MainFrame object and have MainWin point to that object
-  MainFrame* MainWin = new MainFrame(_("Ballpit"), wxDefaultPosition, wxDefaultSize);
+  MainFrame* MainWin = new MainFrame(_("CaVol"), wxDefaultPosition, wxDefaultSize);
   // call member function of the MainFrame object to set visibility
   MainWin->Show(true);
   SetTopWindow(MainWin);
@@ -39,13 +39,13 @@ void MainFrame::InitTopLevel(){
      wxTAB_TRAVERSAL,
      "contains file browser"
     );
-  browsePanel->SetBackgroundColour(wxColour(192,192,192));  
+  browsePanel->SetBackgroundColour(col_panel);  
   
   // parameter Panel
   //
   
   parameterPanel = new wxPanel(this, PANEL_Parameters, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
-  parameterPanel->SetBackgroundColour(wxColour(192,192,192)); 
+  parameterPanel->SetBackgroundColour(col_panel); 
 
   //
 
@@ -59,7 +59,7 @@ void MainFrame::InitTopLevel(){
      wxTAB_TRAVERSAL,
      "initiate user-program communication"
     );
-  sandrPanel->SetBackgroundColour(wxColour(192,192,192)); 
+  sandrPanel->SetBackgroundColour(col_panel); 
 
   // create new sizer
   wxBoxSizer *topLevelSizer = new wxBoxSizer(wxVERTICAL);
@@ -82,7 +82,7 @@ void MainFrame::InitBrowsePanel(){
   radiusfilePanel = new wxPanel(browsePanel, PANEL_Radiusfile, wxDefaultPosition, wxDefaultSize, 0);
 
   // create new sizer
-  wxBoxSizer *browserSizer = new wxBoxSizer(wxVERTICAL);
+  wxStaticBoxSizer *browserSizer = new wxStaticBoxSizer(wxVERTICAL,browsePanel);
   // widgets to sizer
   browserSizer->Add(atomfilePanel,0,wxEXPAND,0);
   browserSizer->Add(radiusfilePanel,0,wxEXPAND,0);
@@ -116,9 +116,9 @@ void MainFrame::InitSandr(){
      wxDefaultValidator,
      "output result"
     );
-  outputText->SetBackgroundColour(wxColour(125,125,125));
+  outputText->SetBackgroundColour(col_output);
 
-  wxBoxSizer *sandrSizer = new wxBoxSizer(wxHORIZONTAL);
+  wxStaticBoxSizer *sandrSizer = new wxStaticBoxSizer(wxHORIZONTAL,sandrPanel);
   sandrSizer->Add(outputText,5,wxALIGN_LEFT | wxALL,10);
   sandrSizer->Add(calcButton,1,wxALIGN_RIGHT | wxALIGN_CENTRE_VERTICAL | wxALL,10);
 
@@ -145,7 +145,7 @@ void MainFrame::InitAtomfilePanel(){
 
   filepathText = new wxTextCtrl
     (atomfilePanel, TEXT_Filename, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator);
-  filepathText->SetBackgroundColour(wxColour(255,255,255));
+  filepathText->SetBackgroundColour(col_white);
 
   InitFilePanel(atomfilePanel, browseButton, filepathText);
 }
@@ -160,28 +160,31 @@ void MainFrame::InitRadiusfilePanel(){
 
   radiuspathText = new wxTextCtrl
     (radiusfilePanel, TEXT_Radius, "./inputfile/radii.txt");
-  radiuspathText->SetBackgroundColour(wxColour(255,255,255));
+  radiuspathText->SetBackgroundColour(col_white);
   
   InitFilePanel(radiusfilePanel, radiusButton, radiuspathText);
   
 }
 
-//
+//////////////////////
+// PARAMETERS PANEL //
+//////////////////////
+
 void MainFrame::InitParametersPanel(){
   // init gridsize and depth panels
   gridsizePanel = new wxPanel(parameterPanel, PANEL_Grid, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
-  gridsizePanel->SetBackgroundColour(wxColour(192,192,192)); 
+  gridsizePanel->SetBackgroundColour(col_panel); 
   
   depthPanel = new wxPanel(parameterPanel, PANEL_Depth, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
-  depthPanel->SetBackgroundColour(wxColour(192,192,192)); 
+//  depthPanel->SetBackgroundColour(col_panel); 
   
   // create new sizer
-  wxBoxSizer *paramSizer = new wxBoxSizer(wxVERTICAL);
+  wxStaticBoxSizer *sizer = new wxStaticBoxSizer(wxVERTICAL,parameterPanel);
   // widgets to sizer
-  paramSizer->Add(gridsizePanel,0,wxEXPAND,20);
-  paramSizer->Add(depthPanel,0,wxEXPAND,20);
+  sizer->Add(gridsizePanel,0,wxEXPAND,20);
+  sizer->Add(depthPanel,0,wxEXPAND,20);
   // set sizer
-  parameterPanel->SetSizer(paramSizer);
+  parameterPanel->SetSizer(sizer);
 
   return;
 }
@@ -194,7 +197,7 @@ void MainFrame::InitGridPanel(){
 
   // panel
   gridsizeInputPanel = new wxPanel(gridsizePanel, PANEL_Depth, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
-  gridsizeInputPanel->SetBackgroundColour(wxColour(192,192,192));
+//  gridsizeInputPanel->SetBackgroundColour(col_panel);
 
   // create sizer
   wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -210,7 +213,7 @@ void MainFrame::InitGridPanel(){
 void MainFrame::InitGridinputPanel(){
   
   gridsizeInputText = new wxTextCtrl(gridsizeInputPanel, TEXT_Gridinput, "0.1");
-  gridsizeInputText->SetBackgroundColour(wxColour(255,255,255));
+  gridsizeInputText->SetBackgroundColour(col_white);
   
   gridsizeUnitText = new wxStaticText(gridsizeInputPanel, TEXT_Gridunit, "A");	
   
@@ -230,6 +233,7 @@ void MainFrame::InitDepthPanel(){
 
   depthInput = new wxSpinCtrl
     (depthPanel, SPIN_Depthinput, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 20, 4);	
+  depthInput->SetBackgroundColour(col_white);
 
   // create sizer
   wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
