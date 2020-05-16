@@ -12,13 +12,14 @@
 void Space::placeAtomsInGrid(const std::vector<Atom> &atoms){
   // calculate position of first voxel
   std::array<double,3> vxl_origin = getOrigin();
-  // origin of the cell has to be offset by half the grid size
-  for(int dim = 0; dim < 3; dim++){
-    vxl_origin[dim] += grid_size/2;
-  }
   
   // calculate side length of top level voxel
   double vxl_dist = grid_size * pow(2,max_depth);
+
+  // origin of the cell has to be offset by half the grid size
+  for(int dim = 0; dim < 3; dim++){
+    vxl_origin[dim] += vxl_dist/2;
+  }
   
   for(size_t x = 0; x < n_gridsteps[0]; x++){
     for(size_t y = 0; y < n_gridsteps[1]; y++){
@@ -69,7 +70,7 @@ std::array<double,3> Space::getSize(){
 }
 
 Voxel& Space::getElement(const size_t &i){
-  assert(i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]); // consider removing this for better performance
+  assert(i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]); 
   return grid[i];
 }
 
@@ -81,15 +82,57 @@ Voxel& Space::getElement(const size_t &x, const size_t &y, const size_t &z){
   return grid[z * n_gridsteps[0] * n_gridsteps[1] + y * n_gridsteps[0] + x];
 }
 
+// displays voxel grid types as matrix in the terminal. useful for debugging
 void Space::printGrid(){
-  for(size_t z = 0; z < n_gridsteps[2]; z++){
-    for(size_t y = 0; y < n_gridsteps[1]; y++){
-      for(size_t x = 0; x < n_gridsteps[0]; x++){
+  char usr_inp = '\0';
+  int x_min = 0;
+  int y_min = 0;
+  
+  int x_max = ((n_gridsteps[0] >= 25)? 25: n_gridsteps[0]);
+  int y_max = ((n_gridsteps[1] >= 25)? 25: n_gridsteps[1]);
+
+  size_t z = 0;
+  std::cout << "Enter 'q' to quit; 'w', 'a', 's', 'd' for directional input; 'c' to continue in z direction; 'r' to go back in z direction" << std::endl;
+  while (usr_inp != 'q'){
+
+    // x and y coordinates
+    if (usr_inp == 'a'){x_min--; x_max--;}
+    else if (usr_inp == 'd'){x_min++; x_max++;}
+    else if (usr_inp == 's'){y_min++; y_max++;}
+    else if (usr_inp == 'w'){y_min--; y_max--;}
+    
+    if (x_min < 0){x_min++; x_max++;}
+    if (y_min < 0){y_min++; y_max++;}
+    if (x_max > n_gridsteps[0]){x_min--; x_max--;}
+    if (y_max > n_gridsteps[1]){y_min--; y_max--;}
+    
+    // z coordinate
+    if (usr_inp == 'r'){
+      if (z==0){
+        std::cout << "z position at min. ";
+      }
+      else{z--;}
+    }
+    else if (usr_inp == 'c'){
+      z++;
+      if (z >= n_gridsteps[2]){
+        z--;
+        std::cout << "z position at max. ";
+      }
+    }
+    
+    // print matrix
+    for(size_t y = y_min; y < y_max; y++){
+      for(size_t x = x_min; x < x_max; x++){
         std::cout << getElement(x,y,z).getType();
       }
       std::cout << std::endl;
     }
+    
+    // get user input
     std::cout << std::endl;
+    std::cout << "INPUT: ";
+    std::cin >> usr_inp;
   }
   return;
 }

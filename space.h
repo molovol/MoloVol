@@ -22,7 +22,7 @@ class Space{
 
     void placeAtomsInGrid(const std::vector<Atom>&);
     double getVolume();
-    
+  
   private:
     std::array <double,3> cart_min; // this is also the "origin" of the space
     std::array <double,3> cart_max;
