@@ -28,14 +28,14 @@ class Space{
     std::array <double,3> cart_max;
     // member function for constructor
     void setBoundaries(std::vector<Atom> &atoms);
-
+  
     std::vector<Voxel> grid;
-    std::array<size_t,3> n_gridsteps;
+    std::array<size_t,3> n_gridsteps; // i think top level voxel?
     void setGrid();
     //void setGrid(const double &grid_step, const int &max_depth);
 
     double grid_size;
-    int max_depth;
+    int max_depth; // for voxels
     
 };
 

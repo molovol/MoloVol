@@ -27,12 +27,6 @@ char Voxel::getType(){
 // SET TYPE //
 //////////////
 
-void debug(char& type, const double& max_depth){
-  if (max_depth == 4){
-    //std::cout << type << std::endl;
-  }
-}
-
 void Voxel::determineType
   (const std::vector<Atom>& atoms, 
    std::array<double,3> pos,
@@ -49,7 +43,6 @@ void Voxel::determineType
       double dist = distance(pos, atom.getPos());
       if (atom.rad > dist){// voxel centre is inside atom radius
         type = 'a';
-        debug(type,max_depth);
         return;
       }
       // else voxel is empty
@@ -69,7 +62,6 @@ void Voxel::determineType
        
       if(atom.rad > (dist + radius_of_influence)){ // voxel is entirely inside atom
         type = 'a'; // in atom
-        debug(type,max_depth);
         return;
       }
       else if(atom.rad > (dist - radius_of_influence)){ // atom border cuts through voxel
@@ -97,7 +89,6 @@ void Voxel::determineType
       }
     }
   }
-  debug(type,max_depth);
   return;
 }
 
@@ -112,7 +103,6 @@ size_t Voxel::tallyVoxelsOfType(const char volume_type, const int max_depth){
     size_t total = 0;
     for(int i = 0; i < 8; i++){
       total += data[i].tallyVoxelsOfType(volume_type, max_depth-1);
-      if(max_depth == 4){std::cout << total << std::endl;}
     }
     return total;
   }
