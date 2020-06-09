@@ -3,5 +3,7 @@ ballpit
 *.o
 *.swp
 inputfile/*
+!inputfile/acetylene.xyz
+!inputfile/radii.txt
 .DS_store
 *.dSYM/Contents/Info.plist
