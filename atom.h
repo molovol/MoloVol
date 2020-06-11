@@ -19,18 +19,20 @@ struct Atom{
   double pos_x, pos_y, pos_z, rad;
   unsigned int number;
   std::string symbol;
+  //std::vector<Atom*> close_atoms;
 
-  std::array<double,3> getPos(){
+  const std::array<double,3> getPos() const {
     return {pos_x, pos_y, pos_z};
   }
 };
 
 
 static inline unsigned int symbolToNumber(const std::string& symbol){
-  const std::array<std::string,18> element_symbols = {
+  const std::array<std::string,30> element_symbols = {
     "H" , "He",
     "Li", "Be", "B" , "C" , "N" , "O" , "F" , "Ne",
-    "Na", "Mg", "Al", "Si", "P" , "S" , "Cl", "Ar"
+    "Na", "Mg", "Al", "Si", "P" , "S" , "Cl", "Ar",
+    "K" , "Ca", "Sc", "Ti", "V" , "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn"
   };
 
   for(int i = 0; i < element_symbols.size(); i++){

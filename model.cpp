@@ -2,6 +2,8 @@
 #include "model.h"
 #include "space.h"
 #include "controller.h"
+#include "atom.h"
+#include "atomtree.h"
 #include <array>
 #include <string>
 
@@ -10,9 +12,13 @@ void Model::defineCell(const double& grid_step, const int& max_depth){
   return;
 }
 
+void Model::findCloseAtoms(const double& r_probe){
+  //TODO  
+  return;
+}
+
 void Model::calcVolume(){
   cell->placeAtomsInGrid(atoms);
-
   double volume = cell->getVolume();
   Ctrl::getInstance()->notifyUser("Van der Waals Volume: " + std::to_string(volume));
   return;

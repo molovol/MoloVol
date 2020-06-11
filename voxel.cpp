@@ -5,6 +5,14 @@
 #include <cmath>
 #include <cassert>
 
+/////////////////
+// CONSTRUCTOR //
+/////////////////
+
+Voxel::Voxel(){
+  type = 'e';
+}
+
 ////////////
 // ACCESS //
 ////////////
@@ -27,21 +35,23 @@ char Voxel::getType(){
 // SET TYPE //
 //////////////
 
+// iterates through all top level voxels and determines their type in
+// relation to the input atoms. when a voxel of mixed type is encountered
+// eight subvoxels are created. this is continued until the maximum tree
+// depth is reached
 void Voxel::determineType
   (const std::vector<Atom>& atoms, 
-   std::array<double,3> pos,
+   std::array<double,3> pos, // voxel centre
    const double& grid_size,
    const double max_depth)
 {
-
-  type = 'e'; // default type empty
   if(max_depth == 0){ // for bottom level voxels
 
     for(int at = 0; at < atoms.size(); at++){ // check against all atoms
       // check if centre is inside atom
       Atom atom = atoms[at];
-      double dist = distance(pos, atom.getPos());
-      if (atom.rad > dist){// voxel centre is inside atom radius
+      double dist_vxl_at = distance(pos, atom.getPos());
+      if (atom.rad > dist_vxl_at){// voxel centre is inside atom radius
         type = 'a';
         return;
       }
@@ -49,22 +59,25 @@ void Voxel::determineType
     }
   }
   else{ // for higher level voxels
+    
     // determine the radius of the sphere that contains the voxel
     // the voxels side length is given by the grid_size (i.e. the side length
     // of a bottom level voxel) multiplied with 2^max_depth. This value multiplied
     // with the sqrt of 3 gives the diagonal of the voxel. The radius is half the
     // diagonal.
     double radius_of_influence = pow(3,0.5)*(grid_size * pow(2,max_depth))/2;
-
-    for(int at = 0; at < atoms.size(); at++){ // check against all atoms
-      Atom atom = atoms[at];
-      double dist = distance(pos, atom.getPos()); // distance betwee voxel centre and atom centre
-       
-      if(atom.rad > (dist + radius_of_influence)){ // voxel is entirely inside atom
+    
+    for(auto const& atom : atoms){
+      
+      double dist_vxl_at = distance(pos, atom.getPos());
+     
+      // is voxel inside atom? 
+      if(atom.rad > (dist_vxl_at + radius_of_influence)){ 
         type = 'a'; // in atom
         return;
       }
-      else if(atom.rad > (dist - radius_of_influence)){ // atom border cuts through voxel
+      // is voxel partially inside atom?
+      else if(atom.rad > (dist_vxl_at - radius_of_influence)){
         type = 'm'; // mixed
       }
       //else empty

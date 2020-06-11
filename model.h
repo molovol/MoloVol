@@ -13,10 +13,11 @@ class Model{
   public:
     void readRadiiFromFile(std::string&);
     inline double findRadiusOfAtom(const std::string&);
-    inline double findRadiusOfAtom(const Atom&); //* has not been tested
+    inline double findRadiusOfAtom(const Atom&); //TODO has not been tested
     void readAtomsFromFile(std::string&);
     // calls the Space constructor and creates a cell containing all atoms. Cell size is defined by atom positions
     void defineCell(const double&, const int&);
+    void findCloseAtoms(const double&); //TODO
     void calcVolume();
     void debug();
   private:

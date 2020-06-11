@@ -16,6 +16,7 @@ class MainApp: public wxApp
 class MainFrame: public wxFrame
 {
   public:
+
     // methods for controller communication
     void clearOutput();
     void printToOutput(std::string& text);
@@ -24,10 +25,14 @@ class MainFrame: public wxFrame
     std::string getRadiusFilepath();
     double getGridsize();
     int getDepth();
+    double getProbeRadius();
 
     MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
     
   private:
+    
+    double r_probe = 1.5; //* hard coded for testing purposes. eventually obtain from user input
+
       wxPanel* browsePanel;
         wxPanel* atomfilePanel;
           wxButton* browseButton;
