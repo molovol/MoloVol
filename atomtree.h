@@ -6,18 +6,19 @@
 #include <vector>
 #include <cmath> 
 
+struct Atom;
 class AtomTree{
   public:
-    AtomTree(Atom* at, AtomTree left_node, AtomTree right_node) 
+    AtomTree(Atom* at, AtomTree* left_node, AtomTree* right_node) 
       : atom(at), left_child(left_node), right_child(right_node) {}
     
     Atom* atom = NULL;
     
     //TODO add exception for empty node
-    AtomTree getLeftChild(){
+    AtomTree* getLeftChild(){
       return left_child;
     }
-    AtomTree getRightChild(){
+    AtomTree* getRightChild(){
       return right_child;
     }
     
@@ -25,7 +26,7 @@ class AtomTree{
     // rather than copying the list of atoms in every recursion, or saving the partitioned
     // vectors, the original list of atoms is passed by reference and only the vector limits
     // are passed by value. any sorting during the tree building occurs in the original list
-    AtomTree buildTree(
+    AtomTree* buildTree(
         std::vector<Atom>& list_of_atoms, 
         int vec_first, // index of first vector element (default 0)
         int vec_end, // vector size (index of last element + 1)
@@ -36,21 +37,21 @@ class AtomTree{
       }
       // if list of atoms has exactly one atom left
       else if((vec_end-vec_first)==1){
-        return AtomTree(&list_of_atoms[vec_first],NULL,NULL);
+        return new AtomTree(&list_of_atoms[vec_first],NULL,NULL);
       }
 
       else{
         sort(list_of_atoms, vec_first, vec_end, dim);
         int median = (vec_end-vec_first)/2; // operation rounds down
-        return AtomTree(
+        return new AtomTree(
             &list_of_atoms[median], 
             buildTree(list_of_atoms, vec_first, median, (dim%3)+1), 
             buildTree(list_of_atoms, median+1, vec_end, (dim%3)+1)); 
       }
     }
   private:
-    AtomTree left_child = NULL;
-    AtomTree right_child = NULL;
+    AtomTree* left_child = NULL;
+    AtomTree* right_child = NULL;
     
     void sort(std::vector<Atom>& list_of_atoms, const int& vec_first, const int& vec_end, const char& dim){
       // TODO  
