@@ -10,6 +10,7 @@ struct Atom;
 class Voxel;
 class Space{
   public:
+    Space() = default;
     Space(std::vector<Atom>&, const double&, const int&);
     std::array <double,3> getMin();
     std::array <double,3> getOrigin(); // same as getMin();

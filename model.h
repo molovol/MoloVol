@@ -4,6 +4,7 @@
 
 // class for dealing with program logic
 #include "atomtree.h"
+#include "space.h"
 #include <iostream>
 #include <vector>
 #include <unordered_map>
@@ -26,7 +27,7 @@ class Model{
   private:
     std::vector<Atom> atoms;
     AtomTree atomtree;
-    Space* cell;
+    Space cell; 
     std::unordered_map<std::string,double> radii;
 };
 
