@@ -20,10 +20,10 @@ static inline std::vector<std::string> splitLine(std::string& line){
 // the Model object
 void Model::readRadiiFromFile(std::string& filepath){
  
-  //* add case handling for when file has already been read
-  //* if map empty: ask user via dialog boy if they want to
-  //* reimport the file
-  //* make a function "consultUser(string)"
+  //TODO add case handling for when file has already been read
+  //TODO if map empty: ask user via dialog boy if they want to
+  //TODO reimport the file
+  //TODO make a function "consultUser(string)"
   //if(radii.empty()){std::cout << "empty" << std::endl;}
 
   std::string line;
@@ -40,7 +40,7 @@ void Model::readRadiiFromFile(std::string& filepath){
 
 // returns the radius of an atom with a given symbol
 inline double Model::findRadiusOfAtom(const std::string& symbol){
-  //* add exception handling for when no radius was found:
+  //TODO add exception handling for when no radius was found:
   //if(radii[symbol == 0]){
   //  throw ...;
   //}
@@ -55,14 +55,14 @@ inline double Model::findRadiusOfAtom(const Atom& at){
 void Model::readAtomsFromFile(std::string& filepath){
 
   int n_atom;
-  std::vector<Atom> list_of_atoms; // will contain the atoms
+  std::vector<Atom> list_of_atoms;
 
-//if (inp_file.is_open()){  //* consider adding an exception, for when file in not valid
+//if (inp_file.is_open()){  //TODO consider adding an exception, for when file in not valid
 
   // we iterate through the lines in the input file
   std::string line;
   std::ifstream inp_file(filepath);
-  // init counter to keep track of line number
+
   int line_counter = 0;
   // iterate through lines
   while(getline(inp_file,line)){

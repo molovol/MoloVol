@@ -3,13 +3,17 @@
 #include "space.h"
 #include "controller.h"
 #include "atom.h"
-#include "atomtree.h"
 #include <array>
 #include <string>
 
 void Model::defineCell(const double& grid_step, const int& max_depth){
   cell = new Space(atoms, grid_step, max_depth);
   return;
+}
+
+void Model::storeAtomsInTree(){
+  atomtree = AtomTree(atoms);
+  atomtree.print();
 }
 
 void Model::findCloseAtoms(const double& r_probe){
