@@ -77,7 +77,8 @@ void Model::readAtomsFromFile(std::string& filepath){
     
     else { // subsequent lines contain atom positional data
       std::vector<std::string> substrings = splitLine(line);
-
+      for(std::string str : substrings){
+      }
       // create new atom and add to storage vector (assumes file format: Element_Symbol x y z)
       Atom at = Atom(std::stod(substrings[1]), 
                      std::stod(substrings[2]), 
@@ -93,7 +94,6 @@ void Model::readAtomsFromFile(std::string& filepath){
   // check if number of atoms matches size of the vector containing the atoms
   assert(n_atom == list_of_atoms.size());
   this->atoms = list_of_atoms;
-  
   return;
 }
 

@@ -23,7 +23,7 @@ class AtomTree{
     AtomTree();
     AtomTree(std::vector<Atom>& list_of_atoms);
 
-    void print();
+    void print() const;
 
   private:
     AtomNode* root;
@@ -34,7 +34,8 @@ class AtomTree{
         int vec_end, // vector size (index of last element + 1)
         char dim);
   
-    void sort(std::vector<Atom>& list_of_atoms, const int& vec_first, const int& vec_end, const char& dim);
+    void quicksort(std::vector<Atom>& list_of_atoms, const int& vec_first, const int& vec_end, const char& dim);
+    void swap(Atom& a, Atom& b);
 };
 
 

@@ -6,6 +6,7 @@
 #include <vector>
 #include <array>
 
+class AtomTree;
 struct Atom;
 class Voxel;
 class Space{
@@ -21,7 +22,7 @@ class Space{
     Voxel& getElement(const size_t &i);
     void printGrid();
 
-    void placeAtomsInGrid(const std::vector<Atom>&);
+    void placeAtomsInGrid(const std::vector<Atom>&, const AtomTree&);
     double getVolume();
   
   private:

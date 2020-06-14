@@ -21,7 +21,7 @@ void Model::findCloseAtoms(const double& r_probe){
 }
 
 void Model::calcVolume(){
-  cell.placeAtomsInGrid(atoms);
+  cell.placeAtomsInGrid(atoms, atomtree);
   double volume = cell.getVolume();
   Ctrl::getInstance()->notifyUser("Van der Waals Volume: " + std::to_string(volume));
   return;

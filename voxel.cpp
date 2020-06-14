@@ -2,6 +2,7 @@
 #include "voxel.h"
 #include "misc.h"
 #include "atom.h"
+#include "atomtree.h"
 #include <cmath>
 #include <cassert>
 
@@ -34,6 +35,18 @@ char Voxel::getType(){
 //////////////
 // SET TYPE //
 //////////////
+
+void Voxel::determineType
+  (const std::vector<Atom>& atoms, 
+   std::array<double,3> pos, // voxel centre
+   const double& grid_size,
+   const double max_depth,
+   const AtomTree& atomtree)
+{
+  determineType(atoms,pos,grid_size,max_depth);
+  return;
+}
+
 
 // iterates through all top level voxels and determines their type in
 // relation to the input atoms. when a voxel of mixed type is encountered

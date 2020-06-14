@@ -4,6 +4,7 @@
 
 #include <vector>
 
+class AtomTree;
 struct Atom;
 class Voxel{
   public:
@@ -17,6 +18,12 @@ class Voxel{
        std::array<double,3> pos,
        const double& grid_size,
        const double max_depth);
+    void determineType
+      (const std::vector<Atom>& atoms, 
+       std::array<double,3> pos,
+       const double& grid_size,
+       const double max_depth,
+       const AtomTree& atomtree);
     size_t tallyVoxelsOfType(const char volume_type, const int max_depth);
 
   private:

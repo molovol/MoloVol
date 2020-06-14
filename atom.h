@@ -2,6 +2,7 @@
 
 #define ATOM_H
 
+#include "exception.h"
 #include <array>
 #include <iostream>
 
@@ -23,6 +24,14 @@ struct Atom{
 
   const std::array<double,3> getPos() const {
     return {pos_x, pos_y, pos_z};
+  }
+  const double getCoordinate(const char& dim){
+    switch(dim){
+      case 0: return pos_x;
+      case 1: return pos_y;
+      case 2: return pos_z;
+    }
+    throw ExceptIllegalFunctionCall();
   }
 };
 
