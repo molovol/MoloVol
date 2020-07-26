@@ -35,7 +35,7 @@ void MainFrame::InitTopLevel(){
     (this,
      PANEL_Browse,
      wxDefaultPosition,
-     wxDefaultSize,
+     wxSize(400,100),
      wxTAB_TRAVERSAL,
      "contains file browser"
     );
@@ -44,7 +44,12 @@ void MainFrame::InitTopLevel(){
   // parameter Panel
   //
   
-  parameterPanel = new wxPanel(this, PANEL_Parameters, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+  parameterPanel = new wxPanel
+    (this, 
+     PANEL_Parameters, 
+     wxDefaultPosition, 
+     wxSize(400,100),
+     wxTAB_TRAVERSAL);
   parameterPanel->SetBackgroundColour(col_panel); 
 
   //
@@ -55,7 +60,7 @@ void MainFrame::InitTopLevel(){
     (this,
      PANEL_Sandr,
      wxDefaultPosition,
-     wxDefaultSize,
+     wxSize(400,100),
      wxTAB_TRAVERSAL,
      "initiate user-program communication"
     );
@@ -70,7 +75,7 @@ void MainFrame::InitTopLevel(){
   //
   topLevelSizer->Add(sandrPanel,0,wxEXPAND,20);
   // set sizer
-  this->SetSizer(topLevelSizer);
+  this->SetSizerAndFit(topLevelSizer);
 }
 
 //////////////////
