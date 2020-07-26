@@ -84,7 +84,7 @@ class MainFrame: public wxFrame
 
 enum
 {
-  // assign an ID to the button Hello
+  // assign an ID to the button Start
   TEXT_Output = wxID_HIGHEST + 1,
     BUTTON_Calc,
     PANEL_Sandr,
