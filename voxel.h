@@ -3,6 +3,7 @@
 #define VOXEL_H
 
 #include <vector>
+#include <array>
 
 struct Atom;
 class Voxel{
