@@ -7,6 +7,7 @@
 #include <sstream> // stringstream
 #include <cassert>
 #include <exception>
+#include <iterator>
 
 // split line into substrings when separated by whitespaces
 static inline std::vector<std::string> splitLine(std::string& line){ 
