@@ -41,7 +41,7 @@ bool Ctrl::runCalculation(){
   // read atoms from file and save a vector containing the atoms
   current_calculation->readRadiiFromFile(radius_filepath);
   current_calculation->readAtomsFromFile(atom_filepath);
-  current_calculation->storeAtomsInTree();
+  current_calculation->storeAtomsInTree(); // TODO consider moving this to readAtomsFromFile method in model class
   
   // get user inputs
   const double grid_step = gui->getGridsize();

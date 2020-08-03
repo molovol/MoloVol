@@ -2,6 +2,12 @@
 #include "atomtree.h"
 #include "atom.h"
 
+///////////////////
+// AUX FUNCTIONS //
+///////////////////
+
+double findMaxRad(std::vector<Atom>& list_of_atoms);
+
 //////////////
 // ATOMNODE //
 //////////////
@@ -38,10 +44,26 @@ void AtomNode::print(){
 
 AtomTree::AtomTree(){
   root = NULL;
+  max_rad = 0;
 }
 
 AtomTree::AtomTree(std::vector<Atom>& list_of_atoms){
-  root = buildTree(list_of_atoms, 0, list_of_atoms.size(), 0);
+  root = buildTree(list_of_atoms, 0, list_of_atoms.size(), 0); 
+  // ideally, the maximum radius would be the largest radius among all children of a node.
+  // this, however, may require running an algorithm for every tree node, increasing the
+  // complexity of the operation. it is much simpler to use the maximum radius among all
+  // atoms instead, sacrificing optimisation.
+  max_rad = findMaxRad(list_of_atoms);
+}
+
+double findMaxRad(std::vector<Atom>& list_of_atoms){
+  double max_rad = 0;
+  for (int atom = 0; atom < list_of_atoms.size(); atom++){
+    if (list_of_atoms[atom].getRad() > max_rad){
+      max_rad = list_of_atoms[atom].getRad();
+    }
+  }
+  return max_rad;
 }
 
     // recursive function to generate a 3-d tree from a list of atoms
@@ -66,7 +88,7 @@ AtomNode* AtomTree::buildTree(
     quicksort(list_of_atoms, vec_first, vec_end, dim);
     int median = vec_first + (vec_end-vec_first)/2; // operation rounds down
     return new AtomNode(
-        &list_of_atoms[median], 
+       &list_of_atoms[median], 
         buildTree(list_of_atoms, vec_first, median, (dim+1)%3), 
         buildTree(list_of_atoms, median+1, vec_end, (dim+1)%3)); 
   }
@@ -111,4 +133,16 @@ void AtomTree::swap(Atom& a, Atom& b){
   a = b;
   b = temp;
   return;
+}
+
+////////////
+// ACCESS //
+////////////
+
+const double AtomTree::getMaxRad() const {
+  return max_rad;
+}
+
+const AtomNode* AtomTree::getRoot() const {
+  return root;
 }

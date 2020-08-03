@@ -8,3 +8,4 @@ inputfile/*
 .DS_store
 *.dSYM/Contents/Info.plist
 benchmark
+*~

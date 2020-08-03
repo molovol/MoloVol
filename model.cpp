@@ -12,7 +12,6 @@ void Model::defineCell(const double& grid_step, const int& max_depth){
 
 void Model::storeAtomsInTree(){
   atomtree = AtomTree(atoms);
-  atomtree.print();
 }
 
 void Model::findCloseAtoms(const double& r_probe){

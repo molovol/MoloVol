@@ -10,7 +10,7 @@
 // VOLUME COMP //
 /////////////////
 
-void Space::placeAtomsInGrid(const std::vector<Atom> &atoms, const AtomTree& atomtree){
+void Space::placeAtomsInGrid(const std::vector<Atom> &atoms, const AtomTree& atomtree){ // TODO: remove atoms argument. no longer necessary
   // calculate position of first voxel
   std::array<double,3> vxl_origin = getOrigin();
   
@@ -28,7 +28,7 @@ void Space::placeAtomsInGrid(const std::vector<Atom> &atoms, const AtomTree& ato
         Voxel& vxl = getElement(x,y,z);
         std::array<double,3> vxl_pos = 
           {vxl_origin[0] + vxl_dist * x, vxl_origin[1] + vxl_dist * y, vxl_origin[2] + vxl_dist * z};
-        vxl.determineType(atoms, vxl_pos, grid_size, max_depth, atomtree);
+        vxl.determineType(vxl_pos, grid_size, max_depth, atomtree);
       }
     }
   }      

@@ -25,6 +25,11 @@ struct Atom{
   const std::array<double,3> getPos() const {
     return {pos_x, pos_y, pos_z};
   }
+  
+  const double getRad() const {
+    return rad;
+  }
+  
   const double getCoordinate(const char& dim){
     switch(dim){
       case 0: return pos_x;
@@ -32,6 +37,10 @@ struct Atom{
       case 2: return pos_z;
     }
     throw ExceptIllegalFunctionCall();
+  }
+  void print(){
+    printf("Object: Atom {%s, (%1.3f, %1.3f, %1.3f)}", symbol.c_str(), pos_x, pos_y, pos_z);
+    return; 
   }
 };
 
@@ -52,5 +61,7 @@ static inline unsigned int symbolToNumber(const std::string& symbol){
   std::cout << "There has been an error in atom.h" << std::endl;
   return 0;
 }
-  
+
+
+
 #endif
