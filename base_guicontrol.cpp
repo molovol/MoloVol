@@ -39,3 +39,7 @@ int MainFrame::getDepth(){
   return depthInput->GetValue();
 }
 
+//* get from user input
+double MainFrame::getProbeRadius(){
+  return r_probe;
+}

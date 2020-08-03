@@ -6,10 +6,12 @@
 #include <vector>
 #include <array>
 
+class AtomTree;
 struct Atom;
 class Voxel;
 class Space{
   public:
+    Space() = default;
     Space(std::vector<Atom>&, const double&, const int&);
     std::array <double,3> getMin();
     std::array <double,3> getOrigin(); // same as getMin();
@@ -20,7 +22,7 @@ class Space{
     Voxel& getElement(const size_t &i);
     void printGrid();
 
-    void placeAtomsInGrid(const std::vector<Atom>&);
+    void placeAtomsInGrid(const std::vector<Atom>&, const AtomTree&);
     double getVolume();
   
   private:
