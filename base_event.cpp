@@ -31,7 +31,7 @@ void MainFrame::OnExit(wxCommandEvent& event)
 // display text in output
 void MainFrame::OnPrint(wxCommandEvent& event)
 {
-  std::string text = "fuck you";
+  std::string text = "fuck you"; // This is likely a relic from tests from jmaglic, need to be changed or removed
   printToOutput(text);
   return;
 }
