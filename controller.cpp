@@ -39,7 +39,7 @@ bool Ctrl::runCalculation(){
   std::string atom_filepath = gui->getAtomFilepath();
   std::string radius_filepath = gui->getRadiusFilepath();
   // read atoms from file and save a vector containing the atoms
-  current_calculation->readRadiiFromFile(radius_filepath);
+  current_calculation->readRadiiAndAtomNumFromFile(radius_filepath);
   current_calculation->readAtomsFromFile(atom_filepath);
   current_calculation->storeAtomsInTree(); // TODO consider moving this to readAtomsFromFile method in model class
   
