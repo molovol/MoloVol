@@ -156,7 +156,7 @@ Space::Space(std::vector<Atom> &atoms, const double& bottom_level_voxel_dist, co
 // member function loops through all atoms (previously extracted
 // from file) and saves the minimum and maximum positions in all
 // three cartesian directions out of all atoms. Also finds max
-// radius of all atoms and sets the space boundries slightly so
+// radius of all atoms and sets the space boundaries slightly so
 // that all atoms fit the space.
 //void Space::findMinMaxFromAtoms
 void Space::setBoundaries
