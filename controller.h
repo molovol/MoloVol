@@ -13,6 +13,7 @@ class Ctrl{
     void registerView(MainFrame* inp_gui);
     static Ctrl* getInstance();
     void notifyUser(std::string str);
+    void notifyUserUnicode(std::wstring wstr);
 
   private:
     Model* current_calculation;
@@ -20,6 +21,6 @@ class Ctrl{
     static Ctrl* instance;
     static MainFrame* gui;
 };
-    
+
 
 #endif

@@ -19,7 +19,15 @@ void MainFrame::printToOutput(std::string& text){
   outputText->SetValue(text);
 }
 
+void MainFrame::printToOutputUnicode(std::wstring& text){
+  outputText->SetValue(text);
+}
+
 void MainFrame::appendOutput(std::string& text){
+  outputText->SetValue(outputText->GetValue() + text);
+}
+
+void MainFrame::appendOutputUnicode(std::wstring& text){
   outputText->SetValue(outputText->GetValue() + text);
 }
 
