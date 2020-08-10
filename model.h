@@ -14,7 +14,7 @@ struct Atom;
 class Space;
 class Model{
   public:
-    void readRadiiFromFile(std::string&);
+    void readRadiiAndAtomNumFromFile(std::string&);
     inline double findRadiusOfAtom(const std::string&);
     inline double findRadiusOfAtom(const Atom&); //TODO has not been tested
     void readAtomsFromFile(std::string&);
@@ -27,8 +27,9 @@ class Model{
   private:
     std::vector<Atom> atoms;
     AtomTree atomtree;
-    Space cell; 
-    std::unordered_map<std::string,double> radii;
+    Space cell;
+    std::unordered_map<std::string, double> radii;
+    std::unordered_map<std::string, int> elem_Z; //I wanted to use unsigned int for atomic number but stoui function doesn't exist, so it is simpler to use int
 };
 
 #endif

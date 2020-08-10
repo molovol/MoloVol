@@ -27,22 +27,22 @@ Ctrl* Ctrl::getInstance(){
   }
   return instance;
 }
-    
-bool Ctrl::runCalculation(){ 
-  
+
+bool Ctrl::runCalculation(){
+
   // create an instance of the model class
   // ensures, that there is only ever one instance of the model class
   if(current_calculation == NULL){
     current_calculation = new Model();
   }
-  
+
   std::string atom_filepath = gui->getAtomFilepath();
   std::string radius_filepath = gui->getRadiusFilepath();
   // read atoms from file and save a vector containing the atoms
-  current_calculation->readRadiiFromFile(radius_filepath);
+  current_calculation->readRadiiAndAtomNumFromFile(radius_filepath);
   current_calculation->readAtomsFromFile(atom_filepath);
   current_calculation->storeAtomsInTree(); // TODO consider moving this to readAtomsFromFile method in model class
-  
+
   // get user inputs
   const double grid_step = gui->getGridsize();
   const int max_depth = gui->getDepth();
@@ -55,9 +55,9 @@ bool Ctrl::runCalculation(){
   current_calculation->calcVolume();
   auto end = std::chrono::steady_clock::now();
   std::chrono::duration<double> elapsed_seconds = end-start;
-  
-  Ctrl::notifyUser("Elapsed time: " + std::to_string(elapsed_seconds.count()));
-  
+
+  Ctrl::notifyUser("Elapsed time: " + std::to_string(elapsed_seconds.count()) + " s");
+
   return true;
 }
 
@@ -66,3 +66,6 @@ void Ctrl::notifyUser(std::string str){
   gui->appendOutput(str);
 }
 
+void Ctrl::notifyUserUnicode(std::wstring wstr){
+  gui->appendOutput(wstr);
+}

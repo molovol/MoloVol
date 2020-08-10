@@ -15,14 +15,16 @@ void Model::storeAtomsInTree(){
 }
 
 void Model::findCloseAtoms(const double& r_probe){
-  //TODO  
+  //TODO
   return;
 }
 
 void Model::calcVolume(){
+  std::wstring angstrom = L" \u212B\u00B3";
   cell.placeAtomsInGrid(atoms, atomtree);
   double volume = cell.getVolume();
   Ctrl::getInstance()->notifyUser("Van der Waals Volume: " + std::to_string(volume));
+  Ctrl::getInstance()->notifyUserUnicode(angstrom);
   return;
 }
 
@@ -31,7 +33,7 @@ void Model::debug(){
   std::array<double,3> cell_max = cell.getMax();
 
   for(int dim = 0; dim < 3; dim++){
-    std::cout << "Cell Limit in Dim " << dim << ":" << cell_min[dim] << " and " << cell_max[dim] << std::endl; 
+    std::cout << "Cell Limit in Dim " << dim << ":" << cell_min[dim] << " and " << cell_max[dim] << std::endl;
   }
   return;
 }
