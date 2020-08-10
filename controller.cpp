@@ -67,5 +67,5 @@ void Ctrl::notifyUser(std::string str){
 }
 
 void Ctrl::notifyUserUnicode(std::wstring wstr){
-  gui->appendOutputUnicode(wstr);
+  gui->appendOutput(wstr);
 }

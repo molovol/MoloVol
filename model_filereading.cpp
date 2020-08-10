@@ -16,23 +16,20 @@ static inline std::vector<std::string> splitLine(std::string& line){
   return substrings;
 }
 
-// Reads a string and converts it to valid atom symbol with first char upper case then lower case chars
-std::string strToValidSymbol(const std::string& str_inp){
-  std::string validSymbol = "";
-  for (int i = 0; str_inp[i]!=0; i++) {
-    if (isalpha(str_inp[i])) {
-      validSymbol = validSymbol + str_inp[i];
-      if (i==0 && islower(validSymbol[i])) {
-        validSymbol[i] = toupper(validSymbol[i]);
-      }
-      else if (i>0 && isupper(validSymbol[i])) {
-        validSymbol[i] = tolower(validSymbol[i]);
-      }
+// reads a string and converts it to valid atom symbol: first character uppercase followed by lowercase characters
+std::string strToValidSymbol(std::string str){
+  // iterate over all characters in string
+  for (int i = 0; i<str.size(); i++) {
+    // only for first character in sequence, convert to uppercase
+    if (i==0) {
+      str[i] = toupper(str[i]);
     }
+    // for all other characters, convert to lowercase
     else {
-      return validSymbol;
+      str[i] = tolower(str[i]);
     }
   }
+  return str;
 }
 
 // reads radii from a file specified by the filepath and
