@@ -28,10 +28,10 @@ void MainFrame::OnExit(wxCommandEvent& event)
   this->Close(TRUE);
 }
 
-// display text in output
+// display text in output, used for debugging
 void MainFrame::OnPrint(wxCommandEvent& event)
 {
-  std::string text = "fuck you"; // This is likely a relic from tests from jmaglic, need to be changed or removed
+  std::string text = "treat yourself well";
   printToOutput(text);
   return;
 }
