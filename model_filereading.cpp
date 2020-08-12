@@ -110,7 +110,11 @@ bool isAtomLine(const std::vector<std::string>& substrings) {
   for (char i=1; i<4; i++){
     // using a try-block feels hacky, but the alternative using strtod does as well
     try {
-      std::stod(substrings[i]);
+      size_t str_pos = 0; // will contain the last position in the string that was successfully evaluated by std::stod()
+      std::stod(substrings[i], &str_pos);
+      if (substrings[i].size() != str_pos) {
+        return false;
+      }
     }
     catch (const std::invalid_argument& ia) {
       return false;
