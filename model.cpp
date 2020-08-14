@@ -28,6 +28,14 @@ void Model::calcVolume(){
   return;
 }
 
+std::vector<std::tuple<std::string, int, double>> Model::generateAtomList(){
+  std::vector<std::tuple<std::string, int, double>> atoms_for_list; 
+  for(auto elem : number_of_atoms){
+    atoms_for_list.emplace_back(elem.first, elem.second, radii[elem.first]);
+  }
+  return atoms_for_list;
+}
+
 void Model::debug(){
   std::array<double,3> cell_min = cell.getMin();
   std::array<double,3> cell_max = cell.getMax();

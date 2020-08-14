@@ -30,10 +30,11 @@ Ctrl* Ctrl::getInstance(){
 
 //std::vector<std::tuple<std::string, int, double>> Ctrl::loadInputFiles(){
 void Ctrl::loadInputFiles(){
-  // create an instance of the model class
-  // ensures, that there is only ever one instance of the model class
+  // disable buttons
   gui->enableGuiElements(false);
 
+  // create an instance of the model class
+  // ensures, that there is only ever one instance of the model class
   if(current_calculation == NULL){
     current_calculation = new Model();
   }
@@ -43,17 +44,17 @@ void Ctrl::loadInputFiles(){
   // read atoms from file and save a vector containing the atoms
   current_calculation->readRadiiAndAtomNumFromFile(radius_filepath);
   current_calculation->listAtomTypesFromFile(atom_filepath);
+ 
+
+  std::vector<std::tuple<std::string, int, double>> atoms_for_list 
+    = current_calculation->generateAtomList();
   
-  std::vector<std::tuple<std::string, int, double>> atoms_for_list;
-  for(auto elem : current_calculation->number_of_atoms){
-    atoms_for_list.emplace_back(elem.first, elem.second, current_calculation->radii[elem.first]);
-  }
-  
-  gui->generateAtomList(atoms_for_list);
+  gui->displayAtomList(atoms_for_list);
 
   // TODO: without wxYield, the button is grayed but still records clicks
   // yet, wxYield is apparently dangerous in an event handler, need to find an alternative
   wxYield();
+  // enable buttons
   gui->enableGuiElements(true);
   
   return;// atoms_for_list;
