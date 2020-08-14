@@ -4,6 +4,7 @@
 #include "atom.h" // i don't know why
 #include "model.h"
 #include <chrono>
+#include <utility>
 
 ///////////////////////
 // STATIC ATTRIBUTES //
@@ -33,6 +34,7 @@ std::vector<std::tuple<std::string, int, double>> Ctrl::loadInputFiles(){
   if(current_file_loading == NULL){
     current_file_loading = new Model();
   }
+
   std::vector<std::tuple<std::string, int, double>> atoms_for_list;
   std::string atom_filepath = gui->getAtomFilepath();
   std::string radius_filepath = gui->getRadiusFilepath();
@@ -49,13 +51,22 @@ std::vector<std::tuple<std::string, int, double>> Ctrl::loadInputFiles(){
 bool Ctrl::runCalculation(){
   // create an instance of the model class
   // ensures, that there is only ever one instance of the model class
+  gui->enableGuiElements(false);
+
+  // without wxYield, the button is grayed but still records clicks
+  // yet, wxYield is apparently dangerous in an event handler, need to find an alternative
+  // moved MainFrame method to here (Controller method) - may have been broken on the way
+  wxYield();
+
+
   if(current_calculation == NULL){
     current_calculation = new Model();
   }
-
+  
   std::string atom_filepath = gui->getAtomFilepath();
   std::unordered_map<std::string, double> radii_list;
   gui->generateRadiiListFromGrid(radii_list);
+  
   current_calculation->radii = radii_list;
   Ctrl::notifyUser("Result for ");
   Ctrl::notifyUser(generateChemicalFormulaUnicode(gui->generateChemicalFormulaFromGrid()));
@@ -74,6 +85,8 @@ bool Ctrl::runCalculation(){
   std::chrono::duration<double> elapsed_seconds = end-start;
 
   Ctrl::notifyUser("Elapsed time: " + std::to_string(elapsed_seconds.count()) + " s");
+  
+  gui->enableGuiElements(true);
 
   return true;
 }

@@ -38,6 +38,7 @@ class MainFrame: public wxFrame
     double getGridsize();
     int getDepth();
     double getProbeRadius();
+    void enableGuiElements(bool inp); // method to turn on and off gui elements upon start and completion of calc
     //
     void generateAtomList(std::vector<std::tuple<std::string, int, double>>& symbol_number_radius);
     std::string generateChemicalFormulaFromGrid();
