@@ -20,11 +20,11 @@ void Model::findCloseAtoms(const double& r_probe){
 }
 
 void Model::calcVolume(){
-  std::wstring angstrom = L" \u212B\u00B3";
+  std::wstring cubic_angstrom = L" \u212B\u00B3";
   cell.placeAtomsInGrid(atoms, atomtree);
   double volume = cell.getVolume();
   Ctrl::getInstance()->notifyUser("Van der Waals Volume: " + std::to_string(volume));
-  Ctrl::getInstance()->notifyUserUnicode(angstrom);
+  Ctrl::getInstance()->notifyUser(cubic_angstrom);
   return;
 }
 
