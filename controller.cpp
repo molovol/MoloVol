@@ -28,24 +28,35 @@ Ctrl* Ctrl::getInstance(){
   return instance;
 }
 
-std::vector<std::tuple<std::string, int, double>> Ctrl::loadInputFiles(){
+//std::vector<std::tuple<std::string, int, double>> Ctrl::loadInputFiles(){
+void Ctrl::loadInputFiles(){
   // create an instance of the model class
   // ensures, that there is only ever one instance of the model class
-  if(current_file_loading == NULL){
-    current_file_loading = new Model();
+  gui->enableGuiElements(false);
+
+  if(current_calculation == NULL){
+    current_calculation = new Model();
   }
 
-  std::vector<std::tuple<std::string, int, double>> atoms_for_list;
   std::string atom_filepath = gui->getAtomFilepath();
   std::string radius_filepath = gui->getRadiusFilepath();
   // read atoms from file and save a vector containing the atoms
-  current_file_loading->readRadiiAndAtomNumFromFile(radius_filepath);
-  current_file_loading->listAtomTypesFromFile(atom_filepath);
-  for(auto elem : current_file_loading->number_of_atoms){
-    atoms_for_list.emplace_back(elem.first, elem.second, current_file_loading->radii[elem.first]);
+  current_calculation->readRadiiAndAtomNumFromFile(radius_filepath);
+  current_calculation->listAtomTypesFromFile(atom_filepath);
+  
+  std::vector<std::tuple<std::string, int, double>> atoms_for_list;
+  for(auto elem : current_calculation->number_of_atoms){
+    atoms_for_list.emplace_back(elem.first, elem.second, current_calculation->radii[elem.first]);
   }
+  
+  gui->generateAtomList(atoms_for_list);
 
-  return atoms_for_list;
+  // TODO: without wxYield, the button is grayed but still records clicks
+  // yet, wxYield is apparently dangerous in an event handler, need to find an alternative
+  wxYield();
+  gui->enableGuiElements(true);
+  
+  return;// atoms_for_list;
 }
 
 bool Ctrl::runCalculation(){
