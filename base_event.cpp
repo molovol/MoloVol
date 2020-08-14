@@ -72,23 +72,8 @@ void MainFrame::OnRadiusBrowse(wxCommandEvent& event){
 // load input files to display radii list
 void MainFrame::OnLoadFiles(wxCommandEvent& event){
 
-  // Deactivate the Start and Load files buttons during the loading
-  //enableGuiElements(false);
-// calcButton->Enable(false);
-// loadFilesButton->Enable(false);
-  // so far only xyz files allowed
-  //std::vector<std::tuple<std::string, int, double>> atoms_for_list = 
   Ctrl::getInstance()->loadInputFiles();
   
-  //MainFrame::generateAtomList(atoms_for_list);
-  
-  // TODO: without wxYield, the button is grayed but still records clicks
-  // yet, wxYield is apparently dangerous in an event handler, need to find an alternative
-  //wxYield();
-  
-  // Reactivate the Start and Load files buttons
-  //MainFrame::calcButton->Enable(true);
-  //MainFrame::loadFilesButton->Enable(true);
   return;
 }
 
