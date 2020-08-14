@@ -7,7 +7,6 @@
 #include "base.h"
 #include "controller.h"
 #include <vector>
-#include <utility>
 
 /////////////////
 // EVENT TABLE //
@@ -42,23 +41,17 @@ void MainFrame::OnPrint(wxCommandEvent& event)
 // begin calculation
 void MainFrame::OnCalc(wxCommandEvent& event){
 
-  //std::string filepath = (filepathText->GetValue()).ToStdString();
-  //  printToOutput(filepath);
-
-  // Deactivate the Start and Load files buttons during the calculation
-  MainFrame::calcButton->Enable(false);
-  MainFrame::loadFilesButton->Enable(false);
-  // Prevents editing of the atom list grid during the calculation
-  MainFrame::atomListGrid->EnableEditing(false);
-  // so far only xyz files allowed
   Ctrl::getInstance()->runCalculation();
-  // without wxYield, the button is grayed but still records clicks
-  // yet, wxYield is apparently dangerous in an event handler, need to find an alternative
-  wxYield();
-  // Reactivate the Start and Load files buttons and the atom list edition
-  MainFrame::calcButton->Enable(true);
-  MainFrame::loadFilesButton->Enable(true);
-  MainFrame::atomListGrid->EnableEditing(true);
+  
+  return;
+}
+
+void MainFrame::enableGuiElements(bool inp){
+  // deactivate the Start and Load files buttons during the calculation
+  calcButton->Enable(inp);
+  loadFilesButton->Enable(inp);
+  // prevents editing of the atom list grid during the calculation
+  atomListGrid->EnableEditing(inp);
   return;
 }
 
@@ -80,8 +73,9 @@ void MainFrame::OnRadiusBrowse(wxCommandEvent& event){
 void MainFrame::OnLoadFiles(wxCommandEvent& event){
 
   // Deactivate the Start and Load files buttons during the loading
-  MainFrame::calcButton->Enable(false);
-  MainFrame::loadFilesButton->Enable(false);
+  enableGuiElements(false);
+// calcButton->Enable(false);
+// loadFilesButton->Enable(false);
   // so far only xyz files allowed
   std::vector<std::tuple<std::string, int, double>> atoms_for_list = Ctrl::getInstance()->loadInputFiles();
   MainFrame::generateAtomList(atoms_for_list);
