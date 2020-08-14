@@ -4,15 +4,12 @@
 
 #include <iostream>
 #include <wx/wx.h>
-#include <vector>
-
-#include <tuple>
 
 class Model;
 class MainFrame;
 class Ctrl{
   public:
-    std::vector<std::tuple<std::string, int, double>> loadInputFiles();
+    void loadInputFiles();
     bool runCalculation();
     void registerView(MainFrame* inp_gui);
     static Ctrl* getInstance();
@@ -22,7 +19,7 @@ class Ctrl{
 
   private:
     Model* current_calculation;
-    Model* current_file_loading;
+//    Model* current_file_loading;
     // static attributes to ensure there is only one of each
     static Ctrl* instance;
     static MainFrame* gui;
