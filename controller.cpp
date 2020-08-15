@@ -28,7 +28,6 @@ Ctrl* Ctrl::getInstance(){
   return instance;
 }
 
-//std::vector<std::tuple<std::string, int, double>> Ctrl::loadInputFiles(){
 void Ctrl::loadInputFiles(){
   // disable buttons
   gui->enableGuiElements(false);
@@ -45,7 +44,6 @@ void Ctrl::loadInputFiles(){
   current_calculation->readRadiiAndAtomNumFromFile(radius_filepath);
   current_calculation->listAtomTypesFromFile(atom_filepath);
  
-
   std::vector<std::tuple<std::string, int, double>> atoms_for_list 
     = current_calculation->generateAtomList();
   
@@ -109,6 +107,7 @@ void Ctrl::notifyUser(std::string str){
 }
 
 void Ctrl::notifyUser(std::wstring wstr){
+  wstr = "\n" + wstr;
   gui->appendOutput(wstr);
 }
 

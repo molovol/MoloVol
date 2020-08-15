@@ -2,6 +2,7 @@
 #include "model.h"
 #include "controller.h"
 #include "atom.h"
+#include "special_chars.cpp"
 #include <array>
 #include <string>
 
@@ -20,11 +21,13 @@ void Model::findCloseAtoms(const double& r_probe){
 }
 
 void Model::calcVolume(){
-  std::wstring cubic_angstrom = L" \u212B\u00B3";
   cell.placeAtomsInGrid(atoms, atomtree);
   double volume = cell.getVolume();
-  Ctrl::getInstance()->notifyUser("Van der Waals Volume: " + std::to_string(volume));
-  Ctrl::getInstance()->notifyUser(cubic_angstrom);
+
+  std::string message_to_user 
+    = "Van der Waals Volume: " + std::to_string(volume) + " " + Symbol::angstrom() + Symbol::cubed();
+  Ctrl::getInstance()->notifyUser(message_to_user);
+  
   return;
 }
 

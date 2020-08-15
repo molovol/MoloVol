@@ -27,7 +27,7 @@ class Model{
     void calcVolume();
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void debug();
-    // following maps were moved to public for convenience but we can find alternatives if they need to be private
+    // TODO: move to private
     std::unordered_map<std::string, double> radii;
     std::unordered_map<std::string, int> elem_Z; //I wanted to use unsigned int for atomic number but stoui function doesn't exist, so it is simpler to use int
   private:

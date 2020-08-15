@@ -19,7 +19,6 @@ class Ctrl{
 
   private:
     Model* current_calculation;
-//    Model* current_file_loading;
     // static attributes to ensure there is only one of each
     static Ctrl* instance;
     static MainFrame* gui;
