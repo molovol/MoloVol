@@ -80,12 +80,11 @@ void Model::listAtomTypesFromFile(std::string& filepath){
   while(getline(inp_file,line)){ // ws to pass empty lines and blank space before atoms if any
     // divide line into "words"
     std::vector<std::string> substrings = splitLine(line);
-      // recognize atom line format: Element_Symbol x y z
-      if (isAtomLine(substrings)) {
+    // recognize atom line format: Element_Symbol x y z
+    if (isAtomLine(substrings)) {
       atom_amounts[strToValidSymbol(substrings[0])]++;
     }
   }
-  // file has been read
   inp_file.close();
 
   return;
