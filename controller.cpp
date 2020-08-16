@@ -78,10 +78,7 @@ bool Ctrl::runCalculation(){
   gui->generateRadiiListFromGrid(radii_list);
   
   current_calculation->radii = radii_list;
-  Ctrl::notifyUser("Result for ");
-//  Ctrl::notifyUser(generateChemicalFormulaUnicode(gui->generateChemicalFormulaFromGrid()));
-  // TODO: test this. if this works, remove the intermediate function.
-  notifyUser(gui->generateChemicalFormulaFromGrid());
+  Ctrl::notifyUser("Result for " + gui->generateChemicalFormulaFromGrid());
 
   current_calculation->readAtomsFromFile(atom_filepath);
   current_calculation->storeAtomsInTree(); // TODO consider moving this to readAtomsFromFile method in model class
@@ -114,45 +111,3 @@ void Ctrl::notifyUser(std::wstring wstr){
   gui->appendOutput(wstr);
 }
 
-
-std::wstring Ctrl::generateChemicalFormulaUnicode(std::string chemical_formula){
-  std::wstring chemical_formula_unicode;
-  for (int i = 0; i < chemical_formula.size(); i++){
-    if (isalpha(chemical_formula[i])){
-      // it is much simpler to convert string to wxString to wstring than directly from string to wstring
-      wxString buffer(chemical_formula[i]);
-      chemical_formula_unicode.append(buffer.wxString::ToStdWstring());
-    }
-    else if (chemical_formula[i] == '0'){
-      chemical_formula_unicode.append(L"\u2080");
-    }
-    else if (chemical_formula[i] == '1'){
-      chemical_formula_unicode.append(L"\u2081");
-    }
-    else if (chemical_formula[i] == '2'){
-      chemical_formula_unicode.append(L"\u2082");
-    }
-    else if (chemical_formula[i] == '3'){
-      chemical_formula_unicode.append(L"\u2083");
-    }
-    else if (chemical_formula[i] == '4'){
-      chemical_formula_unicode.append(L"\u2084");
-    }
-    else if (chemical_formula[i] == '5'){
-      chemical_formula_unicode.append(L"(\u2085");
-    }
-    else if (chemical_formula[i] == '6'){
-      chemical_formula_unicode.append(L"\u2086)");
-    }
-    else if (chemical_formula[i] == '7'){
-      chemical_formula_unicode.append(L"\u2087");
-    }
-    else if (chemical_formula[i] == '8'){
-      chemical_formula_unicode.append(L"\u2088");
-    }
-    else if (chemical_formula[i] == '9'){
-      chemical_formula_unicode.append(L"\u2089");
-    }
-  }
-  return chemical_formula_unicode;
-}
