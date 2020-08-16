@@ -106,8 +106,9 @@ void Ctrl::notifyUser(std::string str){
   gui->appendOutput(str);
 }
 
+/*
 void Ctrl::notifyUser(std::wstring wstr){
   wstr = "\n" + wstr;
   gui->appendOutput(wstr);
-}
+}*/
 

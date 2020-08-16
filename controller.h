@@ -14,10 +14,9 @@ class Ctrl{
     void registerView(MainFrame* inp_gui);
     static Ctrl* getInstance();
     void notifyUser(std::string str);
-    void notifyUser(std::wstring wstr);
-    std::wstring generateChemicalFormulaUnicode(std::string chemical_formula);
 
   private:
+    // consider making static pointer for model
     Model* current_calculation;
     // static attributes to ensure there is only one of each
     static Ctrl* instance;
