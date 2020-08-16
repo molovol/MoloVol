@@ -5,6 +5,7 @@
 #endif
 
 #include "base.h"
+#include "special_chars.h"
 #include <string>
 
 //////////////////////////////////
@@ -85,13 +86,16 @@ std::string MainFrame::generateChemicalFormulaFromGrid(){
 // TODO: For now, the chemical formula is generated in alphabetical order
 // however, the convention is to start with C, then H then by alphabetical order
 // we could modify the function to follow the convention
+
+// TODO: generate a string here, that is UTC-8 encoded 
   std::string chemical_formula = "";
-  for (int i = 0; i < atomListGrid->GetNumberRows(); i++){
-    if (atomListGrid->GetCellValue(i,0) == "1"){
-      std::string symbol = atomListGrid->GetCellValue(i,1).wxString::ToStdString();
-      std::string number = atomListGrid->GetCellValue(i,2).wxString::ToStdString();
-      chemical_formula.append(symbol);
-      chemical_formula.append(number);
+  for (int row = 0; row < atomListGrid->GetNumberRows(); row++){
+    if (atomListGrid->GetCellValue(row,0) == "1"){ // if checkbox "include" is checked
+      std::string symbol = atomListGrid->GetCellValue(row,1).ToStdString();
+      std::string subscript = Symbol::subscript(atomListGrid->GetCellValue(row,2).ToStdString());
+      
+      chemical_formula += symbol + subscript;
+
     }
   }
   return chemical_formula;

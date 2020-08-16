@@ -2,7 +2,7 @@
 #include "model.h"
 #include "controller.h"
 #include "atom.h"
-#include "special_chars.cpp"
+#include "special_chars.h"
 #include <array>
 #include <string>
 
