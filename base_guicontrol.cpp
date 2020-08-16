@@ -83,22 +83,28 @@ void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>
 }
 
 std::string MainFrame::generateChemicalFormulaFromGrid(){
-// TODO: For now, the chemical formula is generated in alphabetical order
-// however, the convention is to start with C, then H then by alphabetical order
-// we could modify the function to follow the convention
-
-// TODO: generate a string here, that is UTC-8 encoded 
-  std::string chemical_formula = "";
+  std::string chemical_formula_suffix = "";
+  std::string chemical_formula_prefix = "";
   for (int row = 0; row < atomListGrid->GetNumberRows(); row++){
     if (atomListGrid->GetCellValue(row,0) == "1"){ // if checkbox "include" is checked
       std::string symbol = atomListGrid->GetCellValue(row,1).ToStdString();
       std::string subscript = Symbol::subscript(atomListGrid->GetCellValue(row,2).ToStdString());
       
-      chemical_formula += symbol + subscript;
+      // by convention: carbon comes first, then hydrogen, then in alphabetical order
+      if (symbol == "C"){
+        chemical_formula_prefix = symbol + subscript + chemical_formula_prefix;
+      }
+      else if (symbol == "H"){
+        chemical_formula_prefix += symbol + subscript;
+      }
+
+      else {
+        chemical_formula_suffix += symbol + subscript;
+      }
 
     }
   }
-  return chemical_formula;
+  return chemical_formula_prefix + chemical_formula_suffix;
 }
 
 void MainFrame::generateRadiiListFromGrid(std::unordered_map<std::string, double>& radii_list){
