@@ -68,18 +68,16 @@ bool Ctrl::runCalculation(){
   // moved MainFrame method to here (Controller method) - may have been broken on the way
   wxYield();
 
-
   if(current_calculation == NULL){
     current_calculation = new Model();
   }
   
-  std::string atom_filepath = gui->getAtomFilepath();
-  std::unordered_map<std::string, double> radii_list;
-  gui->generateRadiiListFromGrid(radii_list);
+  // radius map is generated from grid in gui, then passed to model for calculation
+  current_calculation->setRadiusMap(gui->generateRadiusMapFromView());
   
-  current_calculation->radii = radii_list;
   Ctrl::notifyUser("Result for " + gui->generateChemicalFormulaFromGrid());
 
+  std::string atom_filepath = gui->getAtomFilepath();
   current_calculation->readAtomsFromFile(atom_filepath);
   current_calculation->storeAtomsInTree(); // TODO consider moving this to readAtomsFromFile method in model class
   // get user inputs
@@ -89,6 +87,8 @@ bool Ctrl::runCalculation(){
   // set space size (size of box containing all atoms)
   current_calculation->defineCell(grid_step, max_depth);
   current_calculation->findCloseAtoms(r_probe);
+  
+  // measure time and run calculation
   auto start = std::chrono::steady_clock::now();
   current_calculation->calcVolume();
   auto end = std::chrono::steady_clock::now();

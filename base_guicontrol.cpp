@@ -107,13 +107,15 @@ std::string MainFrame::generateChemicalFormulaFromGrid(){
   return chemical_formula_prefix + chemical_formula_suffix;
 }
 
-void MainFrame::generateRadiiListFromGrid(std::unordered_map<std::string, double>& radii_list){
+std::unordered_map<std::string, double> MainFrame::generateRadiusMapFromView(){ 
+  std::unordered_map<std::string, double> radius_map;
   for (int i = 0; i < atomListGrid->GetNumberRows(); i++){
     if (atomListGrid->GetCellValue(i,0) == "1"){
       std::string symbol = atomListGrid->GetCellValue(i,1).wxString::ToStdString();
       double radius;
       atomListGrid->GetCellValue(i,3).ToDouble(&radius);
-      radii_list[symbol] = radius;
+      radius_map[symbol] = radius;
     }
   }
+  return radius_map;
 }
