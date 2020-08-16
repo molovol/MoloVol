@@ -32,7 +32,7 @@ class Model{
   private:
     std::unordered_map<std::string, double> radius_map;
     std::unordered_map<std::string, int> elem_Z;
-    std::map<std::string, int> number_of_atoms;
+    std::map<std::string, int> atom_amounts;
     
     std::vector<Atom> atoms;
     AtomTree atomtree;
