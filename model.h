@@ -26,11 +26,12 @@ class Model{
     void findCloseAtoms(const double&); //TODO
     void calcVolume();
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
+    // TODO: move to cpp
+    void setRadiusMap(std::unordered_map<std::string, double> map);
     void debug();
-    // TODO: move to private
-    std::unordered_map<std::string, double> radii;
-    std::unordered_map<std::string, int> elem_Z; //I wanted to use unsigned int for atomic number but stoui function doesn't exist, so it is simpler to use int
   private:
+    std::unordered_map<std::string, double> radius_map;
+    std::unordered_map<std::string, int> elem_Z;
     std::map<std::string, int> number_of_atoms;
     
     std::vector<Atom> atoms;

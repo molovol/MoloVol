@@ -33,12 +33,12 @@ static inline std::vector<std::string> splitLine(std::string& line){
 // the Model object
 void Model::readRadiiAndAtomNumFromFile(std::string& filepath){
   // clear unordered_maps to avoid keeping data from previous runs
-  radii.clear();
+  radius_map.clear();
   elem_Z.clear();
   //TODO if map empty: ask user via dialog box if they want to
   //TODO reimport the file
   //TODO make a function "consultUser(string)"
-  //if(radii.empty()){std::cout << "empty" << std::endl;}
+  //if(radius_map.empty()){std::cout << "empty" << std::endl;}
 
   std::string line;
   std::ifstream inp_file(filepath);
@@ -46,7 +46,7 @@ void Model::readRadiiAndAtomNumFromFile(std::string& filepath){
   while(getline(inp_file,line)){
     std::vector<std::string> substrings = splitLine(line);
     if(substrings.size() == 3){
-      radii[substrings[1]] = std::stod(substrings[2]);
+      radius_map[substrings[1]] = std::stod(substrings[2]);
       elem_Z[substrings[1]] = std::stoi(substrings[0]);
     }
   }
@@ -56,11 +56,11 @@ void Model::readRadiiAndAtomNumFromFile(std::string& filepath){
 // returns the radius of an atom with a given symbol
 inline double Model::findRadiusOfAtom(const std::string& symbol){
   //TODO add exception handling for when no radius was found:
-  //if(radii[symbol == 0]){
+  //if(radius_map[symbol == 0]){
   //  throw ...;
   //}
   //else{ return...;}
-  return radii[symbol];
+  return radius_map[symbol];
 }
 
 inline double Model::findRadiusOfAtom(const Atom& at){
@@ -114,7 +114,7 @@ void Model::readAtomsFromFile(std::string& filepath){
                      std::stod(substrings[2]),
                      std::stod(substrings[3]),
                      strToValidSymbol(substrings[0]),
-                     radii[valid_symbol],
+                     radius_map[valid_symbol],
                      elem_Z[valid_symbol]);
       list_of_atoms.push_back(at);
     }
