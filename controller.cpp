@@ -79,7 +79,10 @@ bool Ctrl::runCalculation(){
   
   current_calculation->radii = radii_list;
   Ctrl::notifyUser("Result for ");
-  Ctrl::notifyUser(generateChemicalFormulaUnicode(gui->generateChemicalFormulaFromGrid()));
+//  Ctrl::notifyUser(generateChemicalFormulaUnicode(gui->generateChemicalFormulaFromGrid()));
+  // TODO: test this. if this works, remove the intermediate function.
+  notifyUser(gui->generateChemicalFormulaFromGrid());
+
   current_calculation->readAtomsFromFile(atom_filepath);
   current_calculation->storeAtomsInTree(); // TODO consider moving this to readAtomsFromFile method in model class
   // get user inputs
@@ -110,6 +113,7 @@ void Ctrl::notifyUser(std::wstring wstr){
   wstr = "\n" + wstr;
   gui->appendOutput(wstr);
 }
+
 
 std::wstring Ctrl::generateChemicalFormulaUnicode(std::string chemical_formula){
   std::wstring chemical_formula_unicode;
