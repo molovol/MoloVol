@@ -71,7 +71,7 @@ void Model::listAtomTypesFromFile(std::string& filepath){
 //if (inp_file.is_open()){  //TODO consider adding an exception, for when file in not valid
 
   // clear map to avoid keeping data from previous runs
-  number_of_atoms.clear();
+  atom_amounts.clear();
   // we iterate through the lines in the input file
   std::string line;
   std::ifstream inp_file(filepath);
@@ -82,7 +82,7 @@ void Model::listAtomTypesFromFile(std::string& filepath){
     std::vector<std::string> substrings = splitLine(line);
       // recognize atom line format: Element_Symbol x y z
       if (isAtomLine(substrings)) {
-      number_of_atoms[strToValidSymbol(substrings[0])]++;
+      atom_amounts[strToValidSymbol(substrings[0])]++;
     }
   }
   // file has been read

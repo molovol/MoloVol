@@ -33,7 +33,7 @@ void Model::calcVolume(){
 
 std::vector<std::tuple<std::string, int, double>> Model::generateAtomList(){
   std::vector<std::tuple<std::string, int, double>> atoms_for_list; 
-  for(auto elem : number_of_atoms){
+  for(auto elem : atom_amounts){
     atoms_for_list.emplace_back(elem.first, elem.second, radius_map[elem.first]);
   }
   return atoms_for_list;
