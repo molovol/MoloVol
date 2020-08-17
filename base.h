@@ -30,9 +30,7 @@ class MainFrame: public wxFrame
     // methods for controller communication
     void clearOutput();
     void printToOutput(std::string& text);
-    void printToOutput(std::wstring& text);
     void appendOutput(std::string& text);
-    void appendOutput(std::wstring& text);
     std::string getAtomFilepath();
     std::string getRadiusFilepath();
     double getGridsize();
