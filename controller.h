@@ -9,13 +9,14 @@ class Model;
 class MainFrame;
 class Ctrl{
   public:
+    void loadInputFiles();
     bool runCalculation();
     void registerView(MainFrame* inp_gui);
     static Ctrl* getInstance();
     void notifyUser(std::string str);
-    void notifyUserUnicode(std::wstring wstr);
 
   private:
+    // consider making static pointer for model
     Model* current_calculation;
     // static attributes to ensure there is only one of each
     static Ctrl* instance;
