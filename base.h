@@ -77,18 +77,19 @@ class MainFrame: public wxFrame
     // methods to initialise gui
     void InitTopLevel();
     void InitLeftMainPanel();
-    void InitRightMainPanel();
-    void InitSandr();
     void InitBrowsePanel();
     void InitAtomfilePanel();
     void InitRadiusfilePanel();
-    void InitFileOptionsPanel();
     void InitFilePanel(wxPanel* panel, wxButton* button, wxTextCtrl* text);
+    void InitFileOptionsPanel();
+    void InitAtomListPanel();
+    void InitRightMainPanel();
     void InitParametersPanel();
     void InitGridPanel();
     void InitGridinputPanel();
     void InitDepthPanel();
-    void InitAtomListPanel();
+    void InitSandr();
+    
     void FitSizes();
     // methods to handle events
     void OnExit(wxCommandEvent& event);
@@ -116,34 +117,33 @@ class MainFrame: public wxFrame
 
 enum
 {
+  // assign an ID
+  PANEL_LeftMain = wxID_HIGHEST + 1,
+    PANEL_Browse,
+      PANEL_Atomfile,
+        BUTTON_Browse,
+        TEXT_Filename,
+      PANEL_Radiusfile,
+        BUTTON_Radius,
+        TEXT_Radius,
+      PANEL_FileOptions,
+        BUTTON_LoadFiles,
+    PANEL_AtomList,
+      GRID_AtomList,
+  
   PANEL_RightMain,
-  PANEL_LeftMain,
-  // assign an ID to the button Start
-  TEXT_Output = wxID_HIGHEST + 1,
-    BUTTON_Calc,
+    PANEL_Parameters,
+      PANEL_Grid,
+        TEXT_Grid,
+        PANEL_Gridinput,
+          TEXT_Gridinput,
+          TEXT_Gridunit,
+      PANEL_Depth,
+        TEXT_Depth,
+        SPIN_Depthinput,
     PANEL_Sandr,
-  PANEL_Browse,
-    PANEL_Atomfile,
-      BUTTON_Browse,
-      TEXT_Filename,
-    PANEL_Radiusfile,
-      BUTTON_Radius,
-      TEXT_Radius,
-    PANEL_FileOptions,
-      BUTTON_LoadFiles,
-//
-  PANEL_Parameters,
-    PANEL_Grid,
-      TEXT_Grid,
-      PANEL_Gridinput,
-        TEXT_Gridinput,
-        TEXT_Gridunit,
-    PANEL_Depth,
-      TEXT_Depth,
-      SPIN_Depthinput,
-//
-  PANEL_AtomList,
-    GRID_AtomList,
+      TEXT_Output, 
+      BUTTON_Calc,
 
 };
 
