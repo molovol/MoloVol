@@ -2,6 +2,7 @@
 #include "model.h"
 #include "controller.h"
 #include "atom.h"
+#include "special_chars.h"
 #include <array>
 #include <string>
 
@@ -20,11 +21,26 @@ void Model::findCloseAtoms(const double& r_probe){
 }
 
 void Model::calcVolume(){
-  std::wstring angstrom = L" \u212B\u00B3";
   cell.placeAtomsInGrid(atoms, atomtree);
   double volume = cell.getVolume();
-  Ctrl::getInstance()->notifyUser("Van der Waals Volume: " + std::to_string(volume));
-  Ctrl::getInstance()->notifyUserUnicode(angstrom);
+
+  std::string message_to_user 
+    = "Van der Waals Volume: " + std::to_string(volume) + " " + Symbol::angstrom() + Symbol::cubed();
+  Ctrl::getInstance()->notifyUser(message_to_user);
+  
+  return;
+}
+
+std::vector<std::tuple<std::string, int, double>> Model::generateAtomList(){
+  std::vector<std::tuple<std::string, int, double>> atoms_for_list; 
+  for(auto elem : atom_amounts){
+    atoms_for_list.emplace_back(elem.first, elem.second, radius_map[elem.first]);
+  }
+  return atoms_for_list;
+}
+
+void Model::setRadiusMap(std::unordered_map<std::string, double> map){
+  radius_map = map;
   return;
 }
 
