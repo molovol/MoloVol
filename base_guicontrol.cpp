@@ -65,20 +65,8 @@ void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>
     atomListGrid->SetReadOnly(row,2,true);
     // column 3 (radius of atom)
     atomListGrid->SetCellValue(std::to_string(std::get<2>(symbol_number_radius[row]))  , row, 3);
-   /* I believe this should be handled by the event handler 
-    if (std::wcstod(atomListGrid->GetCellValue(row,3), NULL) == 0){
-      atomListGrid->SetCellBackgroundColour(row,1,col_grey_cell);
-      atomListGrid->SetCellBackgroundColour(row,2,col_grey_cell);
-      atomListGrid->SetCellBackgroundColour(row,3,col_red_cell);
-    }
-    else {
-      atomListGrid->SetCellValue("1",row,0);
-    }
-    */
   }
-  //atomListGrid->Refresh();
-  atomListGrid->Fit();
-  FitSizes();
+  return;
 }
 
 std::string MainFrame::generateChemicalFormulaFromGrid(){

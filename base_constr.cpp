@@ -18,31 +18,7 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 
   InitTopLevel();
 
-  InitBrowsePanel();
-
-  InitAtomfilePanel();
-
-  InitRadiusfilePanel();
-
-  InitFileOptionsPanel();
-
-  //
-  InitParametersPanel();
-
-  InitGridPanel();
-
-  InitGridinputPanel();
-
-  InitDepthPanel();
-
-  //
-  InitAtomListPanel();
-
-  //
-  InitSandr();
-
-  //
-  FitSizes();
+  
 };
 
 

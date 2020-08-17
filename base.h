@@ -80,7 +80,7 @@ class MainFrame: public wxFrame
     void InitBrowsePanel();
     void InitAtomfilePanel();
     void InitRadiusfilePanel();
-    void InitFilePanel(wxPanel* panel, wxButton* button, wxTextCtrl* text);
+    void SetSizerFilePanel(wxPanel* panel, wxButton* button, wxTextCtrl* text);
     void InitFileOptionsPanel();
     void InitAtomListPanel();
     void InitRightMainPanel();
@@ -90,7 +90,8 @@ class MainFrame: public wxFrame
     void InitDepthPanel();
     void InitSandr();
     
-    void FitSizes();
+//    wxStaticBoxSizer *atomListSizer;
+
     // methods to handle events
     void OnExit(wxCommandEvent& event);
     void OnPrint(wxCommandEvent& event);
