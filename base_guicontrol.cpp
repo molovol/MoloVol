@@ -46,30 +46,37 @@ double MainFrame::getProbeRadius(){
 }
 
 void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>>& symbol_number_radius){
-  // Clear previous instance of the atom list grid
-  // DeleteRows causes an error if there is 0 row!
+  // delete all rows
+  // DeleteRows causes an error if there are no rows
   if (atomListGrid->GetNumberRows() > 0) {
-    atomListGrid->ClearGrid();
-    atomListGrid->DeleteRows(0,atomListGrid->GetNumberRows(),true);
+//    atomListGrid->ClearGrid(); // seems unneccessary
+    atomListGrid->DeleteRows(0, atomListGrid->GetNumberRows());
   }
 
-  for (int i = 0; i<symbol_number_radius.size(); i++) {
+  for (int row = 0; row < symbol_number_radius.size(); row++) {
     atomListGrid->AppendRows(1, true);
-    atomListGrid->SetCellValue(std::get<0>(symbol_number_radius[i]),i,1);
-    atomListGrid->SetCellValue(std::to_string(std::get<1>(symbol_number_radius[i])),i,2);
-    atomListGrid->SetCellValue(std::to_string(std::get<2>(symbol_number_radius[i])),i,3);
-    atomListGrid->SetReadOnly(i,1,true);
-    atomListGrid->SetReadOnly(i,2,true);
-    if (std::wcstod(atomListGrid->GetCellValue(i,3), NULL) == 0){
-      atomListGrid->SetCellBackgroundColour(i,1,col_grey_cell);
-      atomListGrid->SetCellBackgroundColour(i,2,col_grey_cell);
-      atomListGrid->SetCellBackgroundColour(i,3,col_red_cell);
+    // column 0 (include checkbox)
+    atomListGrid->SetCellValue("1",row,0);
+    // column 1 (symbol of atom)
+    atomListGrid->SetCellValue(std::get<0>(symbol_number_radius[row])                  , row, 1);
+    atomListGrid->SetReadOnly(row,1,true);
+    // column 2 (number of atom)
+    atomListGrid->SetCellValue(std::to_string(std::get<1>(symbol_number_radius[row]))  , row, 2);
+    atomListGrid->SetReadOnly(row,2,true);
+    // column 3 (radius of atom)
+    atomListGrid->SetCellValue(std::to_string(std::get<2>(symbol_number_radius[row]))  , row, 3);
+   /* I believe this should be handled by the event handler 
+    if (std::wcstod(atomListGrid->GetCellValue(row,3), NULL) == 0){
+      atomListGrid->SetCellBackgroundColour(row,1,col_grey_cell);
+      atomListGrid->SetCellBackgroundColour(row,2,col_grey_cell);
+      atomListGrid->SetCellBackgroundColour(row,3,col_red_cell);
     }
     else {
-      atomListGrid->SetCellValue("1",i,0);
+      atomListGrid->SetCellValue("1",row,0);
     }
+    */
   }
-  atomListGrid->Refresh();
+  //atomListGrid->Refresh();
   atomListGrid->Fit();
   FitSizes();
 }
