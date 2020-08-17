@@ -48,8 +48,6 @@ class MainFrame: public wxFrame
     double r_probe = 1.5; //* hard coded for testing purposes. eventually obtain from user input
 
     wxPanel* leftMainPanel;
-    wxPanel* rightMainPanel;
-     //
       wxPanel* browsePanel;
         wxPanel* atomfilePanel;
           wxButton* browseButton;
@@ -59,7 +57,10 @@ class MainFrame: public wxFrame
           wxTextCtrl* radiuspathText;
         wxPanel* fileOptionsPanel;
           wxButton* loadFilesButton;
-     //
+      wxPanel* atomListPanel;
+        wxGrid* atomListGrid;
+    
+    wxPanel* rightMainPanel;
       wxPanel* parameterPanel;
         wxPanel* gridsizePanel;
           wxStaticText* gridsizeText;
@@ -69,17 +70,14 @@ class MainFrame: public wxFrame
         wxPanel* depthPanel;
           wxStaticText* depthText;
           wxSpinCtrl* depthInput;
-     //
-      wxPanel* atomListPanel;
-        wxGrid* atomListGrid;
-
-     //
       wxPanel* sandrPanel;
         wxTextCtrl* outputText;
         wxButton* calcButton;
 
     // methods to initialise gui
     void InitTopLevel();
+    void InitLeftMainPanel();
+    void InitRightMainPanel();
     void InitSandr();
     void InitBrowsePanel();
     void InitAtomfilePanel();
