@@ -20,15 +20,7 @@ void MainFrame::printToOutput(std::string& text){
   outputText->SetValue(text);
 }
 
-void MainFrame::printToOutput(std::wstring& text){
-  outputText->SetValue(text);
-}
-
 void MainFrame::appendOutput(std::string& text){
-  outputText->SetValue(outputText->GetValue() + text);
-}
-
-void MainFrame::appendOutput(std::wstring& text){
   outputText->SetValue(outputText->GetValue() + text);
 }
 
