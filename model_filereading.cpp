@@ -105,10 +105,11 @@ void Model::readAtomsFromFile(std::string& filepath){
     // create new atom and add to storage vector if line format corresponds to Element_Symbol x y z
     if (isAtomLine(substrings)) {
       std::string valid_symbol = strToValidSymbol(substrings[0]);
-      /*if (elem_Z[valid_symbol] == NULL){
+      
+      if (elem_Z.count(valid_symbol) > 0){
         elem_Z[valid_symbol] = 0;
       }
-      */
+      
       Atom at = Atom(std::stod(substrings[1]),
                      std::stod(substrings[2]),
                      std::stod(substrings[3]),
