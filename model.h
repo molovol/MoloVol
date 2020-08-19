@@ -15,14 +15,17 @@ struct Atom;
 class Space;
 class Model{
   public:
+    void importFiles(std::string&, std::string&);
     void readRadiiAndAtomNumFromFile(std::string&);
+    void readAtomsFromFile(std::string&);
+    void countAtomsInFile(std::string&);
+    
     inline double findRadiusOfAtom(const std::string&);
     inline double findRadiusOfAtom(const Atom&); //TODO has not been tested
-    void listAtomTypesFromFile(std::string&);
-    void readAtomsFromFile(std::string&);
     // calls the Space constructor and creates a cell containing all atoms. Cell size is defined by atom positions
     void defineCell(const double&, const int&);
     void storeAtomsInTree();
+    void updateAtomRadii();
     void findCloseAtoms(const double&); //TODO
     void calcVolume();
     std::vector<std::tuple<std::string, int, double>> generateAtomList();

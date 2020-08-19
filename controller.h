@@ -21,6 +21,8 @@ class Ctrl{
     // static attributes to ensure there is only one of each
     static Ctrl* instance;
     static MainFrame* gui;
+
+//    saveLastWritten(std::string
 };
 
 
