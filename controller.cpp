@@ -39,29 +39,25 @@ void Ctrl::loadInputFiles(){
   std::string atom_filepath = gui->getAtomFilepath();
   std::string radius_filepath = gui->getRadiusFilepath();
 
-//  saveLastWritten(atom_filepath, radius_filepath);
-
   // read atoms from file and save a vector containing the atoms
   current_calculation->importFiles(atom_filepath, radius_filepath);
-
-  //current_calculation->readRadiiAndAtomNumFromFile(radius_filepath);
-  //current_calculation->countAtomsInFile(atom_filepath);
- 
-  std::vector<std::tuple<std::string, int, double>> atoms_for_list 
-    = current_calculation->generateAtomList();
   
-  gui->displayAtomList(atoms_for_list);
+  // get atom list from model and pass onto view
+  gui->displayAtomList(current_calculation->generateAtomList());
 
-  return;// atoms_for_list;
+  return;
 }
 
 bool Ctrl::runCalculation(){
-/*
-  // press the load button
-  if (!alreadyLoaded()){
+  
+  std::string atom_filepath = gui->getAtomFilepath();
+  std::string radius_filepath = gui->getRadiusFilepath();
+  
+  // if import files have changed "press" the load button
+  if (current_calculation->importFilesChanged(atom_filepath, radius_filepath)){
     loadInputFiles();
   }
-*/
+
   if(current_calculation == NULL){
     current_calculation = new Model();
   }
@@ -97,11 +93,16 @@ bool Ctrl::runCalculation(){
   return true;
 }
 /*
-bool Ctrl::alreadyLoaded(){
+bool Ctrl::importFilesChanged(){
+
+  if (filepathsChanged() || fileWritten()){
+    return true;
+  }
   
   return false;
 }
 */
+
 void Ctrl::notifyUser(std::string str){
   str = "\n" + str;
   gui->appendOutput(str);

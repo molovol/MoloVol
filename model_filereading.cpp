@@ -10,6 +10,8 @@
 #include <exception>
 #include <iterator>
 
+namespace fs = std::filesystem;
+
 ///////////////////////////////
 // AUX FUNCTION DECLARATIONS //
 ///////////////////////////////
@@ -21,6 +23,20 @@ static inline std::vector<std::string> splitLine(std::string& line);
 /////////////////
 // FILE IMPORT //
 /////////////////
+bool Model::importFilesChanged(std::string& current_atom_filepath, std::string& current_radius_filepath){ 
+
+  std::string current[2] = {current_atom_filepath, current_radius_filepath};
+  
+  for (int i = 0; i < 2; i++){
+    fs::path current_filepath = fs::path(current[i]);
+    std::cout << "Same File Path: " << (filepaths_last_imported[i] == current_filepath) << std::endl;
+
+    fs::file_time_type current_file_last_written = fs::last_write_time(current_filepath);
+    std::cout << "Same Time Written: " << (files_last_written[i] == current_file_last_written) << std::endl;
+  }  
+
+  return false;
+}
 
 void Model::importFiles(std::string& atom_filepath, std::string& radius_filepath){
   
@@ -28,6 +44,13 @@ void Model::importFiles(std::string& atom_filepath, std::string& radius_filepath
   readRadiiAndAtomNumFromFile(radius_filepath);
   readAtomsFromFile(atom_filepath);
   
+  // save filepaths and last write times
+  filepaths_last_imported[0] = fs::path(atom_filepath);
+  filepaths_last_imported[1] = fs::path(radius_filepath);
+  for (char i = 0; i < 2; i++){
+    files_last_written[i] = fs::last_write_time(filepaths_last_imported[i]);
+  }
+   
   return;
 }
 
