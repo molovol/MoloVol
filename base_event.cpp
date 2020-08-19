@@ -35,15 +35,11 @@ void MainFrame::OnPrint(wxCommandEvent& event)
 {
   std::string text = "treat yourself well";
   printToOutput(text);
-  return;
 }
 
 // begin calculation
 void MainFrame::OnCalc(wxCommandEvent& event){
-
   Ctrl::getInstance()->runCalculation();
-  
-  return;
 }
 
 void MainFrame::enableGuiElements(bool inp){
@@ -52,29 +48,24 @@ void MainFrame::enableGuiElements(bool inp){
   loadFilesButton->Enable(inp);
   // prevents editing of the atom list grid during the calculation
   atomListGrid->EnableEditing(inp);
-  return;
 }
 
 // browse for atom file
 void MainFrame::OnAtomBrowse(wxCommandEvent& event){
   std::string filetype = "XYZ files (*.xyz)|*.xyz";
   OnBrowse(filetype, filepathText);
-  return;
 }
 
 // browse for radius file
 void MainFrame::OnRadiusBrowse(wxCommandEvent& event){
   std::string filetype = "TXT files (*.txt)|*.txt";
   OnBrowse(filetype, radiuspathText);
-  return;
 }
 
 // load input files to display radii list
 void MainFrame::OnLoadFiles(wxCommandEvent& event){
 
   Ctrl::getInstance()->loadInputFiles();
-  
-  return;
 }
 
 // browse (can only be called by another method function)
