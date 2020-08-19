@@ -208,7 +208,8 @@ void MainFrame::InitAtomfilePanel(){
 								wxDefaultSize,
 								0,
 								wxDefaultValidator);
-//filepathText->SetBackgroundColour(col_white);
+	//for dark mode
+	filepathText->SetBackgroundColour(col_white);
 
   SetSizerFilePanel(atomfilePanel, browseButton, filepathText);
 }
@@ -220,7 +221,8 @@ void MainFrame::InitRadiusfilePanel(){
   radiuspathText = new wxTextCtrl(radiusfilePanel,
 								  TEXT_Radius,
 								  "./inputfile/radii.txt");
-//radiuspathText->SetBackgroundColour(col_white);
+	//for dark mode
+	radiuspathText->SetBackgroundColour(col_white);
 
   SetSizerFilePanel(radiusfilePanel, radiusButton, radiuspathText);
 }
