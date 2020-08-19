@@ -98,7 +98,7 @@ class MainFrame: public wxFrame
     void OnCalc(wxCommandEvent& event);
     void OnAtomBrowse(wxCommandEvent& event);
     void OnRadiusBrowse(wxCommandEvent& event);
-    void OnLoadFiles(wxCommandEvent& event);
+    void OnReloadFiles(wxCommandEvent& event);
     void OnBrowse(std::string& filetype, wxTextCtrl* textbox);
     void GridChange(wxGridEvent& event);
 
