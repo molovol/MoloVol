@@ -23,6 +23,8 @@ class Model{
     void readAtomsFromFile(std::string&);
     void countAtomsInFile(std::string&);
     bool importFilesChanged(std::string&, std::string&);
+    bool filesExist(const std::array<std::string,2>& paths) const;
+    bool filesExist(const std::string& path1, const std::string& path2) const;
     
     inline double findRadiusOfAtom(const std::string&);
     inline double findRadiusOfAtom(const Atom&); //TODO has not been tested
