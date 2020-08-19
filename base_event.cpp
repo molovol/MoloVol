@@ -40,8 +40,23 @@ void MainFrame::OnPrint(wxCommandEvent& event)
 
 // begin calculation
 void MainFrame::OnCalc(wxCommandEvent& event){
-
+  enableGuiElements(false);
+  
   Ctrl::getInstance()->runCalculation();
+  
+  wxYield(); // is this necessary?
+  enableGuiElements(true);
+  return;
+}
+
+// load input files to display radii list
+void MainFrame::OnLoadFiles(wxCommandEvent& event){
+  enableGuiElements(false);
+  
+  Ctrl::getInstance()->loadInputFiles();
+  
+  wxYield(); // is this necessary?
+  enableGuiElements(true);
   
   return;
 }
@@ -66,14 +81,6 @@ void MainFrame::OnAtomBrowse(wxCommandEvent& event){
 void MainFrame::OnRadiusBrowse(wxCommandEvent& event){
   std::string filetype = "TXT files (*.txt)|*.txt";
   OnBrowse(filetype, radiuspathText);
-  return;
-}
-
-// load input files to display radii list
-void MainFrame::OnLoadFiles(wxCommandEvent& event){
-
-  Ctrl::getInstance()->loadInputFiles();
-  
   return;
 }
 
