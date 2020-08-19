@@ -9,6 +9,9 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 class AtomTree;
 struct Atom;
@@ -19,6 +22,7 @@ class Model{
     void readRadiiAndAtomNumFromFile(std::string&);
     void readAtomsFromFile(std::string&);
     void countAtomsInFile(std::string&);
+    bool importFilesChanged(std::string&, std::string&);
     
     inline double findRadiusOfAtom(const std::string&);
     inline double findRadiusOfAtom(const Atom&); //TODO has not been tested
@@ -35,7 +39,10 @@ class Model{
     std::unordered_map<std::string, double> radius_map;
     std::unordered_map<std::string, int> elem_Z;
     std::map<std::string, int> atom_amounts;
-    
+   
+    std::array<fs::path,2> filepaths_last_imported;
+    std::array<fs::file_time_type,2> files_last_written;
+
     std::vector<Atom> atoms;
     AtomTree atomtree;
     Space cell;
