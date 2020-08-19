@@ -28,7 +28,7 @@ Ctrl* Ctrl::getInstance(){
   return instance;
 }
 
-void Ctrl::loadInputFiles(){
+bool Ctrl::loadInputFiles(){
 
   // create an instance of the model class
   // ensures, that there is only ever one instance of the model class
@@ -38,24 +38,29 @@ void Ctrl::loadInputFiles(){
 
   std::string atom_filepath = gui->getAtomFilepath();
   std::string radius_filepath = gui->getRadiusFilepath();
-
-  // read atoms from file and save a vector containing the atoms
-  current_calculation->importFiles(atom_filepath, radius_filepath);
   
-  // get atom list from model and pass onto view
-  gui->displayAtomList(current_calculation->generateAtomList());
+  if (current_calculation->filesExist(atom_filepath, radius_filepath)){
+    // read atoms from file and save a vector containing the atoms
+    current_calculation->importFiles(atom_filepath, radius_filepath);
 
-  return;
+    // get atom list from model and pass onto view
+    gui->displayAtomList(current_calculation->generateAtomList());
+  }
+  else{
+    notifyUser("Invalid File Path!");
+    return false;
+  }
+  return true;
 }
 
 bool Ctrl::runCalculation(){
   
   std::string atom_filepath = gui->getAtomFilepath();
   std::string radius_filepath = gui->getRadiusFilepath();
-  
+ 
   // if import files have changed "press" the load button
   if (current_calculation->importFilesChanged(atom_filepath, radius_filepath)){
-    loadInputFiles();
+    if (!loadInputFiles()) {return false;} // if loading unsuccessful, abort calculation
   }
 
   if(current_calculation == NULL){
@@ -92,16 +97,6 @@ bool Ctrl::runCalculation(){
   
   return true;
 }
-/*
-bool Ctrl::importFilesChanged(){
-
-  if (filepathsChanged() || fileWritten()){
-    return true;
-  }
-  
-  return false;
-}
-*/
 
 void Ctrl::notifyUser(std::string str){
   str = "\n" + str;

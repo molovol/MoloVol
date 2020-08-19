@@ -9,7 +9,7 @@ class Model;
 class MainFrame;
 class Ctrl{
   public:
-    void loadInputFiles();
+    bool loadInputFiles();
     bool runCalculation();
     void registerView(MainFrame* inp_gui);
     static Ctrl* getInstance();

@@ -23,25 +23,16 @@ static inline std::vector<std::string> splitLine(std::string& line);
 /////////////////
 // FILE IMPORT //
 /////////////////
-bool Model::importFilesChanged(std::string& current_atom_filepath, std::string& current_radius_filepath){ 
-
-  std::string current[2] = {current_atom_filepath, current_radius_filepath};
-   
-  for (int i = 0; i < 2; i++){
-
-    fs::path current_filepath = fs::path(current[i]);
-    fs::file_time_type current_file_last_written = fs::last_write_time(current_filepath);
-    
-    // files have changed if the file path has changed, or when the file has been rewritten since last import
-    if (filepaths_last_imported[i] != current_filepath || files_last_written[i] != current_file_last_written){
-      return true;
-    }
-  }  
-  return false;
-}
 
 void Model::importFiles(std::string& atom_filepath, std::string& radius_filepath){
-  
+/*
+  // check if file paths are valid  
+  if (!filesExist(atom_filepath, radius_filepath)) {
+    Ctrl::getInstance()->notifyUser("Invalid File Paths!");
+    return;
+  }
+  */
+
   // radius file must be imported before atom file, because atom file import requires the radius map
   readRadiiAndAtomNumFromFile(radius_filepath);
   readAtomsFromFile(atom_filepath);
@@ -52,8 +43,25 @@ void Model::importFiles(std::string& atom_filepath, std::string& radius_filepath
   for (char i = 0; i < 2; i++){
     files_last_written[i] = fs::last_write_time(filepaths_last_imported[i]);
   }
-   
-  return;
+}
+
+bool Model::importFilesChanged(std::string& current_atom_filepath, std::string& current_radius_filepath){ 
+
+  std::array<std::string,2> current = {current_atom_filepath, current_radius_filepath};
+  
+  if (!filesExist(current)) {return true;} // this exception is handled in the load routine
+
+  for (int i = 0; i < 2; i++){    
+
+    fs::path current_filepath = fs::path(current[i]);
+    fs::file_time_type current_file_last_written = fs::last_write_time(current_filepath);
+
+    // files have changed if the file path has changed, or when the file has been rewritten since last import
+    if (filepaths_last_imported[i] != current_filepath || files_last_written[i] != current_file_last_written){
+      return true;
+    }
+  }  
+  return false;
 }
 
 // reads radii from a file specified by the filepath and
@@ -118,6 +126,15 @@ void Model::readAtomsFromFile(std::string& filepath){
   storeAtomsInTree();
 
   return;
+}
+
+bool Model::filesExist(const std::array<std::string,2>& paths) const {
+  return (std::filesystem::exists(paths[0]) && std::filesystem::exists(paths[1]));
+}
+
+bool Model::filesExist(const std::string& path1, const std::string& path2) const {
+  std::array<std::string,2> paths = {path1, path2};
+  return filesExist(paths);
 }
 
 ////////////////////////
