@@ -16,16 +16,19 @@
 
 bool isAtomLine(const std::vector<std::string>& substrings);
 std::string strToValidSymbol(std::string str);
+static inline std::vector<std::string> splitLine(std::string& line);
 
-////////////////////////
-// METHOD DEFINITIONS //
-////////////////////////
+/////////////////
+// FILE IMPORT //
+/////////////////
 
-// split line into substrings when separated by whitespaces
-static inline std::vector<std::string> splitLine(std::string& line){
-  std::istringstream iss(line);
-  std::vector<std::string> substrings((std::istream_iterator<std::string>(iss)), std::istream_iterator<std::string>());
-  return substrings;
+void Model::importFiles(std::string& atom_filepath, std::string& radius_filepath){
+  
+  // radius file must be imported before atom file, because atom file import requires the radius map
+  readRadiiAndAtomNumFromFile(radius_filepath);
+  readAtomsFromFile(atom_filepath);
+  
+  return;
 }
 
 // reads radii from a file specified by the filepath and
@@ -35,10 +38,6 @@ void Model::readRadiiAndAtomNumFromFile(std::string& filepath){
   // clear unordered_maps to avoid keeping data from previous runs
   radius_map.clear();
   elem_Z.clear();
-  //TODO if map empty: ask user via dialog box if they want to
-  //TODO reimport the file
-  //TODO make a function "consultUser(string)"
-  //if(radius_map.empty()){std::cout << "empty" << std::endl;}
 
   std::string line;
   std::ifstream inp_file(filepath);
@@ -46,12 +45,59 @@ void Model::readRadiiAndAtomNumFromFile(std::string& filepath){
   while(getline(inp_file,line)){
     std::vector<std::string> substrings = splitLine(line);
     if(substrings.size() == 3){
+      // TODO: make sure substrings[1] is converted to valid symbol
       radius_map[substrings[1]] = std::stod(substrings[2]);
       elem_Z[substrings[1]] = std::stoi(substrings[0]);
     }
   }
   return;
 }
+
+void Model::readAtomsFromFile(std::string& filepath){
+
+  std::vector<Atom> list_of_atoms;
+  atom_amounts.clear();
+
+//if (inp_file.is_open()){  //TODO consider adding an exception, for when file in not valid
+  std::string line;
+  std::ifstream inp_file(filepath);
+
+  // iterate through lines
+  while(getline(inp_file,line)){
+    // divide line into "words"
+    std::vector<std::string> substrings = splitLine(line);
+    // create new atom and add to storage vector if line format corresponds to Element_Symbol x y z
+    if (isAtomLine(substrings)) {
+
+      std::string valid_symbol = strToValidSymbol(substrings[0]);
+      atom_amounts[valid_symbol]++; // adds one to counter for this symbol
+     
+      // if a key leads to multiple z-values, set z-value to 0 (?)
+      if (elem_Z.count(valid_symbol) > 0){
+        elem_Z[valid_symbol] = 0;
+      }
+      
+      Atom at = Atom(std::stod(substrings[1]),
+                     std::stod(substrings[2]),
+                     std::stod(substrings[3]),
+                     strToValidSymbol(substrings[0]),
+                     findRadiusOfAtom(valid_symbol),
+                     elem_Z[valid_symbol]);
+      list_of_atoms.push_back(at);
+    }
+  }
+  // file has been read
+  inp_file.close();
+
+  atoms = list_of_atoms;
+  storeAtomsInTree();
+
+  return;
+}
+
+////////////////////////
+// METHOD DEFINITIONS //
+////////////////////////
 
 // returns the radius of an atom with a given symbol
 inline double Model::findRadiusOfAtom(const std::string& symbol){
@@ -67,68 +113,16 @@ inline double Model::findRadiusOfAtom(const Atom& at){
   return findRadiusOfAtom(at.symbol);
 }
 
-void Model::listAtomTypesFromFile(std::string& filepath){
-//if (inp_file.is_open()){  //TODO consider adding an exception, for when file in not valid
-
-  // clear map to avoid keeping data from previous runs
-  atom_amounts.clear();
-  // we iterate through the lines in the input file
-  std::string line;
-  std::ifstream inp_file(filepath);
-
-  // iterate through lines
-  while(getline(inp_file,line)){ // ws to pass empty lines and blank space before atoms if any
-    // divide line into "words"
-    std::vector<std::string> substrings = splitLine(line);
-    // recognize atom line format: Element_Symbol x y z
-    if (isAtomLine(substrings)) {
-      atom_amounts[strToValidSymbol(substrings[0])]++;
-    }
-  }
-  inp_file.close();
-
-  return;
-}
-
-void Model::readAtomsFromFile(std::string& filepath){
-
-  std::vector<Atom> list_of_atoms;
-
-//if (inp_file.is_open()){  //TODO consider adding an exception, for when file in not valid
-  std::string line;
-  std::ifstream inp_file(filepath);
-
-  // iterate through lines
-  while(getline(inp_file,line)){
-    // divide line into "words"
-    std::vector<std::string> substrings = splitLine(line);
-    // create new atom and add to storage vector if line format corresponds to Element_Symbol x y z
-    if (isAtomLine(substrings)) {
-      std::string valid_symbol = strToValidSymbol(substrings[0]);
-      
-      if (elem_Z.count(valid_symbol) > 0){
-        elem_Z[valid_symbol] = 0;
-      }
-      
-      Atom at = Atom(std::stod(substrings[1]),
-                     std::stod(substrings[2]),
-                     std::stod(substrings[3]),
-                     strToValidSymbol(substrings[0]),
-                     radius_map[valid_symbol],
-                     elem_Z[valid_symbol]);
-      list_of_atoms.push_back(at);
-    }
-  }
-  // file has been read
-  inp_file.close();
-
-  this->atoms = list_of_atoms;
-  return;
-}
-
 ///////////////////
 // AUX FUNCTIONS //
 ///////////////////
+
+// split line into substrings when separated by whitespaces
+static inline std::vector<std::string> splitLine(std::string& line){
+  std::istringstream iss(line);
+  std::vector<std::string> substrings((std::istream_iterator<std::string>(iss)), std::istream_iterator<std::string>());
+  return substrings;
+}
 
 bool isAtomLine(const std::vector<std::string>& substrings) {
   if (substrings.size() == 4) {
