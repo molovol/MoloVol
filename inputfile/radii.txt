@@ -1,4 +1,8 @@
-Number	Element	vdw radius from "WebElements, https://www.webelements.com (last accessed 31st January 2020)" => S. Alvarez, Dalton Trans. 2013, 42, 8617-8636. https://doi.org/10.1039/C3DT50599E
+Reference:
+S. Alvarez, Dalton Trans. 2013, 42, 8617-8636. 
+https://doi.org/10.1039/C3DT50599E
+
+Number	Element	vdw radius
 1	H	1.20
 2	He	1.43
 3	Li	2.12
