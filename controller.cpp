@@ -29,7 +29,7 @@ Ctrl* Ctrl::getInstance(){
 }
 
 void Ctrl::loadInputFiles(){
-  // disable buttons
+  // disable buttons because loading might fail
   gui->enableGuiElements(false);
 
   // create an instance of the model class
@@ -52,6 +52,7 @@ void Ctrl::loadInputFiles(){
   // TODO: without wxYield, the button is grayed but still records clicks
   // yet, wxYield is apparently dangerous in an event handler, need to find an alternative
   wxYield();
+  // TODO: only enable calculation button if sucessfully loaded
   // enable buttons
   gui->enableGuiElements(true);
   

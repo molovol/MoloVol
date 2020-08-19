@@ -16,7 +16,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_BUTTON(BUTTON_Calc, MainFrame::OnCalc)
   EVT_BUTTON(BUTTON_Browse, MainFrame::OnAtomBrowse)
   EVT_BUTTON(BUTTON_Radius, MainFrame::OnRadiusBrowse)
-  EVT_BUTTON(BUTTON_LoadFiles, MainFrame::OnLoadFiles)
+  EVT_BUTTON(BUTTON_LoadFiles, MainFrame::OnReloadFiles)
   EVT_GRID_CELL_CHANGING(MainFrame::GridChange)
 END_EVENT_TABLE()
 
@@ -63,8 +63,7 @@ void MainFrame::OnRadiusBrowse(wxCommandEvent& event){
 }
 
 // load input files to display radii list
-void MainFrame::OnLoadFiles(wxCommandEvent& event){
-
+void MainFrame::OnReloadFiles(wxCommandEvent& event){
   Ctrl::getInstance()->loadInputFiles();
 }
 
@@ -95,7 +94,8 @@ void MainFrame::OnBrowse(std::string& filetype, wxTextCtrl* textbox){
     return;
   }
   textbox->SetLabel(openFileDialog.GetPath());
-  return;
+  //load automatically
+  Ctrl::getInstance()->loadInputFiles();
 }
 
 // Functions to dynamically change the color of the atom list grid cells
