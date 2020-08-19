@@ -33,12 +33,13 @@ class MainFrame: public wxFrame
     void appendOutput(std::string& text);
     std::string getAtomFilepath();
     std::string getRadiusFilepath();
+    bool getIncludeHetatm();
     double getGridsize();
     int getDepth();
     double getProbeRadius();
     void enableGuiElements(bool inp); // method to turn on and off gui elements upon start and completion of calc
     //
-    void displayAtomList(std::vector<std::tuple<std::string, int, double>> symbol_number_radius);
+    void displayAtomList(std::vector<std::tuple<std::string, int, double>>& symbol_number_radius);
     std::string generateChemicalFormulaFromGrid();
     std::unordered_map<std::string, double> generateRadiusMapFromView();
     MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
@@ -56,10 +57,11 @@ class MainFrame: public wxFrame
           wxButton* radiusButton;
           wxTextCtrl* radiuspathText;
         wxPanel* fileOptionsPanel;
+          wxCheckBox* pdbHetatmCheckbox;
           wxButton* loadFilesButton;
       wxPanel* atomListPanel;
         wxGrid* atomListGrid;
-    
+
     wxPanel* rightMainPanel;
       wxPanel* parameterPanel;
         wxPanel* gridsizePanel;
@@ -89,7 +91,7 @@ class MainFrame: public wxFrame
     void InitGridinputPanel();
     void InitDepthPanel();
     void InitSandr();
-    
+
 //    wxStaticBoxSizer *atomListSizer;
 
     // methods to handle events
@@ -128,10 +130,11 @@ enum
         BUTTON_Radius,
         TEXT_Radius,
       PANEL_FileOptions,
+        CHECKBOX_Hetatm,
         BUTTON_LoadFiles,
     PANEL_AtomList,
       GRID_AtomList,
-  
+
   PANEL_RightMain,
     PANEL_Parameters,
       PANEL_Grid,
@@ -143,7 +146,7 @@ enum
         TEXT_Depth,
         SPIN_Depthinput,
     PANEL_Sandr,
-      TEXT_Output, 
+      TEXT_Output,
       BUTTON_Calc,
 
 };
