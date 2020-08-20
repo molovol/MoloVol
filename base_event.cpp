@@ -25,25 +25,34 @@ END_EVENT_TABLE()
 ////////////////////////////////
 
 // exit program
-void MainFrame::OnExit(wxCommandEvent& event)
-{
+void MainFrame::OnExit(wxCommandEvent& event){
   this->Close(TRUE);
 }
 
 // display text in output, used for debugging
-void MainFrame::OnPrint(wxCommandEvent& event)
-{
+void MainFrame::OnPrint(wxCommandEvent& event){
   std::string text = "treat yourself well";
   printToOutput(text);
-  return;
 }
 
 // begin calculation
 void MainFrame::OnCalc(wxCommandEvent& event){
-
+  enableGuiElements(false);
+  
   Ctrl::getInstance()->runCalculation();
   
-  return;
+  wxYield(); // is this necessary?
+  enableGuiElements(true);
+}
+
+// load input files to display radii list
+void MainFrame::OnLoadFiles(wxCommandEvent& event){
+  enableGuiElements(false);
+  
+  Ctrl::getInstance()->loadInputFiles();
+  
+  wxYield(); // is this necessary?
+  enableGuiElements(true);
 }
 
 void MainFrame::enableGuiElements(bool inp){
@@ -64,11 +73,6 @@ void MainFrame::OnAtomBrowse(wxCommandEvent& event){
 void MainFrame::OnRadiusBrowse(wxCommandEvent& event){
   std::string filetype = "TXT files (*.txt)|*.txt";
   OnBrowse(filetype, radiuspathText);
-}
-
-// load input files to display radii list
-void MainFrame::OnLoadFiles(wxCommandEvent& event){
-  Ctrl::getInstance()->loadInputFiles();
 }
 
 // browse (can only be called by another method function)
@@ -98,7 +102,10 @@ void MainFrame::OnBrowse(std::string& filetype, wxTextCtrl* textbox){
     return;
   }
   textbox->SetLabel(openFileDialog.GetPath());
-  return;
+  //load automatically
+  Ctrl::getInstance()->loadInputFiles();
+  wxYield(); // is this necessary?
+  enableGuiElements(true);
 }
 
 // Functions to dynamically change the color of the atom list grid cells
