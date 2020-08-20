@@ -5,10 +5,6 @@
 #endif
 
 #include "base.h"
-#include "wxVolumeRenderer.h"
-
-
-
 
 IMPLEMENT_APP(MainApp)
 
@@ -16,7 +12,8 @@ IMPLEMENT_APP(MainApp)
 // MAIN APP IS INITIALISED //
 /////////////////////////////
 
-bool MainApp::OnInit(){
+bool MainApp::OnInit()
+{
   // initialise a new MainFrame object and have MainWin point to that object
   MainFrame* MainWin = new MainFrame(_("CaVol"), wxDefaultPosition, wxDefaultSize);
   MainWin->SetBackgroundColour(col_win);
@@ -61,6 +58,7 @@ void MainFrame::InitTopLevel(){
   topLevelSizerH->Add(leftMainPanel,1,wxRIGHT | wxEXPAND,5);
   topLevelSizerH->Add(rightMainPanel,1,wxLEFT | wxEXPAND,5);
   SetSizerAndFit(topLevelSizerH);
+
 }
 
 /////////////////////////
@@ -96,9 +94,11 @@ void MainFrame::InitLeftMainPanel(){
   leftSizerV->Add(browsePanel,1,wxEXPAND,20);
   leftSizerV->Add(atomListPanel,1,wxEXPAND,20);
   leftMainPanel->SetSizerAndFit(leftSizerV);
+
 }
 
 void MainFrame::InitRightMainPanel(){
+
   // contains panels for user input
   parameterPanel = new wxPanel
     (rightMainPanel,
@@ -125,19 +125,13 @@ void MainFrame::InitRightMainPanel(){
   rightSizerV->Add(sandrPanel,0,wxEXPAND,20);
   rightMainPanel->SetSizerAndFit(rightSizerV);
 
-	auto width = 512;
-	auto height = 512;
-	frame = new wxFrame(NULL, wxID_ANY, wxT("3D Renderer"), wxPoint(50,50), wxSize(width,height));
-	drawPane = new wxVolumeRenderer( frame, wxBITMAP_TYPE_JPEG);
-	rightSizerV->Add(drawPane, 1, wxEXPAND);
-	frame->SetSizer(rightSizerV);
-	frame->Show();
 }
 
 //////////////////
 // BROWSE PANEL //
 //////////////////
 void MainFrame::InitBrowsePanel(){
+
   atomfilePanel = new wxPanel(browsePanel, PANEL_Atomfile, wxDefaultPosition, wxDefaultSize, 0);
   radiusfilePanel = new wxPanel(browsePanel, PANEL_Radiusfile, wxDefaultPosition, wxDefaultSize, 0);
   fileOptionsPanel = new wxPanel(browsePanel, PANEL_FileOptions, wxDefaultPosition, wxDefaultSize, 0);
@@ -151,12 +145,14 @@ void MainFrame::InitBrowsePanel(){
   browserSizer->Add(atomfilePanel,0,wxEXPAND,0);
   browserSizer->Add(fileOptionsPanel,0,wxEXPAND,0);
   browsePanel->SetSizerAndFit(browserSizer);
+
 }
 
 ////////////////////////////
 // SEND AND RECEIVE PANEL //
 ////////////////////////////
 void MainFrame::InitSandr(){
+
   calcButton = new wxButton
     (sandrPanel,
      BUTTON_Calc,
@@ -185,6 +181,7 @@ void MainFrame::InitSandr(){
   sandrSizer->Add(outputText,5,wxALIGN_LEFT | wxALL,10);
   sandrSizer->Add(calcButton,1,wxALIGN_RIGHT | wxALIGN_CENTRE_VERTICAL | wxALL,10);
   sandrPanel->SetSizerAndFit(sandrSizer);
+
 }
 
 ////////////////////
@@ -193,6 +190,7 @@ void MainFrame::InitSandr(){
 
 // function used in InitAtomfilePanel and InitRadiusfilePanel to create and set the sizer
 void MainFrame::SetSizerFilePanel(wxPanel* panel, wxButton* button, wxTextCtrl* text){
+  
   wxBoxSizer *fileSizer = new wxBoxSizer(wxHORIZONTAL);
   fileSizer->Add(button,1,wxALIGN_LEFT | wxALIGN_CENTRE_VERTICAL | wxALL,10);
   fileSizer->Add(text,5,wxALIGN_RIGHT | wxALL,10);
@@ -234,6 +232,7 @@ void MainFrame::InitRadiusfilePanel(){
 /////////////////////////////////////
 
 void MainFrame::InitFileOptionsPanel(){
+	
   loadFilesButton = new wxButton
     (fileOptionsPanel,
      BUTTON_LoadFiles,
@@ -270,9 +269,12 @@ void MainFrame::InitParametersPanel(){
   parameterSizer->Add(gridsizePanel,0,wxEXPAND,20);
   parameterSizer->Add(depthPanel,0,wxEXPAND,20);
   parameterPanel->SetSizerAndFit(parameterSizer);
+  
+  return;
 }
 
 void MainFrame::InitGridPanel(){
+
   gridsizeText = new wxStaticText(gridsizePanel, TEXT_Grid, "Grid step size:");
 
   // contains input control for grid size and text field for unit
@@ -285,9 +287,12 @@ void MainFrame::InitGridPanel(){
   gridsizeSizer->Add(gridsizeText,0,wxALL | wxALIGN_CENTRE_VERTICAL,10);
   gridsizeSizer->Add(gridsizeInputPanel,0,0,0);
   gridsizePanel->SetSizerAndFit(gridsizeSizer);
+
+  return;
 }
 
 void MainFrame::InitGridinputPanel(){
+
   gridsizeInputText = new wxTextCtrl(gridsizeInputPanel, TEXT_Gridinput, "0.1");
   gridsizeInputText->SetBackgroundColour(col_white);
 
@@ -297,9 +302,12 @@ void MainFrame::InitGridinputPanel(){
   gridsizeInputsizer->Add(gridsizeInputText, 0, wxALL | wxALIGN_CENTRE_VERTICAL, 10);
   gridsizeInputsizer->Add(gridsizeUnitText, 0, wxALL | wxALIGN_CENTRE_VERTICAL, 10);
   gridsizeInputPanel->SetSizerAndFit(gridsizeInputsizer);
+  
+  return;
 }
 
 void MainFrame::InitDepthPanel(){
+
   depthText = new wxStaticText(depthPanel, TEXT_Depth, "Maximum tree depth:");
 
   depthInput = new wxSpinCtrl
@@ -310,6 +318,7 @@ void MainFrame::InitDepthPanel(){
   depthSizer->Add(depthText,0,wxALIGN_CENTRE_VERTICAL | wxALL,10);
   depthSizer->Add(depthInput,0,wxALIGN_CENTRE_VERTICAL | wxALL,10);
   depthPanel->SetSizerAndFit(depthSizer);
+  return;
 }
 
 /////////////////////
@@ -336,5 +345,7 @@ void MainFrame::InitAtomListPanel(){
   wxStaticBoxSizer *atomListSizer = new wxStaticBoxSizer(wxVERTICAL,atomListPanel);
   atomListSizer->Add(atomListGrid,1,wxEXPAND,20); // proportion factor has to be 1, else atom list does not expand
   atomListPanel->SetSizerAndFit(atomListSizer);
+  return;
 }
+
 
