@@ -139,7 +139,7 @@ void MainFrame::InitBrowsePanel(){
   InitAtomfilePanel();
   InitRadiusfilePanel();
   InitFileOptionsPanel();
-  
+
   wxStaticBoxSizer *browserSizer = new wxStaticBoxSizer(wxVERTICAL,browsePanel);
   browserSizer->Add(radiusfilePanel,0,wxEXPAND,0);
   browserSizer->Add(atomfilePanel,0,wxEXPAND,0);
@@ -190,7 +190,7 @@ void MainFrame::InitSandr(){
 
 // function used in InitAtomfilePanel and InitRadiusfilePanel to create and set the sizer
 void MainFrame::SetSizerFilePanel(wxPanel* panel, wxButton* button, wxTextCtrl* text){
-  
+
   wxBoxSizer *fileSizer = new wxBoxSizer(wxHORIZONTAL);
   fileSizer->Add(button,1,wxALIGN_LEFT | wxALIGN_CENTRE_VERTICAL | wxALL,10);
   fileSizer->Add(text,5,wxALIGN_RIGHT | wxALL,10);
@@ -232,7 +232,20 @@ void MainFrame::InitRadiusfilePanel(){
 /////////////////////////////////////
 
 void MainFrame::InitFileOptionsPanel(){
-	
+  pdbHetatmCheckbox = new wxCheckBox
+    (fileOptionsPanel,
+     CHECKBOX_Hetatm,
+     "Include HETATM (for pdb files)",
+     wxDefaultPosition,
+     wxDefaultSize,
+     0,
+     wxDefaultValidator,
+     "include HETATM"
+    );
+  // Biochemists know what HETATM represent but other chemists might not
+  // thus it is better to include HETATM by default as they are mostly useful for non-biochemists
+  pdbHetatmCheckbox->SetValue(true);
+
   loadFilesButton = new wxButton
     (fileOptionsPanel,
      BUTTON_LoadFiles,
@@ -244,8 +257,10 @@ void MainFrame::InitFileOptionsPanel(){
      "load input files"
     );
   loadFilesButton->Enable (false);
+
   wxBoxSizer *fileOptionsSizer = new wxBoxSizer(wxHORIZONTAL);
-  fileOptionsSizer->Add(loadFilesButton,1,wxALIGN_LEFT | wxALIGN_CENTRE_VERTICAL | wxALL,10);
+  fileOptionsSizer->Add(pdbHetatmCheckbox,1,wxALIGN_LEFT | wxALIGN_CENTRE_VERTICAL | wxALL,10);
+  fileOptionsSizer->Add(loadFilesButton,1,wxALIGN_RIGHT | wxALIGN_CENTRE_VERTICAL | wxALL,10);
   fileOptionsPanel->SetSizerAndFit(fileOptionsSizer);
 }
 
@@ -269,7 +284,7 @@ void MainFrame::InitParametersPanel(){
   parameterSizer->Add(gridsizePanel,0,wxEXPAND,20);
   parameterSizer->Add(depthPanel,0,wxEXPAND,20);
   parameterPanel->SetSizerAndFit(parameterSizer);
-  
+
   return;
 }
 
@@ -302,7 +317,7 @@ void MainFrame::InitGridinputPanel(){
   gridsizeInputsizer->Add(gridsizeInputText, 0, wxALL | wxALIGN_CENTRE_VERTICAL, 10);
   gridsizeInputsizer->Add(gridsizeUnitText, 0, wxALL | wxALIGN_CENTRE_VERTICAL, 10);
   gridsizeInputPanel->SetSizerAndFit(gridsizeInputsizer);
-  
+
   return;
 }
 
@@ -329,19 +344,19 @@ void MainFrame::InitAtomListPanel(){
   atomListGrid = new wxGrid(atomListPanel, GRID_AtomList, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS);
   atomListGrid->CreateGrid(0, 4, wxGrid::wxGridSelectCells);
   atomListGrid->SetDefaultCellAlignment (wxALIGN_CENTRE, wxALIGN_CENTRE);
-  
+
   // columns
   atomListGrid->SetColLabelValue(0, "Include");
   atomListGrid->SetColFormatBool(0);
-  
+
   atomListGrid->SetColLabelValue(1, "Element");
-  
+
   atomListGrid->SetColLabelValue(2, "Number \nof Atoms");
   atomListGrid->SetColFormatNumber(2);
-  
+
   atomListGrid->SetColLabelValue(3, L"Radius (\u212B)");
   atomListGrid->SetColFormatFloat(3, 5, 3); // 2nd argument is width, last argument is precision
-  
+
   wxStaticBoxSizer *atomListSizer = new wxStaticBoxSizer(wxVERTICAL,atomListPanel);
   atomListSizer->Add(atomListGrid,1,wxEXPAND,20); // proportion factor has to be 1, else atom list does not expand
   atomListPanel->SetSizerAndFit(atomListSizer);
