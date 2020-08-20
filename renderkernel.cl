@@ -1,20 +1,12 @@
-/**Kernel Variante A1+A3**/
-#define DIM 1000
+#define DIM 512
 __kernel void matMult(__global float *A,
-                      __global float *C
+                      __global char *C
 							 ) {
-	int i, j, k;
-	i = get_global_id(0);//zeile
+	int x, y, hit;
+	x = get_global_id(0);//spalte
+	y = get_global_id(1);//zeile
+	float res = cos((x*40+y*100)/float(DIM))/2+0.5;
+	C[y*DIM+x] = res*255;
 
-	//kopie in lokalen speicher
-	float columnB[DIM];
-	for (k = 0; k < DIM; k++) {
-		columnB[k] = B[k*DIM+i];
-	}
-
-	for (j = 0; j < DIM; j++) {//loop Ÿber alle spalten
-		for (k = 0; k < DIM; k++) {
-			C[j*DIM+i] += A[j*DIM+k] * columnB[k];
-		}
-	}
+	
 }

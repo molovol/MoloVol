@@ -54,22 +54,15 @@ wxVolumeRenderer::wxVolumeRenderer(wxFrame* parent,
 #define MAX_SOURCE_SIZE (0x100000)
 unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, unsigned int width, unsigned int height){
 	//tmp input matrix
-	unsigned int size_inputmatrix = width * height*3;//RGB
-	unsigned int mem_size_A = sizeof(float) * 100;
+	unsigned int size_inputmatrix = 100 * 100*100;
+	unsigned int mem_size_A = sizeof(float) * size_inputmatrix;
 	float* inputmatrix = (float*) malloc(size_inputmatrix * sizeof(float*));
 	
 	//create output matrix
 	//unsigned int num_elements =width*height;
-	unsigned int size_colormatrix = width * height*3;//RGB
+	unsigned int size_colormatrix = width * height;
 	unsigned int mem_size_colorm = sizeof(float) * size_colormatrix;
-	unsigned char* colormatrix = (unsigned char*) malloc(size_colormatrix * sizeof(unsigned char*));//can not be indexed with 3d array notation
-	for (auto i=0;i<size_colormatrix;++i){
-		colormatrix[i] = rand()%200;
-	}
-	colormatrix[30] = 250;
-	colormatrix[70] = 250;
-	colormatrix[300] = 250;
-	colormatrix[420] = 250;
+	unsigned char* lightmatrix = (unsigned char*) malloc(size_colormatrix * sizeof(unsigned char*));//can not be indexed with 3d array notation
 	
 	// OpenCL
 	// -------------------------------------------------------------------------
@@ -171,15 +164,13 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	// erzeugt handels für in und output buffer, die hier erzeugt werden
 	inputA = clCreateBuffer(context, CL_MEM_READ_ONLY, mem_size_A, NULL, &err);
 	output = clCreateBuffer(context, CL_MEM_WRITE_ONLY, mem_size_colorm, NULL, &err);
-	if (!inputA || !output)
-	{
+	if (!inputA || !output){
 		printf("Error: Failed to allocate device memory!\n");
 		exit(1);
 	}
 
 	// schreibt die Daten aus "data" in den input buffer, jetzt A und B
 	clEnqueueWriteBuffer(command_queue, inputA, CL_TRUE, 0, mem_size_A, inputmatrix, 0, NULL, NULL);
-
 
 	// -------------------------------------------------------------------------
 	// 3) Programm linken und kompilieren, Kernel und Argumente einrichten
@@ -207,9 +198,8 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 
 	// verlinkt input und output mit dem kernel über die Argumente
 	err =  clSetKernelArg(kernel, 0, sizeof(cl_mem), &inputA);
-	err |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &output);
-	if (err != CL_SUCCESS)
-	{
+	err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &output);
+	if (err != CL_SUCCESS) {
 		printf("Error: Failed to set kernel arguments! %d\n", err);
 		exit(1);
 	}
@@ -218,10 +208,9 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	// -------------------------------------------------------------------------
 	// 4) Kernel starten und Ergebnisse einsammeln
 	// -------------------------------------------------------------------------
-	size_t  global[1] = {width}; //TODO
-	err = clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL, global, NULL, 0, NULL, NULL);
-	if (err != CL_SUCCESS)
-	{
+	size_t  global[2] = {width, height}; //TODO was for each entry in C, should now for each in
+	err = clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, global, NULL, 0, NULL, NULL);
+	if (err != CL_SUCCESS){
 		printf("Error: Failed to execute kernel! %d\n", err);
 		exit(1);
 	}
@@ -230,9 +219,8 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	clFinish(command_queue);
 
 	// ließt von der command_queue über den output buffer in results
-	err = clEnqueueReadBuffer(command_queue, output, CL_TRUE, 0, mem_size_colorm, colormatrix, 0, NULL, NULL);
-	if (err != CL_SUCCESS)
-	{
+	err = clEnqueueReadBuffer(command_queue, output, CL_TRUE, 0, mem_size_colorm, lightmatrix, 0, NULL, NULL);
+	if (err != CL_SUCCESS){
 		printf("Error: Failed to read output array! %d\n", err);
 		exit(1);
 	}
@@ -253,6 +241,13 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 			  << std::chrono::duration<double, std::milli>(t_end-t_start).count()
 			  <<  " ms" << std::endl;
 	
+	//to rgb
+	unsigned char* colormatrix = (unsigned char*) malloc(width * height*3 * sizeof(unsigned char*));//can not be indexed with 3d array notation
+	for (auto i=0;i<size_colormatrix;++i){
+		colormatrix[i*3] = lightmatrix[i];
+		colormatrix[i*3+1] = lightmatrix[i];
+		colormatrix[i*3+2] = lightmatrix[i];
+	}
 	return colormatrix;
 }
 
