@@ -9,9 +9,9 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
-//#include <filesystem>
+#include <filesystem>
 
-//namespace fs = std::filesystem;
+namespace fs = std::filesystem;
 
 class AtomTree;
 struct Atom;
@@ -42,8 +42,8 @@ class Model{
     std::unordered_map<std::string, int> elem_Z;
     std::map<std::string, int> atom_amounts;
 
-//    std::array<fs::path,2> filepaths_last_imported;
-//    std::array<fs::file_time_type,2> files_last_written;
+    std::array<fs::path,2> filepaths_last_imported;
+    std::array<fs::file_time_type,2> files_last_written;
 
     std::vector<Atom> atoms;
     AtomTree atomtree;
