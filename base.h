@@ -12,7 +12,7 @@
 #include <vector>
 #include <tuple>
 #include <unordered_map>
-#include "wxImagePanel.h"
+#include "wxVolumeRenderer.h"
 
 class MainApp: public wxApp
 {
@@ -62,7 +62,7 @@ class MainFrame: public wxFrame
         wxGrid* atomListGrid;
     
 	wxFrame *frame;
-	wxImagePanel * drawPane;
+	wxVolumeRenderer * drawPane;
     wxPanel* rightMainPanel;
       wxPanel* parameterPanel;
         wxPanel* gridsizePanel;
