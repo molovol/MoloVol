@@ -31,15 +31,15 @@ void Model::calcVolume(){
   cell.placeAtomsInGrid(atoms, atomtree);
   double volume = cell.getVolume();
 
-  std::string message_to_user 
+  std::string message_to_user
     = "Van der Waals Volume: " + std::to_string(volume) + " " + Symbol::angstrom() + Symbol::cubed();
   Ctrl::getInstance()->notifyUser(message_to_user);
-  
+
   return;
 }
 
 std::vector<std::tuple<std::string, int, double>> Model::generateAtomList(){
-  std::vector<std::tuple<std::string, int, double>> atoms_for_list; 
+  std::vector<std::tuple<std::string, int, double>> atoms_for_list;
   for(auto elem : atom_amounts){
     atoms_for_list.emplace_back(elem.first, elem.second, radius_map[elem.first]);
   }

@@ -235,7 +235,7 @@ void MainFrame::InitFileOptionsPanel(){
     );
   // Biochemists know what HETATM represent but other chemists might not
   // thus it is better to include HETATM by default as they are mostly useful for non-biochemists
-  pdbHetatmCheckbox.SetValue(true);
+  pdbHetatmCheckbox->SetValue(true);
 
   loadFilesButton = new wxButton
     (fileOptionsPanel,
