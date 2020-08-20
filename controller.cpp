@@ -38,10 +38,10 @@ bool Ctrl::loadInputFiles(){
 
   std::string atom_filepath = gui->getAtomFilepath();
   std::string radius_filepath = gui->getRadiusFilepath();
-  
+
   if (current_calculation->filesExist(atom_filepath, radius_filepath)){
     // read atoms from file and save a vector containing the atoms
-    current_calculation->importFiles(atom_filepath, radius_filepath);
+    current_calculation->importFiles(atom_filepath, radius_filepath, gui->getIncludeHetatm());
 
     // get atom list from model and pass onto view
     gui->displayAtomList(current_calculation->generateAtomList());
@@ -54,10 +54,10 @@ bool Ctrl::loadInputFiles(){
 }
 
 bool Ctrl::runCalculation(){
-  
+
   std::string atom_filepath = gui->getAtomFilepath();
   std::string radius_filepath = gui->getRadiusFilepath();
- 
+
   // if import files have changed "press" the load button
   if (current_calculation->importFilesChanged(atom_filepath, radius_filepath)){
     if (!loadInputFiles()) {return false;} // if loading unsuccessful, abort calculation
@@ -66,19 +66,13 @@ bool Ctrl::runCalculation(){
   if(current_calculation == NULL){
     current_calculation = new Model();
   }
-  
+
   // radius map is generated from grid in gui, then passed to model for calculation
   current_calculation->setRadiusMap(gui->generateRadiusMapFromView());
   current_calculation->updateAtomRadii();
 
   Ctrl::notifyUser("Result for " + gui->generateChemicalFormulaFromGrid());
 
-//  std::string atom_filepath = gui->getAtomFilepath();
- // import already done by load button
-//  current_calculation->importFiles(atom_filepath);
-
-//  current_calculation->readAtomsFromFile(atom_filepath);
-//  current_calculation->storeAtomsInTree(); // TODO consider moving this to readAtomsFromFile method in model class
   // get user inputs
   const double grid_step = gui->getGridsize();
   const int max_depth = gui->getDepth();
@@ -86,7 +80,7 @@ bool Ctrl::runCalculation(){
   // set space size (size of box containing all atoms)
   current_calculation->defineCell(grid_step, max_depth);
   current_calculation->findCloseAtoms(r_probe);
-  
+
   // measure time and run calculation
   auto start = std::chrono::steady_clock::now();
   current_calculation->calcVolume();
@@ -94,7 +88,7 @@ bool Ctrl::runCalculation(){
   std::chrono::duration<double> elapsed_seconds = end-start;
 
   notifyUser("Elapsed time: " + std::to_string(elapsed_seconds.count()) + " s");
-  
+
   return true;
 }
 
@@ -102,5 +96,3 @@ void Ctrl::notifyUser(std::string str){
   str = "\n" + str;
   gui->appendOutput(str);
 }
-
-
