@@ -17,7 +17,6 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
   Ctrl::getInstance()->registerView(this);
 
   InitTopLevel();
-
   
 };
 
