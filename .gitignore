@@ -9,3 +9,5 @@ inputfile/*
 *.dSYM/Contents/Info.plist
 benchmark
 *~
+xcuserdata/
+*.dSYM
