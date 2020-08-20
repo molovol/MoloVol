@@ -6,8 +6,8 @@ TARGET := bin/ballpit
 SRCEXT := cpp
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
-CXXFLAGS := -O0 -g -std=c++17 -Wall -Werror
-CFLAGS := -O0 -g -std=c++17
+CXXFLAGS := -O0 -g -std=c++17 -Wall -Werror 
+CFLAGS := -O0 -g -std=c++17 -Wno-unused-command-line-argument
 INC := -I include
 
 $(TARGET): $(OBJECTS)
