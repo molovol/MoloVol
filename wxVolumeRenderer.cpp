@@ -22,28 +22,31 @@ EVT_PAINT(wxVolumeRenderer::paintEvent)
 END_EVENT_TABLE()
 
 
+
 wxVolumeRenderer::wxVolumeRenderer(wxFrame* parent,
 						   wxBitmapType format) : wxPanel(parent){
 	auto width = 512;
 	auto height = 512;
-	image = wxBitmap(width, height, 24); // explicit depth important under MSW
+	//unsigned int num_elements =width*height;
+	unsigned int size_colormatrix = width * height*3;//RGB
+	//unsigned int mem_size_colorm = sizeof(float) * size_colormatrix;
+	unsigned char* colormatrix = (unsigned char*) malloc(size_colormatrix * sizeof(unsigned char*));//can not be indexed with 3d array notation
+	for (auto i=0;i<size_colormatrix;++i){
+		colormatrix[i] = rand()%50;
+	}
+	colormatrix[30] = 250;
+	colormatrix[70] = 250;
+	colormatrix[300] = 250;
+	colormatrix[420] = 250;
+	
+	//directly copying does not work in runtime somehow (it should)
+	imgbuffer = wxImage(width, height, colormatrix, false);//static_data	Indicates if the data should be free'd after use
+	//wxBitmap bmp(wimgbuffer, 24);
+	image = wxBitmap(imgbuffer, 24); // explicit depth important under MSW
 	wxNativePixelData data(image);
 	if ( !data ){
 		// ... raw access to bitmap data unavailable, do something else ...
 		return;
-	}
-	wxNativePixelData::Iterator p(data);
-	// we draw a (10, 10)-(20, 20) rect manually using the given r, g, b
-	p.Offset(data, 10, 10);
-	for ( int y = 0; y < 10; ++y ){
-		wxNativePixelData::Iterator rowStart = p;
-		for ( int x = 0; x < 10; ++x, ++p ){
-			p.Red() = 0;
-			p.Green() = 250;
-			p.Blue() = 30;
-		}
-		p = rowStart;
-		p.OffsetY(data, 1);
 	}
 }
 
