@@ -57,7 +57,7 @@ void MainFrame::InitTopLevel(){
   wxBoxSizer *topLevelSizerH = new wxBoxSizer(wxHORIZONTAL);
   topLevelSizerH->Add(leftMainPanel,1,wxRIGHT | wxEXPAND,5);
   topLevelSizerH->Add(rightMainPanel,1,wxLEFT | wxEXPAND,5);
-  SetSizerAndFit(topLevelSizerH); 
+  SetSizerAndFit(topLevelSizerH);
 
 }
 
@@ -156,13 +156,14 @@ void MainFrame::InitSandr(){
   calcButton = new wxButton
     (sandrPanel,
      BUTTON_Calc,
-     "Start",
+     "Calculate",
      wxDefaultPosition,
      wxDefaultSize,
      0,
      wxDefaultValidator,
      "begin calculation"
     );
+	calcButton->Enable (false);
 
   outputText = new wxTextCtrl
     (sandrPanel,
@@ -200,9 +201,15 @@ void MainFrame::InitAtomfilePanel(){
   browseButton = new wxButton
     (atomfilePanel, BUTTON_Browse, "Browse", wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator);
 
-  filepathText = new wxTextCtrl
-    (atomfilePanel, TEXT_Filename, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator);
-  filepathText->SetBackgroundColour(col_white);
+  filepathText = new wxTextCtrl(atomfilePanel,
+								TEXT_Filename,
+								wxEmptyString,
+								wxDefaultPosition,
+								wxDefaultSize,
+								0,
+								wxDefaultValidator);
+	//for dark mode
+	filepathText->SetBackgroundColour(col_white);
 
   SetSizerFilePanel(atomfilePanel, browseButton, filepathText);
 }
@@ -211,9 +218,11 @@ void MainFrame::InitRadiusfilePanel(){
   radiusButton = new wxButton
     (radiusfilePanel, BUTTON_Radius, "Browse");
 
-  radiuspathText = new wxTextCtrl
-    (radiusfilePanel, TEXT_Radius, "./inputfile/radii.txt");
-  radiuspathText->SetBackgroundColour(col_white);
+  radiuspathText = new wxTextCtrl(radiusfilePanel,
+								  TEXT_Radius,
+								  "./inputfile/radii.txt");
+	//for dark mode
+	radiuspathText->SetBackgroundColour(col_white);
 
   SetSizerFilePanel(radiusfilePanel, radiusButton, radiuspathText);
 }
@@ -223,17 +232,18 @@ void MainFrame::InitRadiusfilePanel(){
 /////////////////////////////////////
 
 void MainFrame::InitFileOptionsPanel(){
+	
   loadFilesButton = new wxButton
     (fileOptionsPanel,
      BUTTON_LoadFiles,
-     "Load files",
+     "Reload",
      wxDefaultPosition,
      wxDefaultSize,
      0,
      wxDefaultValidator,
      "load input files"
     );
-  
+  loadFilesButton->Enable (false);
   wxBoxSizer *fileOptionsSizer = new wxBoxSizer(wxHORIZONTAL);
   fileOptionsSizer->Add(loadFilesButton,1,wxALIGN_LEFT | wxALIGN_CENTRE_VERTICAL | wxALL,10);
   fileOptionsPanel->SetSizerAndFit(fileOptionsSizer);
@@ -337,4 +347,5 @@ void MainFrame::InitAtomListPanel(){
   atomListPanel->SetSizerAndFit(atomListSizer);
   return;
 }
+
 

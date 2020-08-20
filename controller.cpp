@@ -28,10 +28,7 @@ Ctrl* Ctrl::getInstance(){
   return instance;
 }
 
-void Ctrl::loadInputFiles(){
-  // disable buttons
-  gui->enableGuiElements(false);
-
+bool Ctrl::loadInputFiles(){
   // create an instance of the model class
   // ensures, that there is only ever one instance of the model class
   if(current_calculation == NULL){
@@ -40,33 +37,30 @@ void Ctrl::loadInputFiles(){
 
   std::string atom_filepath = gui->getAtomFilepath();
   std::string radius_filepath = gui->getRadiusFilepath();
-  // read atoms from file and save a vector containing the atoms
-  current_calculation->readRadiiAndAtomNumFromFile(radius_filepath);
-  current_calculation->listAtomTypesFromFile(atom_filepath);
- 
-  std::vector<std::tuple<std::string, int, double>> atoms_for_list 
-    = current_calculation->generateAtomList();
   
-  gui->displayAtomList(atoms_for_list);
+  if (current_calculation->filesExist(atom_filepath, radius_filepath)){
+    // read atoms from file and save a vector containing the atoms
+    current_calculation->importFiles(atom_filepath, radius_filepath);
 
-  // TODO: without wxYield, the button is grayed but still records clicks
-  // yet, wxYield is apparently dangerous in an event handler, need to find an alternative
-  wxYield();
-  // enable buttons
-  gui->enableGuiElements(true);
-  
-  return;// atoms_for_list;
+    // get atom list from model and pass onto view
+    gui->displayAtomList(current_calculation->generateAtomList());
+  }
+  else{
+    notifyUser("Invalid File Path!");
+    return false;
+  }
+  return true;
 }
 
 bool Ctrl::runCalculation(){
-  // create an instance of the model class
-  // ensures, that there is only ever one instance of the model class
-  gui->enableGuiElements(false);
-
-  // without wxYield, the button is grayed but still records clicks
-  // yet, wxYield is apparently dangerous in an event handler, need to find an alternative
-  // moved MainFrame method to here (Controller method) - may have been broken on the way
-  wxYield();
+  
+  std::string atom_filepath = gui->getAtomFilepath();
+  std::string radius_filepath = gui->getRadiusFilepath();
+ 
+  // if import files have changed "press" the load button
+  if (current_calculation->importFilesChanged(atom_filepath, radius_filepath)){
+    if (!loadInputFiles()) {return false;} // if loading unsuccessful, abort calculation
+  }
 
   if(current_calculation == NULL){
     current_calculation = new Model();
@@ -74,12 +68,16 @@ bool Ctrl::runCalculation(){
   
   // radius map is generated from grid in gui, then passed to model for calculation
   current_calculation->setRadiusMap(gui->generateRadiusMapFromView());
-  
+  current_calculation->updateAtomRadii();
+
   Ctrl::notifyUser("Result for " + gui->generateChemicalFormulaFromGrid());
 
-  std::string atom_filepath = gui->getAtomFilepath();
-  current_calculation->readAtomsFromFile(atom_filepath);
-  current_calculation->storeAtomsInTree(); // TODO consider moving this to readAtomsFromFile method in model class
+//  std::string atom_filepath = gui->getAtomFilepath();
+ // import already done by load button
+//  current_calculation->importFiles(atom_filepath);
+
+//  current_calculation->readAtomsFromFile(atom_filepath);
+//  current_calculation->storeAtomsInTree(); // TODO consider moving this to readAtomsFromFile method in model class
   // get user inputs
   const double grid_step = gui->getGridsize();
   const int max_depth = gui->getDepth();
@@ -94,10 +92,8 @@ bool Ctrl::runCalculation(){
   auto end = std::chrono::steady_clock::now();
   std::chrono::duration<double> elapsed_seconds = end-start;
 
-  Ctrl::notifyUser("Elapsed time: " + std::to_string(elapsed_seconds.count()) + " s");
+  notifyUser("Elapsed time: " + std::to_string(elapsed_seconds.count()) + " s");
   
-  gui->enableGuiElements(true);
-
   return true;
 }
 
@@ -106,9 +102,4 @@ void Ctrl::notifyUser(std::string str){
   gui->appendOutput(str);
 }
 
-/*
-void Ctrl::notifyUser(std::wstring wstr){
-  wstr = "\n" + wstr;
-  gui->appendOutput(wstr);
-}*/
 

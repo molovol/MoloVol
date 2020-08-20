@@ -45,7 +45,7 @@ double MainFrame::getProbeRadius(){
   return r_probe;
 }
 
-void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>>& symbol_number_radius){
+void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>> symbol_number_radius){
   // delete all rows
   // DeleteRows causes an error if there are no rows
   if (atomListGrid->GetNumberRows() > 0) {
@@ -66,7 +66,6 @@ void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>
     // column 3 (radius of atom)
     atomListGrid->SetCellValue(std::to_string(std::get<2>(symbol_number_radius[row]))  , row, 3);
   }
-  return;
 }
 
 std::string MainFrame::generateChemicalFormulaFromGrid(){

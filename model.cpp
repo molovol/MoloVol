@@ -15,6 +15,13 @@ void Model::storeAtomsInTree(){
   atomtree = AtomTree(atoms);
 }
 
+void Model::updateAtomRadii(){
+  for (Atom& at : atoms){
+    at.rad = radius_map[at.symbol];
+  }
+  return;
+}
+
 void Model::findCloseAtoms(const double& r_probe){
   //TODO
   return;
