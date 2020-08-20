@@ -11,6 +11,7 @@
 #include <wx/rawbmp.h>
 class wxVolumeRenderer : public wxPanel {
 	wxBitmap image;
+	wxImage imgbuffer;
 	
 public:
 	wxVolumeRenderer(wxFrame* parent, wxBitmapType format);
