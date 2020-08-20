@@ -1,6 +1,6 @@
 CFLAGS = -O
 CC = g++
-CXXFLAGS = -O0 -g -std=c++17 -framework OpenCL -Wall -Werror
+CXXFLAGS = -O0 -g -std=c++17 -Wall -Werror
 SRC := $(wildcard *.cpp)
 OBJ = $(SRC:.cpp = .o)
 PROGRAM = ballpit
