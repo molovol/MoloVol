@@ -4,6 +4,7 @@
 #  include <wx/wx.h>
 #endif
 
+#include "wxImagePanel.h"
 #include "base.h"
 #include "controller.h"
 
