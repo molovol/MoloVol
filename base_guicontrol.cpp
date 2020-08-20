@@ -32,6 +32,10 @@ std::string MainFrame::getRadiusFilepath(){
   return radiuspathText->GetValue().ToStdString();
 }
 
+bool MainFrame::getIncludeHetatm(){
+  return pdbHetatmCheckbox->GetValue();
+}
+
 double MainFrame::getGridsize(){
   return std::stod(gridsizeInputText->GetValue().ToStdString());
 }
@@ -75,7 +79,7 @@ std::string MainFrame::generateChemicalFormulaFromGrid(){
     if (atomListGrid->GetCellValue(row,0) == "1"){ // if checkbox "include" is checked
       std::string symbol = atomListGrid->GetCellValue(row,1).ToStdString();
       std::string subscript = Symbol::subscript(atomListGrid->GetCellValue(row,2).ToStdString());
-      
+
       // by convention: carbon comes first, then hydrogen, then in alphabetical order
       if (symbol == "C"){
         chemical_formula_prefix = symbol + subscript + chemical_formula_prefix;
@@ -93,7 +97,7 @@ std::string MainFrame::generateChemicalFormulaFromGrid(){
   return chemical_formula_prefix + chemical_formula_suffix;
 }
 
-std::unordered_map<std::string, double> MainFrame::generateRadiusMapFromView(){ 
+std::unordered_map<std::string, double> MainFrame::generateRadiusMapFromView(){
   std::unordered_map<std::string, double> radius_map;
   for (int i = 0; i < atomListGrid->GetNumberRows(); i++){
     if (atomListGrid->GetCellValue(i,0) == "1"){

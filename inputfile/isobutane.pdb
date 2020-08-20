@@ -1,0 +1,35 @@
+HEADER    CSD ENTRY 
+CRYST1   1.0000   1.0000   1.0000  90.00  90.00  90.00          
+SCALE1      1.000000  0.000000  0.000000       0.000000
+SCALE2      0.000000  1.000000  0.000000       0.000000
+SCALE3      0.000000  0.000000  1.000000       0.000000
+HETATM    1  C   UNK     1      -7.945  -0.100  -0.336  1.00  0.00           C  
+HETATM    2  C   UNK     1      -9.269  -0.881  -0.362  1.00  0.00           C  
+HETATM    3  C   UNK     1      -8.208   1.414  -0.366  1.00  0.00           C  
+HETATM    4  C   UNK     1      -7.114  -0.482   0.899  1.00  0.00           C  
+HETATM    5  H   UNK     1      -9.892  -0.646   0.530  1.00  0.00           H  
+HETATM    6  H   UNK     1      -9.865  -0.632  -1.270  1.00  0.00           H  
+HETATM    7  H   UNK     1      -9.087  -1.980  -0.371  1.00  0.00           H  
+HETATM    8  H   UNK     1      -7.359  -0.372  -1.251  1.00  0.00           H  
+HETATM    9  H   UNK     1      -7.253   1.988  -0.377  1.00  0.00           H  
+HETATM   10  H   UNK     1      -8.784   1.705  -1.274  1.00  0.00           H  
+HETATM   11  H   UNK     1      -8.790   1.739   0.526  1.00  0.00           H  
+HETATM   12  H   UNK     1      -6.139   0.057   0.911  1.00  0.00           H  
+HETATM   13  H   UNK     1      -6.893  -1.574   0.913  1.00  0.00           H  
+HETATM   14  H   UNK     1      -7.654  -0.231   1.840  1.00  0.00           H  
+CONECT    1    2    3    4    8
+CONECT    2    1    5    6    7
+CONECT    3    1    9   10   11
+CONECT    4    1   12   13   14
+CONECT    5    2
+CONECT    6    2
+CONECT    7    2
+CONECT    8    1
+CONECT    9    3
+CONECT   10    3
+CONECT   11    3
+CONECT   12    4
+CONECT   13    4
+CONECT   14    4
+MASTER        0    0    0    0    0    0    0    3   14    0   14    0
+END
