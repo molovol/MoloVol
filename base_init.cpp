@@ -5,6 +5,76 @@
 #endif
 
 #include "base.h"
+#include "wxImagePanel.h"
+#include <wx/rawbmp.h>
+
+BEGIN_EVENT_TABLE(wxImagePanel, wxPanel)
+
+// catch paint events
+EVT_PAINT(wxImagePanel::paintEvent)
+
+END_EVENT_TABLE()
+
+
+wxImagePanel::wxImagePanel(wxFrame* parent,
+						   wxBitmapType format) : wxPanel(parent){
+	auto width = 512;
+	auto height = 512;
+	image = wxBitmap(width, height, 24); // explicit depth important under MSW
+	wxNativePixelData data(image);
+	if ( !data ){
+		// ... raw access to bitmap data unavailable, do something else ...
+		return;
+	}
+	wxNativePixelData::Iterator p(data);
+	// we draw a (10, 10)-(20, 20) rect manually using the given r, g, b
+	p.Offset(data, 10, 10);
+	for ( int y = 0; y < 10; ++y ){
+		wxNativePixelData::Iterator rowStart = p;
+		for ( int x = 0; x < 10; ++x, ++p ){
+			p.Red() = 0;
+			p.Green() = 250;
+			p.Blue() = 30;
+		}
+		p = rowStart;
+		p.OffsetY(data, 1);
+	}
+}
+
+/*
+ * Called by the system of by wxWidgets when the panel needs
+ * to be redrawn. You can also trigger this call by
+ * calling Refresh()/Update().
+ */
+void wxImagePanel::paintEvent(wxPaintEvent & evt){
+    // depending on your system you may need to look at double-buffered dcs
+    wxPaintDC dc(this);
+    render(dc);
+}
+
+/*
+ * Alternatively, you can use a clientDC to paint on the panel
+ * at any time. Using this generally does not free you from
+ * catching paint events, since it is possible that e.g. the window
+ * manager throws away your drawing when the window comes to the
+ * background, and expects you will redraw it when the window comes
+ * back (by sending a paint event).
+ */
+void wxImagePanel::paintNow(){
+    // depending on your system you may need to look at double-buffered dcs
+    wxClientDC dc(this);
+    render(dc);
+}
+
+/*
+ * Here we do the actual rendering. I put it in a separate
+ * method so that it can work no matter what type of DC
+ * (e.g. wxPaintDC or wxClientDC) is used.
+ */
+void wxImagePanel::render(wxDC&  dc){
+    dc.DrawBitmap( image, 0, 0, false );
+}
+
 
 IMPLEMENT_APP(MainApp)
 
@@ -120,6 +190,14 @@ void MainFrame::InitRightMainPanel(){
   rightSizerV->Add(parameterPanel,0,wxEXPAND,20);
   rightSizerV->Add(sandrPanel,0,wxEXPAND,20);
   rightMainPanel->SetSizerAndFit(rightSizerV);
+
+	auto width = 512;
+	auto height = 512;
+	frame = new wxFrame(NULL, wxID_ANY, wxT("3D Renderer"), wxPoint(50,50), wxSize(width,height));
+	drawPane = new wxImagePanel( frame, wxBITMAP_TYPE_JPEG);
+	rightSizerV->Add(drawPane, 1, wxEXPAND);
+	frame->SetSizer(rightSizerV);
+	frame->Show();
 }
 
 //////////////////
