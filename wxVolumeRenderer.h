@@ -10,9 +10,11 @@
 
 #include <wx/rawbmp.h>
 class wxVolumeRenderer : public wxPanel {
+	
+private:
 	wxBitmap image;
 	wxImage imgbuffer;
-	
+	unsigned char*  createImageGPU(std::string const& kernelpath, unsigned int width, unsigned int height);
 public:
 	wxVolumeRenderer(wxFrame* parent, wxBitmapType format);
 	
