@@ -41,10 +41,11 @@ void MainFrame::OnPrint(wxCommandEvent& event)
 // begin calculation
 void MainFrame::OnCalc(wxCommandEvent& event){
   enableGuiElements(false);
-  
+
   Ctrl::getInstance()->runCalculation();
-  
+
   wxYield(); // is this necessary?
+  // without wxYield, the clicks on disabled buttons are queued
   enableGuiElements(true);
   return;
 }
@@ -52,12 +53,13 @@ void MainFrame::OnCalc(wxCommandEvent& event){
 // load input files to display radii list
 void MainFrame::OnLoadFiles(wxCommandEvent& event){
   enableGuiElements(false);
-  
+
   Ctrl::getInstance()->loadInputFiles();
-  
+
   wxYield(); // is this necessary?
+  // without wxYield, the clicks on disabled buttons are queued
   enableGuiElements(true);
-  
+
   return;
 }
 
@@ -72,7 +74,7 @@ void MainFrame::enableGuiElements(bool inp){
 
 // browse for atom file
 void MainFrame::OnAtomBrowse(wxCommandEvent& event){
-  std::string filetype = "XYZ files (*.xyz)|*.xyz";
+  std::string filetype = "XYZ and PDB files (*.xyz;*.pdb)|*.xyz;*pdb";
   OnBrowse(filetype, filepathText);
   return;
 }
@@ -115,6 +117,8 @@ void MainFrame::OnBrowse(std::string& filetype, wxTextCtrl* textbox){
 }
 
 // Functions to dynamically change the color of the atom list grid cells
+// TODO: add events to set radius cell in red if radius = 0
+// TODO: add events to set element and number cells in grey if radius element is excluded
 void MainFrame::GridChange(wxGridEvent& event){
   int col = event.GetCol();
   int row = event.GetRow();
