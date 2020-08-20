@@ -20,32 +20,17 @@ namespace fs = std::filesystem;
 bool isAtomLine(const std::vector<std::string>& substrings);
 std::string strToValidSymbol(std::string str);
 static inline std::vector<std::string> splitLine(std::string& line);
+std::string fileExtension(const std::string& path);
 
 /////////////////
 // FILE IMPORT //
 /////////////////
 
 void Model::importFiles(std::string& atom_filepath, std::string& radius_filepath, bool incl_hetatm){
-/*
-  // check if file paths are valid
-  if (!filesExist(atom_filepath, radius_filepath)) {
-    Ctrl::getInstance()->notifyUser("Invalid File Paths!");
-    return;
-  }
-  */
 
   // radius file must be imported before atom file, because atom file import requires the radius map
   readRadiiAndAtomNumFromFile(radius_filepath);
-  std::string atom_file_format = atom_filepath.substr(atom_filepath.size()-4, 4);
-  if (atom_file_format == ".xyz") {
-    readAtomsFromFileXYZ(atom_filepath);
-  }
-  else if (atom_file_format == ".pdb") {
-    readAtomsFromFilePDB(atom_filepath, incl_hetatm);
-  }
-  else { // The browser does not allow other file formats but a user could manually write the path to an invalid file
-    Ctrl::getInstance()->notifyUser("Invalid structure file format!");
-  }
+  readAtomsFromFile(atom_filepath, incl_hetatm);
 
   // save filepaths and last write times
   filepaths_last_imported[0] = fs::path(atom_filepath);
@@ -96,10 +81,26 @@ void Model::readRadiiAndAtomNumFromFile(std::string& filepath){
   return;
 }
 
-void Model::readAtomsFromFileXYZ(std::string& filepath){
+void Model::readAtomsFromFile(std::string& filepath, bool include_hetatm){
 
   std::vector<Atom> list_of_atoms;
   atom_amounts.clear();
+  
+  if (fileExtension(filepath) == "xyz"){
+    readFileXYZ(list_of_atoms, filepath);
+  }
+  else if (fileExtension(filepath) == "pdb"){
+    readFilePDB(list_of_atoms, filepath, include_hetatm);
+  }
+  else { // The browser does not allow other file formats but a user could manually write the path to an invalid file
+    Ctrl::getInstance()->notifyUser("Invalid structure file format!");
+  }
+
+  atoms = list_of_atoms;
+  storeAtomsInTree();
+}
+
+void Model::readFileXYZ(std::vector<Atom>& list_of_atoms, std::string& filepath){
 
 //if (inp_file.is_open()){  //TODO consider adding an exception, for when file in not valid
   std::string line;
@@ -131,17 +132,9 @@ void Model::readAtomsFromFileXYZ(std::string& filepath){
   }
   // file has been read
   inp_file.close();
-
-  atoms = list_of_atoms;
-  storeAtomsInTree();
-
-  return;
 }
 
-void Model::readAtomsFromFilePDB(std::string& filepath, bool include_hetatm){
-
-  std::vector<Atom> list_of_atoms;
-  atom_amounts.clear();
+void Model::readFilePDB(std::vector<Atom>& list_of_atoms, std::string& filepath, bool include_hetatm){
 
 //if (inp_file.is_open()){  //TODO consider adding an exception, for when file in not valid
   std::string line;
@@ -174,11 +167,6 @@ void Model::readAtomsFromFilePDB(std::string& filepath, bool include_hetatm){
   }
   // file has been read
   inp_file.close();
-
-  atoms = list_of_atoms;
-  storeAtomsInTree();
-
-  return;
 }
 
 bool Model::filesExist(const std::array<std::string,2>& paths) const {
@@ -211,6 +199,18 @@ inline double Model::findRadiusOfAtom(const Atom& at){
 ///////////////////
 // AUX FUNCTIONS //
 ///////////////////
+
+std::string fileExtension(const std::string& path){
+  // will cause an issue, if there is a dot in the middle of the file AND no file extension
+  std::string after_dot = "";
+  int dot_pos = path.find_last_of(".");
+  if (dot_pos != std::string::npos){  
+    return path.substr(dot_pos+1);
+  }
+  else{
+    return "invalid";
+  }
+}
 
 // split line into substrings when separated by whitespaces
 static inline std::vector<std::string> splitLine(std::string& line){

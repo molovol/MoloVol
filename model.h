@@ -20,8 +20,9 @@ class Model{
   public:
     void importFiles(std::string&, std::string&, bool);
     void readRadiiAndAtomNumFromFile(std::string&);
-    void readAtomsFromFileXYZ(std::string&);
-    void readAtomsFromFilePDB(std::string&, bool);
+    void readAtomsFromFile(std::string&, bool);
+    void readFileXYZ(std::vector<Atom>&, std::string&);
+    void readFilePDB(std::vector<Atom>&, std::string&, bool);
     bool importFilesChanged(std::string&, std::string&);
     bool filesExist(const std::array<std::string,2>& paths) const;
     bool filesExist(const std::string& path1, const std::string& path2) const;
