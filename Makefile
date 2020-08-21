@@ -1,6 +1,7 @@
 CC := g++
 SRCDIR := src
 BUILDDIR := build
+BINDIR := bin
 TARGET := bin/ballpit
 
 SRCEXT := cpp
@@ -12,6 +13,7 @@ INC := -I include
 
 $(TARGET): $(OBJECTS)
 	@echo " Linking..."
+	mkdir -p $(BINDIR)
 	$(CC) $(CXXFLAGS) $^ `wx-config --cxxflags --libs` -o $(TARGET)
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
