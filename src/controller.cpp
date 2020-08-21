@@ -29,7 +29,6 @@ Ctrl* Ctrl::getInstance(){
 }
 
 bool Ctrl::loadInputFiles(){
-
   // create an instance of the model class
   // ensures, that there is only ever one instance of the model class
   if(current_calculation == NULL){
