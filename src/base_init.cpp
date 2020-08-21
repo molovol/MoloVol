@@ -126,10 +126,15 @@ void MainFrame::InitRightMainPanel(){
 	auto width = 512;
 	auto height = 512;
 	frame = new wxFrame(NULL, wxID_ANY, wxT("3D Renderer"), wxPoint(50,50), wxSize(width,height));
-	drawPane = new wxVolumeRenderer( frame, wxBITMAP_TYPE_JPEG);
-	rightSizerV->Add(drawPane, 1, wxEXPAND);
+	try {
+		drawPane = new wxVolumeRenderer( frame, wxBITMAP_TYPE_JPEG);
+		rightSizerV->Add(drawPane, 1, wxEXPAND);
+	} catch(const std::runtime_error& e){
+		frame->SetLabel(e.what());//todo add empty image when error
+	}
 	frame->SetSizer(rightSizerV);
 	frame->Show();
+
 }
 
 //////////////////

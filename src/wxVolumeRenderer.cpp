@@ -39,8 +39,10 @@ wxVolumeRenderer::wxVolumeRenderer(wxFrame* parent,
 						   wxBitmapType format) : wxPanel(parent){
 	auto width = 512;
 	auto height = 512;
-	unsigned char* colormatrix = createImageGPU("./renderkernel.cl", width, height);
-
+	unsigned char* colormatrix = createImageGPU("../res/renderkernel.cl", width, height);
+	if (colormatrix==NULL) {
+		throw std::runtime_error("Image could not be generated using OpenCL.");
+	}
 	//directly copying does not work in runtime somehow (it should)
 	imgbuffer = wxImage(width, height, colormatrix, false);//static_data	Indicates if the data should be free'd after use
 	//wxBitmap bmp(wimgbuffer, 24);
@@ -86,8 +88,8 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 
 	fp = fopen(kernelpath.c_str(), "r");
 	if (!fp) {
-		fprintf(stderr, "Failed to load kernel.\n");
-		exit(1);
+		fprintf(stderr, "Failed to load kernel %s. \n", kernelpath.c_str());
+		return NULL;
 	}
 
 	cSourceCL = (char *)malloc(MAX_SOURCE_SIZE);
@@ -166,7 +168,7 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	output = clCreateBuffer(context, CL_MEM_WRITE_ONLY, mem_size_colorm, NULL, &err);
 	if (!inputA || !output){
 		printf("Error: Failed to allocate device memory!\n");
-		exit(1);
+		return NULL;
 	}
 
 	// schreibt die Daten aus "data" in den input buffer, jetzt A und B
@@ -201,7 +203,7 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &output);
 	if (err != CL_SUCCESS) {
 		printf("Error: Failed to set kernel arguments! %d\n", err);
-		exit(1);
+		return NULL;
 	}
 
 
@@ -212,7 +214,7 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	err = clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, global, NULL, 0, NULL, NULL);
 	if (err != CL_SUCCESS){
 		printf("Error: Failed to execute kernel! %d\n", err);
-		exit(1);
+		return NULL;
 	}
 
 	// Barriere bis alle command_queue Befehle abgearbeitet worden
@@ -222,7 +224,7 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	err = clEnqueueReadBuffer(command_queue, output, CL_TRUE, 0, mem_size_colorm, lightmatrix, 0, NULL, NULL);
 	if (err != CL_SUCCESS){
 		printf("Error: Failed to read output array! %d\n", err);
-		exit(1);
+		return NULL;
 	}
 
 
