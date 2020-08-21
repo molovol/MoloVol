@@ -25,17 +25,14 @@ END_EVENT_TABLE()
 ////////////////////////////////
 
 // exit program
-void MainFrame::OnExit(wxCommandEvent& event)
-{
+void MainFrame::OnExit(wxCommandEvent& event){
   this->Close(TRUE);
 }
 
 // display text in output, used for debugging
-void MainFrame::OnPrint(wxCommandEvent& event)
-{
+void MainFrame::OnPrint(wxCommandEvent& event){
   std::string text = "treat yourself well";
   printToOutput(text);
-  return;
 }
 
 // begin calculation
@@ -47,7 +44,6 @@ void MainFrame::OnCalc(wxCommandEvent& event){
   wxYield(); // is this necessary?
   // without wxYield, the clicks on disabled buttons are queued
   enableGuiElements(true);
-  return;
 }
 
 // load input files to display radii list
@@ -59,8 +55,6 @@ void MainFrame::OnLoadFiles(wxCommandEvent& event){
   wxYield(); // is this necessary?
   // without wxYield, the clicks on disabled buttons are queued
   enableGuiElements(true);
-
-  return;
 }
 
 void MainFrame::enableGuiElements(bool inp){
@@ -69,21 +63,18 @@ void MainFrame::enableGuiElements(bool inp){
   loadFilesButton->Enable(inp);
   // prevents editing of the atom list grid during the calculation
   atomListGrid->EnableEditing(inp);
-  return;
 }
 
 // browse for atom file
 void MainFrame::OnAtomBrowse(wxCommandEvent& event){
   std::string filetype = "XYZ and PDB files (*.xyz;*.pdb)|*.xyz;*pdb";
   OnBrowse(filetype, filepathText);
-  return;
 }
 
 // browse for radius file
 void MainFrame::OnRadiusBrowse(wxCommandEvent& event){
   std::string filetype = "TXT files (*.txt)|*.txt";
   OnBrowse(filetype, radiuspathText);
-  return;
 }
 
 // browse (can only be called by another method function)
@@ -113,7 +104,10 @@ void MainFrame::OnBrowse(std::string& filetype, wxTextCtrl* textbox){
     return;
   }
   textbox->SetLabel(openFileDialog.GetPath());
-  return;
+  //load automatically
+  Ctrl::getInstance()->loadInputFiles();
+  wxYield(); // is this necessary?
+  enableGuiElements(true);
 }
 
 // Functions to dynamically change the color of the atom list grid cells
