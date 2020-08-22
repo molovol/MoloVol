@@ -2,24 +2,25 @@
 #define max_bounds 100 //of input
 
 bool inside_volume_bounds(const float3 sampling_pos){
-	return all(sampling_pos >= (float3)(0))
-            && all(sampling_pos <= (float3)(max_bounds));
+	return all(sampling_pos >= 0)
+            && all(sampling_pos < max_bounds);
 }
 
 bool get_sample_data(__global const bool *A, const float3 sampling_position){
-	return A[int(sampling_position.z*max_bounds*max_bounds)+int(sampling_position.y*max_bounds)+int(sampling_position.x)];
+	float3 sample = (float3) max(float3(0.0),(float3)min((float)max_bounds-1,sampling_position));//map to 0-max_bounds
+	return A[uint(sample.z*max_bounds*max_bounds)+uint(sample.y*max_bounds)+uint(sample.x)];
 }
 
 __kernel void matMult(__global bool *A,
                       __global char *C
 							 ) {
-	const int x = get_global_id(0);//spalte
-	const int y = get_global_id(1);//zeile
+	const uint x = get_global_id(0);//spalte
+	const uint y = get_global_id(1);//zeile
 	// the traversal loop,
 	// termination when the sampling position is outside volume boundarys
 	// another termination condition for early ray termination is added
-	const float3 ray_entry_position = (float3)(x,y,0);
-	const float3 camera_location = (float3)(x,y,-1);
+	const float3 ray_entry_position = (float3)(x/5,y/5,0);//map to 0-1
+	const float3 camera_location = (float3)(x/5,y/5,-1);//map to 0-1
 	const float sampling_distance = 1;
 	float3 ray_increment = normalize(ray_entry_position - camera_location) * sampling_distance;
 	float3 sampling_pos = ray_entry_position+ray_increment;
@@ -46,7 +47,7 @@ __kernel void matMult(__global bool *A,
 		
 		//front-to-back
 		// accumulate color
-		dst += s*0.01 * trsp;
+		dst += s*0.03 * trsp;
 		if (s==1){
 			// update opacity
 			trsp *= 0.95;
