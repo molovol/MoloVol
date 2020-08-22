@@ -11,7 +11,9 @@
 #include <iterator>
 #include <algorithm>
 
+/* TODO fs: add back in the code when filesystem issue is solved
 namespace fs = std::filesystem;
+*/
 
 ///////////////////////////////
 // AUX FUNCTION DECLARATIONS //
@@ -26,28 +28,37 @@ std::string fileExtension(const std::string& path);
 // FILE IMPORT //
 /////////////////
 
-void Model::importFiles(std::string& atom_filepath, std::string& radius_filepath, bool incl_hetatm){
+bool Model::importFiles(std::string& atom_filepath, std::string& radius_filepath, bool incl_hetatm){
 
   // radius file must be imported before atom file, because atom file import requires the radius map
   readRadiiAndAtomNumFromFile(radius_filepath);
-  readAtomsFromFile(atom_filepath, incl_hetatm);
+  if (!readAtomsFromFile(atom_filepath, incl_hetatm)){
+    return false;
+  }
 
   // save filepaths and last write times
+/* TODO fs: add back in the code when filesystem issue is solved
   filepaths_last_imported[0] = fs::path(atom_filepath);
   filepaths_last_imported[1] = fs::path(radius_filepath);
   for (char i = 0; i < 2; i++){
     files_last_written[i] = fs::last_write_time(filepaths_last_imported[i]);
   }
+*/
+// TODO fs: remove from code this section when filesystem issue is solved
+  filepaths_last_imported[0] = atom_filepath;
+  filepaths_last_imported[1] = radius_filepath;
+// TODO fs: end of remove section
+  return true;
 }
 
 bool Model::importFilesChanged(std::string& current_atom_filepath, std::string& current_radius_filepath){
-
-  std::array<std::string,2> current = {current_atom_filepath, current_radius_filepath};
-
+  std::string current[2] = {current_atom_filepath, current_radius_filepath};
+/* TODO fs: add back in the code when filesystem issue is solved
   if (!filesExist(current)) {return true;} // this exception is handled in the load routine
+*/
 
   for (int i = 0; i < 2; i++){
-
+/* TODO fs: add back in the code when filesystem issue is solved
     fs::path current_filepath = fs::path(current[i]);
     fs::file_time_type current_file_last_written = fs::last_write_time(current_filepath);
 
@@ -55,6 +66,13 @@ bool Model::importFilesChanged(std::string& current_atom_filepath, std::string& 
     if (filepaths_last_imported[i] != current_filepath || files_last_written[i] != current_file_last_written){
       return true;
     }
+*/
+// TODO fs: remove from code this section when filesystem issue is solved
+    std::string current_filepath = current[i];
+    if (filepaths_last_imported[i] != current_filepath){
+      return true;
+    }
+// TODO fs: end of remove section
   }
   return false;
 }
@@ -81,11 +99,11 @@ void Model::readRadiiAndAtomNumFromFile(std::string& filepath){
   return;
 }
 
-void Model::readAtomsFromFile(std::string& filepath, bool include_hetatm){
+bool Model::readAtomsFromFile(std::string& filepath, bool include_hetatm){
 
   std::vector<Atom> list_of_atoms;
   atom_amounts.clear();
-  
+
   if (fileExtension(filepath) == "xyz"){
     readFileXYZ(list_of_atoms, filepath);
   }
@@ -94,10 +112,12 @@ void Model::readAtomsFromFile(std::string& filepath, bool include_hetatm){
   }
   else { // The browser does not allow other file formats but a user could manually write the path to an invalid file
     Ctrl::getInstance()->notifyUser("Invalid structure file format!");
+    return false;
   }
 
   atoms = list_of_atoms;
   storeAtomsInTree();
+  return true;
 }
 
 void Model::readFileXYZ(std::vector<Atom>& list_of_atoms, std::string& filepath){
@@ -169,6 +189,7 @@ void Model::readFilePDB(std::vector<Atom>& list_of_atoms, std::string& filepath,
   inp_file.close();
 }
 
+/* TODO fs: add back in the code when filesystem issue is solved
 bool Model::filesExist(const std::array<std::string,2>& paths) const {
   return (std::filesystem::exists(paths[0]) && std::filesystem::exists(paths[1]));
 }
@@ -177,6 +198,7 @@ bool Model::filesExist(const std::string& path1, const std::string& path2) const
   std::array<std::string,2> paths = {path1, path2};
   return filesExist(paths);
 }
+*/
 
 ////////////////////////
 // METHOD DEFINITIONS //
@@ -204,7 +226,7 @@ std::string fileExtension(const std::string& path){
   // will cause an issue, if there is a dot in the middle of the file AND no file extension
   std::string after_dot = "";
   int dot_pos = path.find_last_of(".");
-  if (dot_pos != std::string::npos){  
+  if (dot_pos != std::string::npos){
     return path.substr(dot_pos+1);
   }
   else{
