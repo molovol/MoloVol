@@ -1,6 +1,7 @@
 
 #include "special_chars.h"
 #include <iostream>
+#include <cassert>
 
 std::string Symbol::angstrom(){
   return "\xE2\x84\xAB";
@@ -12,7 +13,7 @@ std::string Symbol::cubed(){
 // TODO: write function to return subscript encoding based on int or char
 
 // from an int, produce a string of utf-8 encoded subscripts
-std::string Symbol::subscript(int num){  
+std::string Symbol::subscript(int num){
   std::string retval = "";
 
   while (num > 0){
@@ -30,9 +31,9 @@ std::string Symbol::subscript(int num){
 // from a numeric string, produce a string of utf-8 encoded subscripts
 std::string Symbol::subscript(std::string num){
   std::string retval = "";
-  
+
   // iterate over all chars in input
-  for (char c : num){ 
+  for (char c : num){
     assert(c >= '0' && c <= '9');
     char subscript[4] = "\xE2\x82\x80";   // utf-8 encoding of subscript "0"
     int digit = c - '0';                  // covert numeric char to corresponding int
