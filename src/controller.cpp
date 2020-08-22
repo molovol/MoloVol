@@ -75,8 +75,7 @@ bool Ctrl::runCalculation(){
 
   // if import files have changed "press" the load button
   if (current_calculation->importFilesChanged(atom_filepath, radius_filepath)){
-    if (!loadInputFiles()) {
-  return false;} // if loading unsuccessful, abort calculation
+    if (!loadInputFiles()) {return false;} // if loading unsuccessful, abort calculation
   }
 
   // radius map is generated from grid in gui, then passed to model for calculation
