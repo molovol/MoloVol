@@ -29,6 +29,7 @@ Ctrl* Ctrl::getInstance(){
 }
 
 bool Ctrl::loadInputFiles(){
+
   // create an instance of the model class
   // ensures, that there is only ever one instance of the model class
   if(current_calculation == NULL){
@@ -38,6 +39,7 @@ bool Ctrl::loadInputFiles(){
   std::string atom_filepath = gui->getAtomFilepath();
   std::string radius_filepath = gui->getRadiusFilepath();
 
+/* TODO fs: add back in the code when filesystem issue is solved
   if (current_calculation->filesExist(atom_filepath, radius_filepath)){
     // read atoms from file and save a vector containing the atoms
     current_calculation->importFiles(atom_filepath, radius_filepath, gui->getIncludeHetatm());
@@ -49,21 +51,31 @@ bool Ctrl::loadInputFiles(){
     notifyUser("Invalid File Path!");
     return false;
   }
+*/
+// TODO fs: remove from code this section when filesystem issue is solved
+  // read atoms from file and save a vector containing the atoms
+  if (!current_calculation->importFiles(atom_filepath, radius_filepath, gui->getIncludeHetatm())){
+    return false;
+  }
+  // get atom list from model and pass onto view
+  gui->displayAtomList(current_calculation->generateAtomList());
+// TODO fs: end of remove section
+
   return true;
 }
 
 bool Ctrl::runCalculation(){
-
+  // create an instance of the model class
+  // ensures, that there is only ever one instance of the model class
+  if(current_calculation == NULL){
+    current_calculation = new Model();
+  }
   std::string atom_filepath = gui->getAtomFilepath();
   std::string radius_filepath = gui->getRadiusFilepath();
 
   // if import files have changed "press" the load button
   if (current_calculation->importFilesChanged(atom_filepath, radius_filepath)){
     if (!loadInputFiles()) {return false;} // if loading unsuccessful, abort calculation
-  }
-
-  if(current_calculation == NULL){
-    current_calculation = new Model();
   }
 
   // radius map is generated from grid in gui, then passed to model for calculation
