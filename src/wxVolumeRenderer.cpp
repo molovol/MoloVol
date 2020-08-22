@@ -24,6 +24,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "controller.h"
+#include "model.h"
 #include "wxVolumeRenderer.h"
 #include <wx/rawbmp.h>
 
@@ -56,9 +58,10 @@ wxVolumeRenderer::wxVolumeRenderer(wxFrame* parent,
 #define MAX_SOURCE_SIZE (0x100000)
 unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, unsigned int width, unsigned int height){
 	//tmp input matrix
-	unsigned int size_inputmatrix = 100 * 100*100;
+	std::deque<bool> inputmatrixvector = Ctrl::getInstance()->getModel()->getMatrix();
+	bool* inputmatrix = &inputmatrixvector[0];
+	unsigned int size_inputmatrix = sizeof(inputmatrixvector);
 	unsigned int mem_size_A = sizeof(float) * size_inputmatrix;
-	float* inputmatrix = (float*) malloc(size_inputmatrix * sizeof(float*));
 	
 	//create output matrix
 	//unsigned int num_elements =width*height;
@@ -172,7 +175,7 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	}
 
 	// schreibt die Daten aus "data" in den input buffer, jetzt A und B
-	clEnqueueWriteBuffer(command_queue, inputA, CL_TRUE, 0, mem_size_A, inputmatrix, 0, NULL, NULL);
+	clEnqueueWriteBuffer(command_queue, inputA, CL_TRUE, 0, mem_size_A, &(inputmatrix[0]), 0, NULL, NULL);
 
 	// -------------------------------------------------------------------------
 	// 3) Programm linken und kompilieren, Kernel und Argumente einrichten

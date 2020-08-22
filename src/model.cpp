@@ -60,3 +60,7 @@ void Model::debug(){
   }
   return;
 }
+
+std::deque<bool> Model:: getMatrix(){
+	return std::deque<bool>(100*100*100,0);
+}

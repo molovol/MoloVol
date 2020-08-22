@@ -15,6 +15,7 @@ private:
 	wxBitmap image;
 	wxImage imgbuffer;
 	unsigned char*  createImageGPU(std::string const& kernelpath, unsigned int width, unsigned int height);
+	bool** getMatrix();
 public:
 	wxVolumeRenderer(wxFrame* parent, wxBitmapType format);
 	

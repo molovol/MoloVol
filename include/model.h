@@ -38,6 +38,7 @@ class Model{
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void setRadiusMap(std::unordered_map<std::string, double> map);
     void debug();
+	std::deque<bool> getMatrix();
   private:
     std::unordered_map<std::string, double> radius_map;
     std::unordered_map<std::string, int> elem_Z;
