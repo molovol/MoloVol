@@ -3,7 +3,6 @@
 #define SPECIAL_CHARS_H
 
 #include <string>
-#include <cassert>
 
 class Symbol{
   public:
