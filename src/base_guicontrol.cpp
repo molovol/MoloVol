@@ -109,3 +109,13 @@ std::unordered_map<std::string, double> MainFrame::generateRadiusMapFromView(){
   }
   return radius_map;
 }
+
+std::vector<std::string> MainFrame::getIncludedElementsFromView(){
+  std::vector<std::string> included_elements;
+  for (int i = 0; i < atomListGrid->GetNumberRows(); i++){
+    if (atomListGrid->GetCellValue(i,0) == "1"){
+        included_elements.emplace_back(atomListGrid->GetCellValue(i,1).wxString::ToStdString());
+    }
+  }
+  return included_elements;
+}

@@ -11,10 +11,6 @@
 #include <iterator>
 #include <algorithm>
 
-/* TODO fs: add back in the code when filesystem issue is solved
-namespace fs = std::filesystem;
-*/
-
 ///////////////////////////////
 // AUX FUNCTION DECLARATIONS //
 ///////////////////////////////
@@ -35,46 +31,7 @@ bool Model::importFiles(std::string& atom_filepath, std::string& radius_filepath
   if (!readAtomsFromFile(atom_filepath, incl_hetatm)){
     return false;
   }
-
-  // save filepaths and last write times
-/* TODO fs: add back in the code when filesystem issue is solved
-  filepaths_last_imported[0] = fs::path(atom_filepath);
-  filepaths_last_imported[1] = fs::path(radius_filepath);
-  for (char i = 0; i < 2; i++){
-    files_last_written[i] = fs::last_write_time(filepaths_last_imported[i]);
-  }
-*/
-// TODO fs: remove from code this section when filesystem issue is solved
-  filepaths_last_imported[0] = atom_filepath;
-  filepaths_last_imported[1] = radius_filepath;
-// TODO fs: end of remove section
   return true;
-}
-
-bool Model::importFilesChanged(std::string& current_atom_filepath, std::string& current_radius_filepath){
-  std::string current[2] = {current_atom_filepath, current_radius_filepath};
-/* TODO fs: add back in the code when filesystem issue is solved
-  if (!filesExist(current)) {return true;} // this exception is handled in the load routine
-*/
-
-  for (int i = 0; i < 2; i++){
-/* TODO fs: add back in the code when filesystem issue is solved
-    fs::path current_filepath = fs::path(current[i]);
-    fs::file_time_type current_file_last_written = fs::last_write_time(current_filepath);
-
-    // files have changed if the file path has changed, or when the file has been rewritten since last import
-    if (filepaths_last_imported[i] != current_filepath || files_last_written[i] != current_file_last_written){
-      return true;
-    }
-*/
-// TODO fs: remove from code this section when filesystem issue is solved
-    std::string current_filepath = current[i];
-    if (filepaths_last_imported[i] != current_filepath){
-      return true;
-    }
-// TODO fs: end of remove section
-  }
-  return false;
 }
 
 // reads radii from a file specified by the filepath and
@@ -96,31 +53,38 @@ void Model::readRadiiAndAtomNumFromFile(std::string& filepath){
       elem_Z[substrings[1]] = std::stoi(substrings[0]);
     }
   }
-  return;
+  // Notify the user if no radius is defined
+  // the program can continue running because the user can manually define radii
+  if (radius_map.size() == 0) {
+    Ctrl::getInstance()->notifyUser("Invalid radii definition file!");
+    Ctrl::getInstance()->notifyUser("Please reload a valid file or define radii manually in the table.");
+  }
 }
 
 bool Model::readAtomsFromFile(std::string& filepath, bool include_hetatm){
 
-  std::vector<Atom> list_of_atoms;
   atom_amounts.clear();
+  raw_atom_coordinates.clear();
 
   if (fileExtension(filepath) == "xyz"){
-    readFileXYZ(list_of_atoms, filepath);
+    readFileXYZ(filepath);
   }
   else if (fileExtension(filepath) == "pdb"){
-    readFilePDB(list_of_atoms, filepath, include_hetatm);
+    readFilePDB(filepath, include_hetatm);
   }
   else { // The browser does not allow other file formats but a user could manually write the path to an invalid file
-    Ctrl::getInstance()->notifyUser("Invalid structure file format!");
+    Ctrl::getInstance()->notifyUser("!!!!!!\nInvalid structure file format!\n!!!!!!");
     return false;
   }
-
-  atoms = list_of_atoms;
-  storeAtomsInTree();
+  if (raw_atom_coordinates.size() == 0){ // If no atom is detected in the input file, the file is deemed invalid
+    Ctrl::getInstance()->notifyUser("!!!!!!\nInvalid structure file!\n!!!!!!");
+    return false;
+  }
+  Ctrl::getInstance()->notifyUser("Structure file loaded successfully.");
   return true;
 }
 
-void Model::readFileXYZ(std::vector<Atom>& list_of_atoms, std::string& filepath){
+void Model::readFileXYZ(std::string& filepath){
 
 //if (inp_file.is_open()){  //TODO consider adding an exception, for when file in not valid
   std::string line;
@@ -140,21 +104,18 @@ void Model::readFileXYZ(std::vector<Atom>& list_of_atoms, std::string& filepath)
       if (elem_Z.count(valid_symbol) > 0){
         elem_Z[valid_symbol] = 0;
       }
-
-      Atom at = Atom(std::stod(substrings[1]),
-                     std::stod(substrings[2]),
-                     std::stod(substrings[3]),
-                     valid_symbol,
-                     findRadiusOfAtom(valid_symbol),
-                     elem_Z[valid_symbol]);
-      list_of_atoms.push_back(at);
+      // Stores the full list of atom coordinates from the input file
+      raw_atom_coordinates.emplace_back(valid_symbol,
+                                        std::stod(substrings[1]),
+                                        std::stod(substrings[2]),
+                                        std::stod(substrings[3]));
     }
   }
   // file has been read
   inp_file.close();
 }
 
-void Model::readFilePDB(std::vector<Atom>& list_of_atoms, std::string& filepath, bool include_hetatm){
+void Model::readFilePDB(std::string& filepath, bool include_hetatm){
 
 //if (inp_file.is_open()){  //TODO consider adding an exception, for when file in not valid
   std::string line;
@@ -175,30 +136,16 @@ void Model::readFilePDB(std::vector<Atom>& list_of_atoms, std::string& filepath,
       if (elem_Z.count(symbol) > 0){
         elem_Z[symbol] = 0;
       }
-
-      Atom at = Atom(std::stod(line.substr(30,8)),
-                     std::stod(line.substr(38,8)),
-                     std::stod(line.substr(46,8)),
-                     symbol,
-                     findRadiusOfAtom(symbol),
-                     elem_Z[symbol]);
-      list_of_atoms.push_back(at);
+      // Stores the full list of atom coordinates from the input file
+      raw_atom_coordinates.emplace_back(symbol,
+                                        std::stod(line.substr(30,8)),
+                                        std::stod(line.substr(38,8)),
+                                        std::stod(line.substr(46,8)));
     }
   }
   // file has been read
   inp_file.close();
 }
-
-/* TODO fs: add back in the code when filesystem issue is solved
-bool Model::filesExist(const std::array<std::string,2>& paths) const {
-  return (std::filesystem::exists(paths[0]) && std::filesystem::exists(paths[1]));
-}
-
-bool Model::filesExist(const std::string& path1, const std::string& path2) const {
-  std::array<std::string,2> paths = {path1, path2};
-  return filesExist(paths);
-}
-*/
 
 ////////////////////////
 // METHOD DEFINITIONS //
