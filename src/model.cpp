@@ -62,5 +62,18 @@ void Model::debug(){
 }
 
 std::deque<bool> Model:: getMatrix(){
-	return std::deque<bool>(100*100*100,0);
+	int dim = 100;
+	auto tmp =std::deque<bool>(dim*dim*dim,0);
+	
+	int i=0;
+	for (auto iter = tmp.begin();iter != tmp.end();++iter){
+		int x = i % dim-50;
+		int y = (i % (dim*dim))/dim-50;
+		int z = i / (dim*dim)-50;
+		if (x*x + (y-20)*(y-20) + (z-30)*(z-30) < 50 || x*x + y*y + z*z < 320 || (x<40 && x>20 && y<40 && y>20 && z<40 && z>20)){
+			*iter = 1;
+		}
+		++i;
+	}
+	return tmp;
 }

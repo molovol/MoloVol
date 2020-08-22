@@ -59,8 +59,18 @@ wxVolumeRenderer::wxVolumeRenderer(wxFrame* parent,
 unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, unsigned int width, unsigned int height){
 	//tmp input matrix
 	std::deque<bool> inputmatrixvector = Ctrl::getInstance()->getModel()->getMatrix();
-	bool* inputmatrix = &inputmatrixvector[0];
-	unsigned int size_inputmatrix = sizeof(inputmatrixvector);
+	unsigned int size_inputmatrix = inputmatrixvector.size();
+	
+	bool* inputmatrix = (bool*) malloc(size_inputmatrix * sizeof(bool*));
+	//copy content from deque into c-style array.
+	auto it = inputmatrixvector.begin();
+	unsigned int i=0;
+	while (it != inputmatrixvector.end()) {
+        inputmatrix[i] = *it;
+        ++it;
+		++i;
+    }
+	
 	unsigned int mem_size_A = sizeof(float) * size_inputmatrix;
 	
 	//create output matrix
