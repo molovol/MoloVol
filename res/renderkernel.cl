@@ -19,8 +19,8 @@ __kernel void matMult(__global bool *A,
 	// the traversal loop,
 	// termination when the sampling position is outside volume boundarys
 	// another termination condition for early ray termination is added
-	const float3 ray_entry_position = (float3)(x/5,y/5,0);//map to 0-1
-	const float3 camera_location = (float3)(x/5,y/5,-1);//map to 0-1
+	const float3 ray_entry_position = (float3)(x*max_bounds/DIM, y*max_bounds/DIM,0);//map to 0-1
+	const float3 camera_location = (float3)((x+1)*max_bounds/DIM,y*max_bounds/DIM,-1);//map to 0-1
 	const float sampling_distance = 1;
 	float3 ray_increment = normalize(ray_entry_position - camera_location) * sampling_distance;
 	float3 sampling_pos = ray_entry_position+ray_increment;
