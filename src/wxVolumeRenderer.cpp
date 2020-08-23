@@ -58,7 +58,8 @@ wxVolumeRenderer::wxVolumeRenderer(wxFrame* parent,
 #define MAX_SOURCE_SIZE (0x100000)
 unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, unsigned int width, unsigned int height){
 	//tmp input matrix
-	std::deque<bool> inputmatrixvector = Ctrl::getInstance()->getModel()->getMatrix();
+	auto inputmatrixvector = Ctrl::getInstance()->getModel()->getMatrix();
+	//auto dim = Ctrl::getInstance()->getModel()->cell->getResolution();
 	unsigned int size_inputmatrix = inputmatrixvector.size();
 	
 	uint8_t* inputmatrix = (uint8_t*) malloc(size_inputmatrix * sizeof(uint8_t*));

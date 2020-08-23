@@ -70,6 +70,33 @@ std::array<double,3> Space::getSize(){
   return size;
 }
 
+std::vector<char> Space::getMatrix(){
+	int dim = 100;
+	std::vector<char> grid;
+	grid.resize(pow(dim,3));
+	
+	int i=0;
+	for (auto iter = grid.begin();iter != grid.end();++iter){
+		int x = i % dim-50;
+		int y = (i % (dim*dim))/dim-50;
+		int z = i / (dim*dim)-50;
+		if (x*x + (y-20)*(y-20) + (z-30)*(z-30) < 50 || x*x + y*y + z*z < 320 || (x<40 && x>20 && y<40 && y>20 && z<40 && z>20)){
+			*iter = 1;
+		}
+		++i;
+	}
+	return grid;
+}
+
+//the number of voxels at lowest tree level in one dimension
+std::array<double,3> Space::getResolution(){
+	std::array<double,3> size;
+	for(int dim = 0; dim < 3; dim++){
+		size[dim] = n_gridsteps[dim]*pow(2,max_depth);
+	}
+  return size;
+}
+
 Voxel& Space::getElement(const size_t &i){
   assert(i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]); 
   return grid[i];
