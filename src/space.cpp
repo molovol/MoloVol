@@ -71,6 +71,7 @@ std::array<double,3> Space::getSize(){
 }
 
 std::vector<char> Space::getMatrix(){
+	//int dim = this->getResolution()[0];//assume uniform size
 	int dim = 100;
 	std::vector<char> grid;
 	grid.resize(pow(dim,3));
