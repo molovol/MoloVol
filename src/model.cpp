@@ -19,7 +19,6 @@ void Model::updateAtomRadii(){
   for (Atom& at : atoms){
     at.rad = radius_map[at.symbol];
   }
-  return;
 }
 
 void Model::findCloseAtoms(const double& r_probe){
@@ -34,8 +33,6 @@ void Model::calcVolume(){
   std::string message_to_user
     = "Van der Waals Volume: " + std::to_string(volume) + " " + Symbol::angstrom() + Symbol::cubed();
   Ctrl::getInstance()->notifyUser(message_to_user);
-
-  return;
 }
 
 std::vector<std::tuple<std::string, int, double>> Model::generateAtomList(){
@@ -48,7 +45,6 @@ std::vector<std::tuple<std::string, int, double>> Model::generateAtomList(){
 
 void Model::setRadiusMap(std::unordered_map<std::string, double> map){
   radius_map = map;
-  return;
 }
 
 void Model::debug(){
@@ -58,7 +54,6 @@ void Model::debug(){
   for(int dim = 0; dim < 3; dim++){
     std::cout << "Cell Limit in Dim " << dim << ":" << cell_min[dim] << " and " << cell_max[dim] << std::endl;
   }
-  return;
 }
 
 std::deque<bool> Model:: getMatrix(){
