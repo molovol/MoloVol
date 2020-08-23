@@ -6,13 +6,15 @@ bool inside_volume_bounds(const float3 sampling_pos){
             && all(sampling_pos < max_bounds);
 }
 
-bool get_sample_data(__global const bool *A, const float3 sampling_position){
+char get_sample_data(__global const char *A, const float3 sampling_position){
 	float3 sample = (float3) round(max(float3(0.0),(float3)min((float)max_bounds-1,sampling_position)));//map to 0-max_bounds
 	return A[uint(sample.z)*max_bounds*max_bounds+uint(sample.y)*max_bounds+uint(sample.x)];
 }
 
-__kernel void matMult(__global bool *A,
-                      __global char *C
+//__read_only image3d_t
+__kernel void matMult(__global char *A,
+                      __global char *C//,
+				//	  __read_only image3d_t img
 							 ) {
 	const uint x = get_global_id(0);//spalte
 	const uint y = get_global_id(1);//zeile
@@ -29,7 +31,8 @@ __kernel void matMult(__global bool *A,
 	float brightnes = 1;
 	while (inside_volume_bounds(sampling_pos)) {
 		// get sample
-		bool s = get_sample_data(A, sampling_pos);
+		char s = get_sample_data(A, sampling_pos.xyz);
+		//bool s = bool(read_imagei(A, sampling_pos).a);
 		
 		//early termination
 		if (trsp <= 0.1 || dst>1.0){
@@ -47,8 +50,8 @@ __kernel void matMult(__global bool *A,
 		
 		//front-to-back
 		// accumulate color
-		dst += s*0.03 * trsp;
 		if (s==1){
+			dst += 0.03 * trsp;
 			// update opacity
 			trsp *= 0.95;
 		}

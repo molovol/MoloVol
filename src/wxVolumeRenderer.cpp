@@ -61,7 +61,7 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	std::deque<bool> inputmatrixvector = Ctrl::getInstance()->getModel()->getMatrix();
 	unsigned int size_inputmatrix = inputmatrixvector.size();
 	
-	bool* inputmatrix = (bool*) malloc(size_inputmatrix * sizeof(bool*));
+	uint8_t* inputmatrix = (uint8_t*) malloc(size_inputmatrix * sizeof(uint8_t*));
 	//copy content from deque into c-style array.
 	auto it = inputmatrixvector.begin();
 	unsigned int i=0;
@@ -179,13 +179,53 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	// erzeugt handels für in und output buffer, die hier erzeugt werden
 	inputA = clCreateBuffer(context, CL_MEM_READ_ONLY, mem_size_A, NULL, &err);
 	output = clCreateBuffer(context, CL_MEM_WRITE_ONLY, mem_size_colorm, NULL, &err);
-	if (!inputA || !output){
+	if (!output){
 		printf("Error: Failed to allocate device memory!\n");
 		return NULL;
 	}
-
-	// schreibt die Daten aus "data" in den input buffer, jetzt A und B
+	
 	clEnqueueWriteBuffer(command_queue, inputA, CL_TRUE, 0, mem_size_A, &(inputmatrix[0]), 0, NULL, NULL);
+	
+//	cl_image_format format;
+//	format.image_channel_order = CL_A;
+//	format.image_channel_data_type = CL_UNSIGNED_INT8;
+//	cl_image_desc descr;
+//	descr.image_type = CL_MEM_OBJECT_IMAGE3D;
+//	descr.image_width = 100;
+//	descr.image_height = 100;
+//	descr.image_depth = 100;
+//	descr.image_array_size = 1;
+//	descr.image_row_pitch =100*sizeof(uint8_t);
+//	descr.image_slice_pitch =100*100*sizeof(uint8_t);
+//	descr.num_mip_levels    = 0;
+//	descr.num_samples       = 0;
+//	descr.buffer        = nullptr;
+//	auto inputimage = clCreateImage(
+//		context,
+//		CL_MEM_READ_ONLY,
+//		&format,
+//		&descr,
+//		nullptr,
+//		&err );
+//	if (err != CL_SUCCESS){
+//		printf("Error: Failed to allocate image! Error: %d\n", err);
+//		return NULL;
+//	}
+//	// schreibt die Daten aus "data" in den input buffer, jetzt A und B
+//	const size_t srcOrigin[3] = { 0, 0, 0};
+//	const size_t region[3] = { 100, 100, 100 };
+//	clEnqueueWriteImage(command_queue,
+//						inputimage,
+//						CL_TRUE,
+//						srcOrigin,
+//						region,
+//						0,
+//						0,
+//						&(inputmatrix[0]),
+//						0,//num_events_in_wait_list
+//						NULL,//event_wait_list
+//						NULL);
+
 
 	// -------------------------------------------------------------------------
 	// 3) Programm linken und kompilieren, Kernel und Argumente einrichten
