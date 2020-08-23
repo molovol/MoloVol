@@ -7,8 +7,8 @@ bool inside_volume_bounds(const float3 sampling_pos){
 }
 
 bool get_sample_data(__global const bool *A, const float3 sampling_position){
-	float3 sample = (float3) max(float3(0.0),(float3)min((float)max_bounds-1,sampling_position));//map to 0-max_bounds
-	return A[uint(sample.z*max_bounds*max_bounds)+uint(sample.y*max_bounds)+uint(sample.x)];
+	float3 sample = (float3) round(max(float3(0.0),(float3)min((float)max_bounds-1,sampling_position)));//map to 0-max_bounds
+	return A[uint(sample.z)*max_bounds*max_bounds+uint(sample.y)*max_bounds+uint(sample.x)];
 }
 
 __kernel void matMult(__global bool *A,
