@@ -35,9 +35,26 @@ void MainFrame::OnPrint(wxCommandEvent& event){
   printToOutput(text);
 }
 
+void MainFrame::showRendering(){
+	//show rendering
+	auto width = 512;
+	auto height = 512;
+	wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
+	frame = new wxFrame(NULL, wxID_ANY, wxT("3D Renderer"), wxPoint(50,50), wxSize(width,height));
+	try {
+		drawPane = new wxVolumeRenderer( frame, wxBITMAP_TYPE_JPEG);
+		sizer->Add(drawPane, 1, wxEXPAND);
+	} catch(const std::runtime_error& e){
+		frame->SetLabel(e.what());//todo add empty image when error
+	}
+	frame->SetSizer(sizer);
+	frame->Show();
+}
+
 // begin calculation
 void MainFrame::OnCalc(wxCommandEvent& event){
   enableGuiElements(false);
+	showRendering();
 
   Ctrl::getInstance()->runCalculation();
 

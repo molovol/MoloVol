@@ -118,6 +118,7 @@ class MainFrame: public wxFrame
     DECLARE_EVENT_TABLE()
 
     // other methods
+	void showRendering();
 
 };
 
