@@ -60,15 +60,15 @@ void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>
   for (int row = 0; row < symbol_number_radius.size(); row++) {
     atomListGrid->AppendRows(1, true);
     // column 0 (include checkbox)
-    atomListGrid->SetCellValue("1",row,0);
+    atomListGrid->SetCellValue(row,0,"1");
     // column 1 (symbol of atom)
-    atomListGrid->SetCellValue(std::get<0>(symbol_number_radius[row])                  , row, 1);
+    atomListGrid->SetCellValue(row, 1, std::get<0>(symbol_number_radius[row]));
     atomListGrid->SetReadOnly(row,1,true);
     // column 2 (number of atom)
-    atomListGrid->SetCellValue(std::to_string(std::get<1>(symbol_number_radius[row]))  , row, 2);
+    atomListGrid->SetCellValue(row, 2, std::to_string(std::get<1>(symbol_number_radius[row])));
     atomListGrid->SetReadOnly(row,2,true);
     // column 3 (radius of atom)
-    atomListGrid->SetCellValue(std::to_string(std::get<2>(symbol_number_radius[row]))  , row, 3);
+    atomListGrid->SetCellValue(row, 3, std::to_string(std::get<2>(symbol_number_radius[row])));
   }
 }
 

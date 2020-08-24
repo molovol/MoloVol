@@ -179,7 +179,7 @@ void MainFrame::InitSandr(){
 
   wxStaticBoxSizer *sandrSizer = new wxStaticBoxSizer(wxHORIZONTAL,sandrPanel);
   sandrSizer->Add(outputText,5,wxALIGN_LEFT | wxALL,10);
-  sandrSizer->Add(calcButton,1,wxALIGN_RIGHT | wxALIGN_CENTRE_VERTICAL | wxALL,10);
+  sandrSizer->Add(calcButton,1,wxALIGN_CENTRE_VERTICAL | wxALL,10);
   sandrPanel->SetSizerAndFit(sandrSizer);
 
 }
@@ -193,7 +193,7 @@ void MainFrame::SetSizerFilePanel(wxPanel* panel, wxButton* button, wxTextCtrl* 
 
   wxBoxSizer *fileSizer = new wxBoxSizer(wxHORIZONTAL);
   fileSizer->Add(button,1,wxALIGN_LEFT | wxALIGN_CENTRE_VERTICAL | wxALL,10);
-  fileSizer->Add(text,5,wxALIGN_RIGHT | wxALL,10);
+  fileSizer->Add(text,5,wxALL,10);
   panel->SetSizerAndFit(fileSizer);
 }
 
@@ -261,7 +261,7 @@ void MainFrame::InitFileOptionsPanel(){
 
   wxBoxSizer *fileOptionsSizer = new wxBoxSizer(wxHORIZONTAL);
   fileOptionsSizer->Add(pdbHetatmCheckbox,1,wxALIGN_LEFT | wxALIGN_CENTRE_VERTICAL | wxALL,10);
-  fileOptionsSizer->Add(loadFilesButton,1,wxALIGN_RIGHT | wxALIGN_CENTRE_VERTICAL | wxALL,10);
+  fileOptionsSizer->Add(loadFilesButton,1,wxALIGN_CENTRE_VERTICAL | wxALL,10);
   fileOptionsPanel->SetSizerAndFit(fileOptionsSizer);
 }
 
