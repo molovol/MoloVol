@@ -60,7 +60,7 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	//tmp input matrix
 	auto inputmatrixvector = Ctrl::getInstance()->getModel()->getMatrix();
 	//auto dim = Ctrl::getInstance()->getModel()->cell->getResolution();
-	unsigned int size_inputmatrix = inputmatrixvector.size();
+	cl_int size_inputmatrix = cl_int(inputmatrixvector.size());
 	
 	uint8_t* inputmatrix = (uint8_t*) malloc(size_inputmatrix * sizeof(uint8_t*));
 	//copy content from deque into c-style array.
@@ -72,7 +72,7 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 		++i;
     }
 	
-	unsigned int mem_size_A = sizeof(float) * size_inputmatrix;
+	auto mem_size_A = sizeof(float) * size_inputmatrix;
 	
 	//create output matrix
 	//unsigned int num_elements =width*height;
