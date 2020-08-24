@@ -26,7 +26,7 @@ void Space::placeAtomsInGrid(const std::vector<Atom> &atoms, const AtomTree& ato
     for(size_t y = 0; y < n_gridsteps[1]; y++){
       for(size_t z = 0; z < n_gridsteps[2]; z++){
         Voxel& vxl = getElement(x,y,z);
-        std::array<double,3> vxl_pos = 
+        std::array<double,3> vxl_pos =
           {vxl_origin[0] + vxl_dist * x, vxl_origin[1] + vxl_dist * y, vxl_origin[2] + vxl_dist * z};
         vxl.determineType(vxl_pos, grid_size, max_depth, atomtree);
       }
@@ -70,23 +70,61 @@ std::array<double,3> Space::getSize(){
   return size;
 }
 
+void Space::treetomatrix(std::vector<char> &matrix, Voxel& toplevel, int offx, int offy, int offz, int dimx, int dimy, int dimz){
+	for (int i= 0;i<8;++i){
+		short xhalf = i%2;
+		short yhalf = i<=1||i==4||i==5;
+		short zhalf = i<4;
+		auto type = toplevel.getType();
+		if (type=='m'){
+			auto element = toplevel.get(xhalf,yhalf,zhalf);
+			treetomatrix(matrix,
+						 element,
+						 offx+dimx*xhalf,
+						 offy+dimy*yhalf,
+						 offz+dimz*zhalf,
+						 dimx/2, dimy/2, dimz/2);
+		} else if(type=='e'){
+		   int dim = this->getResolution()[0];
+		   for (int z=offz; z<dimz; ++z){
+			   for (int y=offy;y<dimy; ++y){
+				   for (int x=offx; x<dimx; ++x){
+					   matrix[z*dim*dim+y*dim+x] = 0;
+				   }
+			   }
+		   }
+		} else {
+			int dim = this->getResolution()[0];
+			for (int z=offz;z<dimz;++z){
+				for (int y=offy;y<dimy;++y){
+					for (int x=offx;x<dimx;++x){
+						matrix[z*dim*dim+y*dim+x] = 1;
+					}
+				}
+			}
+		}
+	}
+}
+
+
 std::vector<char> Space::getMatrix(){
-	//int dim = this->getResolution()[0];//assume uniform size
-	int dim = 100;
-	std::vector<char> grid;
-	grid.resize(pow(dim,3));
-	
+	int dim = this->getResolution()[0];//assume uniform size
+	std::vector<char> gridmatrix;
+	gridmatrix.resize(pow(dim,3));
+	for(auto griditem : grid){
+		treetomatrix(gridmatrix, griditem, 0, 0, 0, dim, dim, dim);
+	}
 	int i=0;
-	for (auto iter = grid.begin();iter != grid.end();++iter){
-		int x = i % dim-50;
-		int y = (i % (dim*dim))/dim-50;
-		int z = i / (dim*dim)-50;
-		if (x*x + (y-20)*(y-20) + (z-30)*(z-30) < 50 || x*x + y*y + z*z < 320 || (x<40 && x>20 && y<40 && y>20 && z<40 && z>20)){
+	for (auto iter = gridmatrix.begin();iter != gridmatrix.end();++iter){
+		int x = i % dim-dim/2;
+		int y = (i % (dim*dim))/dim-dim/2;
+		int z = i / (dim*dim)-dim/2;
+		if ((x<20 && x>2 && y<10 && y>4 && z<20 && z>3)){
 			*iter = 1;
 		}
 		++i;
 	}
-	return grid;
+	return gridmatrix;
 }
 
 //the number of voxels at lowest tree level in one dimension
@@ -99,7 +137,7 @@ std::array<double,3> Space::getResolution(){
 }
 
 Voxel& Space::getElement(const size_t &i){
-  assert(i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]); 
+  assert(i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]);
   return grid[i];
 }
 

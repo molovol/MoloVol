@@ -34,6 +34,7 @@ class Space{
   
     std::vector<Voxel> grid;
     std::array<size_t,3> n_gridsteps; // i think top level voxel?
+	void treetomatrix(std::vector<char> &matrix, Voxel& toplevel, int offx, int offy, int offz, int dimx, int dimy, int dimz);
     void setGrid();
     //void setGrid(const double &grid_step, const int &max_depth);
 
