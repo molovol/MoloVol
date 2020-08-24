@@ -117,8 +117,8 @@ void Space::printGrid(){
   int x_min = 0;
   int y_min = 0;
   
-  int x_max = ((n_gridsteps[0] >= 25)? 25: n_gridsteps[0]);
-  int y_max = ((n_gridsteps[1] >= 25)? 25: n_gridsteps[1]);
+  auto x_max = ((n_gridsteps[0] >= 25)? 25: n_gridsteps[0]);
+  auto y_max = ((n_gridsteps[1] >= 25)? 25: n_gridsteps[1]);
 
   size_t z = 0;
   std::cout << "Enter 'q' to quit; 'w', 'a', 's', 'd' for directional input; 'c' to continue in z direction; 'r' to go back in z direction" << std::endl;
