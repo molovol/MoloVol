@@ -1,18 +1,15 @@
 #define DIM 512 //output resolution
-#define max_bounds 100 //of input
+//#define max_bounds 100 //of input
 
-bool inside_volume_bounds(const float3 sampling_pos){
-	return all(sampling_pos >= 0)
-            && all(sampling_pos < max_bounds);
-}
 
-char get_sample_data(__global const char *A, const float3 sampling_position){
-	float3 sample = (float3) round(max(float3(0.0),(float3)min((float)max_bounds-1,sampling_position)));//map to 0-max_bounds
+char get_sample_data(__global const char *A, const float3 sampling_position, int max_bounds){
+	float3 sample = (float3) round(max(float3(0.0),(float3)min(float(max_bounds)-1,sampling_position)));//map to 0-max_bounds
 	return A[uint(sample.z)*max_bounds*max_bounds+uint(sample.y)*max_bounds+uint(sample.x)];
 }
 
 //__read_only image3d_t
-__kernel void matMult(__global char *A,
+__kernel void matMult(int max_bounds,
+					  __global char *A,
                       __global char *C//,
 				//	  __read_only image3d_t img
 							 ) {
@@ -29,9 +26,9 @@ __kernel void matMult(__global char *A,
 	float dst = 0.0;
 	float trsp = 1;
 	float brightnes = 1;
-	while (inside_volume_bounds(sampling_pos)) {
+	while (all(sampling_pos >= 0) && all(sampling_pos < max_bounds)) {
 		// get sample
-		char s = get_sample_data(A, sampling_pos.xyz);
+		char s = get_sample_data(A, sampling_pos.xyz, max_bounds);
 		//bool s = bool(read_imagei(A, sampling_pos).a);
 		
 		//early termination

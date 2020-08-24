@@ -44,6 +44,7 @@ class Model{
     void setRadiusMap(std::unordered_map<std::string, double> map);
     void debug();
 	std::vector<char> getMatrix();
+	std::array<double,3> getResolution();
   private:
     std::unordered_map<std::string, double> radius_map;
     std::unordered_map<std::string, int> elem_Z;

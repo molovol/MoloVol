@@ -59,3 +59,7 @@ void Model::debug(){
 std::vector<char> Model:: getMatrix(){
 	return this->cell.getMatrix();
 }
+
+std::array<double,3> Model::getResolution(){
+	return this->cell.getResolution();
+}

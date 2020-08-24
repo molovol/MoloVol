@@ -61,6 +61,7 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	auto inputmatrixvector = Ctrl::getInstance()->getModel()->getMatrix();
 	//auto dim = Ctrl::getInstance()->getModel()->cell->getResolution();
 	cl_int size_inputmatrix = cl_int(inputmatrixvector.size());
+	cl_int resolution = Ctrl::getInstance()->getModel()->getResolution()[0];
 	
 	uint8_t* inputmatrix = (uint8_t*) malloc(size_inputmatrix * sizeof(uint8_t*));
 	//copy content from deque into c-style array.
@@ -175,7 +176,6 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	// -------------------------------------------------------------------------
 	// 2) Buffer und Gerätespeicher vorbereiten
 	// -------------------------------------------------------------------------
-	printf("Image size [%d][%d]", width, height);
 
 	// erzeugt handels für in und output buffer, die hier erzeugt werden
 	inputA = clCreateBuffer(context, CL_MEM_READ_ONLY, mem_size_A, NULL, &err);
@@ -251,10 +251,15 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 		printf("Error setting kernel. Error: %d\n", err);
 		return NULL;
 	}
+	
+	//pass dimension
+	printf("data res %d -> %d", resolution, size_inputmatrix);
+	printf("Image size [%d][%d]", width, height);
 
 	// verlinkt input und output mit dem kernel über die Argumente
-	err =  clSetKernelArg(kernel, 0, sizeof(cl_mem), &inputA);
-	err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &output);
+	err = clSetKernelArg(kernel, 0, sizeof(cl_int), &resolution);
+	err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &inputA);
+	err |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &output);
 	if (err != CL_SUCCESS) {
 		printf("Error: Failed to set kernel arguments! %d\n", err);
 		return NULL;
