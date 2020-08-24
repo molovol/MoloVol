@@ -36,7 +36,7 @@ Voxel& Voxel::access(const short& i){
   return data[i];
 }
 
-char Voxel::getType(){
+char Voxel::getType() const{
   return type;
 }
 

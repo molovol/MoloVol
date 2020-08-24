@@ -13,7 +13,7 @@ class Voxel{
     Voxel();
     Voxel& access(const short& x, const short& y, const short& z);
     Voxel& access(const short& i);
-    char getType();
+    char getType() const;
 
    /* replaced by other determineType function
     void determineType
