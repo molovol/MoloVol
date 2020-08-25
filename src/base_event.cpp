@@ -56,8 +56,7 @@ void MainFrame::OnCalc(wxCommandEvent& event){
   enableGuiElements(false);
 
   Ctrl::getInstance()->runCalculation();
-	showRendering();
-  wxYield(); // is this necessary?, it crashes
+  showRendering();
   // without wxYield, the clicks on disabled buttons are queued
   enableGuiElements(true);
 }
