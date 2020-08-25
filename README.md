@@ -19,7 +19,7 @@ to download the repository on your local machine. To compile the code you will n
 `$ make`
 
 Dependencies:
-- wxWidgets 3.0.4 (https://www.wxwidgets.org)
+- wxWidgets 3.1.4 (https://www.wxwidgets.org)
 
 Getting Help
 ------------
