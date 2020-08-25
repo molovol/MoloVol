@@ -58,11 +58,22 @@ void MainFrame::OnLoadFiles(wxCommandEvent& event){
 }
 
 void MainFrame::enableGuiElements(bool inp){
-  // deactivate the Start and Load files buttons during the calculation
+  // deactivate the calculation and reload buttons during the calculation
   calcButton->Enable(inp);
   loadFilesButton->Enable(inp);
   // prevents editing of the atom list grid during the calculation
   atomListGrid->EnableEditing(inp);
+  // keeps calculation button deactivated if no valid structure is loaded
+  if (atomListGrid->GetNumberRows() == 0) {
+    calcButton->Enable(false);
+  }
+  // activates pdb specific options only if pdb file is loaded
+    if (getAtomFilepath().size() > 3 && getAtomFilepath().substr(getAtomFilepath().size()-4, 4) == ".pdb"){
+      pdbHetatmCheckbox->Enable(true);
+    }
+    else {
+      pdbHetatmCheckbox->Enable(false);
+    }
 }
 
 // browse for atom file
@@ -105,6 +116,7 @@ void MainFrame::OnBrowse(std::string& filetype, wxTextCtrl* textbox){
   }
   textbox->SetLabel(openFileDialog.GetPath());
   //load automatically
+  enableGuiElements(false);
   Ctrl::getInstance()->loadInputFiles();
   wxYield(); // is this necessary?
   enableGuiElements(true);
