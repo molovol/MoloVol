@@ -5,21 +5,31 @@
 #include "special_chars.h"
 #include <array>
 #include <string>
+#include <vector>
+#include <algorithm>
 
 void Model::defineCell(const double& grid_step, const int& max_depth){
   cell = Space(atoms, grid_step, max_depth);
   return;
 }
 
-void Model::storeAtomsInTree(){
-  atomtree = AtomTree(atoms);
+void Model::setAtomListForCalculation(std::vector<std::string> included_elements){
+  atoms.clear();
+  for(int i = 0; i < raw_atom_coordinates.size(); i++){
+    if(std::find(included_elements.begin(), included_elements.end(), std::get<0>(raw_atom_coordinates[i])) != included_elements.end()){
+      Atom at = Atom(std::get<1>(raw_atom_coordinates[i]),
+                     std::get<2>(raw_atom_coordinates[i]),
+                     std::get<3>(raw_atom_coordinates[i]),
+                     std::get<0>(raw_atom_coordinates[i]),
+                     radius_map[std::get<0>(raw_atom_coordinates[i])],
+                     elem_Z[std::get<0>(raw_atom_coordinates[i])]);
+      atoms.push_back(at);
+    }
+  }
 }
 
-void Model::updateAtomRadii(){
-  for (Atom& at : atoms){
-    at.rad = radius_map[at.symbol];
-  }
-  return;
+void Model::storeAtomsInTree(){
+  atomtree = AtomTree(atoms);
 }
 
 void Model::findCloseAtoms(const double& r_probe){

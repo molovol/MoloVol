@@ -9,43 +9,33 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
-#include <filesystem>
-
-namespace fs = std::filesystem;
 
 class AtomTree;
 struct Atom;
 class Space;
 class Model{
   public:
-    void importFiles(std::string&, std::string&, bool);
+    bool importFiles(std::string&, std::string&, bool);
     void readRadiiAndAtomNumFromFile(std::string&);
-    void readAtomsFromFile(std::string&, bool);
-    void readFileXYZ(std::vector<Atom>&, std::string&);
-    void readFilePDB(std::vector<Atom>&, std::string&, bool);
-    bool importFilesChanged(std::string&, std::string&);
-    bool filesExist(const std::array<std::string,2>& paths) const;
-    bool filesExist(const std::string& path1, const std::string& path2) const;
-
+    bool readAtomsFromFile(std::string&, bool);
+    void readFileXYZ(std::string&);
+    void readFilePDB(std::string&, bool);
     inline double findRadiusOfAtom(const std::string&);
     inline double findRadiusOfAtom(const Atom&); //TODO has not been tested
     // calls the Space constructor and creates a cell containing all atoms. Cell size is defined by atom positions
     void defineCell(const double&, const int&);
+    void setAtomListForCalculation(std::vector<std::string>);
     void storeAtomsInTree();
-    void updateAtomRadii();
     void findCloseAtoms(const double&); //TODO
     void calcVolume();
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void setRadiusMap(std::unordered_map<std::string, double> map);
     void debug();
   private:
+    std::vector<std::tuple<std::string, double, double, double>> raw_atom_coordinates;
     std::unordered_map<std::string, double> radius_map;
     std::unordered_map<std::string, int> elem_Z;
     std::map<std::string, int> atom_amounts;
-
-    std::array<fs::path,2> filepaths_last_imported;
-    std::array<fs::file_time_type,2> files_last_written;
-
     std::vector<Atom> atoms;
     AtomTree atomtree;
     Space cell;
