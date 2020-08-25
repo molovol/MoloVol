@@ -13,7 +13,7 @@ void Model::defineCell(const double& grid_step, const int& max_depth){
   return;
 }
 
-void Model::setAtomListForCalculation(std::vector<std::string> included_elements){
+void Model::setAtomListForCalculation(const std::vector<std::string>& included_elements){
   atoms.clear();
   for(int i = 0; i < raw_atom_coordinates.size(); i++){
     if(std::find(included_elements.begin(), included_elements.end(), std::get<0>(raw_atom_coordinates[i])) != included_elements.end()){

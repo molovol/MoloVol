@@ -57,7 +57,7 @@ void Model::readRadiiAndAtomNumFromFile(std::string& filepath){
   // the program can continue running because the user can manually define radii
   if (radius_map.size() == 0) {
     Ctrl::getInstance()->notifyUser("Invalid radii definition file!");
-    Ctrl::getInstance()->notifyUser("Please reload a valid file or define radii manually in the table.");
+    Ctrl::getInstance()->notifyUser("Please select a valid file or set radii manually.");
   }
 }
 
