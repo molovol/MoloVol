@@ -109,11 +109,16 @@ void Space::treetomatrix(std::vector<char> &matrix, Voxel& toplevel, int offx, i
 
 std::vector<char> Space::getMatrix(){
 	int dim = this->getResolution()[0];//assume uniform size
+	//target matrix for tree to vector conversion
 	std::vector<char> gridmatrix;
 	gridmatrix.resize(pow(dim,3));
+	
+	//TODO positions needs to changed per voxel like in space::placeAtomsInGrid
 	for(auto griditem : grid){
 		treetomatrix(gridmatrix, griditem, 0, 0, 0, dim, dim, dim);
 	}
+	
+	//set some fake data
 	int i=0;
 	for (auto iter = gridmatrix.begin();iter != gridmatrix.end();++iter){
 		int x = i % dim-dim/2;
@@ -124,6 +129,7 @@ std::vector<char> Space::getMatrix(){
 		}
 		++i;
 	}
+	
 	return gridmatrix;
 }
 
