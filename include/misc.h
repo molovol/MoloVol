@@ -2,6 +2,7 @@
 
 #define MISC_H
 
+#include <string>
 #include <array>
 #include <cmath>
 
@@ -12,5 +13,7 @@ inline double distance(const std::array<double,3> &start, const std::array<doubl
 inline double distance(const std::array<double,3> &start, const std::array<double,3> &end, const int dim){
   return end[dim]-start[dim];
 }
+
+std::string fileExtension(const std::string& path);
 
 #endif
