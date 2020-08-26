@@ -58,7 +58,7 @@ char Voxel::determineType
   if(type == 'm'){
     // TODO define method for this part Voxel::splitVoxel()
     // split into 8 subvoxels
-
+	short resultcount = 0;
     for(int i = 0; i < 8; i++){
       data.push_back(Voxel());
       // modify position
@@ -71,7 +71,14 @@ char Voxel::determineType
       for(int dim = 0; dim < 3; dim++){
         new_pos[dim] = vxl_pos[dim] + factors[dim] * grid_size * std::pow(2,max_depth-2);//why -2?
       }
-      auto subtype = data[i].determineType(new_pos, grid_size, max_depth-1, atomtree);
+      resultcount += data[i].determineType(new_pos, grid_size, max_depth-1, atomtree);
+    }
+	  //determine if all children have the same type
+	  if (resultcount == 'a'*8){
+		  type = 'a';
+	  } else if (resultcount == 'e'*8) {
+		  type = 'e';
+	  }
   }
 	return type;
 }
