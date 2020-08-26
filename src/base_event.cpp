@@ -50,7 +50,8 @@ void MainFrame::OnCalc(wxCommandEvent& event){
 void MainFrame::OnLoadFiles(wxCommandEvent& event){
   enableGuiElements(false);
 
-  Ctrl::getInstance()->loadInputFiles();
+  Ctrl::getInstance()->loadRadiusFile();
+  Ctrl::getInstance()->loadAtomFile();
 
   wxYield(); // is this necessary?
   // without wxYield, the clicks on disabled buttons are queued
@@ -80,12 +81,22 @@ void MainFrame::enableGuiElements(bool inp){
 void MainFrame::OnAtomBrowse(wxCommandEvent& event){
   std::string filetype = "XYZ and PDB files (*.xyz;*.pdb)|*.xyz;*pdb";
   OnBrowse(filetype, filepathText);
+  //load automatically
+  enableGuiElements(false);
+  Ctrl::getInstance()->loadAtomFile();
+  wxYield(); // is this necessary?
+  enableGuiElements(true);
 }
 
 // browse for radius file
 void MainFrame::OnRadiusBrowse(wxCommandEvent& event){
   std::string filetype = "TXT files (*.txt)|*.txt";
   OnBrowse(filetype, radiuspathText);
+  //load automatically
+  enableGuiElements(false);
+  Ctrl::getInstance()->loadRadiusFile();
+  wxYield(); // is this necessary?
+  enableGuiElements(true);
 }
 
 // browse (can only be called by another method function)
@@ -115,11 +126,6 @@ void MainFrame::OnBrowse(std::string& filetype, wxTextCtrl* textbox){
     return;
   }
   textbox->SetLabel(openFileDialog.GetPath());
-  //load automatically
-  enableGuiElements(false);
-  Ctrl::getInstance()->loadInputFiles();
-  wxYield(); // is this necessary?
-  enableGuiElements(true);
 }
 
 // Functions to dynamically change the color of the atom list grid cells
