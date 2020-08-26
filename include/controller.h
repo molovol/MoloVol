@@ -9,7 +9,8 @@ class Model;
 class MainFrame;
 class Ctrl{
   public:
-    bool loadInputFiles();
+    bool loadRadiusFile();
+    bool loadAtomFile();
     bool runCalculation();
     void registerView(MainFrame* inp_gui);
     static Ctrl* getInstance();
