@@ -8,15 +8,26 @@
 #include <vector>
 #include <algorithm>
 
+///////////////////////////////
+// AUX FUNCTION DECLARATIONS //
+///////////////////////////////
+
+inline bool isIncluded(const std::string&, const std::vector<std::string>&);
+
 void Model::defineCell(const double& grid_step, const int& max_depth){
   cell = Space(atoms, grid_step, max_depth);
   return;
 }
 
+///////////////////////////
+// CALCULATION FUNCTIONS //
+///////////////////////////
+// Not sure about the name of the section
+
 void Model::setAtomListForCalculation(const std::vector<std::string>& included_elements){
   atoms.clear();
   for(int i = 0; i < raw_atom_coordinates.size(); i++){
-    if(std::find(included_elements.begin(), included_elements.end(), std::get<0>(raw_atom_coordinates[i])) != included_elements.end()){
+    if(isIncluded(std::get<0>(raw_atom_coordinates[i]), included_elements)){
       Atom at = Atom(std::get<1>(raw_atom_coordinates[i]),
                      std::get<2>(raw_atom_coordinates[i]),
                      std::get<3>(raw_atom_coordinates[i]),
@@ -69,4 +80,12 @@ void Model::debug(){
     std::cout << "Cell Limit in Dim " << dim << ":" << cell_min[dim] << " and " << cell_max[dim] << std::endl;
   }
   return;
+}
+
+///////////////////
+// AUX FUNCTIONS //
+///////////////////
+
+inline bool isIncluded(const std::string& element_symbol, const std::vector<std::string>& included_elements) {
+  return (std::find(included_elements.begin(), included_elements.end(), element_symbol) != included_elements.end());
 }

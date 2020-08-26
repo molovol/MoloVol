@@ -24,16 +24,6 @@ std::string fileExtension(const std::string& path);
 // FILE IMPORT //
 /////////////////
 
-bool Model::importFiles(std::string& atom_filepath, std::string& radius_filepath, bool incl_hetatm){
-
-  // radius file must be imported before atom file, because atom file import requires the radius map
-  readRadiiAndAtomNumFromFile(radius_filepath);
-  if (!readAtomsFromFile(atom_filepath, incl_hetatm)){
-    return false;
-  }
-  return true;
-}
-
 // reads radii from a file specified by the filepath and
 // stores them in an unordered map that is an attribute of
 // the Model object
@@ -73,14 +63,13 @@ bool Model::readAtomsFromFile(std::string& filepath, bool include_hetatm){
     readFilePDB(filepath, include_hetatm);
   }
   else { // The browser does not allow other file formats but a user could manually write the path to an invalid file
-    Ctrl::getInstance()->notifyUser("!!!!!!\nInvalid structure file format!\n!!!!!!");
+    Ctrl::getInstance()->notifyUser("Invalid structure file format!");
     return false;
   }
   if (raw_atom_coordinates.size() == 0){ // If no atom is detected in the input file, the file is deemed invalid
-    Ctrl::getInstance()->notifyUser("!!!!!!\nInvalid structure file!\n!!!!!!");
+    Ctrl::getInstance()->notifyUser("Invalid structure file!");
     return false;
   }
-  Ctrl::getInstance()->notifyUser("Structure file loaded successfully.");
   return true;
 }
 

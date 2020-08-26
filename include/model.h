@@ -15,7 +15,6 @@ struct Atom;
 class Space;
 class Model{
   public:
-    bool importFiles(std::string&, std::string&, bool);
     void readRadiiAndAtomNumFromFile(std::string&);
     bool readAtomsFromFile(std::string&, bool);
     void readFileXYZ(std::string&);
