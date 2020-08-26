@@ -32,6 +32,7 @@ class Model{
     void debug();
   private:
     std::vector<std::tuple<std::string, double, double, double>> raw_atom_coordinates;
+    std::unordered_map<std::string, double> raw_radius_map;
     std::unordered_map<std::string, double> radius_map;
     std::unordered_map<std::string, int> elem_Z;
     std::map<std::string, int> atom_amounts;
