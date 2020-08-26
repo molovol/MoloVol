@@ -22,7 +22,7 @@ class Space{
     Voxel& getElement(const size_t &i);
     void printGrid();
 
-    void placeAtomsInGrid(const std::vector<Atom>&, const AtomTree&);
+    void placeAtomsInGrid(const AtomTree&);
     double getVolume();
   
   private:
