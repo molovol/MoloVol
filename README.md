@@ -12,7 +12,7 @@ The CaVol software, along with many of its features, is currently in early devel
 Dependencies:
 - wxWidgets 3.1.4 (https://www.wxwidgets.org)
 
-### On maxOS
+### On macOS
 
 This guide explains how to set up a development environment for macOS in the terminal. You may need to first install Xcode command line tools, if you haven't already. This should be as easy as running the following command in the terminal.
 
