@@ -6,6 +6,7 @@
 
 #include "base.h"
 #include "controller.h"
+#include "misc.h"
 #include <vector>
 
 /////////////////
@@ -69,12 +70,12 @@ void MainFrame::enableGuiElements(bool inp){
     calcButton->Enable(false);
   }
   // activates pdb specific options only if pdb file is loaded
-    if (getAtomFilepath().size() > 3 && getAtomFilepath().substr(getAtomFilepath().size()-4, 4) == ".pdb"){
-      pdbHetatmCheckbox->Enable(true);
-    }
-    else {
-      pdbHetatmCheckbox->Enable(false);
-    }
+  if (fileExtension(getAtomFilepath()) == "pdb"){
+    pdbHetatmCheckbox->Enable(true);
+  }
+  else {
+    pdbHetatmCheckbox->Enable(false);
+  }
 }
 
 // browse for atom file
