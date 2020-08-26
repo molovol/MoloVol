@@ -29,7 +29,7 @@ std::string fileExtension(const std::string& path);
 // the Model object
 void Model::readRadiiAndAtomNumFromFile(std::string& filepath){
   // clear unordered_maps to avoid keeping data from previous runs
-  radius_map.clear();
+  raw_radius_map.clear();
   elem_Z.clear();
 
   std::string line;
@@ -39,13 +39,13 @@ void Model::readRadiiAndAtomNumFromFile(std::string& filepath){
     std::vector<std::string> substrings = splitLine(line);
     if(substrings.size() == 3){
       // TODO: make sure substrings[1] is converted to valid symbol
-      radius_map[substrings[1]] = std::stod(substrings[2]);
+      raw_radius_map[substrings[1]] = std::stod(substrings[2]);
       elem_Z[substrings[1]] = std::stoi(substrings[0]);
     }
   }
   // Notify the user if no radius is defined
   // the program can continue running because the user can manually define radii
-  if (radius_map.size() == 0) {
+  if (raw_radius_map.size() == 0) {
     Ctrl::getInstance()->notifyUser("Invalid radii definition file!");
     Ctrl::getInstance()->notifyUser("Please select a valid file or set radii manually.");
   }
