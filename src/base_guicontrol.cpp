@@ -53,14 +53,11 @@ void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>
   // delete all rows
   // DeleteRows causes an error if there are no rows
   if (atomListGrid->GetNumberRows() > 0) {
-//    atomListGrid->ClearGrid(); // seems unneccessary
     atomListGrid->DeleteRows(0, atomListGrid->GetNumberRows());
   }
 
   for (int row = 0; row < symbol_number_radius.size(); row++) {
     atomListGrid->AppendRows(1, true);
-    // column 0 (include checkbox)
-    atomListGrid->SetCellValue(row,0,"1");
     // column 1 (symbol of atom)
     atomListGrid->SetCellValue(row, 1, std::get<0>(symbol_number_radius[row]));
     atomListGrid->SetReadOnly(row,1,true);
@@ -69,6 +66,20 @@ void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>
     atomListGrid->SetReadOnly(row,2,true);
     // column 3 (radius of atom)
     atomListGrid->SetCellValue(row, 3, std::to_string(std::get<2>(symbol_number_radius[row])));
+    // column 0 (include checkbox)
+    // if no radius is found for the element, color cells to point it to the user
+    // TODO: need to see if the colors can be automatically handled in base_event
+    if (std::wcstod(atomListGrid->GetCellValue(row, 3), NULL) == 0){
+      atomListGrid->SetCellBackgroundColour(row, 1, col_grey_cell);
+      atomListGrid->SetCellBackgroundColour(row, 2, col_grey_cell);
+      atomListGrid->SetCellBackgroundColour(row, 3, col_red_cell);
+    }
+    else { // if a radius is found, include by default the element
+      atomListGrid->SetCellValue(row, 0, "1");
+    }
+    // refresh the grid to enforce the update of cell values and parameters
+    // without this, it was sometimes observed that the last cell was not updated properly
+    atomListGrid->Refresh();
   }
 }
 
@@ -97,7 +108,7 @@ std::string MainFrame::generateChemicalFormulaFromGrid(){
   return chemical_formula_prefix + chemical_formula_suffix;
 }
 
-std::unordered_map<std::string, double> MainFrame::generateRadiusMapFromView(){
+std::unordered_map<std::string, double> MainFrame::generateRadiusMap(){
   std::unordered_map<std::string, double> radius_map;
   for (int i = 0; i < atomListGrid->GetNumberRows(); i++){
     if (atomListGrid->GetCellValue(i,0) == "1"){
@@ -110,7 +121,7 @@ std::unordered_map<std::string, double> MainFrame::generateRadiusMapFromView(){
   return radius_map;
 }
 
-std::vector<std::string> MainFrame::getIncludedElementsFromView(){
+std::vector<std::string> MainFrame::getIncludedElements(){
   std::vector<std::string> included_elements;
   for (int i = 0; i < atomListGrid->GetNumberRows(); i++){
     if (atomListGrid->GetCellValue(i,0) == "1"){

@@ -23,7 +23,7 @@ class Voxel{
        const double max_depth);
     */
 
-    void determineType
+    char determineType
        (std::array<double,3> pos,
        const double& grid_size,
        const double max_depth,

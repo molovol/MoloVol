@@ -28,7 +28,21 @@ Ctrl* Ctrl::getInstance(){
   return instance;
 }
 
-bool Ctrl::loadInputFiles(){
+bool Ctrl::loadRadiusFile(){
+  // create an instance of the model class
+  // ensures, that there is only ever one instance of the model class
+  if(current_calculation == NULL){
+    current_calculation = new Model();
+  }
+
+  std::string radius_filepath = gui->getRadiusFilepath();
+  current_calculation->readRadiiAndAtomNumFromFile(radius_filepath);
+  // Refresh atom list with new radius map
+  gui->displayAtomList(current_calculation->generateAtomList());
+  return true;
+}
+
+bool Ctrl::loadAtomFile(){
 
   // create an instance of the model class
   // ensures, that there is only ever one instance of the model class
@@ -37,17 +51,17 @@ bool Ctrl::loadInputFiles(){
   }
 
   std::string atom_filepath = gui->getAtomFilepath();
-  std::string radius_filepath = gui->getRadiusFilepath();
 
-
-  if (!current_calculation->importFiles(atom_filepath, radius_filepath, gui->getIncludeHetatm())){
+  if (!current_calculation->readAtomsFromFile(atom_filepath, gui->getIncludeHetatm())){
     // refresh the atom list which is now empty due to invalid input file
     gui->displayAtomList(current_calculation->generateAtomList());
     return false;
   }
-  // get atom list from model and pass onto view
-  gui->displayAtomList(current_calculation->generateAtomList());
-  return true;
+  else {
+    // get atom list from model and pass onto view
+    gui->displayAtomList(current_calculation->generateAtomList());
+    return true;
+  }
 }
 
 bool Ctrl::runCalculation(){
@@ -58,8 +72,8 @@ bool Ctrl::runCalculation(){
   }
 
   // radius map is generated from grid in gui, then passed to model for calculation
-  current_calculation->setRadiusMap(gui->generateRadiusMapFromView());
-  current_calculation->setAtomListForCalculation(gui->getIncludedElementsFromView());
+  current_calculation->setRadiusMap(gui->generateRadiusMap());
+  current_calculation->setAtomListForCalculation(gui->getIncludedElements());
   current_calculation->storeAtomsInTree();
 
   Ctrl::notifyUser("Result for " + gui->generateChemicalFormulaFromGrid());

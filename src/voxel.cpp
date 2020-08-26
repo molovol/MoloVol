@@ -1,4 +1,3 @@
-
 #include "voxel.h"
 #include "misc.h"
 #include "atom.h"
@@ -44,7 +43,7 @@ char Voxel::getType() const{
 // SET TYPE //
 //////////////
 
-void Voxel::determineType
+char Voxel::determineType
    (std::array<double,3> vxl_pos, // voxel centre
    const double& grid_size,
    const double max_depth,
@@ -58,22 +57,29 @@ void Voxel::determineType
   if(type == 'm'){
     // TODO define method for this part Voxel::splitVoxel()
     // split into 8 subvoxels
+	short resultcount = 0;
     for(int i = 0; i < 8; i++){
       data.push_back(Voxel());
       // modify position
       std::array<int,3> factors = {
-        ((i%2) >= 1 )? 1 : -1,
-        ((i%4) >= 2 )? 1 : -1,
-        ( i    >= 4 )? 1 : -1};
+        (i%2) >= 1 ? 1 : -1,
+        (i%4) >= 2 ? 1 : -1,
+         i    >= 4 ? 1 : -1};
      
       std::array<double,3> new_pos;
       for(int dim = 0; dim < 3; dim++){
-        new_pos[dim] = vxl_pos[dim] + factors[dim] * grid_size * std::pow(2,max_depth-2);
+        new_pos[dim] = vxl_pos[dim] + factors[dim] * grid_size * std::pow(2,max_depth-2);//why -2?
       }
-      data[i].determineType(new_pos, grid_size, max_depth-1, atomtree);
+      resultcount += data[i].determineType(new_pos, grid_size, max_depth-1, atomtree);
     }
+	  //determine if all children have the same type
+	  if (resultcount == 'a'*8){
+		  type = 'a';
+	  } else if (resultcount == 'e'*8) {
+		  type = 'e';
+	  }
   }
-  return;
+	return type;
 }
 
 // use the properties of the binary tree to recursively traverse the tree and 
@@ -95,15 +101,10 @@ void Voxel::traverseTree
 
   // check if voxel is close enough to atom
   if (abs(dist1D) > (vxl_rad + at_rad)){ // if not continue to next child
-    if (dist1D < 0){
-      traverseTree(node->left_child, (dim+1)%3, at_rad, vxl_rad, vxl_pos, grid_size, max_depth);
-    }
-    else{
-      traverseTree(node->right_child, (dim+1)%3, at_rad, vxl_rad, vxl_pos, grid_size, max_depth);
-    }
-  }
-  else{ // if voxel is close enough, check distance to the node's atom. if needed, 
-        // continue with both children
+      traverseTree(dist1D < 0 ? node->left_child : node->right_child,
+				   (dim+1)%3, at_rad, vxl_rad, vxl_pos, grid_size, max_depth);
+  } else{ // if voxel is close enough, check distance to the node's atom. if needed,
+    // continue with both children
     determineTypeSingleAtom(*(node->atom), vxl_pos, grid_size, max_depth);
     if (type != 'a'){
       traverseTree(node->left_child, (dim+1)%3, at_rad, vxl_rad, vxl_pos, grid_size, max_depth);
@@ -160,79 +161,6 @@ void Voxel::determineTypeSingleAtom
   }
   return;
 }
-
-/*
-No longer needed, since determineType using atomtree is much faster
-// iterates through all top level voxels and determines their type in
-// relation to the input atoms. when a voxel of mixed type is encountered
-// eight subvoxels are created. this is continued until the maximum tree
-// depth is reached
-void Voxel::determineType
-  (const std::vector<Atom>& atoms, 
-   std::array<double,3> pos, // voxel centre
-   const double& grid_size,
-   const double max_depth)
-{
-  if(max_depth == 0){ // for bottom level voxels
-
-    for(int at = 0; at < atoms.size(); at++){ // check against all atoms
-      // check if centre is inside atom
-      Atom atom = atoms[at];
-      double dist_vxl_at = distance(pos, atom.getPos());
-      if (atom.rad > dist_vxl_at){// voxel centre is inside atom radius
-        type = 'a';
-        return;
-      }
-      // else voxel is empty
-    }
-  }
-  else{ // for higher level voxels
-    
-    // determine the radius of the sphere that contains the voxel
-    // the voxels side length is given by the grid_size (i.e. the side length
-    // of a bottom level voxel) multiplied with 2^max_depth. This value multiplied
-    // with the sqrt of 3 gives the diagonal of the voxel. The radius is half the
-    // diagonal.
-    double radius_of_influence = pow(3,0.5)*(grid_size * pow(2,max_depth))/2; // TODO: avoid expensive pow function
-    
-    for(auto const& atom : atoms){
-      
-      double dist_vxl_at = distance(pos, atom.getPos());
-     
-      // is voxel inside atom? 
-      if(atom.rad > (dist_vxl_at + radius_of_influence)){ 
-        type = 'a'; // in atom
-        return;
-      }
-      // is voxel partially inside atom?
-      else if(atom.rad > (dist_vxl_at - radius_of_influence)){
-        type = 'm'; // mixed
-      }
-      //else empty
-    }
-    if(type == 'm'){
-      // split into 8 subvoxels
-      for(int i = 0; i < 8; i++){
-        data.push_back(Voxel());
-        
-        // modify position
-        std::array<int,3> factors = {
-          ((i%2) >= 1 )? 1 : -1,
-          ((i%4) >= 2 )? 1 : -1,
-          ( i    >= 4 )? 1 : -1};
-       
-        std::array<double,3> new_pos;
-        for(int dim = 0; dim < 3; dim++){
-          new_pos[dim] = pos[dim] + factors[dim] * grid_size * std::pow(2,max_depth-2);
-        }
-
-        data[i].determineType(atoms, new_pos, grid_size, max_depth-1);
-      }
-    }
-  }
-  return;
-}
-*/
 
 ///////////
 // TALLY //
