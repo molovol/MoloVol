@@ -44,7 +44,7 @@ char Voxel::getType(){
 // SET TYPE //
 //////////////
 
-void Voxel::determineType
+char Voxel::determineType
    (std::array<double,3> vxl_pos, // voxel centre
    const double& grid_size,
    const double max_depth,
@@ -58,22 +58,22 @@ void Voxel::determineType
   if(type == 'm'){
     // TODO define method for this part Voxel::splitVoxel()
     // split into 8 subvoxels
+
     for(int i = 0; i < 8; i++){
       data.push_back(Voxel());
       // modify position
       std::array<int,3> factors = {
-        ((i%2) >= 1 )? 1 : -1,
-        ((i%4) >= 2 )? 1 : -1,
-        ( i    >= 4 )? 1 : -1};
+        (i%2) >= 1 ? 1 : -1,
+        (i%4) >= 2 ? 1 : -1,
+         i    >= 4 ? 1 : -1};
      
       std::array<double,3> new_pos;
       for(int dim = 0; dim < 3; dim++){
-        new_pos[dim] = vxl_pos[dim] + factors[dim] * grid_size * std::pow(2,max_depth-2);
+        new_pos[dim] = vxl_pos[dim] + factors[dim] * grid_size * std::pow(2,max_depth-2);//why -2?
       }
-      data[i].determineType(new_pos, grid_size, max_depth-1, atomtree);
-    }
+      auto subtype = data[i].determineType(new_pos, grid_size, max_depth-1, atomtree);
   }
-  return;
+	return type;
 }
 
 // use the properties of the binary tree to recursively traverse the tree and 
@@ -95,15 +95,10 @@ void Voxel::traverseTree
 
   // check if voxel is close enough to atom
   if (abs(dist1D) > (vxl_rad + at_rad)){ // if not continue to next child
-    if (dist1D < 0){
-      traverseTree(node->left_child, (dim+1)%3, at_rad, vxl_rad, vxl_pos, grid_size, max_depth);
-    }
-    else{
-      traverseTree(node->right_child, (dim+1)%3, at_rad, vxl_rad, vxl_pos, grid_size, max_depth);
-    }
-  }
-  else{ // if voxel is close enough, check distance to the node's atom. if needed, 
-        // continue with both children
+      traverseTree(dist1D < 0 ? node->left_child : node->right_child,
+				   (dim+1)%3, at_rad, vxl_rad, vxl_pos, grid_size, max_depth);
+  } else{ // if voxel is close enough, check distance to the node's atom. if needed,
+    // continue with both children
     determineTypeSingleAtom(*(node->atom), vxl_pos, grid_size, max_depth);
     if (type != 'a'){
       traverseTree(node->left_child, (dim+1)%3, at_rad, vxl_rad, vxl_pos, grid_size, max_depth);
