@@ -15,7 +15,6 @@ struct Atom;
 class Space;
 class Model{
   public:
-    bool importFiles(std::string&, std::string&, bool);
     void readRadiiAndAtomNumFromFile(std::string&);
     bool readAtomsFromFile(std::string&, bool);
     void readFileXYZ(std::string&);
@@ -24,7 +23,7 @@ class Model{
     inline double findRadiusOfAtom(const Atom&); //TODO has not been tested
     // calls the Space constructor and creates a cell containing all atoms. Cell size is defined by atom positions
     void defineCell(const double&, const int&);
-    void setAtomListForCalculation(std::vector<std::string>);
+    void setAtomListForCalculation(const std::vector<std::string>&);
     void storeAtomsInTree();
     void findCloseAtoms(const double&); //TODO
     void calcVolume();
@@ -33,6 +32,7 @@ class Model{
     void debug();
   private:
     std::vector<std::tuple<std::string, double, double, double>> raw_atom_coordinates;
+    std::unordered_map<std::string, double> raw_radius_map;
     std::unordered_map<std::string, double> radius_map;
     std::unordered_map<std::string, int> elem_Z;
     std::map<std::string, int> atom_amounts;

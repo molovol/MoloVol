@@ -1,4 +1,3 @@
-
 #include "space.h"
 #include "atom.h"
 #include "voxel.h"

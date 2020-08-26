@@ -24,22 +24,12 @@ std::string fileExtension(const std::string& path);
 // FILE IMPORT //
 /////////////////
 
-bool Model::importFiles(std::string& atom_filepath, std::string& radius_filepath, bool incl_hetatm){
-
-  // radius file must be imported before atom file, because atom file import requires the radius map
-  readRadiiAndAtomNumFromFile(radius_filepath);
-  if (!readAtomsFromFile(atom_filepath, incl_hetatm)){
-    return false;
-  }
-  return true;
-}
-
 // reads radii from a file specified by the filepath and
 // stores them in an unordered map that is an attribute of
 // the Model object
 void Model::readRadiiAndAtomNumFromFile(std::string& filepath){
   // clear unordered_maps to avoid keeping data from previous runs
-  radius_map.clear();
+  raw_radius_map.clear();
   elem_Z.clear();
 
   std::string line;
@@ -49,15 +39,15 @@ void Model::readRadiiAndAtomNumFromFile(std::string& filepath){
     std::vector<std::string> substrings = splitLine(line);
     if(substrings.size() == 3){
       // TODO: make sure substrings[1] is converted to valid symbol
-      radius_map[substrings[1]] = std::stod(substrings[2]);
+      raw_radius_map[substrings[1]] = std::stod(substrings[2]);
       elem_Z[substrings[1]] = std::stoi(substrings[0]);
     }
   }
   // Notify the user if no radius is defined
   // the program can continue running because the user can manually define radii
-  if (radius_map.size() == 0) {
+  if (raw_radius_map.size() == 0) {
     Ctrl::getInstance()->notifyUser("Invalid radii definition file!");
-    Ctrl::getInstance()->notifyUser("Please reload a valid file or define radii manually in the table.");
+    Ctrl::getInstance()->notifyUser("Please select a valid file or set radii manually.");
   }
 }
 
@@ -73,14 +63,13 @@ bool Model::readAtomsFromFile(std::string& filepath, bool include_hetatm){
     readFilePDB(filepath, include_hetatm);
   }
   else { // The browser does not allow other file formats but a user could manually write the path to an invalid file
-    Ctrl::getInstance()->notifyUser("!!!!!!\nInvalid structure file format!\n!!!!!!");
+    Ctrl::getInstance()->notifyUser("Invalid structure file format!");
     return false;
   }
   if (raw_atom_coordinates.size() == 0){ // If no atom is detected in the input file, the file is deemed invalid
-    Ctrl::getInstance()->notifyUser("!!!!!!\nInvalid structure file!\n!!!!!!");
+    Ctrl::getInstance()->notifyUser("Invalid structure file!");
     return false;
   }
-  Ctrl::getInstance()->notifyUser("Structure file loaded successfully.");
   return true;
 }
 

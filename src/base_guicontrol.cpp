@@ -97,7 +97,7 @@ std::string MainFrame::generateChemicalFormulaFromGrid(){
   return chemical_formula_prefix + chemical_formula_suffix;
 }
 
-std::unordered_map<std::string, double> MainFrame::generateRadiusMapFromView(){
+std::unordered_map<std::string, double> MainFrame::generateRadiusMap(){
   std::unordered_map<std::string, double> radius_map;
   for (int i = 0; i < atomListGrid->GetNumberRows(); i++){
     if (atomListGrid->GetCellValue(i,0) == "1"){
@@ -110,7 +110,7 @@ std::unordered_map<std::string, double> MainFrame::generateRadiusMapFromView(){
   return radius_map;
 }
 
-std::vector<std::string> MainFrame::getIncludedElementsFromView(){
+std::vector<std::string> MainFrame::getIncludedElements(){
   std::vector<std::string> included_elements;
   for (int i = 0; i < atomListGrid->GetNumberRows(); i++){
     if (atomListGrid->GetCellValue(i,0) == "1"){
