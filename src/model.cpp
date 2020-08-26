@@ -38,7 +38,7 @@ void Model::findCloseAtoms(const double& r_probe){
 }
 
 void Model::calcVolume(){
-  cell.placeAtomsInGrid(atoms, atomtree);
+  cell.placeAtomsInGrid(atomtree);
   double volume = cell.getVolume();
 
   std::string message_to_user

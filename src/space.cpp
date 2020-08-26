@@ -10,29 +10,24 @@
 // VOLUME COMP //
 /////////////////
 
-void Space::placeAtomsInGrid(const std::vector<Atom> &atoms, const AtomTree& atomtree){ // TODO: remove atoms argument. no longer necessary
+void Space::placeAtomsInGrid(const AtomTree& atomtree){
   // calculate position of first voxel
-  std::array<double,3> vxl_origin = getOrigin();
+  const std::array<double,3> vxl_origin = getOrigin();
   
   // calculate side length of top level voxel
-  double vxl_dist = grid_size * pow(2,max_depth);
-
-  // origin of the cell has to be offset by half the grid size
-  for(int dim = 0; dim < 3; dim++){
-    vxl_origin[dim] += vxl_dist/2;
-  }
+  const double vxl_dist = grid_size * pow(2,max_depth);
   
   for(size_t x = 0; x < n_gridsteps[0]; x++){
     for(size_t y = 0; y < n_gridsteps[1]; y++){
       for(size_t z = 0; z < n_gridsteps[2]; z++){
-        Voxel& vxl = getElement(x,y,z);
-        std::array<double,3> vxl_pos = 
-          {vxl_origin[0] + vxl_dist * x, vxl_origin[1] + vxl_dist * y, vxl_origin[2] + vxl_dist * z};
-        vxl.determineType(vxl_pos, grid_size, max_depth, atomtree);
+		// origin of the cell has to be offset by half the grid size
+        std::array<double,3> vxl_pos = {vxl_origin[0] + vxl_dist/2 + vxl_dist * x,
+										vxl_origin[1] + vxl_dist/2 + vxl_dist * y,
+										vxl_origin[2] + vxl_dist/2 + vxl_dist * z};
+        getElement(x,y,z).determineType(vxl_pos, grid_size, max_depth, atomtree);
       }
     }
   }      
-  return;
 }
 
 double Space::getVolume(){
