@@ -43,6 +43,7 @@ class MainFrame: public wxFrame
     void displayAtomList(std::vector<std::tuple<std::string, int, double>> symbol_number_radius);
     std::string generateChemicalFormulaFromGrid();
     std::unordered_map<std::string, double> generateRadiusMapFromView();
+    std::vector<std::string> getIncludedElementsFromView();
     MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
 
   private:
