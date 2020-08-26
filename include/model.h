@@ -24,7 +24,7 @@ class Model{
     inline double findRadiusOfAtom(const Atom&); //TODO has not been tested
     // calls the Space constructor and creates a cell containing all atoms. Cell size is defined by atom positions
     void defineCell(const double&, const int&);
-    void setAtomListForCalculation(std::vector<std::string>);
+    void setAtomListForCalculation(const std::vector<std::string>&);
     void storeAtomsInTree();
     void findCloseAtoms(const double&); //TODO
     void calcVolume();
