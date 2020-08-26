@@ -28,10 +28,6 @@ void Model::setAtomListForCalculation(const std::vector<std::string>& included_e
   }
 }
 
-void Model::updateAtomRadii(){
-  for (Atom& at : atoms){
-    at.rad = radius_map[at.symbol];
-  }
 void Model::storeAtomsInTree(){
   atomtree = AtomTree(atoms);
 }
