@@ -16,9 +16,9 @@ class Space;
 class Model{
   public:
     void readRadiiAndAtomNumFromFile(std::string&);
-    bool readAtomsFromFile(std::string&, bool);
-    void readFileXYZ(std::string&);
-    void readFilePDB(std::string&, bool);
+    bool readAtomsFromFile(const std::string&, bool);
+    void readFileXYZ(const std::string&);
+    void readFilePDB(const std::string&, bool);
     inline double findRadiusOfAtom(const std::string&);
     inline double findRadiusOfAtom(const Atom&); //TODO has not been tested
     // calls the Space constructor and creates a cell containing all atoms. Cell size is defined by atom positions
