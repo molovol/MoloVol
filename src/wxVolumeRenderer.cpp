@@ -61,7 +61,7 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	auto inputmatrixvector = Ctrl::getInstance()->getModel()->getMatrix();
 	//auto dim = Ctrl::getInstance()->getModel()->cell->getResolution();
 	cl_int size_inputmatrix = cl_int(inputmatrixvector.size());
-	cl_int resolution = Ctrl::getInstance()->getModel()->getResolution()[0];
+	const cl_int resolution = Ctrl::getInstance()->getModel()->getResolution()[0];
 	
 	uint8_t* inputmatrix = (uint8_t*) malloc(size_inputmatrix * sizeof(uint8_t*));
 	//copy content from deque into c-style array.
@@ -93,7 +93,7 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	cl_kernel kernel;                    //
 	cl_command_queue command_queue;      //
 	cl_program program;                  //
-	cl_mem inputA, output;       //
+	cl_mem output;       //
 
 	// Kernel laden
 	// -------------------------------------------------------------------------
@@ -178,55 +178,51 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	// -------------------------------------------------------------------------
 
 	// erzeugt handels für in und output buffer, die hier erzeugt werden
-	inputA = clCreateBuffer(context, CL_MEM_READ_ONLY, mem_size_A, NULL, &err);
 	output = clCreateBuffer(context, CL_MEM_WRITE_ONLY, mem_size_colorm, NULL, &err);
 	if (!output){
 		printf("Error: Failed to allocate device memory!\n");
 		return NULL;
 	}
 	
-	clEnqueueWriteBuffer(command_queue, inputA, CL_TRUE, 0, mem_size_A, &(inputmatrix[0]), 0, NULL, NULL);
-	
-//	cl_image_format format;
-//	format.image_channel_order = CL_A;
-//	format.image_channel_data_type = CL_UNSIGNED_INT8;
-//	cl_image_desc descr;
-//	descr.image_type = CL_MEM_OBJECT_IMAGE3D;
-//	descr.image_width = 100;
-//	descr.image_height = 100;
-//	descr.image_depth = 100;
-//	descr.image_array_size = 1;
-//	descr.image_row_pitch =100*sizeof(uint8_t);
-//	descr.image_slice_pitch =100*100*sizeof(uint8_t);
-//	descr.num_mip_levels    = 0;
-//	descr.num_samples       = 0;
-//	descr.buffer        = nullptr;
-//	auto inputimage = clCreateImage(
-//		context,
-//		CL_MEM_READ_ONLY,
-//		&format,
-//		&descr,
-//		nullptr,
-//		&err );
-//	if (err != CL_SUCCESS){
-//		printf("Error: Failed to allocate image! Error: %d\n", err);
-//		return NULL;
-//	}
-//	// schreibt die Daten aus "data" in den input buffer, jetzt A und B
-//	const size_t srcOrigin[3] = { 0, 0, 0};
-//	const size_t region[3] = { 100, 100, 100 };
-//	clEnqueueWriteImage(command_queue,
-//						inputimage,
-//						CL_TRUE,
-//						srcOrigin,
-//						region,
-//						0,
-//						0,
-//						&(inputmatrix[0]),
-//						0,//num_events_in_wait_list
-//						NULL,//event_wait_list
-//						NULL);
-
+	//create image
+	cl_image_format format;
+	format.image_channel_order = CL_A;
+	format.image_channel_data_type = CL_UNSIGNED_INT8;
+	cl_image_desc descr;
+	descr.image_type = CL_MEM_OBJECT_IMAGE3D;
+	descr.image_width = resolution;
+	descr.image_height = resolution;
+	descr.image_depth = resolution;
+	descr.image_array_size = 1;
+	descr.image_row_pitch =resolution*sizeof(uint8_t);
+	descr.image_slice_pitch =resolution*resolution*sizeof(uint8_t);
+	descr.num_mip_levels    = 0;
+	descr.num_samples       = 0;
+	descr.buffer        = nullptr;
+	auto inputimage = clCreateImage(
+		context,
+		CL_MEM_READ_ONLY,
+		&format,
+		&descr,
+		nullptr,
+		&err );
+	if (err != CL_SUCCESS){
+		printf("Error: Failed to allocate image! Error: %d\n", err);
+		return NULL;
+	}
+	const size_t srcOrigin[3] = { 0, 0, 0};
+	const size_t region[3] = { size_t(resolution), size_t(resolution), size_t(resolution) };
+	clEnqueueWriteImage(command_queue,
+						inputimage,
+						CL_TRUE,
+						srcOrigin,
+						region,
+						0,
+						0,
+						&(inputmatrix[0]),
+						0,//num_events_in_wait_list
+						NULL,//event_wait_list
+						NULL);
 
 	// -------------------------------------------------------------------------
 	// 3) Programm linken und kompilieren, Kernel und Argumente einrichten
@@ -243,6 +239,15 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	err = clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
 	if (err != CL_SUCCESS) {
 		printf("Error building program. Error: %d\n", err);
+		size_t n = 0;
+		cl_int ret = clGetProgramBuildInfo(program, device_id, CL_PROGRAM_BUILD_LOG, n, NULL, &n);
+		if (n > 1) {
+			std::vector<char> buildLog;
+			buildLog.resize(n);
+			ret = clGetProgramBuildInfo(program, device_id, CL_PROGRAM_BUILD_LOG, n, &buildLog[0], &n);
+			fprintf(stderr, "OpenCL Build log: %s", &buildLog[0]);
+		}
+
 		return NULL;
 	}
 
@@ -258,7 +263,7 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 
 	// verlinkt input und output mit dem kernel über die Argumente
 	err = clSetKernelArg(kernel, 0, sizeof(cl_int), &resolution);
-	err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &inputA);
+	err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &inputimage);
 	err |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &output);
 	if (err != CL_SUCCESS) {
 		printf("Error: Failed to set kernel arguments! %d\n", err);
@@ -290,7 +295,7 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	// -------------------------------------------------------------------------
 	// 5) OpenCL Objekte freigeben
 	// -------------------------------------------------------------------------
-	clReleaseMemObject(inputA);
+	clReleaseMemObject(inputimage);
 	clReleaseMemObject(output);
 	clReleaseProgram(program);
 	clReleaseKernel(kernel);

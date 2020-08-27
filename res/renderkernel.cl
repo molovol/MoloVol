@@ -2,34 +2,29 @@
 //#define max_bounds 100 //of input
 
 
-char get_sample_data(__global const char *A, const float3 sampling_position, int max_bounds){
-	float3 sample = (float3) round(max(float3(0.0),(float3)min(float(max_bounds)-1,sampling_position)));//map to 0-max_bounds
-	return A[uint(sample.z)*max_bounds*max_bounds+uint(sample.y)*max_bounds+uint(sample.x)];
-}
-
-//__read_only image3d_t
 __kernel void matMult(int max_bounds,
-					  __global char *A,
+					  __read_only image3d_t A,
                       __global char *C//,
-				//	  __read_only image3d_t img
 							 ) {
 	const uint x = get_global_id(0);//spalte
 	const uint y = get_global_id(1);//zeile
 	// the traversal loop,
 	// termination when the sampling position is outside volume boundarys
 	// another termination condition for early ray termination is added
-	const float3 ray_entry_position = (float3)(x*max_bounds/DIM, y*max_bounds/DIM,0);//map to 0-1
-	const float3 camera_location = (float3)(x*max_bounds/DIM,y*max_bounds/DIM,-1);//map to 0-1
+	const float3 ray_entry_position = (float3)(x*max_bounds/(float)DIM, y*max_bounds/(float)DIM,0);//map to 0-1
+	const float3 camera_location = (float3)(x*max_bounds/(float)DIM,y*max_bounds/(float)DIM,-1);//map to 0-1
 	const float sampling_distance = 1;
 	float3 ray_increment = normalize(ray_entry_position - camera_location) * sampling_distance;
-	float3 sampling_pos = ray_entry_position+ray_increment;
+	float4 sampling_pos = float4(0.0);
+	sampling_pos.xyz = ray_entry_position+ray_increment;
 	float dst = 0.0;
 	float trsp = 1;
 	float brightnes = 1;
+	const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_REPEAT |
+	CLK_FILTER_LINEAR;
 	while (all(sampling_pos >= 0) && all(sampling_pos < max_bounds)) {
 		// get sample
-		char s = get_sample_data(A, sampling_pos.xyz, max_bounds);
-		//bool s = bool(read_imagei(A, sampling_pos).a);
+		bool s = bool(read_imagei(A, sampler, sampling_pos).a);
 		
 		//early termination
 		if (trsp <= 0.1 || dst>1.0){
@@ -54,7 +49,7 @@ __kernel void matMult(int max_bounds,
 		}
 		
 		// increment the ray sampling position
-		sampling_pos += ray_increment;
+		sampling_pos.xyz += ray_increment;
 	}
 	C[y*DIM+x] = dst*255;
 }
