@@ -309,11 +309,22 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	
 	//to rgb
 	unsigned char* colormatrix = (unsigned char*) malloc(width * height*3 * sizeof(unsigned char*));//can not be indexed with 3d array notation
+	int maximum = 0;
+	//second 2D pass for brightness normalization
 	for (auto i=0;i<size_colormatrix;++i){
-		colormatrix[i*3] = lightmatrix[i];
-		colormatrix[i*3+1] = lightmatrix[i];
-		colormatrix[i*3+2] = lightmatrix[i];
+		auto brightness = lightmatrix[i];
+		if (brightness > maximum){
+			maximum = brightness;
+		}
 	}
+	//write to colormatrix
+	for (auto i=0;i<size_colormatrix;++i){
+		char brightness = lightmatrix[i]/(float)maximum*255;
+		colormatrix[i*3] = brightness;
+		colormatrix[i*3+1] = brightness;
+		colormatrix[i*3+2] = brightness;
+	}
+	
 	return colormatrix;
 }
 

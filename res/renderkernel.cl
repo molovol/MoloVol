@@ -43,7 +43,7 @@ __kernel void matMult(int max_bounds,
 		//front-to-back
 		// accumulate color
 		if (s==1){
-			dst += 0.04 * trsp;
+			dst += 0.03 * trsp;
 			// update opacity
 			trsp *= 0.975;
 		}
