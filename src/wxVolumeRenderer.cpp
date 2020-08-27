@@ -73,8 +73,6 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 		++i;
     }
 	
-	auto mem_size_A = sizeof(float) * size_inputmatrix;
-	
 	//create output matrix
 	//unsigned int num_elements =width*height;
 	unsigned int size_colormatrix = width * height;
