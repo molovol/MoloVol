@@ -51,7 +51,7 @@ void Model::readRadiiAndAtomNumFromFile(std::string& filepath){
   }
 }
 
-bool Model::readAtomsFromFile(std::string& filepath, bool include_hetatm){
+bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
 
   atom_amounts.clear();
   raw_atom_coordinates.clear();
@@ -73,7 +73,7 @@ bool Model::readAtomsFromFile(std::string& filepath, bool include_hetatm){
   return true;
 }
 
-void Model::readFileXYZ(std::string& filepath){
+void Model::readFileXYZ(const std::string& filepath){
 
 //if (inp_file.is_open()){  //TODO consider adding an exception, for when file in not valid
   std::string line;
@@ -104,7 +104,7 @@ void Model::readFileXYZ(std::string& filepath){
   inp_file.close();
 }
 
-void Model::readFilePDB(std::string& filepath, bool include_hetatm){
+void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
 
 //if (inp_file.is_open()){  //TODO consider adding an exception, for when file in not valid
   std::string line;
