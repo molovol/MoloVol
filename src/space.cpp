@@ -64,34 +64,47 @@ std::array<double,3> Space::getSize(){
   return size;
 }
 
+/**
+ Recursevly fill a matrix
+ @param matrix a reference to the matrix, which is written
+ @param toplevel the current top level voxel
+ @param offx offset in matrix
+ @param offy offset in matrix
+ @param offz offset in matrix
+ @param dimx range
+ @param dimy range
+ @param dimz range
+ 
+ 
+ */
 void Space::treetomatrix(std::vector<char> &matrix, Voxel& toplevel, int offx, int offy, int offz, int dimx, int dimy, int dimz){
 	for (int i= 0;i<8;++i){
-		short xhalf = i%2;
-		short yhalf = i<=1||i==4||i==5;
-		short zhalf = i<4;
 		auto type = toplevel.getType();
 		if (type=='m'){
+			short xhalf = i%2;
+			short yhalf = (i%4) >= 2;
+			short zhalf = i>=4;
 			auto element = toplevel.get(xhalf,yhalf,zhalf);
 			treetomatrix(matrix,
 						 element,
-						 offx+dimx*xhalf,
-						 offy+dimy*yhalf,
-						 offz+dimz*zhalf,
+						 offx+dimx/2*xhalf,
+						 offy+dimy/2*yhalf,
+						 offz+dimz/2*zhalf,
 						 dimx/2, dimy/2, dimz/2);
 		} else if(type=='e'){
 		   int dim = this->getResolution()[0];
-		   for (int z=offz; z<dimz; ++z){
-			   for (int y=offy;y<dimy; ++y){
-				   for (int x=offx; x<dimx; ++x){
+		   for (int z=offz; z<offz+dimz; ++z){
+			   for (int y=offy;y<offy+dimy; ++y){
+				   for (int x=offx; x<offx+dimx; ++x){
 					   matrix[z*dim*dim+y*dim+x] = 0;
 				   }
 			   }
 		   }
 		} else {
 			int dim = this->getResolution()[0];
-			for (int z=offz;z<dimz;++z){
-				for (int y=offy;y<dimy;++y){
-					for (int x=offx;x<dimx;++x){
+			for (int z=offz;z<offz+dimz;++z){
+				for (int y=offy;y<offy+dimy;++y){
+					for (int x=offx;x<offx+dimx;++x){
 						matrix[z*dim*dim+y*dim+x] = 1;
 					}
 				}
@@ -102,26 +115,26 @@ void Space::treetomatrix(std::vector<char> &matrix, Voxel& toplevel, int offx, i
 
 
 std::vector<char> Space::getMatrix(){
-	int dim = this->getResolution()[0];//assume uniform size
+	int res = this->getResolution()[0];//assume uniform size
+	auto chunkres = pow(2,max_depth);
 	//target matrix for tree to vector conversion
 	std::vector<char> gridmatrix;
-	gridmatrix.resize(pow(dim,3));
+	gridmatrix.resize(pow(res,3));
 	
-	//TODO positions needs to changed per voxel like in space::placeAtomsInGrid
-	for(auto griditem : grid){
-		treetomatrix(gridmatrix, griditem, 0, 0, 0, dim, dim, dim);
-	}
-	
-	//set some fake data
-	int i=0;
-	for (auto iter = gridmatrix.begin();iter != gridmatrix.end();++iter){
-		int x = i % dim-dim/2;
-		int y = (i % (dim*dim))/dim-dim/2;
-		int z = i / (dim*dim)-dim/2;
-		if ((x<20 && x>2 && y<10 && y>4 && z<20 && z>3)){
-			*iter = 1;
+	for(size_t x = 0; x < n_gridsteps[0]; x++){
+	  for(size_t y = 0; y < n_gridsteps[1]; y++){
+		for(size_t z = 0; z < n_gridsteps[2]; z++){
+			treetomatrix(gridmatrix,
+						 getElement(x, y, z),
+						 x*chunkres,
+						 y*chunkres,
+						 z*chunkres,
+						 chunkres,
+						 chunkres,
+						 chunkres
+			);
 		}
-		++i;
+	  }
 	}
 	
 	return gridmatrix;
