@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A664904C24F8164F006DD0AA /* misc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A664904B24F8164F006DD0AA /* misc.cpp */; };
 		A6D93AA924F1224A00D34026 /* renderkernel.cl in Sources */ = {isa = PBXBuildFile; fileRef = A6D93AA324F1202C00D34026 /* renderkernel.cl */; };
 		A6D93AAE24F12A2F00D34026 /* wxVolumeRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6D93AAD24F12A2F00D34026 /* wxVolumeRenderer.cpp */; };
 		A6E1C6F224EF1BA100E4CC1D /* space.h in Sources */ = {isa = PBXBuildFile; fileRef = A6E1C6DB24EF14CE00E4CC1D /* space.h */; };
@@ -49,6 +50,7 @@
 /* Begin PBXFileReference section */
 		A6251EAA24997354002B3B12 /* inputfile */ = {isa = PBXFileReference; lastKnownFileType = folder; path = inputfile; sourceTree = "<group>"; };
 		A62DCA7324ED9D9700EF2D2E /* ballpitcltool */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ballpitcltool; sourceTree = BUILT_PRODUCTS_DIR; };
+		A664904B24F8164F006DD0AA /* misc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = misc.cpp; sourceTree = "<group>"; };
 		A6D93AA324F1202C00D34026 /* renderkernel.cl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.opencl; path = renderkernel.cl; sourceTree = "<group>"; };
 		A6D93AAC24F12A2400D34026 /* wxVolumeRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = wxVolumeRenderer.h; sourceTree = "<group>"; };
 		A6D93AAD24F12A2F00D34026 /* wxVolumeRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = wxVolumeRenderer.cpp; sourceTree = "<group>"; };
@@ -128,6 +130,7 @@
 		A6E1C6CD24EF14CE00E4CC1D /* src */ = {
 			isa = PBXGroup;
 			children = (
+				A664904B24F8164F006DD0AA /* misc.cpp */,
 				A6E1C6CE24EF14CE00E4CC1D /* base_init.cpp */,
 				A6E1C6CF24EF14CE00E4CC1D /* voxel.cpp */,
 				A6D93AAD24F12A2F00D34026 /* wxVolumeRenderer.cpp */,
@@ -268,6 +271,7 @@
 				A6E1C6F824EF1BA100E4CC1D /* special_chars.h in Sources */,
 				A6E1C6F924EF1BA100E4CC1D /* atomtree.h in Sources */,
 				A6E1C6FA24EF1BA100E4CC1D /* model.h in Sources */,
+				A664904C24F8164F006DD0AA /* misc.cpp in Sources */,
 				A6D93AAE24F12A2F00D34026 /* wxVolumeRenderer.cpp in Sources */,
 				A6E1C6FB24EF1BA100E4CC1D /* exception.h in Sources */,
 				A6E1C6FC24EF1BA100E4CC1D /* base.h in Sources */,
