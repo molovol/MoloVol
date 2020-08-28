@@ -61,7 +61,7 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	auto inputmatrixvector = Ctrl::getInstance()->getModel()->getMatrix();
 	//auto dim = Ctrl::getInstance()->getModel()->cell->getResolution();
 	cl_int size_inputmatrix = cl_int(inputmatrixvector.size());
-	const cl_int resolution = Ctrl::getInstance()->getModel()->getResolution()[0];
+	const cl_int data_res = Ctrl::getInstance()->getModel()->getResolution()[0];
 	
 	uint8_t* inputmatrix = (uint8_t*) malloc(size_inputmatrix * sizeof(uint8_t*));
 	//copy content from deque into c-style array.
@@ -188,12 +188,12 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	format.image_channel_data_type = CL_UNSIGNED_INT8;
 	cl_image_desc descr;
 	descr.image_type = CL_MEM_OBJECT_IMAGE3D;
-	descr.image_width = resolution;
-	descr.image_height = resolution;
-	descr.image_depth = resolution;
+	descr.image_width = data_res;
+	descr.image_height = data_res;
+	descr.image_depth = data_res;
 	descr.image_array_size = 1;
-	descr.image_row_pitch =resolution*sizeof(uint8_t);
-	descr.image_slice_pitch =resolution*resolution*sizeof(uint8_t);
+	descr.image_row_pitch =data_res*sizeof(uint8_t);
+	descr.image_slice_pitch =data_res*data_res*sizeof(uint8_t);
 	descr.num_mip_levels    = 0;
 	descr.num_samples       = 0;
 	descr.buffer        = nullptr;
@@ -209,7 +209,7 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 		return NULL;
 	}
 	const size_t srcOrigin[3] = { 0, 0, 0};
-	const size_t region[3] = { size_t(resolution), size_t(resolution), size_t(resolution) };
+	const size_t region[3] = { size_t(data_res), size_t(data_res), size_t(data_res) };
 	clEnqueueWriteImage(command_queue,
 						inputimage,
 						CL_TRUE,
@@ -256,13 +256,13 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	}
 	
 	//pass dimension
-	printf("data res %d -> %d", resolution, size_inputmatrix);
-	printf("Image size [%d][%d]", width, height);
+	printf("data res %d -> %d", data_res, size_inputmatrix);
 
 	// verlinkt input und output mit dem kernel über die Argumente
-	err = clSetKernelArg(kernel, 0, sizeof(cl_int), &resolution);
-	err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &inputimage);
-	err |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &output);
+	err = clSetKernelArg(kernel, 0, sizeof(cl_int), &data_res);
+	err = clSetKernelArg(kernel, 1, sizeof(cl_int), &width);
+	err |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &inputimage);
+	err |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &output);
 	if (err != CL_SUCCESS) {
 		printf("Error: Failed to set kernel arguments! %d\n", err);
 		return NULL;

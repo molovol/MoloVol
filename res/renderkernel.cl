@@ -1,8 +1,5 @@
-#define DIM 512 //output resolution
-//#define max_bounds 100 //of input
-
-
 __kernel void matMult(int max_bounds,
+					  int outputres,
 					  __read_only image3d_t A,
                       __global char *C//,
 							 ) {
@@ -11,8 +8,8 @@ __kernel void matMult(int max_bounds,
 	// the traversal loop,
 	// termination when the sampling position is outside volume boundarys
 	// another termination condition for early ray termination is added
-	const float3 ray_entry_position = (float3)(x*max_bounds/(float)DIM, y*max_bounds/(float)DIM,0);//map to 0-1
-	const float3 camera_location = (float3)(x*max_bounds/(float)DIM,y*max_bounds/(float)DIM,-1);//map to 0-1
+	const float3 ray_entry_position = (float3)(x*max_bounds/(float)outputres, y*max_bounds/(float)outputres,0);//map to 0-1
+	const float3 camera_location = (float3)(x*max_bounds/(float)outputres,y*max_bounds/(float)outputres,-1);//map to 0-1
 	const float sampling_distance = 1;
 	float3 ray_increment = normalize(ray_entry_position - camera_location) * sampling_distance;
 	float4 sampling_pos = float4(0.0);
@@ -51,5 +48,5 @@ __kernel void matMult(int max_bounds,
 		// increment the ray sampling position
 		sampling_pos.xyz += ray_increment;
 	}
-	C[y*DIM+x] = dst*255;
+	C[y*outputres+x] = dst*255;
 }
