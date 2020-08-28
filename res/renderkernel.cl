@@ -9,7 +9,7 @@ __kernel void matMult(int max_bounds,
 	// termination when the sampling position is outside volume boundarys
 	// another termination condition for early ray termination is added
 	const float3 ray_entry_position = (float3)(x*max_bounds/(float)outputres, y*max_bounds/(float)outputres,0);//map to 0-1
-	const float3 camera_location = (float3)(x*max_bounds/(float)outputres,y*max_bounds/(float)outputres,-1);//map to 0-1
+	const float3 camera_location = (float3)(ray_entry_position.x, ray_entry_position.y,-1);//map to 0-1
 	const float sampling_distance = 1;
 	float3 ray_increment = normalize(ray_entry_position - camera_location) * sampling_distance;
 	float4 sampling_pos = float4(0.0);
