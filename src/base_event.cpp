@@ -130,15 +130,12 @@ void MainFrame::OnBrowse(std::string& filetype, wxTextCtrl* textbox){
 }
 
 // Functions to dynamically change the color of the atom list grid cells
-// TODO: add events to set radius cell in red if radius = 0
-// TODO: add events to set element and number cells in grey if radius element is excluded
 void MainFrame::GridChange(wxGridEvent& event){
   int col = event.GetCol();
   int row = event.GetRow();
-  wxString value = atomListGrid->GetCellValue(row,col);
-/*  if (col == 0){
-    atomListGrid->SetReadOnly(row,col,true);
-    if (value == "1"){
+  wxString value = event.GetString();
+  if (col == 0){
+    if (value == "1"){ //
       atomListGrid->SetCellBackgroundColour(row,1,col_white);
       atomListGrid->SetCellBackgroundColour(row,2,col_white);
     }
@@ -147,14 +144,14 @@ void MainFrame::GridChange(wxGridEvent& event){
       atomListGrid->SetCellBackgroundColour(row,2,col_grey_cell);
     }
   }
-  else */if (col == 3){
- //   if (wcstod(value,NULL) == 0){
- //     atomListGrid->SetCellBackgroundColour(row,3,col_red_cell);
- //   }
- //   else {
+  else if (col == 3){
+    if (wcstod(value,NULL) == 0){
+      atomListGrid->SetCellBackgroundColour(row,3,col_red_cell);
+    }
+    else {
       atomListGrid->SetCellBackgroundColour(row,3,col_cyan_cell);
- //   }
+    }
   }
-  atomListGrid->Refresh();
+  atomListGrid->ForceRefresh();
 }
 
