@@ -130,8 +130,6 @@ void MainFrame::OnBrowse(std::string& filetype, wxTextCtrl* textbox){
 }
 
 // Functions to dynamically change the color of the atom list grid cells
-// TODO: add events to set radius cell in red if radius = 0
-// TODO: add events to set element and number cells in grey if radius element is excluded
 void MainFrame::GridChange(wxGridEvent& event){
   int col = event.GetCol();
   int row = event.GetRow();
