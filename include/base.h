@@ -102,7 +102,7 @@ class MainFrame: public wxFrame
     void OnAtomBrowse(wxCommandEvent& event);
     void OnRadiusBrowse(wxCommandEvent& event);
     void OnLoadFiles(wxCommandEvent& event);
-    void OnBrowse(std::string& filetype, wxTextCtrl* textbox);
+    void OnBrowse(wxCommandEvent& event, std::string& filetype, wxTextCtrl* textbox);
     void GridChange(wxGridEvent& event);
 
     // colours
