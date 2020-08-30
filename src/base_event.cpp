@@ -152,7 +152,6 @@ void MainFrame::setDefaultState(wxWindow* widget, bool state){
 
 void MainFrame::toggleOptionsPdb(){
   setDefaultState(pdbHetatmCheckbox, fileExtension(getAtomFilepath()) == "pdb" );
-  std::cout << (fileExtension(getAtomFilepath()) == "pdb") << std::endl;
 }
 
 void MainFrame::toggleButtons(){
