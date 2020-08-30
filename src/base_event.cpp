@@ -54,34 +54,18 @@ void MainFrame::OnLoadFiles(wxCommandEvent& event){
   Ctrl::getInstance()->loadRadiusFile();
   Ctrl::getInstance()->loadAtomFile();
 
-  wxYield(); // is this necessary?
-  // without wxYield, the clicks on disabled buttons are queued
+  toggleButtons(); // sets accessibility of buttons
+  wxYield();
   enableGuiElements(true);
-}
-
-void MainFrame::enableGuiElements(bool inp){
-  // deactivate the calculation and reload buttons during the calculation
-  calcButton->Enable(inp);
-  loadFilesButton->Enable(inp);
-  // prevents editing of the atom list grid during the calculation
-  atomListGrid->EnableEditing(inp);
-  // keeps calculation button deactivated if no valid structure is loaded
-  if (atomListGrid->GetNumberRows() == 0) {
-    calcButton->Enable(false);
-  }
-  // activates pdb specific options only if pdb file is loaded
-  if (fileExtension(getAtomFilepath()) == "pdb"){
-    pdbHetatmCheckbox->Enable(true);
-  }
-  else {
-    pdbHetatmCheckbox->Enable(false);
-  }
 }
 
 // browse for atom file
 void MainFrame::OnAtomBrowse(wxCommandEvent& event){
   std::string filetype = "XYZ and PDB files (*.xyz;*.pdb)|*.xyz;*pdb";
   OnBrowse(event, filetype, filepathText);
+  // if user selects a .pdb file, then the .pdf file options are unlocked
+  toggleOptionsPdb();
+  enableGuiElements(true);
 }
 
 // browse for radius file
@@ -148,5 +132,31 @@ void MainFrame::GridChange(wxGridEvent& event){
     }
   }
   atomListGrid->ForceRefresh();
+}
+
+////////////////////////////////
+// GUI enabling and disabling //
+////////////////////////////////
+
+void MainFrame::enableGuiElements(bool inp){
+  // disables all interactable widgets listed in InitDefaultStates() in base_init.cpp
+  // enables all widgets whose default state has been set to true
+  for (std::map<wxWindow*, bool>::iterator it = default_states.begin(); it != default_states.end(); it++){
+    it->first->Enable( inp ? it->second : false );
+  }
+}
+
+void MainFrame::setDefaultState(wxWindow* widget, bool state){
+  default_states[widget] = state;
+}
+
+void MainFrame::toggleOptionsPdb(){
+  setDefaultState(pdbHetatmCheckbox, fileExtension(getAtomFilepath()) == "pdb" );
+  std::cout << (fileExtension(getAtomFilepath()) == "pdb") << std::endl;
+}
+
+void MainFrame::toggleButtons(){
+  setDefaultState(loadFilesButton, true);
+  setDefaultState(calcButton, atomListGrid->GetNumberRows() != 0);
 }
 
