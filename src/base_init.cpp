@@ -23,6 +23,32 @@ bool MainApp::OnInit()
   return true;
 };
 
+
+// set default states of GUI elements here
+void MainFrame::InitDefaultStates(){
+  // set default accessibility of interactable gui controls  
+  wxWindow* widgets_enabled[] = {
+    browseButton,
+    radiusButton,
+    filepathText,
+    radiuspathText,
+    atomListGrid,
+    gridsizeInputText,
+    depthInput};
+  wxWindow* widgets_disabled[] = {
+    pdbHetatmCheckbox,
+    loadFilesButton,
+    calcButton};
+  
+  // initialise map
+  for (auto i : widgets_enabled){
+    default_states[i] = true;
+  }
+  for (auto i : widgets_disabled){
+    default_states[i] = false;
+  }
+}
+
 ////////////////////////////////////
 // INITIALISATION OF GUI ELEMENTS //
 ////////////////////////////////////
@@ -58,7 +84,8 @@ void MainFrame::InitTopLevel(){
   topLevelSizerH->Add(leftMainPanel,1,wxRIGHT | wxEXPAND,5);
   topLevelSizerH->Add(rightMainPanel,1,wxLEFT | wxEXPAND,5);
   SetSizerAndFit(topLevelSizerH);
-
+  
+  InitDefaultStates();
 }
 
 /////////////////////////
