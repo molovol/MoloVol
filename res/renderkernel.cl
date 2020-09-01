@@ -1,5 +1,5 @@
-__kernel void matMult(int max_bounds,
-					  int outputres,
+__kernel void matMult(uint3 inputdim,
+					  uint outputres,
 					  __read_only image3d_t A,
                       __global char *C//,
 							 ) {
@@ -8,11 +8,12 @@ __kernel void matMult(int max_bounds,
 	// the traversal loop,
 	// termination when the sampling position is outside volume boundarys
 	// another termination condition for early ray termination is added
-	const float3 ray_entry_position = (float3)(x*max_bounds/(float)outputres, y*max_bounds/(float)outputres,0);//map to 0-1
+	const float3 ray_entry_position = (float3)(x*inputdim[0]/(float)outputres, y*inputdim[1]/(float)outputres,0);//map to 0-1
 	const float3 camera_location = (float3)(ray_entry_position.x, ray_entry_position.y,-1);//map to 0-1
 	const float sampling_distance = 1;
 	float3 ray_increment = normalize(ray_entry_position - camera_location) * sampling_distance;
 	float4 sampling_pos = float4(0.0);
+	float4 max_bounds = float4((float)inputdim[0],(float)inputdim[1],(float)inputdim[2],1.0);
 	sampling_pos.xyz = ray_entry_position+ray_increment;
 	float dst = 0.0;
 	float trsp = 1;
@@ -40,7 +41,7 @@ __kernel void matMult(int max_bounds,
 		//front-to-back
 		// accumulate color
 		if (s==1){
-			dst += 0.03 * trsp;
+			dst += 0.01 * trsp;
 			// update opacity
 			trsp *= 0.975;
 		}

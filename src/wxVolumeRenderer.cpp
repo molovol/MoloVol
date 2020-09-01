@@ -66,11 +66,9 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 			  << std::chrono::duration<double, std::milli>(matrix_end-matrix_start).count()
 			  <<  " ms" << std::endl;
 	
-	//auto dim = Ctrl::getInstance()->getModel()->cell->getResolution();
-	cl_int size_inputmatrix = cl_int(inputmatrixvector.size());
-	const cl_int data_res = Ctrl::getInstance()->getModel()->getResolution()[0];
-	
-	uint8_t* inputmatrix = &inputmatrixvector[0];
+	const cl_int size_inputmatrix = cl_int(inputmatrixvector.size());
+	const auto data_res = Ctrl::getInstance()->getModel()->getResolution();
+	const uint8_t* inputmatrix = &inputmatrixvector[0];
 	
 	//create output matrix
 	//unsigned int num_elements =width*height;
@@ -187,12 +185,12 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	format.image_channel_data_type = CL_UNSIGNED_INT8;
 	cl_image_desc descr;
 	descr.image_type = CL_MEM_OBJECT_IMAGE3D;
-	descr.image_width = data_res;
-	descr.image_height = data_res;
-	descr.image_depth = data_res;
+	descr.image_width = data_res[0];
+	descr.image_height = data_res[1];
+	descr.image_depth = data_res[2];
 	descr.image_array_size = 1;
-	descr.image_row_pitch =data_res*sizeof(uint8_t);
-	descr.image_slice_pitch =data_res*data_res*sizeof(uint8_t);
+	descr.image_row_pitch = data_res[0]*sizeof(uint8_t);
+	descr.image_slice_pitch = data_res[0]*data_res[1]*sizeof(uint8_t);
 	descr.num_mip_levels    = 0;
 	descr.num_samples       = 0;
 	descr.buffer        = nullptr;
@@ -208,7 +206,7 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 		return NULL;
 	}
 	const size_t srcOrigin[3] = { 0, 0, 0};
-	const size_t region[3] = { size_t(data_res), size_t(data_res), size_t(data_res) };
+	const size_t region[3] = { size_t(data_res[0]), size_t(data_res[1]), size_t(data_res[2]) };
 	clEnqueueWriteImage(command_queue,
 						inputimage,
 						CL_TRUE,
@@ -255,11 +253,12 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	}
 	
 	//pass dimension
-	printf("data res %d -> %d", data_res, size_inputmatrix);
+	printf("data res %d x %d x %d= %d", data_res[0],data_res[1],data_res[2], size_inputmatrix);
 
+		
 	// verlinkt input und output mit dem kernel über die Argumente
-	err = clSetKernelArg(kernel, 0, sizeof(cl_int), &data_res);
-	err = clSetKernelArg(kernel, 1, sizeof(cl_int), &width);
+	err = clSetKernelArg(kernel, 0, sizeof(cl_uint3), &data_res);
+	err = clSetKernelArg(kernel, 1, sizeof(cl_uint), &width);
 	err |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &inputimage);
 	err |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &output);
 	if (err != CL_SUCCESS) {
