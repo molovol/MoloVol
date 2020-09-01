@@ -92,12 +92,13 @@ void Space::treetomatrix(std::vector<uint8_t> &matrix, Voxel& toplevel, int offx
              offz+dimz/2*zhalf,
              dimx/2, dimy/2, dimz/2);
     } else {
-      int dim = this->getResolution()[0];
       uint8_t fill = type=='a';
+      int dimX = this->getResolution()[0];
+	  int dimY = this->getResolution()[1];
       for (int z=offz; z<offz+dimz; ++z){
         for (int y=offy;y<offy+dimy; ++y){
           for (int x=offx; x<offx+dimx; ++x){
-            matrix[z*dim*dim+y*dim+x] = fill;
+            matrix[z*dimX*dimY+y*dimY+x] = fill;
           }
         }
       }
