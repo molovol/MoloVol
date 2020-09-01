@@ -30,7 +30,7 @@ class Model{
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void setRadiusMap(std::unordered_map<std::string, double> map);
     void debug();
-	std::vector<char> getMatrix();
+	std::vector<uint8_t> getMatrix();
 	std::array<double,3> getResolution();
   private:
     std::vector<std::tuple<std::string, double, double, double>> raw_atom_coordinates;

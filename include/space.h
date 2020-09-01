@@ -25,7 +25,7 @@ class Space{
 
     void placeAtomsInGrid(const AtomTree&);
     double getVolume();
-	std::vector<char> getMatrix();
+	std::vector<uint8_t> getMatrix();
   private:
     std::array <double,3> cart_min; // this is also the "origin" of the space
     std::array <double,3> cart_max;
@@ -34,7 +34,7 @@ class Space{
   
     std::vector<Voxel> grid;
     std::array<size_t,3> n_gridsteps; // i think top level voxel?
-	void treetomatrix(std::vector<char> &matrix, Voxel& toplevel, int offx, int offy, int offz, int dimx, int dimy, int dimz);
+	void treetomatrix(std::vector<uint8_t> &matrix, Voxel& toplevel, int offx, int offy, int offz, int dimx, int dimy, int dimz);
     void setGrid();
     //void setGrid(const double &grid_step, const int &max_depth);
 

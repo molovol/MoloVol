@@ -77,7 +77,7 @@ std::array<double,3> Space::getSize(){
  
  
  */
-void Space::treetomatrix(std::vector<char> &matrix, Voxel& toplevel, int offx, int offy, int offz, int dimx, int dimy, int dimz){
+void Space::treetomatrix(std::vector<uint8_t> &matrix, Voxel& toplevel, int offx, int offy, int offz, int dimx, int dimy, int dimz){
   for (int i= 0;i<8;++i){
     auto type = toplevel.getType();
     if (type=='m'){
@@ -92,8 +92,8 @@ void Space::treetomatrix(std::vector<char> &matrix, Voxel& toplevel, int offx, i
              offz+dimz/2*zhalf,
              dimx/2, dimy/2, dimz/2);
     } else {
-      int fill = type=='a';
       int dim = this->getResolution()[0];
+      uint8_t fill = type=='a';
       for (int z=offz; z<offz+dimz; ++z){
         for (int y=offy;y<offy+dimy; ++y){
           for (int x=offx; x<offx+dimx; ++x){
@@ -106,9 +106,9 @@ void Space::treetomatrix(std::vector<char> &matrix, Voxel& toplevel, int offx, i
 }
 
 
-std::vector<char> Space::getMatrix(){
+std::vector<uint8_t> Space::getMatrix(){
   //target matrix for tree to vector conversion
-  std::vector<char> gridmatrix;
+  std::vector<uint8_t> gridmatrix;
   gridmatrix.resize(n_gridsteps[0]*n_gridsteps[1]*n_gridsteps[2]);//hold three dimensions with this size
   //number of cells on a chunk in one dimension
   auto chunkres = pow(2,max_depth);

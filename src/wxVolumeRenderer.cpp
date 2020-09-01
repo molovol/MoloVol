@@ -41,7 +41,7 @@ wxVolumeRenderer::wxVolumeRenderer(wxFrame* parent,
 						   wxBitmapType format) : wxPanel(parent){
 	auto width = 512;
 	auto height = 512;
-	unsigned char* colormatrix = createImageGPU("../res/renderkernel.cl", width, height);
+	uint8_t* colormatrix = createImageGPU("../res/renderkernel.cl", width, height);
 	if (colormatrix==NULL) {
 		throw std::runtime_error("Image could not be generated using OpenCL.");
 	}
@@ -53,12 +53,13 @@ wxVolumeRenderer::wxVolumeRenderer(wxFrame* parent,
 	if ( !data ){
 		// ... raw access to bitmap data unavailable, do something else ...
 		return;
-	}}
+	}
+}
 
 #define MAX_SOURCE_SIZE (0x100000)
 unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, unsigned int width, unsigned int height){
 	//tmp input matrix
-	auto inputmatrixvector = Ctrl::getInstance()->getModel()->getMatrix();
+	std::vector<uint8_t> inputmatrixvector = Ctrl::getInstance()->getModel()->getMatrix();
 	//auto dim = Ctrl::getInstance()->getModel()->cell->getResolution();
 	cl_int size_inputmatrix = cl_int(inputmatrixvector.size());
 	const cl_int data_res = Ctrl::getInstance()->getModel()->getResolution()[0];

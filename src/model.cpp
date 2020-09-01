@@ -78,7 +78,7 @@ void Model::debug(){
   }
 }
 
-std::vector<char> Model:: getMatrix(){
+std::vector<uint8_t> Model:: getMatrix(){
 	return this->cell.getMatrix();
 }
 
