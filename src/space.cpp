@@ -19,10 +19,10 @@ void Space::placeAtomsInGrid(const AtomTree& atomtree){
   for(size_t x = 0; x < n_gridsteps[0]; x++){
     for(size_t y = 0; y < n_gridsteps[1]; y++){
       for(size_t z = 0; z < n_gridsteps[2]; z++){
-		// origin of the cell has to be offset by half the grid size
+    // origin of the cell has to be offset by half the grid size
         std::array<double,3> vxl_pos = {vxl_origin[0] + vxl_dist/2 + vxl_dist * x,
-										vxl_origin[1] + vxl_dist/2 + vxl_dist * y,
-										vxl_origin[2] + vxl_dist/2 + vxl_dist * z};
+                    vxl_origin[1] + vxl_dist/2 + vxl_dist * y,
+                    vxl_origin[2] + vxl_dist/2 + vxl_dist * z};
         getElement(x,y,z).determineType(vxl_pos, grid_size, max_depth, atomtree);
       }
     }
@@ -78,74 +78,73 @@ std::array<double,3> Space::getSize(){
  
  */
 void Space::treetomatrix(std::vector<char> &matrix, Voxel& toplevel, int offx, int offy, int offz, int dimx, int dimy, int dimz){
-	for (int i= 0;i<8;++i){
-		auto type = toplevel.getType();
-		if (type=='m'){
-			short xhalf = i%2;
-			short yhalf = (i%4) >= 2;
-			short zhalf = i>=4;
-			auto element = toplevel.get(xhalf,yhalf,zhalf);
-			treetomatrix(matrix,
-						 element,
-						 offx+dimx/2*xhalf,
-						 offy+dimy/2*yhalf,
-						 offz+dimz/2*zhalf,
-						 dimx/2, dimy/2, dimz/2);
-		} else if(type=='e'){
-		   int dim = this->getResolution()[0];
-		   for (int z=offz; z<offz+dimz; ++z){
-			   for (int y=offy;y<offy+dimy; ++y){
-				   for (int x=offx; x<offx+dimx; ++x){
-					   matrix[z*dim*dim+y*dim+x] = 0;
-				   }
-			   }
-		   }
-		} else {
-			int dim = this->getResolution()[0];
-			for (int z=offz;z<offz+dimz;++z){
-				for (int y=offy;y<offy+dimy;++y){
-					for (int x=offx;x<offx+dimx;++x){
-						matrix[z*dim*dim+y*dim+x] = 1;
-					}
-				}
-			}
-		}
-	}
+  for (int i= 0;i<8;++i){
+    auto type = toplevel.getType();
+    if (type=='m'){
+      short xhalf = i%2;
+      short yhalf = (i%4) >= 2;
+      short zhalf = i>=4;
+      auto element = toplevel.get(xhalf,yhalf,zhalf);
+      treetomatrix(matrix,
+             element,
+             offx+dimx/2*xhalf,
+             offy+dimy/2*yhalf,
+             offz+dimz/2*zhalf,
+             dimx/2, dimy/2, dimz/2);
+    } else if(type=='e'){
+      int dim = this->getResolution()[0];
+      for (int z=offz; z<offz+dimz; ++z){
+        for (int y=offy;y<offy+dimy; ++y){
+          for (int x=offx; x<offx+dimx; ++x){
+            matrix[z*dim*dim+y*dim+x] = 0;
+          }
+        }
+      }
+    } else {
+      int dim = this->getResolution()[0];
+      for (int z=offz;z<offz+dimz;++z){
+        for (int y=offy;y<offy+dimy;++y){
+          for (int x=offx;x<offx+dimx;++x){
+            matrix[z*dim*dim+y*dim+x] = 1;
+          }
+        }
+      }
+    }
+  }
 }
 
 
 std::vector<char> Space::getMatrix(){
-	int res = this->getResolution()[0];//assume uniform size
-	auto chunkres = pow(2,max_depth);
-	//target matrix for tree to vector conversion
-	std::vector<char> gridmatrix;
-	gridmatrix.resize(pow(res,3));
-	
-	for(size_t x = 0; x < n_gridsteps[0]; x++){
-	  for(size_t y = 0; y < n_gridsteps[1]; y++){
-		for(size_t z = 0; z < n_gridsteps[2]; z++){
-			treetomatrix(gridmatrix,
-						 getElement(x, y, z),
-						 x*chunkres,
-						 y*chunkres,
-						 z*chunkres,
-						 chunkres,
-						 chunkres,
-						 chunkres
-			);
-		}
-	  }
-	}
-	
-	return gridmatrix;
+  auto chunkres = pow(2,max_depth);
+  //target matrix for tree to vector conversion
+  std::vector<char> gridmatrix;
+  int res = this->getResolution()[0];//assume uniform size
+  gridmatrix.resize(pow(res,3));
+  
+  for(size_t x = 0; x < n_gridsteps[0]; x++){
+    for(size_t y = 0; y < n_gridsteps[1]; y++){
+      for(size_t z = 0; z < n_gridsteps[2]; z++){
+        treetomatrix(gridmatrix,
+             getElement(x, y, z),
+             x*chunkres,
+             y*chunkres,
+             z*chunkres,
+             chunkres,
+             chunkres,
+             chunkres
+        );
+      }
+    }
+  }
+  return gridmatrix;
 }
 
 //the number of voxels at lowest tree level in one dimension
 std::array<double,3> Space::getResolution(){
-	std::array<double,3> size;
-	for(int dim = 0; dim < 3; dim++){
-		size[dim] = n_gridsteps[dim]*pow(2,max_depth);
-	}
+  std::array<double,3> size;
+  for(int dim = 0; dim < 3; dim++){
+    size[dim] = n_gridsteps[dim]*pow(2,max_depth);
+  }
   return size;
 }
 
