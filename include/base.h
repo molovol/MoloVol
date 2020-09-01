@@ -13,6 +13,7 @@
 #include <tuple>
 #include <unordered_map>
 #include "wxVolumeRenderer.h"
+#include <map>
 
 class MainApp: public wxApp
 {
@@ -38,8 +39,8 @@ class MainFrame: public wxFrame
     double getGridsize();
     int getDepth();
     double getProbeRadius();
-    void enableGuiElements(bool inp); // method to turn on and off gui elements upon start and completion of calc
-    //
+    void enableGuiElements(bool inp); // method to turn on and off interactable gui elements
+    
     void displayAtomList(std::vector<std::tuple<std::string, int, double>> symbol_number_radius);
     std::string generateChemicalFormulaFromGrid();
     std::unordered_map<std::string, double> generateRadiusMap();
@@ -80,6 +81,13 @@ class MainFrame: public wxFrame
         wxTextCtrl* outputText;
         wxButton* calcButton;
 
+    // set and manipulate gui interactivity
+    void InitDefaultStates();
+    std::map<wxWindow*, bool> default_states;
+    void setDefaultState(wxWindow*, bool);
+    void toggleOptionsPdb();
+    void toggleButtons();
+
     // methods to initialise gui
     void InitTopLevel();
     void InitLeftMainPanel();
@@ -95,9 +103,7 @@ class MainFrame: public wxFrame
     void InitGridinputPanel();
     void InitDepthPanel();
     void InitSandr();
-
-//    wxStaticBoxSizer *atomListSizer;
-
+    
     // methods to handle events
     void OnExit(wxCommandEvent& event);
     void OnPrint(wxCommandEvent& event);
@@ -105,7 +111,7 @@ class MainFrame: public wxFrame
     void OnAtomBrowse(wxCommandEvent& event);
     void OnRadiusBrowse(wxCommandEvent& event);
     void OnLoadFiles(wxCommandEvent& event);
-    void OnBrowse(std::string& filetype, wxTextCtrl* textbox);
+    void OnBrowse(wxCommandEvent& event, std::string& filetype, wxTextCtrl* textbox);
     void GridChange(wxGridEvent& event);
 
     // colours
