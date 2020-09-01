@@ -59,7 +59,13 @@ wxVolumeRenderer::wxVolumeRenderer(wxFrame* parent,
 #define MAX_SOURCE_SIZE (0x100000)
 unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, unsigned int width, unsigned int height){
 	//tmp input matrix
+	auto matrix_start = std::chrono::high_resolution_clock::now();
 	std::vector<uint8_t> inputmatrixvector = Ctrl::getInstance()->getModel()->getMatrix();
+	auto matrix_end = std::chrono::high_resolution_clock::now();
+	std::cout << "Time for octrees to matrix conversion "
+			  << std::chrono::duration<double, std::milli>(matrix_end-matrix_start).count()
+			  <<  " ms" << std::endl;
+	
 	//auto dim = Ctrl::getInstance()->getModel()->cell->getResolution();
 	cl_int size_inputmatrix = cl_int(inputmatrixvector.size());
 	const cl_int data_res = Ctrl::getInstance()->getModel()->getResolution()[0];
@@ -294,7 +300,7 @@ unsigned char* wxVolumeRenderer::createImageGPU(std::string const& kernelpath, u
 	clReleaseContext(context);
 	
 	auto t_end = std::chrono::high_resolution_clock::now();
-	std::cout << "Parallel time using OpenCL"
+	std::cout << "Parallel time using OpenCL "
 			  << std::chrono::duration<double, std::milli>(t_end-t_start).count()
 			  <<  " ms" << std::endl;
 	
