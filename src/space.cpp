@@ -130,12 +130,10 @@ std::vector<uint8_t> Space::getMatrix(){
 }
 
 //the number of voxels at lowest tree level in one dimension
-std::array<double,3> Space::getResolution(){
-  std::array<double,3> size;
-  for(int dim = 0; dim < 3; dim++){
-    size[dim] = n_gridsteps[dim]*pow(2,max_depth);
-  }
-  return size;
+std::array<unsigned int,3> Space::getResolution() const{
+	return {static_cast<unsigned int>(n_gridsteps[0]*pow(2,max_depth)),
+		static_cast<unsigned int>(n_gridsteps[1]*(int)pow(2,max_depth)),
+		static_cast<unsigned int>(n_gridsteps[2]*(int)pow(2,max_depth))};
 }
 
 Voxel& Space::getElement(const size_t &i){
