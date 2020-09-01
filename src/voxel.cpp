@@ -26,7 +26,9 @@ Voxel::Voxel(){
 ////////////
 
 Voxel& Voxel::get(const short x, const short y, const short z){
-  assert(x*y*z < 8);
+  assert(x<2);
+  assert(y<2);
+  assert(z<2);
   return data[4 * z + 2 * y + x];
 }
 
