@@ -115,12 +115,11 @@ void Space::treetomatrix(std::vector<char> &matrix, Voxel& toplevel, int offx, i
 
 
 std::vector<char> Space::getMatrix(){
-  auto chunkres = pow(2,max_depth);
   //target matrix for tree to vector conversion
   std::vector<char> gridmatrix;
-  int res = this->getResolution()[0];//assume uniform size
-  gridmatrix.resize(pow(res,3));
-  
+  gridmatrix.resize(n_gridsteps[0]*n_gridsteps[1]*n_gridsteps[2]);//hold three dimensions with this size
+  //number of cells on a chunk in one dimension
+  auto chunkres = pow(2,max_depth);
   for(size_t x = 0; x < n_gridsteps[0]; x++){
     for(size_t y = 0; y < n_gridsteps[1]; y++){
       for(size_t z = 0; z < n_gridsteps[2]; z++){
