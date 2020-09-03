@@ -103,7 +103,8 @@ bool Ctrl::runCalculation(){
   const double r_probe = gui->getProbe1Radius();
   // set space size (size of box containing all atoms)
   current_calculation->defineCell(grid_step, max_depth);
-  current_calculation->findCloseAtoms(r_probe);
+  
+  current_calculation->linkAtomsToAdjacentAtoms(r_probe);
 
   // generate result report
   std::vector<std::string> parameters;

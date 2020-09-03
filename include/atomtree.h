@@ -29,6 +29,7 @@ class AtomTree{
     const double getMaxRad() const;
     void print() const;
 
+    std::vector<Atom*> findAdjacent(const Atom&, const double&);
   private:
     AtomNode* root;
     double max_rad;

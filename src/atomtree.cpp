@@ -1,6 +1,8 @@
 
 #include "atomtree.h"
 #include "atom.h"
+#include "misc.h"
+#include <cmath>
 
 ///////////////////
 // AUX FUNCTIONS //
@@ -41,6 +43,10 @@ void AtomNode::print(){
 //////////////
 // ATOMTREE //
 //////////////
+
+/////////////////
+// CONSTRUCTOR //
+/////////////////
 
 AtomTree::AtomTree(){
   root = NULL;
@@ -133,6 +139,53 @@ void AtomTree::swap(Atom& a, Atom& b){
   a = b;
   b = temp;
   return;
+}
+
+/////////////////////
+// DATA GENERATION //
+/////////////////////
+
+void findAdjacentRecursive(std::vector<Atom*>&, const Atom&, const double& shell_to_shell_dist, const double& min_distance, const AtomNode* node, int dim);
+std::vector<Atom*> AtomTree::findAdjacent(const Atom& at, const double& shell_to_shell_dist){
+  std::vector<Atom*> list_of_adjacent;
+  int dim = 0;
+  double min_distance = at.rad + max_rad + shell_to_shell_dist;
+
+  findAdjacentRecursive(list_of_adjacent, at, shell_to_shell_dist, min_distance, root, dim);
+  
+  return list_of_adjacent;
+}
+
+void findAdjacentRecursive(
+    std::vector<Atom*>& list_of_adjacent, 
+    const Atom& atom,
+    const double& shell_to_shell_dist,
+    const double& min_distance,
+    const AtomNode* node, 
+    int dim){
+  
+  if (node == NULL) {return;}
+  Atom* test_atom = node->atom; // for easier access
+  double dist1D = distance(test_atom->getPos(), atom.getPos(), dim);
+  
+  if (abs(dist1D) > min_distance){ // if atom is very far from test atom
+    findAdjacentRecursive(
+        list_of_adjacent,
+        atom,
+        shell_to_shell_dist,
+        min_distance,
+        dist1D < 0 ? node->left_child : node->right_child,
+        (dim+1)%3);
+  }
+  else{ // if atom is close enough to test atom that is could be adjacent
+    double dist_at_at = distance(atom.getPos(), test_atom->getPos());
+    if (dist_at_at < (atom.rad + test_atom->rad + shell_to_shell_dist)){ // if test atom is adjacent
+      list_of_adjacent.push_back(test_atom);
+    }
+    for (AtomNode* child : {node->left_child, node->right_child}){
+      findAdjacentRecursive(list_of_adjacent, atom, shell_to_shell_dist, min_distance, child, (dim+1)%3);
+    }
+  }
 }
 
 ////////////

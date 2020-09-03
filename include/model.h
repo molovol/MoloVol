@@ -36,7 +36,8 @@ class Model{
     void defineCell(const double&, const int&);
     void setAtomListForCalculation(const std::vector<std::string>&, bool);
     void storeAtomsInTree();
-    void findCloseAtoms(const double&); //TODO
+    void linkAtomsToAdjacentAtoms(const double&);
+    void linkToAdjacentAtoms(const double&, Atom&);
     void calcVolume();
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void setRadiusMap(std::unordered_map<std::string, double> map);
