@@ -72,15 +72,6 @@ void Model::linkAtomsToAdjacentAtoms(const double& r_probe){
   for (Atom& at : atoms){
     linkToAdjacentAtoms(r_probe, at);
   }
-
-  int i = 1;
-  for (Atom& at : atoms){
-    std::cout << i << ": " << at.symbol << std::endl;
-    for (Atom* adj_at : at.adjacent_atoms){
-      std::cout << adj_at->symbol << ": " << distance(at.getPos(), adj_at->getPos()) << std::endl;
-    }
-    i++;
-  }
 }
 
 void Model::calcVolume(){
