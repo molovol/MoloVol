@@ -2,6 +2,7 @@
 #include "model.h"
 #include "controller.h"
 #include "atom.h"
+#include "misc.h"
 #include "special_chars.h"
 #include <array>
 #include <string>
@@ -58,9 +59,28 @@ void Model::storeAtomsInTree(){
   atomtree = AtomTree(atoms);
 }
 
-void Model::findCloseAtoms(const double& r_probe){
-  //TODO
-  return;
+void Model::linkToAdjacentAtoms(const double& r_probe, Atom& at){
+  if (at.adjacent_atoms.empty()){
+    at.adjacent_atoms = atomtree.findAdjacent(at, 2*r_probe);
+    for (Atom* adjacent_at : at.adjacent_atoms){
+      linkToAdjacentAtoms(r_probe, *adjacent_at);
+    }
+  }
+}
+
+void Model::linkAtomsToAdjacentAtoms(const double& r_probe){
+  for (Atom& at : atoms){
+    linkToAdjacentAtoms(r_probe, at);
+  }
+
+  int i = 1;
+  for (Atom& at : atoms){
+    std::cout << i << ": " << at.symbol << std::endl;
+    for (Atom* adj_at : at.adjacent_atoms){
+      std::cout << adj_at->symbol << ": " << distance(at.getPos(), adj_at->getPos()) << std::endl;
+    }
+    i++;
+  }
 }
 
 void Model::calcVolume(){

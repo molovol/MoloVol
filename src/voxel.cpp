@@ -43,11 +43,11 @@ char Voxel::getType(){
 // SET TYPE //
 //////////////
 
-char Voxel::determineType
-   (std::array<double,3> vxl_pos, // voxel centre
-   const double& grid_size,
-   const double max_depth,
-   const AtomTree& atomtree)
+char Voxel::determineType(
+    std::array<double,3> vxl_pos, // voxel centre
+    const double& grid_size,
+    const double max_depth,
+    const AtomTree& atomtree)
 {
   double at_rad = atomtree.getMaxRad();
   double vxl_rad = calcSphereOfInfluence(grid_size, max_depth);
