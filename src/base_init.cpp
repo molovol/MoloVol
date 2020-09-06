@@ -23,6 +23,32 @@ bool MainApp::OnInit()
   return true;
 };
 
+
+// set default states of GUI elements here
+void MainFrame::InitDefaultStates(){
+  // set default accessibility of interactable gui controls  
+  wxWindow* widgets_enabled[] = {
+    browseButton,
+    radiusButton,
+    filepathText,
+    radiuspathText,
+    atomListGrid,
+    gridsizeInputText,
+    depthInput};
+  wxWindow* widgets_disabled[] = {
+    pdbHetatmCheckbox,
+    loadFilesButton,
+    calcButton};
+  
+  // initialise map
+  for (auto i : widgets_enabled){
+    default_states[i] = true;
+  }
+  for (auto i : widgets_disabled){
+    default_states[i] = false;
+  }
+}
+
 ////////////////////////////////////
 // INITIALISATION OF GUI ELEMENTS //
 ////////////////////////////////////
@@ -58,7 +84,8 @@ void MainFrame::InitTopLevel(){
   topLevelSizerH->Add(leftMainPanel,1,wxRIGHT | wxEXPAND,5);
   topLevelSizerH->Add(rightMainPanel,1,wxLEFT | wxEXPAND,5);
   SetSizerAndFit(topLevelSizerH);
-
+  
+  InitDefaultStates();
 }
 
 /////////////////////////
@@ -208,8 +235,6 @@ void MainFrame::InitAtomfilePanel(){
 								wxDefaultSize,
 								0,
 								wxDefaultValidator);
-	//for dark mode
-	filepathText->SetBackgroundColour(col_white);
 
   SetSizerFilePanel(atomfilePanel, browseButton, filepathText);
 }
@@ -221,8 +246,6 @@ void MainFrame::InitRadiusfilePanel(){
   radiuspathText = new wxTextCtrl(radiusfilePanel,
 								  TEXT_Radius,
 								  "./inputfile/radii.txt");
-	//for dark mode
-	radiuspathText->SetBackgroundColour(col_white);
 
   SetSizerFilePanel(radiusfilePanel, radiusButton, radiuspathText);
 }
@@ -310,7 +333,6 @@ void MainFrame::InitGridPanel(){
 void MainFrame::InitGridinputPanel(){
 
   gridsizeInputText = new wxTextCtrl(gridsizeInputPanel, TEXT_Gridinput, "0.1");
-  gridsizeInputText->SetBackgroundColour(col_white);
 
   gridsizeUnitText = new wxStaticText(gridsizeInputPanel, TEXT_Gridunit, L"\u212B "); // unicode for angstrom
 
@@ -328,7 +350,6 @@ void MainFrame::InitDepthPanel(){
 
   depthInput = new wxSpinCtrl
     (depthPanel, SPIN_Depthinput, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 20, 4);
-  depthInput->SetBackgroundColour(col_white);
 
   wxBoxSizer *depthSizer = new wxBoxSizer(wxHORIZONTAL);
   depthSizer->Add(depthText,0,wxALIGN_CENTRE_VERTICAL | wxALL,10);

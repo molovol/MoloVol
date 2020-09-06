@@ -68,7 +68,6 @@ void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>
     atomListGrid->SetCellValue(row, 3, std::to_string(std::get<2>(symbol_number_radius[row])));
     // column 0 (include checkbox)
     // if no radius is found for the element, color cells to point it to the user
-    // TODO: need to see if the colors can be automatically handled in base_event
     if (std::wcstod(atomListGrid->GetCellValue(row, 3), NULL) == 0){
       atomListGrid->SetCellBackgroundColour(row, 1, col_grey_cell);
       atomListGrid->SetCellBackgroundColour(row, 2, col_grey_cell);
@@ -79,7 +78,7 @@ void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>
     }
     // refresh the grid to enforce the update of cell values and parameters
     // without this, it was sometimes observed that the last cell was not updated properly
-    atomListGrid->Refresh();
+    atomListGrid->ForceRefresh();
   }
 }
 

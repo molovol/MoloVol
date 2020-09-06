@@ -4,6 +4,7 @@ bin/
 *.swp
 inputfile/*
 !inputfile/acetylene.xyz
+!inputfile/6s8y.xyz
 !inputfile/radii.txt
 .DS_store
 *.dSYM/Contents/Info.plist
