@@ -43,7 +43,7 @@ Now you're ready to compile. Simply run:
 
 This step will take a while. Once compilation has finished, you can place the library files in your system's default library folder.
 
-`$ make`
+`$ make install`
 
 You can check whether your installation was successful by running the `wx-config` command.
 
