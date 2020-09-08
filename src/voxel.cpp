@@ -57,7 +57,7 @@ char Voxel::determineType(
   if(type == 'm'){
     // TODO define method for this part Voxel::splitVoxel()
     // split into 8 subvoxels
-	short resultcount = 0;
+	  short resultcount = 0;
     for(int i = 0; i < 8; i++){
       data.push_back(Voxel());
       // modify position
@@ -113,7 +113,6 @@ void Voxel::traverseTree
       traverseTree(node->right_child, (dim+1)%3, at_rad, vxl_rad, vxl_pos, grid_size, max_depth);
     }
   }
-  return;
 }
 
 void Voxel::determineTypeSingleAtom
@@ -122,44 +121,27 @@ void Voxel::determineTypeSingleAtom
    const double& grid_size,
    const double max_depth)
 {
-  // only mixed and empty type voxels need to be considered
-  if(type == 'a'){
+  // return if voxel is already in atom 
+  if(type == 'a'){return;}
+
+  double dist_vxl_at = distance(vxl_pos, atom.getPos());
+
+  // if bottom level voxel: radius of influence = 0, i.e., treat like point
+  // if higher level voxel: radius of influence > 0
+  double radius_of_influence = 
+    max_depth != 0 ? pow(3,0.5)*(grid_size * pow(2,max_depth))/2 : 0; // TODO: avoid expensive pow function
+  
+  // is voxel inside atom? 
+  if(atom.rad > (dist_vxl_at + radius_of_influence)){ 
+    type = 'a'; // in atom
     return;
   }
-  if(max_depth == 0){ // for bottom level voxels
-
-    // check if centre is inside atom
-    double dist_vxl_at = distance(vxl_pos, atom.getPos());
-    if (atom.rad > dist_vxl_at){// voxel centre is inside atom radius
-      type = 'a';
-      return;
-    }
-    // else type remains unchanged, i.e., empty 
+  // is voxel partially inside atom?
+  else if(atom.rad > (dist_vxl_at - radius_of_influence)){
+    type = 'm'; // mixed
+    return;
+  // else type remains unchanged
   }
-  else{ // for higher level voxels
-    
-    // determine the radius of the sphere that contains the voxel
-    // the voxels side length is given by the grid_size (i.e. the side length
-    // of a bottom level voxel) multiplied with 2^max_depth. This value multiplied
-    // with the sqrt of 3 gives the diagonal of the voxel. The radius is half the
-    // diagonal.
-    double radius_of_influence = pow(3,0.5)*(grid_size * pow(2,max_depth))/2; // TODO: avoid expensive pow function
-
-    double dist_vxl_at = distance(vxl_pos, atom.getPos());
-    
-    // is voxel inside atom? 
-    if(atom.rad > (dist_vxl_at + radius_of_influence)){ 
-      type = 'a'; // in atom
-      return;
-    }
-    // is voxel partially inside atom?
-    else if(atom.rad > (dist_vxl_at - radius_of_influence)){
-      type = 'm'; // mixed
-      return;
-    }
-    // else type remains unchanged
-  }
-  return;
 }
 
 ///////////
