@@ -92,25 +92,20 @@ void Voxel::traverseTree
    const std::array<double,3> vxl_pos, 
    const double& grid_size, 
    const double& max_depth){
-  if (node == NULL){
-    return;
-  }
-  
-  std::array<double,3> at_pos = node->atom->getPos();
-  double dist1D = distance(at_pos, vxl_pos, dim);
 
-  // check if voxel is close enough to atom
-  if (abs(dist1D) > (vxl_rad + at_rad)){ // if not continue to next child
+  if (node == NULL){return;}
+  // distance between atom and voxel along one dimension
+  double dist1D = distance(node->atom->getPos(), vxl_pos, dim);
+
+  // is voxel close enough to atom?
+  if (abs(dist1D) > (vxl_rad + at_rad)){ // if not, continue to next child
       traverseTree(dist1D < 0 ? node->left_child : node->right_child,
 				   (dim+1)%3, at_rad, vxl_rad, vxl_pos, grid_size, max_depth);
   } else{ // if voxel is close enough, check distance to the node's atom. if needed,
     // continue with both children
     determineTypeSingleAtom(*(node->atom), vxl_pos, grid_size, max_depth);
-    if (type != 'a'){
-      traverseTree(node->left_child, (dim+1)%3, at_rad, vxl_rad, vxl_pos, grid_size, max_depth);
-    }
-    if (type != 'a'){
-      traverseTree(node->right_child, (dim+1)%3, at_rad, vxl_rad, vxl_pos, grid_size, max_depth);
+    for (AtomNode* child : {node->left_child, node->right_child}){
+      traverseTree(child, (dim+1)%3, at_rad, vxl_rad, vxl_pos, grid_size, max_depth);
     }
   }
 }
