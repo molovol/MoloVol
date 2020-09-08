@@ -49,37 +49,40 @@ char Voxel::determineType(
     const double max_depth,
     const AtomTree& atomtree)
 {
-  double at_rad = atomtree.getMaxRad();
-  double vxl_rad = calcSphereOfInfluence(grid_size, max_depth);
+  double r_at = atomtree.getMaxRad();
+  double r_vxl = calcSphereOfInfluence(grid_size, max_depth);
     
-  traverseTree(atomtree.getRoot(), 0, at_rad, vxl_rad, vxl_pos, grid_size, max_depth); 
+  traverseTree(atomtree.getRoot(), 0, r_at, r_vxl, vxl_pos, grid_size, max_depth); 
 
   if(type == 'm'){
-    // TODO define method for this part Voxel::splitVoxel()
-    // split into 8 subvoxels
-	  short resultcount = 0;
-    for(int i = 0; i < 8; i++){
-      data.push_back(Voxel());
-      // modify position
-      std::array<int,3> factors = {
-        (i%2) >= 1 ? 1 : -1,
-        (i%4) >= 2 ? 1 : -1,
-         i    >= 4 ? 1 : -1};
-     
-      std::array<double,3> new_pos;
-      for(int dim = 0; dim < 3; dim++){
-        new_pos[dim] = vxl_pos[dim] + factors[dim] * grid_size * std::pow(2,max_depth-2);//why -2?
-      }
-      resultcount += data[i].determineType(new_pos, grid_size, max_depth-1, atomtree);
-    }
-	  //determine if all children have the same type
-	  if (resultcount == 'a'*8){
-		  type = 'a';
-	  } else if (resultcount == 'e'*8) {
-		  type = 'e';
-	  }
+    splitVoxel(vxl_pos, grid_size, max_depth, atomtree);
   }
 	return type;
+}
+
+void Voxel::splitVoxel(const std::array<double,3>& vxl_pos, const double& grid_size, const double& max_depth, const AtomTree& atomtree){
+  // split into 8 subvoxels
+	short resultcount = 0;
+  for(int i = 0; i < 8; i++){
+    data.push_back(Voxel());
+    // modify position
+    std::array<int,3> factors = {
+      (i%2) >= 1 ? 1 : -1,
+      (i%4) >= 2 ? 1 : -1,
+       i    >= 4 ? 1 : -1};
+   
+    std::array<double,3> new_pos;
+    for(int dim = 0; dim < 3; dim++){
+      new_pos[dim] = vxl_pos[dim] + factors[dim] * grid_size * std::pow(2,max_depth-2);//why -2?
+    }
+    resultcount += data[i].determineType(new_pos, grid_size, max_depth-1, atomtree);
+  }
+	//determine if all children have the same type
+	if (resultcount == 'a'*8){
+	  type = 'a';
+	} else if (resultcount == 'e'*8) {
+	  type = 'e';
+	}
 }
 
 // use the properties of the binary tree to recursively traverse the tree and 
