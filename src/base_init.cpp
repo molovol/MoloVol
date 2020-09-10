@@ -1,3 +1,5 @@
+#include <filesystem>
+
 #include <wx/wxprec.h>
 
 #ifndef WX_PRECOMP
@@ -21,6 +23,14 @@ bool MainApp::OnInit(){
   // call member function of the MainFrame object to set visibility
   MainWin->Show(true);
   SetTopWindow(MainWin);
+  std::filesystem::path working_directory_exe = (wxGetApp().argv[0]).ToStdString();
+  working_directory_exe = working_directory_exe.parent_path();
+  std::error_code ec;
+  current_path(working_directory_exe, ec);
+	if (ec.value()!=0){
+		std::cout << "Failed changing wd"<<ec;
+	}
+		
   return true;
 };
 

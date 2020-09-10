@@ -41,7 +41,7 @@ wxVolumeRenderer::wxVolumeRenderer(wxFrame* parent,
 						   wxBitmapType format) : wxPanel(parent){
 	auto width = 512;
 	auto height = 512;
-	uint8_t* colormatrix = createImageGPU("../res/renderkernel.cl", width, height);
+	uint8_t* colormatrix = createImageGPU("./res/renderkernel.cl", width, height);
 	if (colormatrix==NULL) {
 		throw std::runtime_error("Image could not be generated using OpenCL.");
 	}
