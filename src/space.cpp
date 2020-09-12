@@ -152,13 +152,10 @@ Space::Space(std::vector<Atom> &atoms, const double& bottom_level_voxel_dist, co
 // three cartesian directions out of all atoms. Also finds max
 // radius of all atoms and sets the space boundaries slightly so
 // that all atoms fit the space.
-//void Space::findMinMaxFromAtoms
-void Space::setBoundaries
-  (std::vector<Atom> &atoms)
-{
+void Space::setBoundaries(const std::vector<Atom> &atoms){
   double max_radius = 0;
   for(int at = 0; at < atoms.size(); at++){
-    std::array<double,3> atom_pos = {atoms[at].pos_x, atoms[at].pos_y, atoms[at].pos_z}; // atom positions are correct
+    std::array<double,3> atom_pos = atoms[at].getPos();
   
     // if we are at the first atom, then the atom position is min/max by default
     if(at == 0){
