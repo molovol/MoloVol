@@ -29,7 +29,7 @@ class Space{
     std::array <double,3> cart_min; // this is also the "origin" of the space
     std::array <double,3> cart_max;
     // member function for constructor
-    void setBoundaries(std::vector<Atom> &atoms);
+    void setBoundaries(const std::vector<Atom>&);
   
     std::vector<Voxel> grid;
     std::array<size_t,3> n_gridsteps; // i think top level voxel?
