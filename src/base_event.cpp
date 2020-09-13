@@ -37,6 +37,7 @@ void MainFrame::OnPrint(wxCommandEvent& event){
 }
 
 void MainFrame::showRendering(){
+	#ifdef VOXELRENDERER
 	//show rendering
 	auto width = 512;
 	auto height = 512;
@@ -50,6 +51,7 @@ void MainFrame::showRendering(){
 	}
 	frame->SetSizer(sizer);
 	frame->Show();
+	#endif
 }
 
 // begin calculation

@@ -10,6 +10,8 @@
 #    include <CL/cl.h>
 #endif
 
+#define VOXELRENDERER true
+
 #include <wx/wxprec.h>
 
 #ifndef WX_PRECOMP

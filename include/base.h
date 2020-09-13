@@ -12,7 +12,9 @@
 #include <vector>
 #include <tuple>
 #include <unordered_map>
+#if __has_include("wxVolumeRenderer.h")
 #include "wxVolumeRenderer.h"
+#endif
 #include <map>
 
 class MainApp: public wxApp
@@ -66,7 +68,9 @@ class MainFrame: public wxFrame
         wxGrid* atomListGrid;
 
 	wxFrame *frame;
+	#if __has_include("wxVolumeRenderer.h")
 	wxVolumeRenderer * drawPane;
+	#endif
     wxPanel* rightMainPanel;
       wxPanel* parameterPanel;
         wxPanel* gridsizePanel;

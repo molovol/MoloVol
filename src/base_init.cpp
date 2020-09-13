@@ -7,7 +7,9 @@
 #endif
 
 #include "base.h"
+#if __has_include("wxVolumeRenderer.h")
 #include "wxVolumeRenderer.h"
+#endif
 
 
 IMPLEMENT_APP(MainApp)
