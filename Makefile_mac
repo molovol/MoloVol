@@ -1,8 +1,9 @@
-
 CC := g++
 SRCDIR := src
 BUILDDIR := build
 BINDIR := bin
+RESDIR := bin/res
+RESSRC := res
 TARGET := bin/ballpit
 
 SRCEXT := cpp
@@ -12,23 +13,21 @@ CXXFLAGS := -O0 -g -std=c++17 -Wall -Werror
 CFLAGS := -O0 -g -std=c++17 -Wno-unused-command-line-argument
 INC := -I include
 
-.PHONY: clean bin/images
+.PHONY: clean
 	
 $(TARGET): $(OBJECTS)
 	@echo " Linking..."
 	mkdir -p $(BINDIR)
 	$(CC) $(CXXFLAGS) $^ `wx-config --cxxflags --libs` -framework OpenCL -o $(TARGET)
+	@echo " rsync -rupE $(RESSRC) $(BINDIR)"; rsync -rupE $(RESSRC) $(BINDIR)
 
-bin/res:
-	rsync -rupE res bin/
-	
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	@mkdir -p $(BUILDDIR)
 	$(CC) $(CFLAGS) $(INC) -c `wx-config --cxxflags --libs` -o $@ $<
 
-
 clean:
 	@echo " Cleaning..."; 
 	@echo " $(RM) -r $(BUILDDIR) $(TARGET)"; $(RM) -r $(BUILDDIR) $(TARGET)
+	@echo " $(RM) -rf $(RESDIR)"; $(RM) -rf $(RESDIR)
 
 
