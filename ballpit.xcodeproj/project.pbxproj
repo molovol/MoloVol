@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A602FEFE250E44B700EF778E /* renderkernel.cl in CopyFiles */ = {isa = PBXBuildFile; fileRef = A6D93AA324F1202C00D34026 /* renderkernel.cl */; };
 		A664904C24F8164F006DD0AA /* misc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A664904B24F8164F006DD0AA /* misc.cpp */; };
 		A6D93AA924F1224A00D34026 /* renderkernel.cl in Sources */ = {isa = PBXBuildFile; fileRef = A6D93AA324F1202C00D34026 /* renderkernel.cl */; };
 		A6D93AAE24F12A2F00D34026 /* wxVolumeRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A6D93AAD24F12A2F00D34026 /* wxVolumeRenderer.cpp */; };
@@ -38,12 +39,13 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		A62DCA7124ED9D9700EF2D2E /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
+			buildActionMask = 12;
+			dstPath = res;
+			dstSubfolderSpec = 16;
 			files = (
+				A602FEFE250E44B700EF778E /* renderkernel.cl in CopyFiles */,
 			);
-			runOnlyForDeploymentPostprocessing = 1;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
