@@ -4,6 +4,11 @@
 //
 //  Created by Benedikt Stefan Vogler on 20.08.20.
 //
+#if __has_include(<OpenCL/opencl.h>)
+#    include <OpenCL/opencl.h>
+#else
+#    include <CL/cl.h>
+#endif
 
 #include <wx/wxprec.h>
 
@@ -11,11 +16,6 @@
 #  include <wx/wx.h>
 #endif
 
-#ifdef __APPLE__
-#include <OpenCL/opencl.h>
-#else
-#include <CL/cl.h>
-#endif
 
 #include <chrono>
 #include <iostream>
