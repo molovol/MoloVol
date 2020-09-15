@@ -24,6 +24,7 @@ void Space::placeAtomsInGrid(const AtomTree& atomtree){
       vxl_pos[1] = vxl_origin[1] + vxl_dist * (0.5 + y);
       for(size_t z = 0; z < n_gridsteps[2]; z++){
         vxl_pos[2] = vxl_origin[2] + vxl_dist * (0.5 + z);
+        // voxel position is deliberately not stored in voxel object to reduce memory cost
         getElement(x,y,z).determineType(vxl_pos, grid_size, max_depth, atomtree);
       }
     }

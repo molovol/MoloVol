@@ -15,14 +15,6 @@ class Voxel{
     Voxel& access(const short& i);
     char getType();
 
-   /* replaced by other determineType function
-    void determineType
-      (const std::vector<Atom>& atoms, 
-       std::array<double,3> pos,
-       const double& grid_size,
-       const double max_depth);
-    */
-
     char determineType(
         std::array<double,3> pos,
         const double& grid_size,
