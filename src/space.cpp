@@ -16,13 +16,14 @@ void Space::placeAtomsInGrid(const AtomTree& atomtree){
   // calculate side length of top level voxel
   const double vxl_dist = grid_size * pow(2,max_depth);
   
+  std::array<double,3> vxl_pos;
+
   for(size_t x = 0; x < n_gridsteps[0]; x++){
+    vxl_pos[0] = vxl_origin[0] + vxl_dist * (0.5 + x);
     for(size_t y = 0; y < n_gridsteps[1]; y++){
+      vxl_pos[1] = vxl_origin[1] + vxl_dist * (0.5 + y);
       for(size_t z = 0; z < n_gridsteps[2]; z++){
-		// origin of the cell has to be offset by half the grid size
-        std::array<double,3> vxl_pos = {vxl_origin[0] + vxl_dist/2 + vxl_dist * x,
-										vxl_origin[1] + vxl_dist/2 + vxl_dist * y,
-										vxl_origin[2] + vxl_dist/2 + vxl_dist * z};
+        vxl_pos[2] = vxl_origin[2] + vxl_dist * (0.5 + z);
         getElement(x,y,z).determineType(vxl_pos, grid_size, max_depth, atomtree);
       }
     }
