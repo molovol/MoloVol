@@ -10,7 +10,7 @@
 ///////////////////
 
 inline double calcSphereOfInfluence(const double& grid_size, const double& max_depth){
-  return pow(3,0.5)*(grid_size * pow(2,max_depth))/2; // TODO: avoid expensive pow function
+  return 0.70710678118 * grid_size * (pow(2,max_depth)-1);
 }
 
 /////////////////
