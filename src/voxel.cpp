@@ -50,7 +50,7 @@ char Voxel::determineType(
     const AtomTree& atomtree)
 {
   double r_at = atomtree.getMaxRad();
-  double r_vxl = calcSphereOfInfluence(grid_size, max_depth);
+  double r_vxl = calcSphereOfInfluence(grid_size, max_depth); // calculated every time, since max_depth may change
     
   traverseTree(atomtree.getRoot(), 0, r_at, r_vxl, vxl_pos, grid_size, max_depth); 
 
