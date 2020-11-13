@@ -1,6 +1,6 @@
-# CaVol<img src="https://user-images.githubusercontent.com/65410083/89782147-00a79400-db15-11ea-8ca6-d545902d1aff.png" width="250" ALIGN="right">
+# MoloVol<img src="https://user-images.githubusercontent.com/65410083/99060370-3a6ab980-25a0-11eb-8f39-92e7af993223.png" width="250" ALIGN="right">
 
-Cavol is a free, cross-plattform, scientific software for volume and surface computations of single molecules and crystallographic unit cells.
+MoloVol is a free, cross-plattform, scientific software for volume and surface computations of single molecules and crystallographic unit cells.
 
 ## Utility
 With the CaVol software we aim to combine an intuitive and easy-to-use user interface with powerful computing algorithms. We want the software to serve a broad range of scientist by being easily accessible on all common platforms.
@@ -65,7 +65,7 @@ If you ever wish to remove the installation, run the following command from your
 
 You will need to install Git if you havent already. Visit https://git-scm.com. Once you have Git installed on your computer you can clone the respository to download all files to your local machine.
 
-`$ git clone https://github.com/jmaglic/ballpit`
+`$ git clone https://github.com/jmaglic/MoloVol`
 
 If you have all dependencies installed, you should be able to easily compile the program by running:
 
@@ -73,11 +73,11 @@ If you have all dependencies installed, you should be able to easily compile the
 
 The compiled executable will be placed in the `bin` folder.
 
-`$ bin/ballpit`
+`$ bin/MoloVol`
 
 ## Getting Help
 If you wish to report a bug or request a feature go to the project's GitHub:
-https://github.com/jmaglic/ballpit/issues
+https://github.com/jmaglic/MoloVol/issues
 
 ## Development Team
 The development is currently lead by Jasmin B. Maglic and Roy Lavendomme.
