@@ -14,6 +14,7 @@ class Ctrl{
     bool runCalculation();
     void registerView(MainFrame* inp_gui);
     static Ctrl* getInstance();
+    void getGuiParameters(std::vector<std::string>&);
     void notifyUser(std::string str);
 
   private:
