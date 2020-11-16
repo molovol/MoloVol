@@ -19,11 +19,22 @@ class Model{
     bool readAtomsFromFile(const std::string&, bool);
     void readFileXYZ(const std::string&);
     void readFilePDB(const std::string&, bool);
+    bool getSymmetryElements(std::string, std::vector<int>&, std::vector<double>&);
+    bool createOutputFolder();
+    void createReport(std::string, std::vector<std::string>);
+    void writeXYZfile(std::vector<std::tuple<std::string, double, double, double>>&, std::string);
+    bool processUnitCell(double, double, double, double);
+    void orthogonalizeUnitCell();
+    bool symmetrizeUnitCell();
+    void moveAtomsInsideCell();
+    void removeDuplicateAtoms();
+    void generateSupercell(double);
+    void generateUsefulAtomMapFromSupercell(double);
     inline double findRadiusOfAtom(const std::string&);
     inline double findRadiusOfAtom(const Atom&); //TODO has not been tested
     // calls the Space constructor and creates a cell containing all atoms. Cell size is defined by atom positions
     void defineCell(const double&, const int&);
-    void setAtomListForCalculation(const std::vector<std::string>&);
+    void setAtomListForCalculation(const std::vector<std::string>&, bool);
     void storeAtomsInTree();
     void findCloseAtoms(const double&); //TODO
     void calcVolume();
@@ -31,7 +42,12 @@ class Model{
     void setRadiusMap(std::unordered_map<std::string, double> map);
     void debug();
   private:
+    std::string output_folder = "./"; // default folder is the program folder but it is changed with the output file routine
     std::vector<std::tuple<std::string, double, double, double>> raw_atom_coordinates;
+    std::vector<std::tuple<std::string, double, double, double>> processed_atom_coordinates;
+    double cell_param[6]; // unit cell parameters in order: A, B, C, alpha, beta, gamma
+    double cart_matrix[3][3]; // cartesian coordinates of vectors A, B, C
+    std::string space_group;
     std::unordered_map<std::string, double> raw_radius_map;
     std::unordered_map<std::string, double> radius_map;
     std::unordered_map<std::string, int> elem_Z;

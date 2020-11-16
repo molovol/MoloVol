@@ -44,9 +44,25 @@ int MainFrame::getDepth(){
   return depthInput->GetValue();
 }
 
-//* get from user input
-double MainFrame::getProbeRadius(){
-  return r_probe;
+bool MainFrame::getAnalyzeUnitCell(){
+  return unitCellCheckbox->GetValue();
+}
+
+bool MainFrame::getProbeMode(){
+  return twoProbesCheckbox->GetValue();
+}
+
+double MainFrame::getProbe1Radius(){
+  return std::stod(probe1InputText->GetValue().ToStdString());
+}
+
+double MainFrame::getProbe2Radius(){
+  if(getProbeMode()){
+    return std::stod(probe2InputText->GetValue().ToStdString());
+  }
+  else{ // when the probe mode is set to one probe, the second probe radius is considered null
+    return 0;
+  }
 }
 
 void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>> symbol_number_radius){
@@ -118,6 +134,20 @@ std::unordered_map<std::string, double> MainFrame::generateRadiusMap(){
     }
   }
   return radius_map;
+}
+
+double MainFrame::getMaxRad(){
+  double max_rad = 0;
+  double radius = 0;
+  for (int i = 0; i < atomListGrid->GetNumberRows(); i++){
+    if (atomListGrid->GetCellValue(i,0) == "1"){
+      atomListGrid->GetCellValue(i,3).ToDouble(&radius);
+      if (radius > max_rad){
+        max_rad = radius;
+      }
+    }
+  }
+  return max_rad;
 }
 
 std::vector<std::string> MainFrame::getIncludedElements(){
