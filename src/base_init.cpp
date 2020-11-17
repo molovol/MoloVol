@@ -15,7 +15,7 @@ IMPLEMENT_APP(MainApp)
 bool MainApp::OnInit()
 {
   // initialise a new MainFrame object and have MainWin point to that object
-  MainFrame* MainWin = new MainFrame(_("CaVol"), wxDefaultPosition, wxDefaultSize);
+  MainFrame* MainWin = new MainFrame(_("MoloVol"), wxDefaultPosition, wxDefaultSize);
   MainWin->SetBackgroundColour(col_win);
   // call member function of the MainFrame object to set visibility
   MainWin->Show(true);
@@ -378,11 +378,11 @@ void MainFrame::InitProbe1InputPanel(){
 
   probe1InputText = new wxTextCtrl(probe1InputPanel, TEXT_Probe1Input, "1.2");
 
-  probe1UnitText = new wxStaticText(probe1InputPanel, TEXT_Probe1Unit, L"\u212B (use 1.4 \u212B to approximate the radius of a water molecule)"); // unicode for angstrom, biochemists often use a probe corresponding to a molecule of water
+  probe1UnitText = new wxStaticText(probe1InputPanel, TEXT_Probe1Unit, L"\u212B  (note: approximate H\u2082O radius = 1.4 \u212B)  "); // unicode for angstrom, biochemists often use a probe corresponding to a molecule of water
 
   wxBoxSizer *probe1Inputsizer = new wxBoxSizer(wxHORIZONTAL);
   probe1Inputsizer->Add(probe1InputText, 0, wxALL | wxALIGN_CENTRE_VERTICAL, 10);
-  probe1Inputsizer->Add(probe1UnitText, 0, wxALL | wxALIGN_CENTRE_VERTICAL, 10);
+  probe1Inputsizer->Add(probe1UnitText, 0, wxALIGN_CENTRE_VERTICAL, 10);
   probe1InputPanel->SetSizerAndFit(probe1Inputsizer);
 
   return;
@@ -414,7 +414,7 @@ void MainFrame::InitProbe2InputPanel(){
 
   wxBoxSizer *probe2Inputsizer = new wxBoxSizer(wxHORIZONTAL);
   probe2Inputsizer->Add(probe2InputText, 0, wxALL | wxALIGN_CENTRE_VERTICAL, 10);
-  probe2Inputsizer->Add(probe2UnitText, 0, wxALL | wxALIGN_CENTRE_VERTICAL, 10);
+  probe2Inputsizer->Add(probe2UnitText, 0, wxALIGN_CENTRE_VERTICAL, 10);
   probe2InputPanel->SetSizerAndFit(probe2Inputsizer);
 
   probe2InputText->Enable(false);
@@ -448,7 +448,7 @@ void MainFrame::InitGridinputPanel(){
 
   wxBoxSizer *gridsizeInputsizer = new wxBoxSizer(wxHORIZONTAL);
   gridsizeInputsizer->Add(gridsizeInputText, 0, wxALL | wxALIGN_CENTRE_VERTICAL, 10);
-  gridsizeInputsizer->Add(gridsizeUnitText, 0, wxALL | wxALIGN_CENTRE_VERTICAL, 10);
+  gridsizeInputsizer->Add(gridsizeUnitText, 0, wxALIGN_CENTRE_VERTICAL, 10);
   gridsizeInputPanel->SetSizerAndFit(gridsizeInputsizer);
 
   return;
