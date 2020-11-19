@@ -12,6 +12,9 @@
 inline double calcSphereOfInfluence(const double& grid_size, const double& max_depth){
   return 0.70710678118 * grid_size * (pow(2,max_depth)-1);
 }
+bool isAtom(Voxel& vxl, const Atom& atom, const double& dist_vxl_at, const double& radius_of_influence);
+bool isAtAtomEdge(Voxel& vxl, const Atom& atom, const double& dist_vxl_at, const double& radius_of_influence);
+bool isProbeExcluded(Voxel& vxl, const Atom& atom, const std::array<double,3>& vxl_pos, const double& r_probe);
 
 /////////////////
 // CONSTRUCTOR //
@@ -39,6 +42,10 @@ char Voxel::getType(){
   return type;
 }
 
+void Voxel::setType(char input){
+  type = input;
+}
+
 //////////////
 // SET TYPE //
 //////////////
@@ -51,7 +58,7 @@ char Voxel::determineType(
 {
   double r_at = atomtree.getMaxRad();
   double r_vxl = calcSphereOfInfluence(grid_size, max_depth); // calculated every time, since max_depth may change
-    
+  
   traverseTree(atomtree.getRoot(), 0, r_at, r_vxl, vxl_pos, grid_size, max_depth); 
 
   if(type == 'm'){
@@ -101,11 +108,11 @@ void Voxel::traverseTree
   double dist1D = distance(node->atom->getPos(), vxl_pos, dim);
 
   // is voxel close enough to atom?
-  if (abs(dist1D) > (vxl_rad + at_rad)){ // if not, continue to next child
+  if (abs(dist1D) > (vxl_rad + at_rad)){        // if not, continue to next child
       traverseTree(dist1D < 0 ? node->left_child : node->right_child,
 				   (dim+1)%3, at_rad, vxl_rad, vxl_pos, grid_size, max_depth);
-  } else{ // if voxel is close enough, check distance to the node's atom. if needed,
-    // continue with both children
+  } else{     // if voxel is close enough, check distance to the node's atom. if needed,
+              // continue with both children
     determineTypeSingleAtom(*(node->atom), vxl_pos, grid_size, max_depth);
     for (AtomNode* child : {node->left_child, node->right_child}){
       traverseTree(child, (dim+1)%3, at_rad, vxl_rad, vxl_pos, grid_size, max_depth);
@@ -113,12 +120,18 @@ void Voxel::traverseTree
   }
 }
 
-void Voxel::determineTypeSingleAtom
-  (const Atom& atom, 
-   std::array<double,3> vxl_pos, // voxel centre
-   const double& grid_size,
-   const double max_depth)
-{
+void Voxel::determineTypeSingleAtom(const Atom& atom, 
+                                    std::array<double,3> vxl_pos, // voxel centre
+                                    const double& grid_size,
+                                    const double max_depth){
+  // CONSTRUCTION SITE //
+  // Move these somewhere else or delete
+  double r_probe = 1.2; // is the current default value obtained from the user  
+  // atom 1 is always atom. atom 2 is obtained from atom 
+  
+  // CONSTRUCTION SITE //
+
+
   // return if voxel is already in atom 
   if(type == 'a'){return;}
 
@@ -130,16 +143,38 @@ void Voxel::determineTypeSingleAtom
     max_depth != 0 ? pow(3,0.5)*(grid_size * pow(2,max_depth))/2 : 0; // TODO: avoid expensive pow function
   
   // is voxel inside atom? 
-  if(atom.rad > (dist_vxl_at + radius_of_influence)){ 
-    type = 'a'; // in atom
-    return;
-  }
+  if (isAtom(*this, atom, dist_vxl_at, radius_of_influence)){return;}
+
   // is voxel partially inside atom?
-  else if(atom.rad > (dist_vxl_at - radius_of_influence)){
-    type = 'm'; // mixed
-    return;
+  else if(isAtAtomEdge(*this, atom, dist_vxl_at, radius_of_influence)){return;}
+  
+  else if(isProbeExcluded(*this, atom, vxl_pos, r_probe)){return;}
   // else type remains unchanged
+}
+
+////////////////////
+// CHECK FOR TYPE //
+////////////////////
+
+bool isAtom(Voxel& vxl, const Atom& atom, const double& dist_vxl_at, const double& radius_of_influence){
+  if(atom.rad > (dist_vxl_at + radius_of_influence)){ 
+    vxl.setType('a'); // in atom
+    return true;
   }
+  return false;
+}
+
+bool isAtAtomEdge(Voxel& vxl, const Atom& atom, const double& dist_vxl_at, const double& radius_of_influence){
+  if(atom.rad > (dist_vxl_at - radius_of_influence)){
+    vxl.setType('m'); // mixed
+    return true;
+  }
+  return false;
+}
+
+bool isProbeExcluded(Voxel& vxl, const Atom& atom, const std::array<double,3>& vxl_pos, const double& r_probe){
+   
+  return false;
 }
 
 ///////////

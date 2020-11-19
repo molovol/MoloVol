@@ -1,0 +1,7 @@
+MoloVol program: calculation results report
+
+Structure file analyzed: /Users/jmaglic/Local Documents/Projekte/Programmieren/01_Ballpit/environment/inputfile/isobutane.xyz
+Probe mode: one probe
+Probe radius: 1.200000 A
+Grid step size (resolution): 0.100000 A
+Maximum tree depth (algorithm acceleration): 4
