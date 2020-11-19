@@ -3,9 +3,9 @@
 MoloVol is a free, cross-plattform, scientific software for volume and surface computations of single molecules and crystallographic unit cells.
 
 ## Utility
-With the CaVol software we aim to combine an intuitive and easy-to-use user interface with powerful computing algorithms. We want the software to serve a broad range of scientist by being easily accessible on all common platforms.
+With the MoloVol software we aim to combine an intuitive and easy-to-use user interface with powerful computing algorithms. We want the software to serve a broad range of scientist by being easily accessible on all common platforms.
 
-The CaVol software, along with many of its features, is currently in early development. The software is being actively developed on Windows 10 and macOS Catalina.
+The MoloVol software, along with many of its features, is currently in early development. The software is being actively developed on Windows 10 and macOS Catalina.
 
 ## Getting Started
 

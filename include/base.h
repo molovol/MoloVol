@@ -35,20 +35,22 @@ class MainFrame: public wxFrame
     std::string getAtomFilepath();
     std::string getRadiusFilepath();
     bool getIncludeHetatm();
+    bool getAnalyzeUnitCell();
+    bool getProbeMode();
+    double getProbe1Radius();
+    double getProbe2Radius();
     double getGridsize();
     int getDepth();
-    double getProbeRadius();
     void enableGuiElements(bool inp); // method to turn on and off interactable gui elements
-    
+
     void displayAtomList(std::vector<std::tuple<std::string, int, double>> symbol_number_radius);
     std::string generateChemicalFormulaFromGrid();
     std::unordered_map<std::string, double> generateRadiusMap();
+    double getMaxRad();
     std::vector<std::string> getIncludedElements();
     MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
 
   private:
-
-    double r_probe = 1.5; //* hard coded for testing purposes. eventually obtain from user input
 
     wxPanel* leftMainPanel;
       wxPanel* browsePanel;
@@ -66,6 +68,18 @@ class MainFrame: public wxFrame
 
     wxPanel* rightMainPanel;
       wxPanel* parameterPanel;
+        wxCheckBox* unitCellCheckbox;
+        wxCheckBox* twoProbesCheckbox;
+        wxPanel* probe1Panel;
+          wxStaticText* probe1Text;
+          wxPanel* probe1InputPanel;
+            wxTextCtrl* probe1InputText;
+            wxStaticText* probe1UnitText; // possibly usable universally?
+        wxPanel* probe2Panel;
+          wxStaticText* probe2Text;
+          wxPanel* probe2InputPanel;
+            wxTextCtrl* probe2InputText;
+            wxStaticText* probe2UnitText; // possibly usable universally?
         wxPanel* gridsizePanel;
           wxStaticText* gridsizeText;
           wxPanel* gridsizeInputPanel;
@@ -96,11 +110,15 @@ class MainFrame: public wxFrame
     void InitAtomListPanel();
     void InitRightMainPanel();
     void InitParametersPanel();
+    void InitProbe1Panel();
+    void InitProbe1InputPanel();
+    void InitProbe2Panel();
+    void InitProbe2InputPanel();
     void InitGridPanel();
     void InitGridinputPanel();
     void InitDepthPanel();
     void InitSandr();
-    
+
     // methods to handle events
     void OnExit(wxCommandEvent& event);
     void OnPrint(wxCommandEvent& event);
@@ -109,6 +127,7 @@ class MainFrame: public wxFrame
     void OnRadiusBrowse(wxCommandEvent& event);
     void OnLoadFiles(wxCommandEvent& event);
     void OnBrowse(wxCommandEvent& event, std::string& filetype, wxTextCtrl* textbox);
+    void ProbeModeChange(wxCommandEvent& event);
     void GridChange(wxGridEvent& event);
 
     // colours
@@ -141,6 +160,18 @@ enum
 
   PANEL_RightMain,
     PANEL_Parameters,
+      CHECKBOX_UnitCell,
+      CHECKBOX_TwoProbes,
+      PANEL_Probe1,
+        TEXT_Probe1,
+        PANEL_Probe1Input,
+          TEXT_Probe1Input,
+          TEXT_Probe1Unit,
+      PANEL_Probe2,
+        TEXT_Probe2,
+        PANEL_Probe2Input,
+          TEXT_Probe2Input,
+          TEXT_Probe2Unit,
       PANEL_Grid,
         TEXT_Grid,
         PANEL_Gridinput,
