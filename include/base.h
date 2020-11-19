@@ -52,6 +52,8 @@ class MainFrame: public wxFrame
 
   private:
 
+    double r_probe = 3; //* hard coded for testing purposes. eventually obtain from user input
+
     wxPanel* leftMainPanel;
       wxPanel* browsePanel;
         wxPanel* atomfilePanel;
