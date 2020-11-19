@@ -52,9 +52,13 @@ void Model::readRadiiAndAtomNumFromFile(std::string& filepath){
 }
 
 bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
-
+  // clear previous data
   atom_amounts.clear();
   raw_atom_coordinates.clear();
+  space_group = "";
+  for(int i = 0; i < 6; i++){
+    cell_param[i] = 0;
+  }
 
   if (fileExtension(filepath) == "xyz"){
     readFileXYZ(filepath);
@@ -131,9 +135,62 @@ void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
                                         std::stod(line.substr(38,8)),
                                         std::stod(line.substr(46,8)));
     }
+    else if (line.substr(0,6) == "CRYST1"){
+      cell_param[0] = std::stod(line.substr(6,9));
+      cell_param[1] = std::stod(line.substr(15,9));
+      cell_param[2] = std::stod(line.substr(24,9));
+      cell_param[3] = std::stod(line.substr(33,7));
+      cell_param[4] = std::stod(line.substr(40,7));
+      cell_param[5] = std::stod(line.substr(47,7));
+      space_group = line.substr(55,11); // note: mercury recognizes only 10 chars but official PDB format is 11 chars
+      space_group.erase(std::remove(space_group.begin(), space_group.end(), ' '), space_group.end()); // remove white spaces
+    }
   }
   // file has been read
   inp_file.close();
+}
+
+bool Model::getSymmetryElements(std::string group, std::vector<int> &sym_matrix_XYZ, std::vector<double> &sym_matrix_fraction){
+  for (int i = 0; i<group.size(); i++) { // convert space group to upper case chars to compare with the list
+    group[i] = toupper(group[i]);
+  }
+  group = "'" + group + "'";
+  std::ifstream sym_file("./inputfile/space_groups.txt");
+  std::string sym_line;
+  bool group_found = 0;
+  bool sym_matrix = 0;
+  while (getline (sym_file, sym_line)){
+    if(sym_matrix){
+      if(sym_line.find("Space group end") != std::string::npos){
+        return true; // end function when all symmetry elements of the matching space group are stored in vectors
+      }
+      else{
+        std::vector<std::string> sym_matrix_line = splitLine(sym_line); // store 12 parameters of the symmetry matrix
+        std::stringstream ss;
+        if(sym_matrix_line.size() == 12){
+          for (int i = 0; i < 9; i++){
+            std::stringstream ss(sym_matrix_line[i]);
+            int matrix_elem = 0;
+            ss >> matrix_elem;
+            sym_matrix_XYZ.emplace_back(matrix_elem); // stores the Aa, Ab, Ac, Ba, Bb, Bc, Ca, Cb, Cc matrix elements as +1, 0 or -1
+          }
+          for (int i = 9; i < 12; i++){
+            sym_matrix_fraction.emplace_back(std::stod(sym_matrix_line[i])); // stores the AA, BB, CC matrix elements as fractions 0, 1/6, 1/4, 1/3, 1/2, 2/3, 3/4, 5/6
+          }
+        }
+        else {
+          return false; // return false if a matrix line was found with less than 12 elements which should not happen with the space group list file provided
+        }
+      }
+    }
+    else if(group_found && sym_line.find("_symmetry_equiv_pos_as_matrix") != std::string::npos){
+      sym_matrix = 1; // activate second switch when we reach the symmetry matrix part of the matching space group
+    }
+    else if(sym_line.find("_symmetry_space_group_name_H-M") != std::string::npos && sym_line.find(group) != std::string::npos){
+      group_found = 1; // activate switch when matching space group is found
+    }
+  }
+  return false; // return false when no matching space group was found in the list file or no file found
 }
 
 ////////////////////////

@@ -15,7 +15,7 @@ IMPLEMENT_APP(MainApp)
 bool MainApp::OnInit()
 {
   // initialise a new MainFrame object and have MainWin point to that object
-  MainFrame* MainWin = new MainFrame(_("CaVol"), wxDefaultPosition, wxDefaultSize);
+  MainFrame* MainWin = new MainFrame(_("MoloVol"), wxDefaultPosition, wxDefaultSize);
   MainWin->SetBackgroundColour(col_win);
   // call member function of the MainFrame object to set visibility
   MainWin->Show(true);
@@ -26,20 +26,24 @@ bool MainApp::OnInit()
 
 // set default states of GUI elements here
 void MainFrame::InitDefaultStates(){
-  // set default accessibility of interactable gui controls  
+  // set default accessibility of interactable gui controls
   wxWindow* widgets_enabled[] = {
     browseButton,
     radiusButton,
     filepathText,
     radiuspathText,
     atomListGrid,
+    twoProbesCheckbox,
+    probe1InputText,
     gridsizeInputText,
     depthInput};
   wxWindow* widgets_disabled[] = {
     pdbHetatmCheckbox,
     loadFilesButton,
+    unitCellCheckbox,
+    probe2InputText,
     calcButton};
-  
+
   // initialise map
   for (auto i : widgets_enabled){
     default_states[i] = true;
@@ -84,7 +88,7 @@ void MainFrame::InitTopLevel(){
   topLevelSizerH->Add(leftMainPanel,1,wxRIGHT | wxEXPAND,5);
   topLevelSizerH->Add(rightMainPanel,1,wxLEFT | wxEXPAND,5);
   SetSizerAndFit(topLevelSizerH);
-  
+
   InitDefaultStates();
 }
 
@@ -293,6 +297,40 @@ void MainFrame::InitFileOptionsPanel(){
 //////////////////////
 
 void MainFrame::InitParametersPanel(){
+  unitCellCheckbox = new wxCheckBox
+    (parameterPanel,
+     CHECKBOX_UnitCell,
+     "Analyze crystal unit cell (for pdb files)",
+     wxDefaultPosition,
+     wxDefaultSize,
+     0,
+     wxDefaultValidator,
+     "Unit Cell"
+    );
+  unitCellCheckbox->Enable(false);
+  unitCellCheckbox->SetValue(false);
+
+  twoProbesCheckbox = new wxCheckBox
+    (parameterPanel,
+     CHECKBOX_TwoProbes,
+     "Use two probes mode (to dicern the inside from the outside of molecules)",
+     wxDefaultPosition,
+     wxDefaultSize,
+     0,
+     wxDefaultValidator,
+     "Two probes"
+    );
+  twoProbesCheckbox->Enable(true);
+  twoProbesCheckbox->SetValue(false);
+
+  // contains input controls for probe 1 (small) radius
+  probe1Panel = new wxPanel(parameterPanel, PANEL_Probe1, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+  probe1Panel->SetBackgroundColour(col_panel);
+
+  // contains input controls for probe 2 (large) radius
+  probe2Panel = new wxPanel(parameterPanel, PANEL_Probe2, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+  probe2Panel->SetBackgroundColour(col_panel);
+
   // contains input controls for grid size
   gridsizePanel = new wxPanel(parameterPanel, PANEL_Grid, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
   gridsizePanel->SetBackgroundColour(col_panel);
@@ -301,13 +339,85 @@ void MainFrame::InitParametersPanel(){
   depthPanel = new wxPanel(parameterPanel, PANEL_Depth, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
   depthPanel->SetBackgroundColour(col_panel);
 
+  InitProbe1Panel();
+  InitProbe2Panel();
   InitGridPanel();
   InitDepthPanel();
 
   wxStaticBoxSizer *parameterSizer = new wxStaticBoxSizer(wxVERTICAL,parameterPanel);
+  parameterSizer->Add(unitCellCheckbox,1,wxALIGN_LEFT | wxALL,10);
+  parameterSizer->Add(twoProbesCheckbox,1,wxALIGN_LEFT | wxALL,10);
+  parameterSizer->Add(probe1Panel,0,wxEXPAND,20);
+  parameterSizer->Add(probe2Panel,0,wxEXPAND,20);
   parameterSizer->Add(gridsizePanel,0,wxEXPAND,20);
   parameterSizer->Add(depthPanel,0,wxEXPAND,20);
   parameterPanel->SetSizerAndFit(parameterSizer);
+
+  return;
+}
+
+void MainFrame::InitProbe1Panel(){
+
+  probe1Text = new wxStaticText(probe1Panel, TEXT_Probe1, "Probe 1 radius (small):");
+
+  // contains input control for probe 1 radius and text field for unit
+  probe1InputPanel = new wxPanel(probe1Panel, PANEL_Probe1Input, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+  probe1InputPanel->SetBackgroundColour(col_panel);
+
+  InitProbe1InputPanel();
+
+  wxBoxSizer *probe1Sizer = new wxBoxSizer(wxHORIZONTAL);
+  probe1Sizer->Add(probe1Text,0,wxALL | wxALIGN_CENTRE_VERTICAL,10);
+  probe1Sizer->Add(probe1InputPanel,0,0,0);
+  probe1Panel->SetSizerAndFit(probe1Sizer);
+
+  return;
+}
+
+void MainFrame::InitProbe1InputPanel(){
+
+  probe1InputText = new wxTextCtrl(probe1InputPanel, TEXT_Probe1Input, "1.2");
+
+  probe1UnitText = new wxStaticText(probe1InputPanel, TEXT_Probe1Unit, L"\u212B  (note: approximate H\u2082O radius = 1.4 \u212B)  "); // unicode for angstrom, biochemists often use a probe corresponding to a molecule of water
+
+  wxBoxSizer *probe1Inputsizer = new wxBoxSizer(wxHORIZONTAL);
+  probe1Inputsizer->Add(probe1InputText, 0, wxALL | wxALIGN_CENTRE_VERTICAL, 10);
+  probe1Inputsizer->Add(probe1UnitText, 0, wxALIGN_CENTRE_VERTICAL, 10);
+  probe1InputPanel->SetSizerAndFit(probe1Inputsizer);
+
+  return;
+}
+
+void MainFrame::InitProbe2Panel(){
+
+  probe2Text = new wxStaticText(probe2Panel, TEXT_Probe2, "Probe 2 radius (large):");
+
+  // contains input control for probe 2 radius and text field for unit
+  probe2InputPanel = new wxPanel(probe2Panel, PANEL_Probe2Input, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+  probe2InputPanel->SetBackgroundColour(col_panel);
+
+  InitProbe2InputPanel();
+
+  wxBoxSizer *probe2Sizer = new wxBoxSizer(wxHORIZONTAL);
+  probe2Sizer->Add(probe2Text,0,wxALL | wxALIGN_CENTRE_VERTICAL,10);
+  probe2Sizer->Add(probe2InputPanel,0,0,0);
+  probe2Panel->SetSizerAndFit(probe2Sizer);
+
+  return;
+}
+
+void MainFrame::InitProbe2InputPanel(){
+
+  probe2InputText = new wxTextCtrl(probe2InputPanel, TEXT_Probe2Input, "5");
+
+  probe2UnitText = new wxStaticText(probe2InputPanel, TEXT_Probe2Unit, L"\u212B "); // unicode for angstrom
+
+  wxBoxSizer *probe2Inputsizer = new wxBoxSizer(wxHORIZONTAL);
+  probe2Inputsizer->Add(probe2InputText, 0, wxALL | wxALIGN_CENTRE_VERTICAL, 10);
+  probe2Inputsizer->Add(probe2UnitText, 0, wxALIGN_CENTRE_VERTICAL, 10);
+  probe2InputPanel->SetSizerAndFit(probe2Inputsizer);
+
+  probe2InputText->Enable(false);
 
   return;
 }
@@ -317,7 +427,7 @@ void MainFrame::InitGridPanel(){
   gridsizeText = new wxStaticText(gridsizePanel, TEXT_Grid, "Grid step size:");
 
   // contains input control for grid size and text field for unit
-  gridsizeInputPanel = new wxPanel(gridsizePanel, PANEL_Depth, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+  gridsizeInputPanel = new wxPanel(gridsizePanel, PANEL_Gridinput, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
   gridsizeInputPanel->SetBackgroundColour(col_panel);
 
   InitGridinputPanel();
@@ -338,7 +448,7 @@ void MainFrame::InitGridinputPanel(){
 
   wxBoxSizer *gridsizeInputsizer = new wxBoxSizer(wxHORIZONTAL);
   gridsizeInputsizer->Add(gridsizeInputText, 0, wxALL | wxALIGN_CENTRE_VERTICAL, 10);
-  gridsizeInputsizer->Add(gridsizeUnitText, 0, wxALL | wxALIGN_CENTRE_VERTICAL, 10);
+  gridsizeInputsizer->Add(gridsizeUnitText, 0, wxALIGN_CENTRE_VERTICAL, 10);
   gridsizeInputPanel->SetSizerAndFit(gridsizeInputsizer);
 
   return;

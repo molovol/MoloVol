@@ -18,6 +18,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_BUTTON(BUTTON_Browse, MainFrame::OnAtomBrowse)
   EVT_BUTTON(BUTTON_Radius, MainFrame::OnRadiusBrowse)
   EVT_BUTTON(BUTTON_LoadFiles, MainFrame::OnLoadFiles)
+  EVT_CHECKBOX(CHECKBOX_TwoProbes, MainFrame::ProbeModeChange)
   EVT_GRID_CELL_CHANGING(MainFrame::GridChange)
 END_EVENT_TABLE()
 
@@ -108,6 +109,12 @@ void MainFrame::OnBrowse(wxCommandEvent& event, std::string& filetype, wxTextCtr
   }
 }
 
+// toggle the probe 2 radius box depending on the probe mode
+void MainFrame::ProbeModeChange(wxCommandEvent& event){
+  probe2InputText->Enable(event.IsChecked());
+  setDefaultState(probe2InputText, event.IsChecked());
+}
+
 // Functions to dynamically change the color of the atom list grid cells
 void MainFrame::GridChange(wxGridEvent& event){
   int col = event.GetCol();
@@ -152,6 +159,10 @@ void MainFrame::setDefaultState(wxWindow* widget, bool state){
 
 void MainFrame::toggleOptionsPdb(){
   setDefaultState(pdbHetatmCheckbox, fileExtension(getAtomFilepath()) == "pdb" );
+  setDefaultState(unitCellCheckbox, fileExtension(getAtomFilepath()) == "pdb" );
+  if(fileExtension(getAtomFilepath()) != "pdb"){
+    unitCellCheckbox->SetValue(false);
+  }
 }
 
 void MainFrame::toggleButtons(){
