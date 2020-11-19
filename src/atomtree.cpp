@@ -180,7 +180,9 @@ void findAdjacentRecursive(
   else{ // if atom is close enough to test atom that is could be adjacent
     double dist_at_at = distance(atom.getPos(), test_atom->getPos());
     if (dist_at_at < (atom.rad + test_atom->rad + shell_to_shell_dist)){ // if test atom is adjacent
-      list_of_adjacent.push_back(test_atom);
+      if (&atom != test_atom){ // if its not the same atom
+        list_of_adjacent.push_back(test_atom);
+      }
     }
     for (AtomNode* child : {node->left_child, node->right_child}){
       findAdjacentRecursive(list_of_adjacent, atom, shell_to_shell_dist, min_distance, child, (dim+1)%3);
