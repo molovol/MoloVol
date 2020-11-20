@@ -173,7 +173,8 @@ bool isAtAtomEdge(Voxel& vxl, const Atom& atom, const double& dist_vxl_at, const
 }
 
 bool isProbeExcluded(Voxel& vxl, const Atom& atom, const std::array<double,3>& vxl_pos, const double& r_probe){
-   
+//  rel_vxl_pos = atom.getPos();
+
   return false;
 }
 
