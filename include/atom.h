@@ -3,6 +3,7 @@
 #define ATOM_H
 
 #include "exception.h"
+#include <vector>
 #include <array>
 #include <iostream>
 
