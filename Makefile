@@ -6,13 +6,14 @@ TARGET := bin/MoloVol
 
 TESTDIR := test
 TESTTARGET := test/out
+TESTBUILDDIR := test/build
 
 SRCEXT := cpp
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 
 TESTSOURCES := $(shell find $(TESTDIR) -type f -name *.$(SRCEXT))
-TESTOBJECTS := $(patsubst $(TESTDIR)/%,$(TESTDIR)/%,$(TESTSOURCES:.$(SRCEXT)=.o))
+TESTOBJECTS := $(patsubst $(TESTDIR)/%,$(TESTBUILDDIR)/%,$(TESTSOURCES:.$(SRCEXT)=.o))
 
 CXXFLAGS := -O0 -g -std=c++17 -Wall -Werror 
 CFLAGS := -O0 -g -std=c++17 -Wno-unused-command-line-argument
@@ -30,13 +31,14 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 test: $(TESTOBJECTS)
 	$(CC) $(CXXFLAGS) $^ `wx-config --cxxflags --libs` -o $(TESTTARGET)
 
-$(TESTDIR)/%.o: $(TESTDIR)/%.$(SRCEXT)
+$(TESTBUILDDIR)/%.o: $(TESTDIR)/%.$(SRCEXT)
+	@mkdir -p $(TESTBUILDDIR)
 	$(CC) $(CFLAGS) $(INC) -c `wx-config --cxxflags --libs` -o $@ $<
 
 cleantest:
 	@echo " Cleaning Test Directory..."
+	@echo " $(RM) -r $(TESTBUILDDIR)"; $(RM) -r $(TESTBUILDDIR)
 	@echo " $(RM) $(TESTTARGET)"; $(RM) $(TESTTARGET)
-	@echo " $(RM) $(TESTOBJECTS)"; $(RM) -r $(TESTOBJECTS)
 
 clean:
 	@echo " Cleaning..."; 
