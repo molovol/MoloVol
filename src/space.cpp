@@ -32,13 +32,19 @@ void Space::placeAtomsInGrid(const AtomTree& atomtree){
 }
 
 double Space::getVolume(){
+  // TODO: Remove when Voxel::isExcludedByPair works as indended
+  printGrid();
   // calc Volume
   size_t total = 0;
+  size_t total_excluded = 0;
   for(size_t i = 0; i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]; i++){ // loop through all top level voxels
     // tally bottom level voxels
     total += getElement(i).tallyVoxelsOfType('a',max_depth);
+    total_excluded += getElement(i).tallyVoxelsOfType('x',max_depth);
   }
   double unit_volume = pow(grid_size,3);
+  double unit_excluded = pow(grid_size,3);
+  std::cout << "Probe inaccessible volume: " << unit_excluded*total_excluded << std::endl;
   return unit_volume * total;
 }
 

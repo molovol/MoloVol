@@ -2,6 +2,7 @@
 
 #define VOXEL_H
 
+#include "vector.h"
 #include <vector>
 #include <array>
 
@@ -26,6 +27,7 @@ class Voxel{
         const Atom& atom, 
         std::array<double,3> pos, // voxel centre
         const double& grid_size,
+        const double& r_probe,
         const double max_depth);
    
     void traverseTree(
@@ -44,6 +46,12 @@ class Voxel{
         const double& max_depth, 
         const AtomTree& atom_tree);
   private:
+    
+    bool isAtom(const Atom& atom, const double& dist_vxl_at, const double& radius_of_influence);
+    bool isAtAtomEdge(const Atom& atom, const double& dist_vxl_at, const double& radius_of_influence);
+    bool isProbeExcluded(const Atom& atom, const std::array<double,3>& vxl_pos, const double& r_probe, const double&);
+    bool isExcludedByPair(const Vector&, const Vector&, const double&, const double&, const double&, const double&);
+
     std::vector<Voxel> data; // empty or exactly 8 elements
     char type;
     // types

@@ -15,6 +15,7 @@ struct Atom{
       rad(rad_inp),
       number(elem_Z_inp),
       symbol(symbol_inp) {}
+  // TODO destructor
 
   double pos_x, pos_y, pos_z, rad;
   unsigned int number;

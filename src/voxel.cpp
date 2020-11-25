@@ -58,9 +58,10 @@ char Voxel::determineType(
 {
   double r_at = atomtree.getMaxRad();
   double r_vxl = calcSphereOfInfluence(grid_size, max_depth); // calculated every time, since max_depth may change
-  
-  traverseTree(atomtree.getRoot(), 0, r_at, r_vxl, vxl_pos, grid_size, max_depth); 
+  // TODO: Add r_probe here. Include r_probe in the traverse tree algo
 
+  traverseTree(atomtree.getRoot(), 0, r_at, r_vxl, vxl_pos, grid_size, max_depth); 
+  
   if(type == 'm'){
     splitVoxel(vxl_pos, grid_size, max_depth, atomtree);
   }
@@ -90,6 +91,7 @@ void Voxel::splitVoxel(const std::array<double,3>& vxl_pos, const double& grid_s
 	} else if (resultcount == 'e'*8) {
 	  type = 'e';
 	}
+  //
 }
 
 // use the properties of the binary tree to recursively traverse the tree and 
@@ -106,14 +108,22 @@ void Voxel::traverseTree
   if (node == NULL){return;}
   // distance between atom and voxel along one dimension
   double dist1D = distance(node->atom->getPos(), vxl_pos, dim);
-
-  // is voxel close enough to atom?
-  if (abs(dist1D) > (vxl_rad + at_rad)){        // if not, continue to next child
+  
+  // CONSTRUCTION SITE //
+  // Move these somewhere else or delete
+  double r_probe = 1.2; // is the current default value obtained from the user  
+  // atom 1 is always atom. atom 2 is obtained from atom 
+  
+  // CONSTRUCTION SITE //
+ 
+  // this condition is not optimised. r_probe might be unneccessary here and slow down the algo
+  if (abs(dist1D) > (vxl_rad + at_rad + r_probe)){ // then atom is too far to matter for voxel type
       traverseTree(dist1D < 0 ? node->left_child : node->right_child,
 				   (dim+1)%3, at_rad, vxl_rad, vxl_pos, grid_size, max_depth);
-  } else{     // if voxel is close enough, check distance to the node's atom. if needed,
-              // continue with both children
-    determineTypeSingleAtom(*(node->atom), vxl_pos, grid_size, max_depth);
+  } else{ // then atom is close enough to influence voxel type
+    // evaluate voxel type with respect to the found atom
+    determineTypeSingleAtom(*(node->atom), vxl_pos, grid_size, r_probe, max_depth);
+    // continue with both children
     for (AtomNode* child : {node->left_child, node->right_child}){
       traverseTree(child, (dim+1)%3, at_rad, vxl_rad, vxl_pos, grid_size, max_depth);
     }
@@ -123,13 +133,8 @@ void Voxel::traverseTree
 void Voxel::determineTypeSingleAtom(const Atom& atom, 
                                     std::array<double,3> vxl_pos, // voxel centre
                                     const double& grid_size,
+                                    const double& r_probe,
                                     const double max_depth){
-  // CONSTRUCTION SITE //
-  // Move these somewhere else or delete
-  double r_probe = 1.2; // is the current default value obtained from the user  
-  // atom 1 is always atom. atom 2 is obtained from atom 
-  
-  // CONSTRUCTION SITE //
 
 
   // return if voxel is already in atom 
@@ -140,15 +145,16 @@ void Voxel::determineTypeSingleAtom(const Atom& atom,
   // if bottom level voxel: radius of influence = 0, i.e., treat like point
   // if higher level voxel: radius of influence > 0
   double radius_of_influence = 
-    max_depth != 0 ? pow(3,0.5)*(grid_size * pow(2,max_depth))/2 : 0; // TODO: avoid expensive pow function
+    max_depth != 0 ? 1.73205080757*(grid_size * pow(2,max_depth))/2 : 0;
   
   // is voxel inside atom? 
-  if (isAtom(*this, atom, dist_vxl_at, radius_of_influence)){return;}
+  if (isAtom(atom, dist_vxl_at, radius_of_influence)){return;}
 
   // is voxel partially inside atom?
-  else if(isAtAtomEdge(*this, atom, dist_vxl_at, radius_of_influence)){return;}
+  else if(isAtAtomEdge(atom, dist_vxl_at, radius_of_influence)){return;}
   
-  else if(isProbeExcluded(*this, atom, vxl_pos, r_probe)){return;}
+  // is voxel inaccessible by probe?
+  else if(isProbeExcluded(atom, vxl_pos, r_probe, radius_of_influence)){return;}
   // else type remains unchanged
 }
 
@@ -156,25 +162,83 @@ void Voxel::determineTypeSingleAtom(const Atom& atom,
 // CHECK FOR TYPE //
 ////////////////////
 
-bool isAtom(Voxel& vxl, const Atom& atom, const double& dist_vxl_at, const double& radius_of_influence){
+bool Voxel::isAtom(const Atom& atom, const double& dist_vxl_at, const double& radius_of_influence){
   if(atom.rad > (dist_vxl_at + radius_of_influence)){ 
-    vxl.setType('a'); // in atom
+    setType('a'); // in atom
     return true;
   }
   return false;
 }
 
-bool isAtAtomEdge(Voxel& vxl, const Atom& atom, const double& dist_vxl_at, const double& radius_of_influence){
-  if(atom.rad > (dist_vxl_at - radius_of_influence)){
-    vxl.setType('m'); // mixed
+bool Voxel::isAtAtomEdge(const Atom& atom, const double& dist_vxl_at, const double& radius_of_influence){
+  if(atom.rad >= (dist_vxl_at - radius_of_influence)){
+    setType('m'); // mixed
     return true;
   }
   return false;
 }
 
-bool isProbeExcluded(Voxel& vxl, const Atom& atom, const std::array<double,3>& vxl_pos, const double& r_probe){
-//  rel_vxl_pos = atom.getPos();
+bool Voxel::isProbeExcluded(const Atom& atom, const std::array<double,3>& vxl_pos, const double& r_probe, const double& radius_of_influence){ 
+  assert(type != 'a');
+  // for simplicity all vectors are shifted by -vec_offset, so that the atom is in the origin
+  Vector vec_offset = Vector(atom.getPos());
+  double rad_atom = atom.getRad(); 
+  
+  Vector vec_vxl = Vector(vxl_pos) - vec_offset;
+  
+  for (const Atom* adj : atom.adjacent_atoms){
+    Vector vec_adj = Vector(adj->getPos()) - vec_offset; // vector pointing from atom to neighbour atom
+    double rad_adj = adj->getRad();
+    
+    if (vec_adj < 2*r_probe + rad_atom + rad_adj){ // then atoms are close enough
+      if (isExcludedByPair(vec_vxl, vec_adj, rad_atom, rad_adj, r_probe, radius_of_influence)){
+        setType('x');
+        return true;
+      } 
+    }
+  }
+  return false;
+}
 
+bool Voxel::isExcludedByPair(const Vector& vec_vxl, const Vector& vec_atat, const double& rad_atom1, const double& rad_atom2, const double& rad_probe, const double& rad_vxl){
+
+  Vector unitvec_parallel = vec_atat.normalise();
+  double vxl_parallel = vec_vxl * unitvec_parallel; 
+  if (vxl_parallel > 0 && vec_atat > vxl_parallel){ // then voxel is between atoms
+    Vector unitvec_orthogonal = (vec_vxl-unitvec_parallel*vxl_parallel).normalise();
+    double vxl_orthogonal = vec_vxl * unitvec_orthogonal; 
+    
+    double dist_atom1_probe = rad_atom1 + rad_probe;
+    double dist_atom2_probe = rad_atom2 + rad_probe;
+    double dist_atom1_atom2 = vec_atat.length();
+
+    double angle_atom1 = acos((pow(dist_atom1_probe,2) + pow(dist_atom1_atom2,2) - pow(dist_atom2_probe,2))/(2*dist_atom1_probe*dist_atom1_atom2));
+    double angle_vxl1 = atan(vxl_orthogonal/vxl_parallel);
+
+    if (angle_atom1 > angle_vxl1){
+      double angle_atom2 = acos((pow(dist_atom2_probe,2) + pow(dist_atom1_atom2,2) - pow(dist_atom1_probe,2))/(2*dist_atom2_probe*dist_atom1_atom2));
+      double angle_vxl2 = atan(vxl_orthogonal/(dist_atom1_atom2-vxl_parallel));
+      if (angle_atom2 > angle_vxl2){ // then voxel is in triangle spanned by atoms and probe
+        double probe_parallel = ((pow(dist_atom1_probe,2) + pow(dist_atom1_atom2,2) - pow(dist_atom2_probe,2))/(2*dist_atom1_atom2));
+        double probe_orthogonal = pow(pow(dist_atom1_probe,2)-pow(probe_parallel,2),0.5);
+
+        Vector vec_probe = probe_parallel * unitvec_parallel + probe_orthogonal * unitvec_orthogonal;
+
+        double dist_probe_vxl = (vec_probe-vec_vxl).length();
+        if (dist_probe_vxl-rad_vxl > rad_probe){ // then all subvoxels are inaccessible
+          setType('x');
+          return true;
+        }
+        else if (dist_probe_vxl+rad_vxl < rad_probe){ // then all subvoxels are accessible
+          return false;
+        }
+        else { // then each subvoxel has to be evaluated
+          setType('m');
+          return false;
+        }
+      }
+    }
+  }
   return false;
 }
 
