@@ -10,7 +10,7 @@ struct Vector{
     Vector(double, double, double);
     Vector(std::array<double,3>);
     
-    void print(); 
+    void print() const; 
     const double& getCoordinate(char) const;
     void setCoordinate(char,const double&);
     
@@ -25,18 +25,18 @@ struct Vector{
     bool isShorterThan(const double&) const;
     bool isSameLength(const Vector&) const;
     bool isSameLength(const double&) const;
-    bool operator>(const Vector&);
-    bool operator>(const double&);
-    bool operator>=(const Vector&);
-    bool operator>=(const double&);
-    bool operator<(const Vector&);
-    bool operator<(const double&);
-    bool operator<=(const Vector&);
-    bool operator<=(const double&);
-    bool operator==(const Vector&);
-    bool operator==(const double&);
-    bool operator!=(const Vector&);
-    bool operator!=(const double&);
+    bool operator>(const Vector&) const;
+    bool operator>(const double&) const;
+    bool operator>=(const Vector&) const;
+    bool operator>=(const double&) const;
+    bool operator<(const Vector&) const;
+    bool operator<(const double&) const;
+    bool operator<=(const Vector&) const;
+    bool operator<=(const double&) const;
+    bool operator==(const Vector&) const;
+    bool operator==(const double&) const;
+    bool operator!=(const Vector&) const;
+    bool operator!=(const double&) const;
 
   private:
     double squared() const;

@@ -19,7 +19,7 @@ Vector::Vector(std::array<double,3> inp_arr)
 // METHODS //
 /////////////
 
-void Vector::print(){
+void Vector::print() const {
   printf("(%.4f,%.4f,%.4f)\n", coord[0], coord[1], coord[2]);
 }
 
@@ -71,18 +71,18 @@ bool Vector::isSameLength(const double& valToCompare) const{
   return (this->squared() == (valToCompare*valToCompare)); 
 }
 
-bool Vector::operator>(const Vector& vec){return this->isLongerThan(vec);}
-bool Vector::operator>(const double& val){return this->isLongerThan(val);}
-bool Vector::operator>=(const Vector& vec){return !this->isShorterThan(vec);}
-bool Vector::operator>=(const double& val){return !this->isShorterThan(val);}
-bool Vector::operator<(const Vector& vec){return this->isShorterThan(vec);}
-bool Vector::operator<(const double& val){return this->isShorterThan(val);}
-bool Vector::operator<=(const Vector& vec){return !this->isLongerThan(vec);}
-bool Vector::operator<=(const double& val){return !this->isLongerThan(val);}
-bool Vector::operator==(const Vector& vec){return this->isSameLength(vec);}
-bool Vector::operator==(const double& val){return this->isSameLength(val);}
-bool Vector::operator!=(const Vector& vec){return !this->isSameLength(vec);}
-bool Vector::operator!=(const double& val){return !this->isSameLength(val);}
+bool Vector::operator>(const Vector& vec) const {return this->isLongerThan(vec);}
+bool Vector::operator>(const double& val) const {return this->isLongerThan(val);}
+bool Vector::operator>=(const Vector& vec) const {return !this->isShorterThan(vec);}
+bool Vector::operator>=(const double& val) const {return !this->isShorterThan(val);}
+bool Vector::operator<(const Vector& vec) const {return this->isShorterThan(vec);}
+bool Vector::operator<(const double& val) const {return this->isShorterThan(val);}
+bool Vector::operator<=(const Vector& vec) const {return !this->isLongerThan(vec);}
+bool Vector::operator<=(const double& val) const {return !this->isLongerThan(val);}
+bool Vector::operator==(const Vector& vec) const {return this->isSameLength(vec);}
+bool Vector::operator==(const double& val) const {return this->isSameLength(val);}
+bool Vector::operator!=(const Vector& vec) const {return !this->isSameLength(vec);}
+bool Vector::operator!=(const double& val) const {return !this->isSameLength(val);}
 
 ////////////////
 // OPERATIONS //
