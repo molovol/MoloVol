@@ -86,6 +86,7 @@ void Voxel::splitVoxel(const std::array<double,3>& vxl_pos, const double& grid_s
     resultcount += data[i].determineType(new_pos, grid_size, max_depth-1, atomtree);
   }
 	//determine if all children have the same type
+  // TODO: delete data vector in this case
 	if (resultcount == 'a'*8){
 	  type = 'a';
 	} else if (resultcount == 'e'*8) {
@@ -137,15 +138,16 @@ void Voxel::determineTypeSingleAtom(const Atom& atom,
                                     const double max_depth){
 
 
-  // return if voxel is already in atom 
-  if(type == 'a'){return;}
+  // return if voxel is already in atom
+  if(type == 'a' || type == 'm'){return;}
 
   double dist_vxl_at = distance(vxl_pos, atom.getPos());
 
   // if bottom level voxel: radius of influence = 0, i.e., treat like point
   // if higher level voxel: radius of influence > 0
   double radius_of_influence = 
-    max_depth != 0 ? 1.73205080757*(grid_size * pow(2,max_depth))/2 : 0;
+    max_depth != 0 ? 1.73205080757 * grid_size * (pow(2,max_depth) - 1) : 0;
+  // I believe the use of a conditional makes the code slightly faster
   
   // is voxel inside atom? 
   if (isAtom(atom, dist_vxl_at, radius_of_influence)){return;}
@@ -179,7 +181,6 @@ bool Voxel::isAtAtomEdge(const Atom& atom, const double& dist_vxl_at, const doub
 }
 
 bool Voxel::isProbeExcluded(const Atom& atom, const std::array<double,3>& vxl_pos, const double& r_probe, const double& radius_of_influence){ 
-  assert(type != 'a');
   // for simplicity all vectors are shifted by -vec_offset, so that the atom is in the origin
   Vector vec_offset = Vector(atom.getPos());
   double rad_atom = atom.getRad(); 
@@ -192,13 +193,14 @@ bool Voxel::isProbeExcluded(const Atom& atom, const std::array<double,3>& vxl_po
     
     if (vec_adj < 2*r_probe + rad_atom + rad_adj){ // then atoms are close enough
       if (isExcludedByPair(vec_vxl, vec_adj, rad_atom, rad_adj, r_probe, radius_of_influence)){
-        setType('x');
         return true;
       } 
     }
   }
   return false;
 }
+
+void breakpoint(){return;}
 
 bool Voxel::isExcludedByPair(const Vector& vec_vxl, const Vector& vec_atat, const double& rad_atom1, const double& rad_atom2, const double& rad_probe, const double& rad_vxl){
 
@@ -223,16 +225,16 @@ bool Voxel::isExcludedByPair(const Vector& vec_vxl, const Vector& vec_atat, cons
         double probe_orthogonal = pow(pow(dist_atom1_probe,2)-pow(probe_parallel,2),0.5);
 
         Vector vec_probe = probe_parallel * unitvec_parallel + probe_orthogonal * unitvec_orthogonal;
-
-        double dist_probe_vxl = (vec_probe-vec_vxl).length();
-        if (dist_probe_vxl-rad_vxl > rad_probe){ // then all subvoxels are inaccessible
+        
+        if (vec_probe-vec_vxl > rad_probe+rad_vxl){ // then all subvoxels are inaccessible
           setType('x');
           return true;
         }
-        else if (dist_probe_vxl+rad_vxl < rad_probe){ // then all subvoxels are accessible
+        else if (vec_probe-vec_vxl <= rad_probe-rad_vxl){ // then all subvoxels are accessible
           return false;
         }
         else { // then each subvoxel has to be evaluated
+          breakpoint();
           setType('m');
           return false;
         }
@@ -246,6 +248,7 @@ bool Voxel::isExcludedByPair(const Vector& vec_vxl, const Vector& vec_atat, cons
 // TALLY //
 ///////////
 
+// TODO: Optimise. Allow for tallying multiples types at once
 size_t Voxel::tallyVoxelsOfType(const char volume_type, const int max_depth){
   // if voxel is of type "mixed" (i.e. data vector is not empty)
   if(!data.empty()){
@@ -263,3 +266,4 @@ size_t Voxel::tallyVoxelsOfType(const char volume_type, const int max_depth){
   // if neither empty nor of the type of interest, then the voxel doesn't count towards the total
   return 0;
 }
+
