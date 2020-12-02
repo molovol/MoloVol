@@ -72,10 +72,8 @@ bool Ctrl::runCalculation(){
     current_calculation = new Model();
   }
 
-  // stop calculation if probe 2 radius is too small in two probes mode
-  if(gui->getProbeMode() && gui->getProbe1Radius() > gui->getProbe2Radius()){
-    notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.");
-    return false;
+  if(!current_calculation->setProbeRadii(gui->getProbe1Radius(), gui->getProbe2Radius(), gui->getProbeMode())){
+    return false; // abort calculation if radius2 is smaller than radius 1
   }
 
   // radius map is generated from grid in gui, then passed to model for calculation

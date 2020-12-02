@@ -25,6 +25,20 @@ void Model::defineCell(const double& grid_step, const int& max_depth){
 ///////////////////////////
 // Not sure about the name of the section
 
+bool Model::setProbeRadii(const double& r_1, const double& r_2, bool two_probe_mode){
+  r_probe1 = r_1;
+  if (two_probe_mode){
+    if (r_1 > r_2){
+    Ctrl::getInstance()->notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.");
+    return false;
+    }
+    else{
+      r_probe2 = r_2;
+    }
+  }
+  return true;
+}
+
 void Model::setAtomListForCalculation(const std::vector<std::string>& included_elements, bool useUnitCell){
   atoms.clear();
   if(useUnitCell){
@@ -75,7 +89,7 @@ void Model::linkAtomsToAdjacentAtoms(const double& r_probe){
 }
 
 void Model::calcVolume(){
-  cell.placeAtomsInGrid(atomtree);
+  cell.placeAtomsInGrid(atomtree, r_probe1);
   double volume = cell.getVolume();
 
   std::string message_to_user

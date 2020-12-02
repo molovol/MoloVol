@@ -53,22 +53,27 @@ void Voxel::setType(char input){
 char Voxel::determineType(
     std::array<double,3> vxl_pos, // voxel centre
     const double& grid_size,
+    const double& r_probe,
     const double max_depth,
     const AtomTree& atomtree)
 {
   double r_at = atomtree.getMaxRad();
   double r_vxl = calcSphereOfInfluence(grid_size, max_depth); // calculated every time, since max_depth may change
-  // TODO: Add r_probe here. Include r_probe in the traverse tree algo
 
-  traverseTree(atomtree.getRoot(), 0, r_at, r_vxl, vxl_pos, grid_size, max_depth); 
+  traverseTree(atomtree.getRoot(), 0, r_at, r_vxl, vxl_pos, grid_size, r_probe, max_depth); 
   
   if(type == 'm'){
-    splitVoxel(vxl_pos, grid_size, max_depth, atomtree);
+    splitVoxel(vxl_pos, grid_size, r_probe, max_depth, atomtree);
   }
 	return type;
 }
 
-void Voxel::splitVoxel(const std::array<double,3>& vxl_pos, const double& grid_size, const double& max_depth, const AtomTree& atomtree){
+void Voxel::splitVoxel(
+    const std::array<double,3>& vxl_pos, 
+    const double& grid_size, 
+    const double& r_probe, 
+    const double& max_depth, 
+    const AtomTree& atomtree){
   // split into 8 subvoxels
 	short resultcount = 0;
   for(int i = 0; i < 8; i++){
@@ -83,7 +88,7 @@ void Voxel::splitVoxel(const std::array<double,3>& vxl_pos, const double& grid_s
     for(int dim = 0; dim < 3; dim++){
       new_pos[dim] = vxl_pos[dim] + factors[dim] * grid_size * std::pow(2,max_depth-2);//why -2?
     }
-    resultcount += data[i].determineType(new_pos, grid_size, max_depth-1, atomtree);
+    resultcount += data[i].determineType(new_pos, grid_size, r_probe, max_depth-1, atomtree);
   }
 	//determine if all children have the same type
   // TODO: delete data vector in this case
@@ -104,6 +109,7 @@ void Voxel::traverseTree
    const double& vxl_rad, 
    const std::array<double,3> vxl_pos, 
    const double& grid_size, 
+   const double& r_probe, 
    const double& max_depth){
 
   if (node == NULL){return;}
@@ -112,7 +118,7 @@ void Voxel::traverseTree
   
   // CONSTRUCTION SITE //
   // Move these somewhere else or delete
-  double r_probe = 1.2; // is the current default value obtained from the user  
+  //double r_probe = 1.2; // is the current default value obtained from the user  
   // atom 1 is always atom. atom 2 is obtained from atom 
   
   // CONSTRUCTION SITE //
@@ -120,13 +126,13 @@ void Voxel::traverseTree
   // this condition is not optimised. r_probe might be unneccessary here and slow down the algo
   if (abs(dist1D) > (vxl_rad + at_rad + r_probe)){ // then atom is too far to matter for voxel type
       traverseTree(dist1D < 0 ? node->left_child : node->right_child,
-				   (dim+1)%3, at_rad, vxl_rad, vxl_pos, grid_size, max_depth);
+				   (dim+1)%3, at_rad, vxl_rad, vxl_pos, grid_size, r_probe, max_depth);
   } else{ // then atom is close enough to influence voxel type
     // evaluate voxel type with respect to the found atom
     determineTypeSingleAtom(*(node->atom), vxl_pos, grid_size, r_probe, max_depth);
     // continue with both children
     for (AtomNode* child : {node->left_child, node->right_child}){
-      traverseTree(child, (dim+1)%3, at_rad, vxl_rad, vxl_pos, grid_size, max_depth);
+      traverseTree(child, (dim+1)%3, at_rad, vxl_rad, vxl_pos, grid_size, r_probe, max_depth);
     }
   }
 }
