@@ -20,6 +20,7 @@ class Voxel{
     char determineType(
         std::array<double,3> pos,
         const double& grid_size,
+        const double& r_probe,
         const double max_depth,
         const AtomTree& atomtree);
     
@@ -37,12 +38,14 @@ class Voxel{
         const double& vxl_rad, 
         const std::array<double,3> vxl_pos,
         const double& grid_size, 
+        const double& r_probe, 
         const double& max_depth);
     size_t tallyVoxelsOfType(const char volume_type, const int max_depth);
 
     void splitVoxel(
         const std::array<double,3>& vxl_pos, 
         const double& grid_size, 
+        const double& r_probe, 
         const double& max_depth, 
         const AtomTree& atom_tree);
   private:

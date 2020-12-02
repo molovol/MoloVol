@@ -15,10 +15,12 @@ struct Atom;
 class Space;
 class Model{
   public:
+    // file reading
     void readRadiiAndAtomNumFromFile(std::string&);
     bool readAtomsFromFile(const std::string&, bool);
     void readFileXYZ(const std::string&);
     void readFilePDB(const std::string&, bool);
+
     bool getSymmetryElements(std::string, std::vector<int>&, std::vector<double>&);
     bool createOutputFolder();
     void createReport(std::string, std::vector<std::string>);
@@ -30,8 +32,11 @@ class Model{
     void removeDuplicateAtoms();
     void generateSupercell(double);
     void generateUsefulAtomMapFromSupercell(double);
+
     inline double findRadiusOfAtom(const std::string&);
     inline double findRadiusOfAtom(const Atom&); //TODO has not been tested
+
+    // controller-model communication
     // calls the Space constructor and creates a cell containing all atoms. Cell size is defined by atom positions
     void defineCell(const double&, const int&);
     void setAtomListForCalculation(const std::vector<std::string>&, bool);
@@ -41,6 +46,8 @@ class Model{
     void calcVolume();
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void setRadiusMap(std::unordered_map<std::string, double> map);
+    bool setProbeRadii(const double&, const double&, bool);
+
     void debug();
   private:
     std::string output_folder = "./"; // default folder is the program folder but it is changed with the output file routine
@@ -56,6 +63,8 @@ class Model{
     std::vector<Atom> atoms;
     AtomTree atomtree;
     Space cell;
+    double r_probe1 = 0;
+    double r_probe2 = 0;
 };
 
 #endif
