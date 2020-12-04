@@ -16,6 +16,8 @@ class Voxel{
     Voxel& access(const short& i);
     void setType(char);
     char getType();
+    
+    //static void storeUniversalVariables();
 
     char determineType(
         std::array<double,3> pos,
@@ -29,7 +31,8 @@ class Voxel{
         std::array<double,3> pos, // voxel centre
         const double& grid_size,
         const double& r_probe,
-        const double max_depth);
+        const double max_depth,
+        bool&);
    
     void traverseTree(
         const AtomNode* node, 
@@ -39,7 +42,8 @@ class Voxel{
         const std::array<double,3> vxl_pos,
         const double& grid_size, 
         const double& r_probe, 
-        const double& max_depth);
+        const double& max_depth,
+        bool&);
     size_t tallyVoxelsOfType(const char volume_type, const int max_depth);
 
     void splitVoxel(
@@ -49,10 +53,10 @@ class Voxel{
         const double& max_depth, 
         const AtomTree& atom_tree);
   private:
-    
+
     bool isAtom(const Atom& atom, const double& dist_vxl_at, const double& radius_of_influence); // inline not faster
     bool isAtAtomEdge(const Atom& atom, const double& dist_vxl_at, const double& radius_of_influence); // inline not faster
-    bool isProbeExcluded(const Atom& atom, const std::array<double,3>& vxl_pos, const double& r_probe, const double&);
+    bool isProbeExcluded(const Atom& atom, const std::array<double,3>& vxl_pos, const double& r_probe, const double&, bool&);
     bool isExcludedByPair(const Vector&, const Vector&, const double&, const double&, const double&, const double&);
 
     std::vector<Voxel> data; // empty or exactly 8 elements
