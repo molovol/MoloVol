@@ -9,6 +9,7 @@
 // VOLUME COMP //
 /////////////////
 
+// sets all voxel's types, determined by the input atoms
 void Space::placeAtomsInGrid(const AtomTree& atomtree, const double& r_probe){
   // calculate position of first voxel
   const std::array<double,3> vxl_origin = getOrigin();
@@ -17,6 +18,9 @@ void Space::placeAtomsInGrid(const AtomTree& atomtree, const double& r_probe){
   const double vxl_dist = grid_size * pow(2,max_depth);
   
   std::array<double,3> vxl_pos;
+
+  // save variable that all voxels need access to for their type determination
+  //Voxel::storeUniversalVariables();
 
   for(size_t x = 0; x < n_gridsteps[0]; x++){
     vxl_pos[0] = vxl_origin[0] + vxl_dist * (0.5 + x);
