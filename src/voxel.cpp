@@ -129,8 +129,7 @@ void Voxel::determineTypeSingleAtom(const Atom& atom,
                                     bool& accessibility_checked){
 
 
-  // return if voxel is already in atom
-  if(type == 'a' || type == 'm'){return;}
+  if(type == 'a'){return;} // type 'a' can never be changed
 
   double dist_vxl_at = distance(vxl_pos, atom.getPos());
 
@@ -142,9 +141,6 @@ void Voxel::determineTypeSingleAtom(const Atom& atom,
   
   // is voxel inside atom? 
   if (isAtom(atom, dist_vxl_at, radius_of_influence)){return;}
-
-  // is voxel partially inside atom?
-  //else if(isAtAtomEdge(atom, dist_vxl_at, radius_of_influence)){return;}
   
   // is voxel inaccessible by probe?
   // pass _r_probe1 as proper argument, so that this routine may be reused for two probe mode
@@ -171,7 +167,10 @@ bool Voxel::isAtom(const Atom& atom, const double& dist_vxl_at, const double& ra
 }
 
 bool Voxel::isProbeExcluded(const Atom& atom, const std::array<double,3>& vxl_pos, const double& r_probe, const double& radius_of_influence, bool& accessibility_checked){ 
-  accessibility_checked = true;
+  
+  accessibility_checked = true; // function has been called
+  
+  if(type == 'm'){return false;} // type 'm' can never be changed by probe
 
   // for simplicity all vectors are shifted by -vec_offset, so that the atom is in the origin
   Vector vec_offset = Vector(atom.getPos());

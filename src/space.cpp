@@ -32,6 +32,7 @@ void Space::placeAtomsInGrid(const AtomTree& atomtree, const double& r_probe){
         getElement(x,y,z).determineType(vxl_pos, max_depth);
       }
     }
+    printf("%i%% done\n", int(100*(double(x)+1)/double(n_gridsteps[0])));
   }      
 }
 
