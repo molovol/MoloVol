@@ -1,7 +1,7 @@
 #include "voxel.h"
 #include "misc.h"
 #include "atom.h"
-#include "atomtree.h"
+//#include "atomtree.h"
 #include <cmath> // abs, pow
 #include <cassert>
 
@@ -12,9 +12,6 @@
 inline double calcSphereOfInfluence(const double& grid_size, const double& max_depth){
   return 0.70710678118 * grid_size * (pow(2,max_depth)-1);
 }
-bool isAtom(Voxel& vxl, const Atom& atom, const double& dist_vxl_at, const double& radius_of_influence);
-bool isAtAtomEdge(Voxel& vxl, const Atom& atom, const double& dist_vxl_at, const double& radius_of_influence);
-bool isProbeExcluded(Voxel& vxl, const Atom& atom, const std::array<double,3>& vxl_pos, const double& r_probe);
 
 /////////////////
 // CONSTRUCTOR //
@@ -50,31 +47,27 @@ void Voxel::setType(char input){
 // SET TYPE //
 //////////////
 
-char Voxel::determineType(
-    std::array<double,3> vxl_pos, // voxel centre
-    const double& grid_size,
-    const double& r_probe,
-    const double max_depth,
-    const AtomTree& atomtree)
+void Voxel::storeUniversal(AtomTree atomtree, double grid_size, double r_probe1){
+  _atomtree = atomtree;
+  _grid_size = grid_size;
+  _r_probe1 = r_probe1;
+}
+
+char Voxel::determineType(std::array<double,3> vxl_pos, const double max_depth)
 {
-  double r_at = atomtree.getMaxRad();
-  double r_vxl = calcSphereOfInfluence(grid_size, max_depth); // calculated every time, since max_depth may change
+  double r_at = _atomtree.getMaxRad();
+  double r_vxl = calcSphereOfInfluence(_grid_size, max_depth); // calculated every time, since max_depth may change
   
   bool accessibility_checked = false; // keeps track of whether probe accessibility has been determined
-  traverseTree(atomtree.getRoot(), 0, r_at, r_vxl, vxl_pos, grid_size, r_probe, max_depth, accessibility_checked); 
+  traverseTree(_atomtree.getRoot(), 0, r_at, r_vxl, vxl_pos, max_depth, accessibility_checked); 
   
   if(type == 'm'){
-    splitVoxel(vxl_pos, grid_size, r_probe, max_depth, atomtree);
+    splitVoxel(vxl_pos, max_depth);
   }
 	return type;
 }
 
-void Voxel::splitVoxel(
-    const std::array<double,3>& vxl_pos, 
-    const double& grid_size, 
-    const double& r_probe, 
-    const double& max_depth, 
-    const AtomTree& atomtree){
+void Voxel::splitVoxel(const std::array<double,3>& vxl_pos, const double& max_depth){
   // split into 8 subvoxels
 	short resultcount = 0;
   for(int i = 0; i < 8; i++){
@@ -87,9 +80,9 @@ void Voxel::splitVoxel(
    
     std::array<double,3> new_pos;
     for(int dim = 0; dim < 3; dim++){
-      new_pos[dim] = vxl_pos[dim] + factors[dim] * grid_size * std::pow(2,max_depth-2);//why -2?
+      new_pos[dim] = vxl_pos[dim] + factors[dim] * _grid_size * std::pow(2,max_depth-2);//why -2?
     }
-    resultcount += data[i].determineType(new_pos, grid_size, r_probe, max_depth-1, atomtree);
+    resultcount += data[i].determineType(new_pos, max_depth-1);
   }
 	//determine if all children have the same type
   // TODO: delete data vector in this case
@@ -109,8 +102,6 @@ void Voxel::traverseTree
    int dim, const double& at_rad, 
    const double& vxl_rad, 
    const std::array<double,3> vxl_pos, 
-   const double& grid_size, 
-   const double& r_probe, 
    const double& max_depth,
    bool& accessibility_checked){
 
@@ -118,24 +109,22 @@ void Voxel::traverseTree
   // distance between atom and voxel along one dimension
   double dist1D = distance(node->atom->getPos(), vxl_pos, dim);
  
-  // this condition is not optimised. r_probe might be unneccessary here and slow down the algo
-  if (abs(dist1D) > (vxl_rad + at_rad + r_probe)){ // then atom is too far to matter for voxel type
+  // this condition is not optimised. _r_probe1 might be unneccessary here and slow down the algo
+  if (abs(dist1D) > (vxl_rad + at_rad + _r_probe1)){ // then atom is too far to matter for voxel type
       traverseTree(dist1D < 0 ? node->left_child : node->right_child,
-				   (dim+1)%3, at_rad, vxl_rad, vxl_pos, grid_size, r_probe, max_depth, accessibility_checked);
+				   (dim+1)%3, at_rad, vxl_rad, vxl_pos, max_depth, accessibility_checked);
   } else{ // then atom is close enough to influence voxel type
     // evaluate voxel type with respect to the found atom
-    determineTypeSingleAtom(*(node->atom), vxl_pos, grid_size, r_probe, max_depth, accessibility_checked);
+    determineTypeSingleAtom(*(node->atom), vxl_pos, max_depth, accessibility_checked);
     // continue with both children
     for (AtomNode* child : {node->left_child, node->right_child}){
-      traverseTree(child, (dim+1)%3, at_rad, vxl_rad, vxl_pos, grid_size, r_probe, max_depth, accessibility_checked);
+      traverseTree(child, (dim+1)%3, at_rad, vxl_rad, vxl_pos, max_depth, accessibility_checked);
     }
   }
 }
 
 void Voxel::determineTypeSingleAtom(const Atom& atom, 
                                     std::array<double,3> vxl_pos, // voxel centre
-                                    const double& grid_size,
-                                    const double& r_probe,
                                     const double max_depth,
                                     bool& accessibility_checked){
 
@@ -148,8 +137,8 @@ void Voxel::determineTypeSingleAtom(const Atom& atom,
   // if bottom level voxel: radius of influence = 0, i.e., treat like point
   // if higher level voxel: radius of influence > 0
   double radius_of_influence = 
-    max_depth != 0 ? 1.73205080757 * grid_size * (pow(2,max_depth) - 1) : 0;
-  // I believe the use of a conditional makes the code slightly faster
+    max_depth != 0 ? 1.73205080757 * _grid_size * (pow(2,max_depth) - 1) : 0;
+  // I believe the use of a conditional makes the code slightly faster -JM
   
   // is voxel inside atom? 
   if (isAtom(atom, dist_vxl_at, radius_of_influence)){return;}
@@ -158,7 +147,8 @@ void Voxel::determineTypeSingleAtom(const Atom& atom,
   else if(isAtAtomEdge(atom, dist_vxl_at, radius_of_influence)){return;}
   
   // is voxel inaccessible by probe?
-  else if (!accessibility_checked && isProbeExcluded(atom, vxl_pos, r_probe, radius_of_influence, accessibility_checked)){
+  // pass _r_probe1 as proper argument, so that this routine may be reused for two probe mode
+  else if (!accessibility_checked && isProbeExcluded(atom, vxl_pos, _r_probe1, radius_of_influence, accessibility_checked)){
     return;
   }
   // else type remains unchanged
@@ -183,6 +173,7 @@ bool Voxel::isAtAtomEdge(const Atom& atom, const double& dist_vxl_at, const doub
   }
   return false;
 }
+
 
 bool Voxel::isProbeExcluded(const Atom& atom, const std::array<double,3>& vxl_pos, const double& r_probe, const double& radius_of_influence, bool& accessibility_checked){ 
   accessibility_checked = true;

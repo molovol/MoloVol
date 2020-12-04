@@ -20,7 +20,7 @@ void Space::placeAtomsInGrid(const AtomTree& atomtree, const double& r_probe){
   std::array<double,3> vxl_pos;
 
   // save variable that all voxels need access to for their type determination
-  //Voxel::storeUniversalVariables();
+  Voxel::storeUniversal(atomtree, grid_size, r_probe);
 
   for(size_t x = 0; x < n_gridsteps[0]; x++){
     vxl_pos[0] = vxl_origin[0] + vxl_dist * (0.5 + x);
@@ -29,7 +29,7 @@ void Space::placeAtomsInGrid(const AtomTree& atomtree, const double& r_probe){
       for(size_t z = 0; z < n_gridsteps[2]; z++){
         vxl_pos[2] = vxl_origin[2] + vxl_dist * (0.5 + z);
         // voxel position is deliberately not stored in voxel object to reduce memory cost
-        getElement(x,y,z).determineType(vxl_pos, grid_size, r_probe, max_depth, atomtree);
+        getElement(x,y,z).determineType(vxl_pos, max_depth);
       }
     }
   }      
