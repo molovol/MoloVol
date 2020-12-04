@@ -50,7 +50,6 @@ class Voxel{
     static inline double _r_probe1;
 
     bool isAtom(const Atom& atom, const double& dist_vxl_at, const double& radius_of_influence); // inline not faster
-    bool isAtAtomEdge(const Atom& atom, const double& dist_vxl_at, const double& radius_of_influence); // inline not faster
     bool isProbeExcluded(const Atom& atom, const std::array<double,3>& vxl_pos, const double& r_probe, const double&, bool&);
     bool isExcludedByPair(const Vector&, const Vector&, const double&, const double&, const double&, const double&);
 
