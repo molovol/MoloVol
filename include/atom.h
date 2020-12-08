@@ -7,7 +7,16 @@
 #include <array>
 #include <iostream>
 
-struct Atom{
+struct Atom{ 
+  Atom(){
+    pos_x = 0;
+    pos_y = 0;
+    pos_z = 0;
+    rad = -1;
+    number = -1;
+    symbol = "Empty";
+  }
+
   Atom(const double& x_inp, const double& y_inp, const double& z_inp, const std::string& symbol_inp, const double& rad_inp, const int& elem_Z_inp)
     : pos_x(x_inp),
       pos_y(y_inp),
@@ -42,6 +51,9 @@ struct Atom{
     printf("Object: Atom {%s, (%1.3f, %1.3f, %1.3f)}", symbol.c_str(), pos_x, pos_y, pos_z);
     return;
   }
+
+  bool isValid() const {return (rad != -1);}
+
 };
 
 
