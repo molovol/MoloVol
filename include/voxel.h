@@ -44,6 +44,7 @@ class Voxel{
         const std::array<double,3>&, 
         const double&,
         const double&,
+        const double&,
         const char);
 
     size_t tallyVoxelsOfType(const char volume_type, const int max_depth);
