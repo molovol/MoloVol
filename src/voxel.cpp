@@ -12,6 +12,8 @@
 inline double calcSphereOfInfluence(const double& grid_size, const double& max_depth){
   return 0.70710678118 * grid_size * (pow(2,max_depth)-1);
 }
+bool allAtomsClose(
+    const double&, const std::array<double,3>&, const std::array<Vector,3>&, char); 
 
 /////////////////
 // CONSTRUCTOR //
@@ -61,6 +63,9 @@ char Voxel::determineType(std::array<double,3> vxl_pos, const double max_depth)
   bool accessibility_checked = false; // keeps track of whether probe accessibility has been determined
   traverseTree(_atomtree.getRoot(), 0, r_at, r_vxl, vxl_pos, max_depth, accessibility_checked); 
   
+  // Vector
+  // std::vector<Atom> for_atom_type = traverseTree(_atomtree.getRoot(), 0, )
+
   if(type == 'm'){
     splitVoxel(vxl_pos, max_depth);
   }
@@ -94,6 +99,8 @@ void Voxel::splitVoxel(const std::array<double,3>& vxl_pos, const double& max_de
   //
 }
 
+// TODO: consider making this function return a list of atoms to be checked.
+
 // use the properties of the binary tree to recursively traverse the tree and 
 // only check the voxel type with respect to relevant atoms. at the end of this 
 // method, the type of the voxel will have been set.
@@ -109,7 +116,7 @@ void Voxel::traverseTree
   // distance between atom and voxel along one dimension
   double dist1D = distance(node->atom->getPos(), vxl_pos, dim);
  
-  // this condition is not optimised. _r_probe1 might be unneccessary here and slow down the algo
+  // TODO: this condition is not optimised. _r_probe1 might be unneccessary here and slow down the algo
   if (abs(dist1D) > (vxl_rad + at_rad + _r_probe1)){ // then atom is too far to matter for voxel type
       traverseTree(dist1D < 0 ? node->left_child : node->right_child,
 				   (dim+1)%3, at_rad, vxl_rad, vxl_pos, max_depth, accessibility_checked);
@@ -136,12 +143,13 @@ void Voxel::determineTypeSingleAtom(const Atom& atom,
   // if bottom level voxel: radius of influence = 0, i.e., treat like point
   // if higher level voxel: radius of influence > 0
   double radius_of_influence = 
-    max_depth != 0 ? 1.73205080757 * _grid_size * (pow(2,max_depth) - 1) : 0;
+    max_depth != 0 ? 0.86602540378 * _grid_size * (pow(2,max_depth) - 1) : 0;
   // I believe the use of a conditional makes the code slightly faster -JM
   
   // is voxel inside atom? 
   if (isAtom(atom, dist_vxl_at, radius_of_influence)){return;}
   
+  // TODO: run this only in for the last atom
   // is voxel inaccessible by probe?
   // pass _r_probe1 as proper argument, so that this routine may be reused for two probe mode
   else if (!accessibility_checked && isProbeExcluded(atom, vxl_pos, _r_probe1, radius_of_influence, accessibility_checked)){
@@ -166,35 +174,98 @@ bool Voxel::isAtom(const Atom& atom, const double& dist_vxl_at, const double& ra
   return false;
 }
 
-bool Voxel::isProbeExcluded(const Atom& atom, const std::array<double,3>& vxl_pos, const double& r_probe, const double& radius_of_influence, bool& accessibility_checked){ 
+// TEMPORARY
+bool isExcludedByTriplet(
+  const Vector& vec_vxl, 
+  const double& rad_vxl, 
+  const std::array<Vector,3>& vec_atom,
+  const std::array<double,3>& rad_atom,
+  const double& rad_probe);
+// TEMPORARY
+
+bool Voxel::isProbeExcluded(const Atom& atom1, const std::array<double,3>& vxl_pos, const double& r_probe, const double& radius_of_influence, bool& accessibility_checked){ 
   
+  if (distance(atom1.getPos(),vxl_pos) > atom1.getRad() + r_probe) {return false;}
+
   accessibility_checked = true; // function has been called
   
   if(type == 'm'){return false;} // type 'm' can never be changed by probe
 
   // for simplicity all vectors are shifted by -vec_offset, so that the atom is in the origin
-  Vector vec_offset = Vector(atom.getPos());
-  double rad_atom = atom.getRad(); 
+  Vector vec_offset = Vector(atom1.getPos());
   
+  std::array<double,3> atom_radii;
+  std::array<Vector,3> vectors;
+  
+  vectors[0] = Vector();
+  atom_radii[0] = atom1.getRad();
+
   Vector vec_vxl = Vector(vxl_pos) - vec_offset;
   
-  for (const Atom* adj : atom.adjacent_atoms){
-    Vector vec_adj = Vector(adj->getPos()) - vec_offset; // vector pointing from atom to neighbour atom
-    double rad_adj = adj->getRad();
+  int n_adjacent_atoms = atom1.adjacent_atoms.size();
+
+  for (int i = 0; i < n_adjacent_atoms; i++){
+    Atom atom2 = *(atom1.adjacent_atoms[i]);
+    atom_radii[1] = atom2.getRad();
+    vectors[1] = Vector(atom2.getPos()) - vec_offset;
+
+    if (!allAtomsClose(r_probe, atom_radii, vectors, 2)){continue;}
+    if (isExcludedByPair(vec_vxl, vectors[1], atom_radii[0], atom_radii[1], r_probe, radius_of_influence)){return true;}
     
-    if (vec_adj < 2*r_probe + rad_atom + rad_adj){ // then atoms are close enough
-      if (isExcludedByPair(vec_vxl, vec_adj, rad_atom, rad_adj, r_probe, radius_of_influence)){
-        return true;
-      } 
-    }
+    /*for (int j = i+1; j < n_adjacent_atoms; j++){
+      Atom atom3 = *(atom1.adjacent_atoms[j]);
+      atom_radii[2] = atom3.getRad();
+      vectors[2] = Vector(atom3.getPos()) - vec_offset;
+      
+      if (!allAtomsClose(r_probe, atom_radii, vectors, 3)){continue;}
+      if (isExcludedByTriplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe)){return true;}
+
+    }*/
+    
   }
   return false;
 }
 
 void breakpoint(){return;}
 
-bool Voxel::isExcludedByPair(const Vector& vec_vxl, const Vector& vec_atat, const double& rad_atom1, const double& rad_atom2, const double& rad_probe, const double& rad_vxl){
+bool isExcludedByTriplet(
+  const Vector& vec_vxl, 
+  const double& rad_vxl, 
+  const std::array<Vector,3>& vec_atom,
+  const std::array<double,3>& rad_atom,
+  const double& rad_probe){
+  // check if between atom1 and atom2 - done by isExcludedByPair
+//  double dist_vxl_12 = unitvec_12 * vec_vxl; // voxel vector component along 12
 
+  Vector unitvec_13 = vec_atom[2].normalise(); // vector pointing from atom1 to atom3
+  double dist_vxl_13 = unitvec_13 * vec_vxl; // voxel vector component along 13
+  if (dist_vxl_13 > 0 && dist_vxl_13 < 2 * rad_probe + rad_atom[0] + rad_atom[2]){ // check if between atom1 and atom3
+    
+    double dist_12 = vec_atom[1].length();
+    double dist_probe_12 = (dist_12 + pow(rad_atom[0]+rad_probe,2) - pow(rad_atom[1]+rad_probe,2))/(2*dist_12);
+    
+    double dist_13 = vec_atom[2].length();
+    double dist_probe_13 = (dist_13 + pow(rad_atom[0]+rad_probe,2) - pow(rad_atom[2]+rad_probe,2))/(2*dist_13);
+
+    Vector unitvec_12 = vec_atom[1].normalise(); // vector pointing from atom1 to atom2 // calculated in Pairs
+    Vector vec_probe_plane = unitvec_12*dist_probe_12 + unitvec_13*dist_probe_13;
+    
+    // implement cross-product
+    // calc cross product between unitvectors 12 and 13 to get a vector normal to the plane
+    // normalise vector
+    // check that sign is correct, relative to voxel
+    // calculate height of probe
+    // multiply height with normal unitvector and add to vec_probe_plane to get vec_probe
+    // check whether voxel is inside triangle
+    // if so: check distance between voxel and probe
+  }
+
+  // get probe position
+  return false;
+}
+
+bool Voxel::isExcludedByPair(const Vector& vec_vxl, const Vector& vec_atat, const double& rad_atom1, const double& rad_atom2, const double& rad_probe, const double& rad_vxl){
+    
   Vector unitvec_parallel = vec_atat.normalise();
   double vxl_parallel = vec_vxl * unitvec_parallel; 
   if (vxl_parallel > 0 && vec_atat > vxl_parallel){ // then voxel is between atoms
@@ -256,5 +327,27 @@ size_t Voxel::tallyVoxelsOfType(const char volume_type, const int max_depth){
   }
   // if neither empty nor of the type of interest, then the voxel doesn't count towards the total
   return 0;
+}
+
+//////////////////////////////
+// AUX FUNCTION DEFINITIONS //
+//////////////////////////////
+
+bool allAtomsClose(
+    const double& r_probe, 
+    const std::array<double,3>& atom_radii, 
+    const std::array<Vector,3>& vectors, 
+    char n_atoms) 
+{
+  bool all_atoms_close = true;
+
+  Vector last_added = vectors[n_atoms-1];
+  double rad_last_added = atom_radii[n_atoms-1];
+  for (char i = 0; i < n_atoms-1; i++){
+    if (vectors[i]-last_added > 2*r_probe + atom_radii[i] + rad_last_added){
+      return false;
+    }
+  }
+  return true; // if all atoms close
 }
 
