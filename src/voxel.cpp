@@ -9,9 +9,10 @@
 // AUX FUNCTIONS //
 ///////////////////
 
-inline double calcSphereOfInfluence(const double& grid_size, const double& max_depth){
-  return 0.70710678118 * grid_size * (pow(2,max_depth)-1);
+inline double Voxel::calcRadiusOfInfluence(const double& max_depth){
+  return max_depth != 0 ? 0.86602540378 * _grid_size * (pow(2,max_depth) - 1) : 0;
 }
+
 bool allAtomsClose(
     const double&, const std::array<double,3>&, const std::array<Vector,3>&, char); 
 
@@ -57,14 +58,15 @@ void Voxel::storeUniversal(AtomTree atomtree, double grid_size, double r_probe1)
 
 char Voxel::determineType(std::array<double,3> vxl_pos, const double max_depth)
 {
-  double r_at = _atomtree.getMaxRad();
-  double r_vxl = calcSphereOfInfluence(_grid_size, max_depth); // calculated every time, since max_depth may change
+  double r_vxl = calcRadiusOfInfluence(max_depth); // calculated every time, since max_depth may change
   
   bool accessibility_checked = false; // keeps track of whether probe accessibility has been determined
-  traverseTree(_atomtree.getRoot(), 0, r_at, r_vxl, vxl_pos, max_depth, accessibility_checked); 
+  //traverseTree(_atomtree.getRoot(), 0, r_at, r_vxl, vxl_pos, max_depth, accessibility_checked); 
   
-  // Vector
-  // std::vector<Atom> for_atom_type = traverseTree(_atomtree.getRoot(), 0, )
+  std::vector<Atom> very_close_atoms = listFromTree(_atomtree.getRoot(), vxl_pos, r_vxl, 0, 0);
+  for (Atom atom : very_close_atoms){
+    determineTypeSingleAtom(atom, vxl_pos, max_depth, accessibility_checked);
+  }
 
   if(type == 'm'){
     splitVoxel(vxl_pos, max_depth);
@@ -99,8 +101,44 @@ void Voxel::splitVoxel(const std::array<double,3>& vxl_pos, const double& max_de
   //
 }
 
-// TODO: consider making this function return a list of atoms to be checked.
+// go through a tree, starting from node. return a list of atoms that are a specified max distance (max_dist)
+// from a point with radius rad_point.
+std::vector<Atom> Voxel::listFromTree(
+  const AtomNode* node, 
+  const std::array<double,3>& pos_point, // consider using custom vector class instead
+  const double& rad_point, 
+  const double& max_dist=0, 
+  const char dim=0)
+{
+  std::vector<Atom> atom_list;
+  if (node == NULL){return atom_list;}
+  
+  double rad_max = _atomtree.getMaxRad();
+  
+  // distance between atom and point along one dimension
+  double dist1D = distance(node->atom->getPos(), pos_point, dim);
+  double rad_atom = node->atom->getRad();
+  
+  std::vector<Atom> temp;
+  if (abs(dist1D) > rad_point + rad_max + max_dist) { // then atom is too far
+      temp = listFromTree(dist1D < 0 ? node->left_child : node->right_child, pos_point, rad_point, max_dist, (dim+1)%3);
+      atom_list.insert(atom_list.end(), temp.begin(), temp.end());
+  } 
+  else { // then atom may be close enough
+    if (distance(node->atom->getPos(), pos_point) < rad_point + rad_atom + max_dist){
+      atom_list.push_back(*(node->atom));
+    }
+    
+    // continue with both children
+    for (AtomNode* child : {node->left_child, node->right_child}){
+      temp = listFromTree(child, pos_point, rad_point, max_dist, (dim+1)%3);
+      atom_list.insert(atom_list.end(), temp.begin(), temp.end());
+    }
+  }
+  return atom_list;
+}
 
+/*
 // use the properties of the binary tree to recursively traverse the tree and 
 // only check the voxel type with respect to relevant atoms. at the end of this 
 // method, the type of the voxel will have been set.
@@ -129,6 +167,7 @@ void Voxel::traverseTree
     }
   }
 }
+*/
 
 void Voxel::determineTypeSingleAtom(const Atom& atom, 
                                     std::array<double,3> vxl_pos, // voxel centre
@@ -152,9 +191,9 @@ void Voxel::determineTypeSingleAtom(const Atom& atom,
   // TODO: run this only in for the last atom
   // is voxel inaccessible by probe?
   // pass _r_probe1 as proper argument, so that this routine may be reused for two probe mode
-  else if (!accessibility_checked && isProbeExcluded(atom, vxl_pos, _r_probe1, radius_of_influence, accessibility_checked)){
+  /*else if (!accessibility_checked && isProbeExcluded(atom, vxl_pos, _r_probe1, radius_of_influence, accessibility_checked)){
     return;
-  }
+  }*/
   // else type remains unchanged
 }
 
