@@ -23,7 +23,19 @@ void Vector::print() const {
   printf("(%.4f,%.4f,%.4f)\n", coord[0], coord[1], coord[2]);
 }
 
+double& Vector::getCoordinate(char i) {
+  return (*this)[i];
+}
+
+double& Vector::operator[](char i) {
+  return coord[i];
+}
+
 const double& Vector::getCoordinate(char i) const {
+  return (*this)[i];
+}
+
+const double& Vector::operator[](char i) const {
   return coord[i];
 }
 
@@ -125,3 +137,11 @@ double dotproduct(const Vector& rhs, const Vector& lhs){
 }
 
 double operator*(const Vector& rhs, const Vector& lhs){return dotproduct(lhs, rhs);}
+
+Vector crossproduct(const Vector& lhs, const Vector& rhs){
+  Vector retvec = Vector();
+  retvec[0] = lhs[1]*rhs[2] - lhs[2]*rhs[1];
+  retvec[1] = lhs[2]*rhs[0] - lhs[0]*rhs[2];
+  retvec[2] = lhs[0]*rhs[1] - lhs[1]*rhs[0];
+  return retvec;
+}

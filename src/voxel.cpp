@@ -64,6 +64,9 @@ char Voxel::determineType(std::array<double,3> vxl_pos, const double max_depth)
   std::vector<Atom> very_close_atoms = listFromTree(_atomtree.getRoot(), vxl_pos, r_vxl, rad_max, 0, 0);
  
   { // TODO: FUNCTION?
+    // can be further optimised: use traverTree function instead
+    // 2nd optimisation: higher level voxels with radii larger than the atoms will never be type 'a'. in
+    // these cases the function can abort once a type 'm' has been found
     // is voxel inside an atom?
     for (Atom atom : very_close_atoms){ 
       isAtom(atom, distance(vxl_pos, atom.getPos()), r_vxl);
