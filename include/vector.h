@@ -11,7 +11,10 @@ struct Vector{
     Vector(std::array<double,3>);
     
     void print() const; 
+    double& getCoordinate(char);
+    double& operator[](char);
     const double& getCoordinate(char) const;
+    const double& operator[](char) const;
     void setCoordinate(char,const double&);
     
     double length() const;
@@ -55,5 +58,7 @@ Vector operator/(const Vector&, const double&);
 
 double dotproduct(const Vector&, const Vector&);
 double operator*(const Vector&, const Vector&);
+
+Vector crossproduct(const Vector&, const Vector&);
 
 #endif
