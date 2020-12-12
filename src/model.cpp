@@ -90,6 +90,7 @@ void Model::linkAtomsToAdjacentAtoms(const double& r_probe){
 
 void Model::calcVolume(){
   cell.placeAtomsInGrid(atomtree, r_probe1);
+  cell.printGrid(); // for testing
   double volume = cell.getVolume();
 
   std::string message_to_user
