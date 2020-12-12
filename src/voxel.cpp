@@ -269,9 +269,9 @@ bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r
   
       if (!allAtomsClose(r_probe, atom_radii, vectors, 2)){continue;}
       if (isExcludedByPair(vec_vxl, vectors[1], atom_radii[0], atom_radii[1], r_probe, radius_of_influence)){return true;}
-      /*
-      for (int j = i+1; j < n_adjacent_atoms; j++){
-        Atom atom3 = *(atom1.adjacent_atoms[j]);
+      
+      for (int k = j+1; k < close_atoms.size(); k++){
+        Atom atom3 = close_atoms[k];
         atom_radii[2] = atom3.getRad();
         vectors[2] = Vector(atom3.getPos()) - vec_offset;
         
@@ -279,8 +279,6 @@ bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r
         if (isExcludedByTriplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe)){return true;}
   
       }
-      */
-      
     }
   }
   return false;
@@ -335,13 +333,12 @@ bool Voxel::isExcludedByTriplet(
           sign = signbit(vec_vxl*normals[i]);
         }
         else { // if sign ever differs then vxl is not inside tetrahedron
-          if (sign != signbit(vec_vxl*normals[i])){
+          if (sign != signbit((vec_vxl-vec_atom[i])*normals[i])){
             return false;  
           }
         }
       }
     }
-    return false;
   
     // function
     // this block should be made a function since it is also used in pairs
@@ -357,12 +354,7 @@ bool Voxel::isExcludedByTriplet(
       return false;
     }
     // function
-    
-
-    // check whether voxel is inside triangle
-    // if so: check distance between voxel and probe
   }
-
   return false;
 }
 
