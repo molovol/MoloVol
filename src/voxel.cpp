@@ -77,6 +77,7 @@ char Voxel::determineType(std::array<double,3> vxl_pos, const double max_depth)
   // probe mode
   
   { // TODO: FUNCTION?
+    /*
     Atom probe_atom = Atom(); // initialise with empty atom
     if (very_close_atoms.size() > 0) {probe_atom = very_close_atoms[0];}
     else {
@@ -87,12 +88,18 @@ char Voxel::determineType(std::array<double,3> vxl_pos, const double max_depth)
         probe_atom = close_atoms[0];
       }
     }
+    */
   
     // pass _r_probe1 as proper argument, so that this routine may be reused for two probe mode
+    std::vector<Atom> close_atoms = listFromTree(_atomtree.getRoot(), vxl_pos, 0, rad_max, _r_probe1, 0);
+    isProbeExcluded(vxl_pos, _r_probe1, r_vxl, close_atoms);
+    if (type=='x'){return type;}
+    /*
     if (probe_atom.isValid()){ // there is an atom near the voxel
       bool accessibility_checked = false; // not necessary when only passing one atom
-      isProbeExcluded(probe_atom, vxl_pos, _r_probe1, r_vxl, accessibility_checked);
+      isProbeExcluded(probe_atom, vxl_pos, _r_probe1, r_vxl, close_atoms);
     }
+    */
   }
   
   // probe mode
@@ -167,7 +174,7 @@ std::vector<Atom> Voxel::listFromTree(
   return atom_list;
 }
 
-/*
+/* don' delete, could become useful later
 // use the properties of the binary tree to recursively traverse the tree and 
 // only check the voxel type with respect to relevant atoms. at the end of this 
 // method, the type of the voxel will have been set.
@@ -199,6 +206,7 @@ void Voxel::traverseTree
 */
 
 // no longer used
+/*
 void Voxel::determineTypeSingleAtom(const Atom& atom, 
                                     std::array<double,3> vxl_pos, // voxel centre
                                     const double max_depth,
@@ -218,14 +226,8 @@ void Voxel::determineTypeSingleAtom(const Atom& atom,
   // is voxel inside atom? 
   if (isAtom(atom, dist_vxl_at, radius_of_influence)){return;}
   
-  // TODO: run this only in for the last atom
-  // is voxel inaccessible by probe?
-  // pass _r_probe1 as proper argument, so that this routine may be reused for two probe mode
-  /*else if (!accessibility_checked && isProbeExcluded(atom, vxl_pos, _r_probe1, radius_of_influence, accessibility_checked)){
-    return;
-  }*/
-  // else type remains unchanged
 }
+*/
 
 ////////////////////
 // CHECK FOR TYPE //
@@ -243,61 +245,50 @@ bool Voxel::isAtom(const Atom& atom, const double& dist_vxl_at, const double& ra
   return false;
 }
 
-// TEMPORARY
-bool isExcludedByTriplet(
-  const Vector& vec_vxl, 
-  const double& rad_vxl, 
-  const std::array<Vector,3>& vec_atom,
-  const std::array<double,3>& rad_atom,
-  const double& rad_probe);
-// TEMPORARY
-
-bool Voxel::isProbeExcluded(const Atom& atom1, const std::array<double,3>& vxl_pos, const double& r_probe, const double& radius_of_influence, bool& accessibility_checked){ 
-  
-  if (distance(atom1.getPos(),vxl_pos) > atom1.getRad() + r_probe) {return false;}
-
-  accessibility_checked = true; // function has been called
+bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r_probe, const double& radius_of_influence, const std::vector<Atom>& close_atoms){ 
   
   if(type == 'm'){return false;} // type 'm' can never be changed by probe
-
-  // for simplicity all vectors are shifted by -vec_offset, so that the atom is in the origin
-  Vector vec_offset = Vector(atom1.getPos());
   
-  std::array<double,3> atom_radii;
-  std::array<Vector,3> vectors;
-  
-  vectors[0] = Vector();
-  atom_radii[0] = atom1.getRad();
-
-  Vector vec_vxl = Vector(vxl_pos) - vec_offset;
-  
-  int n_adjacent_atoms = atom1.adjacent_atoms.size();
-
-  for (int i = 0; i < n_adjacent_atoms; i++){
-    Atom atom2 = *(atom1.adjacent_atoms[i]);
-    atom_radii[1] = atom2.getRad();
-    vectors[1] = Vector(atom2.getPos()) - vec_offset;
-
-    if (!allAtomsClose(r_probe, atom_radii, vectors, 2)){continue;}
-    if (isExcludedByPair(vec_vxl, vectors[1], atom_radii[0], atom_radii[1], r_probe, radius_of_influence)){return true;}
+  for (int i = 0; i < close_atoms.size(); i++){
+    Atom atom1 = close_atoms[i];
+    // for simplicity all vectors are shifted by -vec_offset, so that the atom is in the origin
+    Vector vec_offset = Vector(atom1.getPos());
     
-    /*for (int j = i+1; j < n_adjacent_atoms; j++){
-      Atom atom3 = *(atom1.adjacent_atoms[j]);
-      atom_radii[2] = atom3.getRad();
-      vectors[2] = Vector(atom3.getPos()) - vec_offset;
+    std::array<double,3> atom_radii;
+    std::array<Vector,3> vectors;
+    
+    vectors[0] = Vector();
+    atom_radii[0] = atom1.getRad();
+  
+    Vector vec_vxl = Vector(vxl_pos) - vec_offset;
+    
+    for (int j = i+1; j < close_atoms.size(); j++){
+      Atom atom2 = close_atoms[j];
+      atom_radii[1] = atom2.getRad();
+      vectors[1] = Vector(atom2.getPos()) - vec_offset;
+  
+      if (!allAtomsClose(r_probe, atom_radii, vectors, 2)){continue;}
+      if (isExcludedByPair(vec_vxl, vectors[1], atom_radii[0], atom_radii[1], r_probe, radius_of_influence)){return true;}
+      /*
+      for (int j = i+1; j < n_adjacent_atoms; j++){
+        Atom atom3 = *(atom1.adjacent_atoms[j]);
+        atom_radii[2] = atom3.getRad();
+        vectors[2] = Vector(atom3.getPos()) - vec_offset;
+        
+        if (!allAtomsClose(r_probe, atom_radii, vectors, 3)){continue;}
+        if (isExcludedByTriplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe)){return true;}
+  
+      }
+      */
       
-      if (!allAtomsClose(r_probe, atom_radii, vectors, 3)){continue;}
-      if (isExcludedByTriplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe)){return true;}
-
-    }*/
-    
+    }
   }
   return false;
 }
 
 void breakpoint(){return;}
 
-bool isExcludedByTriplet(
+bool Voxel::isExcludedByTriplet(
   const Vector& vec_vxl, 
   const double& rad_vxl, 
   const std::array<Vector,3>& vec_atom,
@@ -311,25 +302,67 @@ bool isExcludedByTriplet(
   if (dist_vxl_13 > 0 && dist_vxl_13 < 2 * rad_probe + rad_atom[0] + rad_atom[2]){ // check if between atom1 and atom3
     
     double dist_12 = vec_atom[1].length();
-    double dist_probe_12 = (dist_12 + pow(rad_atom[0]+rad_probe,2) - pow(rad_atom[1]+rad_probe,2))/(2*dist_12);
+    double dist_probe_12 = (rad_atom[0]-rad_atom[1])*(2*rad_probe + (rad_atom[0]+rad_atom[1]))/(2*dist_12) + (dist_12/2);
+//        pow(rad_atom[0]+rad_probe,2) - pow(rad_atom[1]+rad_probe,2))/(2*dist_12);
     
     double dist_13 = vec_atom[2].length();
-    double dist_probe_13 = (dist_13 + pow(rad_atom[0]+rad_probe,2) - pow(rad_atom[2]+rad_probe,2))/(2*dist_13);
+    double dist_probe_13 = (rad_atom[0]-rad_atom[2])*(2*rad_probe + (rad_atom[0]+rad_atom[2]))/(2*dist_13) + (dist_13/2);
 
     Vector unitvec_12 = vec_atom[1].normalise(); // vector pointing from atom1 to atom2 // calculated in Pairs
     Vector vec_probe_plane = unitvec_12*dist_probe_12 + unitvec_13*dist_probe_13;
     
-    // implement cross-product
-    // calc cross product between unitvectors 12 and 13 to get a vector normal to the plane
-    // normalise vector
-    // check that sign is correct, relative to voxel
-    // calculate height of probe
-    // multiply height with normal unitvector and add to vec_probe_plane to get vec_probe
+    Vector unitvec_normal = crossproduct(unitvec_12,unitvec_13).normalise();
+    unitvec_normal = unitvec_normal * ( signbit(unitvec_normal*vec_vxl)? -1 : 1 ); // let unitvec normal point towards vxl
+
+    Vector vec_probe_normal = unitvec_normal * pow((pow(rad_atom[0]+rad_probe,2) - vec_probe_plane*vec_probe_plane),0.5);
+    Vector vec_probe = vec_probe_plane + vec_probe_normal;
+    
+    
+    Vector unitvec_1p = vec_probe.normalise();
+    
+
+    // check whether vxl is inside tetrahedron spanned by atoms1-3 and probe 
+    {
+      std::array<Vector,4> normals = 
+        {crossproduct(unitvec_12, unitvec_13),
+         crossproduct(unitvec_13, unitvec_1p), 
+         crossproduct(unitvec_1p, unitvec_12),
+         crossproduct(vec_probe-vec_atom[1], vec_atom[2]-vec_atom[1])};
+      
+      char sign = 0;
+      for (char i; i < normals.size(); i++){
+        if (i){ // for first iteration save sign
+          sign = signbit(vec_vxl*normals[i]);
+        }
+        else { // if sign ever differs then vxl is not inside tetrahedron
+          if (sign != signbit(vec_vxl*normals[i])){
+            return false;  
+          }
+        }
+      }
+    }
+    return false;
+  
+    // function
+    // this block should be made a function since it is also used in pairs
+    if (vec_probe-vec_vxl > rad_probe+rad_vxl){ // then all subvoxels are inaccessible
+      setType('x');
+      return true;
+    }
+    else if (vec_probe-vec_vxl <= rad_probe-rad_vxl){ // then all subvoxels are accessible
+      return false;
+    }
+    else { // then each subvoxel has to be evaluated
+      setType('m');
+      return false;
+    }
+    // function
+    
+
     // check whether voxel is inside triangle
     // if so: check distance between voxel and probe
   }
 
-  // get probe position
   return false;
 }
 
@@ -365,7 +398,6 @@ bool Voxel::isExcludedByPair(const Vector& vec_vxl, const Vector& vec_atat, cons
           return false;
         }
         else { // then each subvoxel has to be evaluated
-          breakpoint();
           setType('m');
           return false;
         }

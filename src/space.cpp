@@ -115,7 +115,7 @@ void Space::printGrid(){
     // z coordinate
     if (usr_inp == 'r'){
       if (z==0){
-        std::cout << "z position at min. ";
+        std::cout << "z position at min. " << std::endl;
       }
       else{z--;}
     }
@@ -123,14 +123,15 @@ void Space::printGrid(){
       z++;
       if (z >= n_gridsteps[2]){
         z--;
-        std::cout << "z position at max. ";
+        std::cout << "z position at max. " << std::endl;
       }
     }
     
     // print matrix
     for(size_t y = y_min; y < y_max; y++){
       for(size_t x = x_min; x < x_max; x++){
-        std::cout << getElement(x,y,z).getType();
+        char to_print = (getElement(x,y,z).getType() == 'a')? 'A' : getElement(x,y,z).getType();
+        std::cout << to_print << " ";
       }
       std::cout << std::endl;
     }
