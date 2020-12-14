@@ -91,7 +91,7 @@ char Voxel::determineType(std::array<double,3> vxl_pos, const double max_depth)
     */
   
     // pass _r_probe1 as proper argument, so that this routine may be reused for two probe mode
-    std::vector<Atom> close_atoms = listFromTree(_atomtree.getRoot(), vxl_pos, 0, rad_max, _r_probe1, 0);
+    std::vector<Atom> close_atoms = listFromTree(_atomtree.getRoot(), vxl_pos, 0, rad_max, _r_probe1*2, 0);
     isProbeExcluded(vxl_pos, _r_probe1, r_vxl, close_atoms);
     if (type=='x'){return type;}
     /*
@@ -269,7 +269,7 @@ bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r
   
       if (!allAtomsClose(r_probe, atom_radii, vectors, 2)){continue;}
       if (isExcludedByPair(vec_vxl, vectors[1], atom_radii[0], atom_radii[1], r_probe, radius_of_influence)){return true;}
-      
+    /*  
       for (int k = j+1; k < close_atoms.size(); k++){
         Atom atom3 = close_atoms[k];
         atom_radii[2] = atom3.getRad();
@@ -279,6 +279,7 @@ bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r
         if (isExcludedByTriplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe)){return true;}
   
       }
+      */
     }
   }
   return false;
@@ -363,6 +364,7 @@ bool Voxel::isExcludedByPair(const Vector& vec_vxl, const Vector& vec_atat, cons
   Vector unitvec_parallel = vec_atat.normalise();
   double vxl_parallel = vec_vxl * unitvec_parallel; 
   if (vxl_parallel > 0 && vec_atat > vxl_parallel){ // then voxel is between atoms
+    
     Vector unitvec_orthogonal = (vec_vxl-unitvec_parallel*vxl_parallel).normalise();
     double vxl_orthogonal = vec_vxl * unitvec_orthogonal; 
     
@@ -379,7 +381,7 @@ bool Voxel::isExcludedByPair(const Vector& vec_vxl, const Vector& vec_atat, cons
       if (angle_atom2 > angle_vxl2){ // then voxel is in triangle spanned by atoms and probe
         double probe_parallel = ((pow(dist_atom1_probe,2) + pow(dist_atom1_atom2,2) - pow(dist_atom2_probe,2))/(2*dist_atom1_atom2));
         double probe_orthogonal = pow(pow(dist_atom1_probe,2)-pow(probe_parallel,2),0.5);
-
+        
         Vector vec_probe = probe_parallel * unitvec_parallel + probe_orthogonal * unitvec_orthogonal;
         
         if (vec_probe-vec_vxl > rad_probe+rad_vxl){ // then all subvoxels are inaccessible
