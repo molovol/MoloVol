@@ -268,8 +268,8 @@ bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r
       vectors[1] = Vector(atom2.getPos()) - vec_offset;
   
       if (!allAtomsClose(r_probe, atom_radii, vectors, 2)){continue;}
-      if (isExcludedByPair(vec_vxl, vectors[1], atom_radii[0], atom_radii[1], r_probe, radius_of_influence)){return true;}
-    /*  
+    //  if (isExcludedByPair(vec_vxl, vectors[1], atom_radii[0], atom_radii[1], r_probe, radius_of_influence)){return true;}
+      
       for (int k = j+1; k < close_atoms.size(); k++){
         Atom atom3 = close_atoms[k];
         atom_radii[2] = atom3.getRad();
@@ -279,7 +279,6 @@ bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r
         if (isExcludedByTriplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe)){return true;}
   
       }
-      */
     }
   }
   return false;
@@ -298,60 +297,63 @@ bool Voxel::isExcludedByTriplet(
 
   Vector unitvec_13 = vec_atom[2].normalise(); // vector pointing from atom1 to atom3
   double dist_vxl_13 = unitvec_13 * vec_vxl; // voxel vector component along 13
-  if (dist_vxl_13 > 0 && dist_vxl_13 < 2 * rad_probe + rad_atom[0] + rad_atom[2]){ // check if between atom1 and atom3
+  if (dist_vxl_13 > 0 && vec_atom[2] > dist_vxl_13){
+      //2 * rad_probe + rad_atom[0] + rad_atom[2]){ // check if between atom1 and atom3
     
     double dist_12 = vec_atom[1].length();
-    double dist_probe_12 = (rad_atom[0]-rad_atom[1])*(2*rad_probe + (rad_atom[0]+rad_atom[1]))/(2*dist_12) + (dist_12/2);
+    double dist_probe_12 = (rad_atom[0]-rad_atom[1])*(((rad_atom[0] + rad_atom[1]) + 2*rad_probe)/(2*dist_12)) + (dist_12/2);
 //        pow(rad_atom[0]+rad_probe,2) - pow(rad_atom[1]+rad_probe,2))/(2*dist_12);
     
     double dist_13 = vec_atom[2].length();
     double dist_probe_13 = (rad_atom[0]-rad_atom[2])*(2*rad_probe + (rad_atom[0]+rad_atom[2]))/(2*dist_13) + (dist_13/2);
 
     Vector unitvec_12 = vec_atom[1].normalise(); // vector pointing from atom1 to atom2 // calculated in Pairs
-    Vector vec_probe_plane = unitvec_12*dist_probe_12 + unitvec_13*dist_probe_13;
+    Vector vec_probe_plane = 0.5*(unitvec_12*dist_probe_12 + unitvec_13*dist_probe_13);
     
     Vector unitvec_normal = crossproduct(unitvec_12,unitvec_13).normalise();
     unitvec_normal = unitvec_normal * ( signbit(unitvec_normal*vec_vxl)? -1 : 1 ); // let unitvec normal point towards vxl
 
     Vector vec_probe_normal = unitvec_normal * pow((pow(rad_atom[0]+rad_probe,2) - vec_probe_plane*vec_probe_plane),0.5);
     Vector vec_probe = vec_probe_plane + vec_probe_normal;
-    
-    
+   
     Vector unitvec_1p = vec_probe.normalise();
-    
 
     // check whether vxl is inside tetrahedron spanned by atoms1-3 and probe 
     {
       std::array<Vector,4> normals = 
-        {crossproduct(unitvec_12, unitvec_13),
-         crossproduct(unitvec_13, unitvec_1p), 
-         crossproduct(unitvec_1p, unitvec_12),
-         crossproduct(vec_probe-vec_atom[1], vec_atom[2]-vec_atom[1])};
+        {crossproduct(unitvec_12, unitvec_13), // normal 1-2-3 plane
+         crossproduct(unitvec_13, unitvec_1p), // normal 1-3-p plane
+         crossproduct(unitvec_1p, unitvec_12), // normal 1-p-2 plane
+         crossproduct(vec_probe-vec_atom[1], vec_atom[2]-vec_atom[1])}; // normal 2-p-3 plane
       
-      char sign = 0;
-      for (char i; i < normals.size(); i++){
-        if (i){ // for first iteration save sign
+      breakpoint(); 
+      bool sign;
+      for (char i = 0; i < normals.size(); i++){
+        if (!i){ // for first iteration save sign
+          double direction = (vec_vxl*normals[i]);
           sign = signbit(vec_vxl*normals[i]);
         }
         else { // if sign ever differs then vxl is not inside tetrahedron
-          if (sign != signbit((vec_vxl-vec_atom[i])*normals[i])){
+          double direction = (vec_vxl-vec_atom[i-1])*normals[i];
+          if (sign != signbit((vec_vxl-vec_atom[i-1])*normals[i])){
             return false;  
           }
         }
       }
     }
-  
+    setType('t');
+
     // function
     // this block should be made a function since it is also used in pairs
     if (vec_probe-vec_vxl > rad_probe+rad_vxl){ // then all subvoxels are inaccessible
-      setType('x');
+     // setType('x');
       return true;
     }
     else if (vec_probe-vec_vxl <= rad_probe-rad_vxl){ // then all subvoxels are accessible
       return false;
     }
     else { // then each subvoxel has to be evaluated
-      setType('m');
+      //setType('m');
       return false;
     }
     // function
