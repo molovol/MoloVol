@@ -268,7 +268,7 @@ bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r
       vectors[1] = Vector(atom2.getPos()) - vec_offset;
   
       if (!allAtomsClose(r_probe, atom_radii, vectors, 2)){continue;}
-    //  if (isExcludedByPair(vec_vxl, vectors[1], atom_radii[0], atom_radii[1], r_probe, radius_of_influence)){return true;}
+      if (isExcludedByPair(vec_vxl, vectors[1], atom_radii[0], atom_radii[1], r_probe, radius_of_influence)){return true;}
       
       for (int k = j+1; k < close_atoms.size(); k++){
         Atom atom3 = close_atoms[k];
@@ -308,7 +308,20 @@ bool Voxel::isExcludedByTriplet(
     double dist_probe_13 = (rad_atom[0]-rad_atom[2])*(2*rad_probe + (rad_atom[0]+rad_atom[2]))/(2*dist_13) + (dist_13/2);
 
     Vector unitvec_12 = vec_atom[1].normalise(); // vector pointing from atom1 to atom2 // calculated in Pairs
-    Vector vec_probe_plane = 0.5*(unitvec_12*dist_probe_12 + unitvec_13*dist_probe_13);
+    //Vector vec_probe_plane = (unitvec_12*dist_probe_12 + unitvec_13*dist_probe_13)/2;
+    
+    Vector vec_probe_plane;
+    {
+      Vector vec_probe_12 = dist_probe_12 * unitvec_12;
+      Vector vec_probe_13 = dist_probe_13 * unitvec_13;
+
+      Vector vec_normal_12 = crossproduct(crossproduct(vec_probe_12,vec_probe_13),vec_probe_12);
+      Vector vec_normal_13 = crossproduct(crossproduct(vec_probe_12,vec_probe_13),vec_probe_13);
+
+      double c1 = ((vec_probe_13[1]-vec_probe_12[1]) + (vec_normal_13[1]/vec_normal_13[0])*(vec_probe_12[0]-vec_probe_13[0]))/(vec_normal_12[1]-(vec_normal_12[0]*vec_normal_13[1]/vec_normal_13[0]));
+
+      vec_probe_plane = vec_probe_12 + (c1 * vec_normal_12);
+    }
     
     Vector unitvec_normal = crossproduct(unitvec_12,unitvec_13).normalise();
     unitvec_normal = unitvec_normal * ( signbit(unitvec_normal*vec_vxl)? -1 : 1 ); // let unitvec normal point towards vxl
@@ -326,7 +339,6 @@ bool Voxel::isExcludedByTriplet(
          crossproduct(unitvec_1p, unitvec_12), // normal 1-p-2 plane
          crossproduct(vec_probe-vec_atom[1], vec_atom[2]-vec_atom[1])}; // normal 2-p-3 plane
       
-      breakpoint(); 
       bool sign;
       for (char i = 0; i < normals.size(); i++){
         if (!i){ // for first iteration save sign
@@ -341,19 +353,17 @@ bool Voxel::isExcludedByTriplet(
         }
       }
     }
-    setType('t');
-
     // function
     // this block should be made a function since it is also used in pairs
-    if (vec_probe-vec_vxl > rad_probe+rad_vxl){ // then all subvoxels are inaccessible
-     // setType('x');
+    if (vec_probe-vec_vxl > (rad_probe+rad_vxl)){ // then all subvoxels are inaccessible
+      setType('x');
       return true;
     }
-    else if (vec_probe-vec_vxl <= rad_probe-rad_vxl){ // then all subvoxels are accessible
+    else if (vec_probe-vec_vxl <= (rad_probe-rad_vxl)){ // then all subvoxels are accessible
       return false;
     }
     else { // then each subvoxel has to be evaluated
-      //setType('m');
+      setType('m');
       return false;
     }
     // function
