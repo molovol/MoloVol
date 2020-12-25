@@ -14,7 +14,7 @@ inline double Voxel::calcRadiusOfInfluence(const double& max_depth){
 }
 
 bool allAtomsClose(
-    const double&, const std::array<double,3>&, const std::array<Vector,3>&, char); 
+    const double&, const std::array<double,4>&, const std::array<Vector,4>&, char); 
 
 bool isInsideTetrahedron(const Vector&, const std::array<Vector,4>&, const std::array<Vector,4>&, bool& sign);
 bool isInsideTetrahedron(const Vector&, const std::array<Vector,4>&, const std::array<Vector,4>&);
@@ -209,30 +209,6 @@ void Voxel::traverseTree
 }
 */
 
-// no longer used
-/*
-void Voxel::determineTypeSingleAtom(const Atom& atom, 
-                                    std::array<double,3> vxl_pos, // voxel centre
-                                    const double max_depth,
-                                    bool& accessibility_checked){
-
-
-  if(type == 'a'){return;} // type 'a' can never be changed
-
-  double dist_vxl_at = distance(vxl_pos, atom.getPos());
-
-  // if bottom level voxel: radius of influence = 0, i.e., treat like point
-  // if higher level voxel: radius of influence > 0
-  double radius_of_influence = 
-    max_depth != 0 ? 0.86602540378 * _grid_size * (pow(2,max_depth) - 1) : 0;
-  // I believe the use of a conditional makes the code slightly faster -JM
-  
-  // is voxel inside atom? 
-  if (isAtom(atom, dist_vxl_at, radius_of_influence)){return;}
-  
-}
-*/
-
 ////////////////////
 // CHECK FOR TYPE //
 ////////////////////
@@ -251,7 +227,6 @@ bool Voxel::isAtom(const Atom& atom, const double& dist_vxl_at, const double& ra
 
 // DEVELOPMENT
 bool isExcludedByQuadruplet(){
-  
   return false;
 }
 // DEVELOPMENT
@@ -263,13 +238,13 @@ bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r
   
   for (int i = 0; i < close_atoms.size(); i++){
     Atom atom1 = close_atoms[i];
-    // for simplicity all vectors are shifted by -vec_offset, so that the atom is in the origin
+    // for simplicity all vectors are shifted by -vec_offset, so that atom1 is in the origin
     Vector vec_offset = Vector(atom1.getPos());
     
-    std::array<double,3> atom_radii;
-    std::array<Vector,3> vectors;
+    std::array<double,4> atom_radii;
+    std::array<Vector,4> vectors;
     
-    vectors[0] = Vector();
+    vectors[0] = Vector(); // not strictly necessary
     atom_radii[0] = atom1.getRad();
   
     Vector vec_vxl = Vector(vxl_pos) - vec_offset;
@@ -308,8 +283,8 @@ void breakpoint(){return;}
 bool Voxel::isExcludedByTriplet(
   const Vector& vec_vxl, 
   const double& rad_vxl, 
-  const std::array<Vector,3>& vec_atom,
-  const std::array<double,3>& rad_atom,
+  const std::array<Vector,4>& vec_atom,
+  const std::array<double,4>& rad_atom,
   const double& rad_probe){
   // check if between atom1 and atom2 - done by isExcludedByPair
 //  double dist_vxl_12 = unitvec_12 * vec_vxl; // voxel vector component along 12
@@ -450,8 +425,8 @@ size_t Voxel::tallyVoxelsOfType(const char volume_type, const int max_depth){
 
 bool allAtomsClose(
     const double& r_probe, 
-    const std::array<double,3>& atom_radii, 
-    const std::array<Vector,3>& vectors, 
+    const std::array<double,4>& atom_radii, 
+    const std::array<Vector,4>& vectors, 
     char n_atoms) 
 {
   bool all_atoms_close = true;
