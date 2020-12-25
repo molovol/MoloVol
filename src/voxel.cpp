@@ -26,6 +26,8 @@ Vector calcProbeComponentAlong(const Vector&, const double&, const double&, cons
 Vector calcProbeVectorInPlane(const std::array<Vector,4>, const std::array<double,4>&, const double&);
 Vector calcProbeVectorNormal(const std::array<Vector,4>, const std::array<double,4>&, const double&, const Vector&);
 
+bool isPointBetween(const Vector& vec_point, const Vector& vec_bounds);
+
 /////////////////
 // CONSTRUCTOR //
 /////////////////
@@ -308,31 +310,31 @@ bool Voxel::isExcludedByTriplet(
   // check if between atom1 and atom2 - done by isExcludedByPair
 //  double dist_vxl_12 = unitvec_12 * vec_vxl; // voxel vector component along 12
   
-  Vector unitvec_13 = vec_atom[2].normalise(); // vector pointing from atom1 to atom3
-  double dist_vxl_13 = unitvec_13 * vec_vxl; // voxel vector component along 13
-  if (dist_vxl_13 > 0 && vec_atom[2] > dist_vxl_13){
-    
-    Vector vec_probe_plane = calcProbeVectorInPlane(vec_atom, rad_atom, rad_probe);
-    
-    Vector vec_probe_normal = calcProbeVectorNormal(vec_atom, rad_atom, rad_probe, vec_probe_plane);
-    
-    // let unitvec normal point towards vxl
-    vec_probe_normal = vec_probe_normal * ( signbit(vec_probe_normal*vec_vxl)? -1 : 1 );
-    
-    Vector vec_probe = vec_probe_plane + vec_probe_normal;
-   
-    // check whether vxl is inside tetrahedron spanned by atoms1-3 and probe 
-    std::array<Vector,4> vec_vertices; // vectors pointing to vertices of the tetrahedron
-    for (char i = 0; i<3; i++){
-      vec_vertices[i] = vec_atom[i];
-    }
-    vec_vertices[4] = vec_probe-vec_atom[1];
+  if (!isPointBetween(vec_vxl, vec_atom[2])){return false;} // filter voxels outside range
+  
+  Vector vec_probe_plane = calcProbeVectorInPlane(vec_atom, rad_atom, rad_probe);
+  
+  Vector vec_probe_normal = calcProbeVectorNormal(vec_atom, rad_atom, rad_probe, vec_probe_plane);
+  
+  // let unitvec normal point towards vxl
+  vec_probe_normal = vec_probe_normal * ( signbit(vec_probe_normal*vec_vxl)? -1 : 1 );
 
-    if (!isInsideTetrahedron(vec_vxl, vec_vertices)){return false;}
-    
-    return isExcludedSetType(vec_vxl, rad_vxl, vec_probe, rad_probe);
+  // restricted triplet: set sign of normal vector
+  
+  Vector vec_probe = vec_probe_plane + vec_probe_normal;
+
+  // restricted triplet: do not check whether inside tetrahedron
+  
+  // check whether vxl is inside tetrahedron spanned by atoms1-3 and probe 
+  std::array<Vector,4> vec_vertices; // vectors pointing to vertices of the tetrahedron
+  for (char i = 0; i<3; i++){
+    vec_vertices[i] = vec_atom[i];
   }
-  return false;
+  vec_vertices[4] = vec_probe;
+
+  if (!isInsideTetrahedron(vec_vxl, vec_vertices)){return false;}
+  
+  return isExcludedSetType(vec_vxl, rad_vxl, vec_probe, rad_probe);
 }
 
 bool Voxel::isExcludedByPair(
@@ -343,7 +345,6 @@ bool Voxel::isExcludedByPair(
     const double& rad_probe, 
     const double& rad_vxl)
 {
-    
   Vector unitvec_parallel = vec_atat.normalise();
   double vxl_parallel = vec_vxl * unitvec_parallel; 
   if (vxl_parallel > 0 && vec_atat > vxl_parallel){ // then voxel is between atoms
@@ -493,6 +494,12 @@ std::array<Vector,4> makeNormalsForTetrahedron(const std::array<Vector,4>& vec_v
     }
   }
   return norm_planes;
+}
+
+bool isPointBetween(const Vector& vec_point, const Vector& vec_bounds){
+  Vector unitvec_bounds = vec_bounds.normalise(); 
+  double dist_point_along_bounds = unitvec_bounds * vec_point;
+  return (dist_point_along_bounds > 0 && vec_bounds > dist_point_along_bounds);
 }
 
 Vector calcProbeComponentAlong(const Vector& vec_atom_atom, const double& rad_atom_origin, const double& rad_atom_destination, const double& rad_probe)
