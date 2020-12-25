@@ -64,6 +64,7 @@ class Voxel{
     bool isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r_probe, const double&, const std::vector<Atom>&);
     bool isExcludedByPair(const Vector&, const Vector&, const double&, const double&, const double&, const double&);
     bool isExcludedByTriplet(const Vector&, const double&, const std::array<Vector,4>&, const std::array<double,4>&, const double&);
+    bool isExcludedByQuadruplet(const Vector&, const double&, const std::array<Vector,4>&, const std::array<double,4>&, const double&);
 
     std::vector<Voxel> data; // empty or exactly 8 elements
     char type;

@@ -16,9 +16,11 @@ inline double Voxel::calcRadiusOfInfluence(const double& max_depth){
 bool allAtomsClose(
     const double&, const std::array<double,4>&, const std::array<Vector,4>&, char); 
 
-bool isInsideTetrahedron(const Vector&, const std::array<Vector,4>&, const std::array<Vector,4>&, bool& sign);
+bool isInsideTetrahedron(const Vector&, const std::array<Vector,4>&, const std::array<Vector,4>&, bool&);
 bool isInsideTetrahedron(const Vector&, const std::array<Vector,4>&, const std::array<Vector,4>&);
-bool isInsideTetrahedron(const Vector& vec_vxl, const std::array<Vector,4>&); 
+bool isInsideTetrahedron(const Vector&, const std::array<Vector,4>&, bool&);
+bool isInsideTetrahedron(const Vector&, const std::array<Vector,4>&); 
+std::array<Vector,4> makeNormalsForTetrahedron(const std::array<Vector,4>&);
 
 /////////////////
 // CONSTRUCTOR //
@@ -225,12 +227,6 @@ bool Voxel::isAtom(const Atom& atom, const double& dist_vxl_at, const double& ra
   return false;
 }
 
-// DEVELOPMENT
-bool isExcludedByQuadruplet(){
-  return false;
-}
-// DEVELOPMENT
-
 
 bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r_probe, const double& radius_of_influence, const std::vector<Atom>& close_atoms){ 
   
@@ -270,7 +266,7 @@ bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r
           atom_radii[3] = atom4.getRad();
           vectors[3] = Vector(atom4.getPos()) - vec_offset;
           if (!allAtomsClose(r_probe, atom_radii, vectors, 4)){continue;}
-          if (isExcludedByQuadruplet()){return true;}
+          if (isExcludedByQuadruplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe)){return true;}
         }
       }
     }
@@ -280,12 +276,25 @@ bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r
 
 void breakpoint(){return;}
 
+bool Voxel::isExcludedByQuadruplet(
+    const Vector& vec_vxl, 
+    const double& rad_vxl, 
+    const std::array<Vector,4>& vec_atoms,
+    const std::array<double,4>& rad_atoms,
+    const double& rad_probe)
+{
+  bool sign;
+  if (!isInsideTetrahedron(vec_vxl, vec_atoms, sign)){return false;}
+  return false;
+}
+
 bool Voxel::isExcludedByTriplet(
   const Vector& vec_vxl, 
   const double& rad_vxl, 
   const std::array<Vector,4>& vec_atom,
   const std::array<double,4>& rad_atom,
-  const double& rad_probe){
+  const double& rad_probe)
+{
   // check if between atom1 and atom2 - done by isExcludedByPair
 //  double dist_vxl_12 = unitvec_12 * vec_vxl; // voxel vector component along 12
 
@@ -327,13 +336,13 @@ bool Voxel::isExcludedByTriplet(
 
     // check whether vxl is inside tetrahedron spanned by atoms1-3 and probe 
     {
-      std::array<Vector,4> vec_points; // vectors pointing to vertices of the tetrahedron
+      std::array<Vector,4> vec_vertices; // vectors pointing to vertices of the tetrahedron
       for (char i = 0; i<3; i++){
-        vec_points[i] = vec_atom[i];
+        vec_vertices[i] = vec_atom[i];
       }
-      vec_points[4] = vec_probe-vec_atom[1];
+      vec_vertices[4] = vec_probe-vec_atom[1];
 
-      if (!isInsideTetrahedron(vec_vxl, vec_points)){return false;}
+      if (!isInsideTetrahedron(vec_vxl, vec_vertices)){return false;}
     }
 
     // function
@@ -354,7 +363,14 @@ bool Voxel::isExcludedByTriplet(
   return false;
 }
 
-bool Voxel::isExcludedByPair(const Vector& vec_vxl, const Vector& vec_atat, const double& rad_atom1, const double& rad_atom2, const double& rad_probe, const double& rad_vxl){
+bool Voxel::isExcludedByPair(
+    const Vector& vec_vxl, 
+    const Vector& vec_atat, 
+    const double& rad_atom1, 
+    const double& rad_atom2, 
+    const double& rad_probe, 
+    const double& rad_vxl)
+{
     
   Vector unitvec_parallel = vec_atat.normalise();
   double vxl_parallel = vec_vxl * unitvec_parallel; 
@@ -401,7 +417,8 @@ bool Voxel::isExcludedByPair(const Vector& vec_vxl, const Vector& vec_atat, cons
 ///////////
 
 // TODO: Optimise. Allow for tallying multiples types at once
-size_t Voxel::tallyVoxelsOfType(const char volume_type, const int max_depth){
+size_t Voxel::tallyVoxelsOfType(const char volume_type, const int max_depth)
+{
   // if voxel is of type "mixed" (i.e. data vector is not empty)
   if(!data.empty()){
     // then total number of voxels is given by tallying all subvoxels
@@ -442,10 +459,11 @@ bool allAtomsClose(
 }
 
 bool isInsideTetrahedron(
-  const Vector& vec_vxl, 
-  const std::array<Vector,4>& vec_points, 
-  const std::array<Vector,4>& norm_planes, 
-  bool& sign){
+    const Vector& vec_point, 
+    const std::array<Vector,4>& vec_vertices, 
+    const std::array<Vector,4>& norm_planes, 
+    bool& sign)
+{
   // when multiplying the voxel vector with a normal belonging to a plane, the
   // sign of the resulting vector holds information about which side of the plane
   // the voxel is on. The order of normals in norm_planes is integral to the
@@ -453,9 +471,9 @@ bool isInsideTetrahedron(
   // if all signs are the same, then the voxel is inside the tetrahedron
   for (char i = 0; i < norm_planes.size(); i++){
     if (!i){
-      sign = signbit((vec_vxl-vec_points[i])*norm_planes[i]);
+      sign = signbit((vec_point-vec_vertices[i])*norm_planes[i]);
     }
-    else if (sign != signbit((vec_vxl-vec_points[i])*norm_planes[i])){
+    else if (sign != signbit((vec_point-vec_vertices[i])*norm_planes[i])){
       return false;
     }
   }
@@ -463,28 +481,40 @@ bool isInsideTetrahedron(
 }
 
 bool isInsideTetrahedron(
-    const Vector& vec_vxl, 
-    const std::array<Vector,4>& vec_points, 
-    const std::array<Vector,4>& norm_planes){
+    const Vector& vec_point, 
+    const std::array<Vector,4>& vec_vertices, 
+    const std::array<Vector,4>& norm_planes)
+{
   bool dummy = false;
-  return isInsideTetrahedron(vec_vxl, vec_points, norm_planes, dummy);
+  return isInsideTetrahedron(vec_point, vec_vertices, norm_planes, dummy);
 }
 
 bool isInsideTetrahedron(
-  const Vector& vec_vxl, 
-  const std::array<Vector,4>& vec_points){ 
-  
-  std::array<Vector,4> norm_planes; 
+    const Vector& vec_point, 
+    const std::array<Vector,4>& vec_vertices,
+  bool& sign)
+{
+  return isInsideTetrahedron(vec_point, vec_vertices, makeNormalsForTetrahedron(vec_vertices), sign);
+}
 
-  int i = 0;
-  for (int j = 0; j < 4; j++){
-    for (int k = j+1; k < 4; k++){
-      for (int l = k+1; l < 4; l++){
-        norm_planes[i] = pow(-1,i) * crossproduct(vec_points[k]-vec_points[j], vec_points[l]-vec_points[j]);
+bool isInsideTetrahedron(
+    const Vector& vec_point, 
+    const std::array<Vector,4>& vec_vertices)
+{ 
+  return isInsideTetrahedron(vec_point, vec_vertices, makeNormalsForTetrahedron(vec_vertices));
+}
+
+std::array<Vector,4> makeNormalsForTetrahedron(const std::array<Vector,4>& vec_vertices)
+{
+  std::array<Vector,4> norm_planes;
+  char i = 0;
+  for (char j = 0; j < 4; j++){
+    for (char k = j+1; k < 4; k++){
+      for (char l = k+1; l < 4; l++){
+        norm_planes[i] = pow(-1,i) * crossproduct(vec_vertices[k]-vec_vertices[j], vec_vertices[l]-vec_vertices[j]);
         i++;
       }
     }
   }
-
-  return isInsideTetrahedron(vec_vxl, vec_points, norm_planes);
+  return norm_planes;
 }
