@@ -22,6 +22,10 @@ bool isInsideTetrahedron(const Vector&, const std::array<Vector,4>&, bool&);
 bool isInsideTetrahedron(const Vector&, const std::array<Vector,4>&); 
 std::array<Vector,4> makeNormalsForTetrahedron(const std::array<Vector,4>&);
 
+Vector calcProbeComponentAlong(const Vector&, const double&, const double&, const double&);
+Vector calcProbeVectorInPlane(const std::array<Vector,4>, const std::array<double,4>&, const double&);
+Vector calcProbeVectorNormal(const std::array<Vector,4>, const std::array<double,4>&, const double&, const Vector&);
+
 /////////////////
 // CONSTRUCTOR //
 /////////////////
@@ -285,6 +289,12 @@ bool Voxel::isExcludedByQuadruplet(
 {
   bool sign;
   if (!isInsideTetrahedron(vec_vxl, vec_atoms, sign)){return false;}
+ /* 
+  for (plane : tetrahedron){
+    isExcludedByTriplet(); // one-sided
+  }
+  */
+
   return false;
 }
 
@@ -297,68 +307,30 @@ bool Voxel::isExcludedByTriplet(
 {
   // check if between atom1 and atom2 - done by isExcludedByPair
 //  double dist_vxl_12 = unitvec_12 * vec_vxl; // voxel vector component along 12
-
+  
   Vector unitvec_13 = vec_atom[2].normalise(); // vector pointing from atom1 to atom3
   double dist_vxl_13 = unitvec_13 * vec_vxl; // voxel vector component along 13
   if (dist_vxl_13 > 0 && vec_atom[2] > dist_vxl_13){
-      //2 * rad_probe + rad_atom[0] + rad_atom[2]){ // check if between atom1 and atom3
     
-    double dist_12 = vec_atom[1].length();
-    double dist_probe_12 = (rad_atom[0]-rad_atom[1])*(((rad_atom[0] + rad_atom[1]) + 2*rad_probe)/(2*dist_12)) + (dist_12/2);
-//        pow(rad_atom[0]+rad_probe,2) - pow(rad_atom[1]+rad_probe,2))/(2*dist_12);
+    Vector vec_probe_plane = calcProbeVectorInPlane(vec_atom, rad_atom, rad_probe);
     
-    double dist_13 = vec_atom[2].length();
-    double dist_probe_13 = (rad_atom[0]-rad_atom[2])*(2*rad_probe + (rad_atom[0]+rad_atom[2]))/(2*dist_13) + (dist_13/2);
-
-    Vector unitvec_12 = vec_atom[1].normalise(); // vector pointing from atom1 to atom2 // calculated in Pairs
-    //Vector vec_probe_plane = (unitvec_12*dist_probe_12 + unitvec_13*dist_probe_13)/2;
+    Vector vec_probe_normal = calcProbeVectorNormal(vec_atom, rad_atom, rad_probe, vec_probe_plane);
     
-    Vector vec_probe_plane;
-    {
-      Vector vec_probe_12 = dist_probe_12 * unitvec_12;
-      Vector vec_probe_13 = dist_probe_13 * unitvec_13;
-
-      Vector vec_normal_12 = crossproduct(crossproduct(vec_probe_12,vec_probe_13),vec_probe_12);
-      Vector vec_normal_13 = crossproduct(crossproduct(vec_probe_12,vec_probe_13),vec_probe_13);
-
-      double c1 = ((vec_probe_13[1]-vec_probe_12[1]) + (vec_normal_13[1]/vec_normal_13[0])*(vec_probe_12[0]-vec_probe_13[0]))/(vec_normal_12[1]-(vec_normal_12[0]*vec_normal_13[1]/vec_normal_13[0]));
-
-      vec_probe_plane = vec_probe_12 + (c1 * vec_normal_12);
-    }
+    // let unitvec normal point towards vxl
+    vec_probe_normal = vec_probe_normal * ( signbit(vec_probe_normal*vec_vxl)? -1 : 1 );
     
-    Vector unitvec_normal = crossproduct(unitvec_12,unitvec_13).normalise();
-    unitvec_normal = unitvec_normal * ( signbit(unitvec_normal*vec_vxl)? -1 : 1 ); // let unitvec normal point towards vxl
-
-    Vector vec_probe_normal = unitvec_normal * pow((pow(rad_atom[0]+rad_probe,2) - vec_probe_plane*vec_probe_plane),0.5);
     Vector vec_probe = vec_probe_plane + vec_probe_normal;
    
-    Vector unitvec_1p = vec_probe.normalise();
-
     // check whether vxl is inside tetrahedron spanned by atoms1-3 and probe 
-    {
-      std::array<Vector,4> vec_vertices; // vectors pointing to vertices of the tetrahedron
-      for (char i = 0; i<3; i++){
-        vec_vertices[i] = vec_atom[i];
-      }
-      vec_vertices[4] = vec_probe-vec_atom[1];
+    std::array<Vector,4> vec_vertices; // vectors pointing to vertices of the tetrahedron
+    for (char i = 0; i<3; i++){
+      vec_vertices[i] = vec_atom[i];
+    }
+    vec_vertices[4] = vec_probe-vec_atom[1];
 
-      if (!isInsideTetrahedron(vec_vxl, vec_vertices)){return false;}
-    }
-
-    // function
-    // this block should be made a function since it is also used in pairs
-    if (vec_probe-vec_vxl > (rad_probe+rad_vxl)){ // then all subvoxels are inaccessible
-      setType('x');
-      return true;
-    }
-    else if (vec_probe-vec_vxl <= (rad_probe-rad_vxl)){ // then all subvoxels are accessible
-      return false;
-    }
-    else { // then each subvoxel has to be evaluated
-      setType('m');
-      return false;
-    }
-    // function
+    if (!isInsideTetrahedron(vec_vxl, vec_vertices)){return false;}
+    
+    return isExcludedSetType(vec_vxl, rad_vxl, vec_probe, rad_probe);
   }
   return false;
 }
@@ -394,22 +366,26 @@ bool Voxel::isExcludedByPair(
         double probe_orthogonal = pow(pow(dist_atom1_probe,2)-pow(probe_parallel,2),0.5);
         
         Vector vec_probe = probe_parallel * unitvec_parallel + probe_orthogonal * unitvec_orthogonal;
-        
-        if (vec_probe-vec_vxl > rad_probe+rad_vxl){ // then all subvoxels are inaccessible
-          setType('x');
-          return true;
-        }
-        else if (vec_probe-vec_vxl <= rad_probe-rad_vxl){ // then all subvoxels are accessible
-          return false;
-        }
-        else { // then each subvoxel has to be evaluated
-          setType('m');
-          return false;
-        }
+
+        return isExcludedSetType(vec_vxl, rad_vxl, vec_probe, rad_probe);
       }
     }
   }
   return false;
+}
+
+bool Voxel::isExcludedSetType(const Vector& vec_vxl, const double& rad_vxl, const Vector& vec_probe, const double& rad_probe){
+  if (vec_probe-vec_vxl > (rad_probe+rad_vxl)){ // then all subvoxels are inaccessible
+    setType('x');
+    return true;
+  }
+  else if (vec_probe-vec_vxl <= (rad_probe-rad_vxl)){ // then all subvoxels are accessible
+    return false;
+  }
+  else { // then each subvoxel has to be evaluated
+    setType('m');
+    return false;
+  }
 }
 
 ///////////
@@ -517,4 +493,31 @@ std::array<Vector,4> makeNormalsForTetrahedron(const std::array<Vector,4>& vec_v
     }
   }
   return norm_planes;
+}
+
+Vector calcProbeComponentAlong(const Vector& vec_atom_atom, const double& rad_atom_origin, const double& rad_atom_destination, const double& rad_probe)
+{
+  double dist = vec_atom_atom.length();
+  double dist_probe = (rad_atom_origin-rad_atom_destination)*(((rad_atom_origin + rad_atom_destination) + 2*rad_probe)/(2*dist)) + (dist/2);
+  return dist_probe * vec_atom_atom.normalise(); // the unitvector here may be calculated multiple times
+}
+
+Vector calcProbeVectorInPlane(const std::array<Vector,4> vec_atom, const std::array<double,4>& rad_atom, const double& rad_probe){
+
+  Vector vec_probe_12 = calcProbeComponentAlong(vec_atom[1], rad_atom[0], rad_atom[1], rad_probe);
+  Vector vec_probe_13 = calcProbeComponentAlong(vec_atom[2], rad_atom[0], rad_atom[2], rad_probe);
+  
+  Vector vec_normal_12 = crossproduct(crossproduct(vec_probe_12,vec_probe_13),vec_probe_12);
+  Vector vec_normal_13 = crossproduct(crossproduct(vec_probe_12,vec_probe_13),vec_probe_13);
+
+  double c1 = ((vec_probe_13[1]-vec_probe_12[1]) + (vec_normal_13[1]/vec_normal_13[0])*(vec_probe_12[0]-vec_probe_13[0]))/(vec_normal_12[1]-(vec_normal_12[0]*vec_normal_13[1]/vec_normal_13[0])); // system of linear equations
+
+  return vec_probe_12 + (c1 * vec_normal_12);
+}
+
+Vector calcProbeVectorNormal(const std::array<Vector,4> vec_atom, const std::array<double,4>& rad_atom, const double& rad_probe, const Vector& vec_probe_plane){
+  
+  Vector unitvec_normal = crossproduct(vec_atom[1],vec_atom[2]).normalise();
+
+  return unitvec_normal * pow((pow(rad_atom[0]+rad_probe,2) - vec_probe_plane*vec_probe_plane),0.5);
 }
