@@ -265,8 +265,9 @@ bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r
           Atom atom4 = close_atoms[l];
           atom_radii[3] = atom4.getRad();
           vectors[3] = Vector(atom4.getPos()) - vec_offset;
+
           if (!allAtomsClose(r_probe, atom_radii, vectors, 4)){continue;}
-//          if (isExcludedByQuadruplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe)){return true;}
+          if (isExcludedByQuadruplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe)){return true;}
         }
       }
     }
@@ -285,31 +286,42 @@ bool Voxel::isExcludedByQuadruplet(
 {
   bool sign;
   if (!isInsideTetrahedron(vec_vxl, vec_atoms, sign)){return false;}
-
+  setType('x'); // all voxels inside tetrahedron are assumed inaccessible
   // currently, access evaluation functions work with arrays of size four even when not strictly needed,
   // in order to avoid the use of pointers
   // this loop goes over all combinations of three atoms, i.e., all planes that make up the tetrahedron
   std::array<Vector,4> vec_plane_vertices;
   std::array<double,4> rad_plane_vertices;
   for (char i = 0; i < 4; i++){
-    vec_plane_vertices[0] = vec_atoms[i];
+//    vec_plane_vertices[0] = vec_atoms[i];
     rad_plane_vertices[0] = rad_atoms[i];
     for (char j = i+1; j < 4; j++){
-      vec_plane_vertices[1] = vec_atoms[j];
+      vec_plane_vertices[1] = vec_atoms[j]-vec_atoms[i];
       rad_plane_vertices[1] = rad_atoms[j];
       for (char k = j+1; k < 4; k++){
-        vec_plane_vertices[2] = vec_atoms[k];
+        vec_plane_vertices[2] = vec_atoms[k]-vec_atoms[i];
         rad_plane_vertices[2] = rad_atoms[k];
         
-        // remember that the origin is now wrong
-
-        if (isExcludedByTriplet(vec_vxl, rad_vxl, vec_plane_vertices, rad_plane_vertices, rad_probe, true, !sign)){return true;}
-
+        // introducing a dummy voxel as a hack, in order to independantly evaluate the voxel accessibilty 
+        // for every plane
+        Voxel dummy = Voxel();
+        dummy.isExcludedByTriplet(vec_vxl-vec_atoms[i], rad_vxl, vec_plane_vertices, rad_plane_vertices, rad_probe, true);
+        char type_from_plane = dummy.getType();
+        
+        // if any voxel is found to be completely accessible, then set type and end 
+        if (type_from_plane=='e'){
+          setType('e');
+          return false;
+        }
+        // if any voxel is found to be partially accessible, then set type and continue 
+        else if (type_from_plane=='m'){
+          setType('m');
+        }
       }
     }
   }
-
-  return false;
+  // if voxel has not been determined accessible, then it is inaccessible
+  return true;
 }
 
 bool Voxel::isExcludedByTriplet(
@@ -318,8 +330,7 @@ bool Voxel::isExcludedByTriplet(
   const std::array<Vector,4>& vec_atom,
   const std::array<double,4>& rad_atom,
   const double& rad_probe,
-  const bool side_restr,
-  const bool sign)
+  const bool side_restr)
 {
   // check if between atom1 and atom2 - done by isExcludedByPair
 //  double dist_vxl_12 = unitvec_12 * vec_vxl; // voxel vector component along 12
@@ -332,10 +343,10 @@ bool Voxel::isExcludedByTriplet(
   
   Vector vec_probe;
   
-  // side restricted mode: the side of the plane on which the probe sits relative to the voxel is
-  // set by a function input
+  // side restricted mode: the probe always sits on the other side of the plane relative to 
+  // the voxel. we do not check whether the voxel is inside the tetrahedron, because it never is
   if (side_restr){
-    vec_probe = vec_probe_plane + vec_probe_normal * ( signbit(vec_probe_normal*vec_vxl)!=sign? -1 : 1 );
+    vec_probe = vec_probe_plane + vec_probe_normal * ( signbit(vec_probe_normal*vec_vxl)? 1 : -1 );
   }
   
   // default mode: the probe always sits on the same side as the voxel
