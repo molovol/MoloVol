@@ -106,15 +106,9 @@ char Voxel::determineType(std::array<double,3> vxl_pos, const double max_depth)
     std::vector<Atom> close_atoms = listFromTree(_atomtree.getRoot(), vxl_pos, 0, rad_max, _r_probe1*2, 0);
     isProbeExcluded(vxl_pos, _r_probe1, r_vxl, close_atoms);
     if (type=='x'){return type;}
-    /*
-    if (probe_atom.isValid()){ // there is an atom near the voxel
-      bool accessibility_checked = false; // not necessary when only passing one atom
-      isProbeExcluded(probe_atom, vxl_pos, _r_probe1, r_vxl, close_atoms);
-    }
-    */
   }
   
-  // probe mode
+  // end probe mode
   
   if(type == 'm'){
     splitVoxel(vxl_pos, max_depth);
@@ -272,7 +266,7 @@ bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r
           atom_radii[3] = atom4.getRad();
           vectors[3] = Vector(atom4.getPos()) - vec_offset;
           if (!allAtomsClose(r_probe, atom_radii, vectors, 4)){continue;}
-          if (isExcludedByQuadruplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe)){return true;}
+//          if (isExcludedByQuadruplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe)){return true;}
         }
       }
     }
@@ -291,11 +285,29 @@ bool Voxel::isExcludedByQuadruplet(
 {
   bool sign;
   if (!isInsideTetrahedron(vec_vxl, vec_atoms, sign)){return false;}
- /* 
-  for (plane : tetrahedron){
-    isExcludedByTriplet(); // one-sided
+
+  // currently, access evaluation functions work with arrays of size four even when not strictly needed,
+  // in order to avoid the use of pointers
+  // this loop goes over all combinations of three atoms, i.e., all planes that make up the tetrahedron
+  std::array<Vector,4> vec_plane_vertices;
+  std::array<double,4> rad_plane_vertices;
+  for (char i = 0; i < 4; i++){
+    vec_plane_vertices[0] = vec_atoms[i];
+    rad_plane_vertices[0] = rad_atoms[i];
+    for (char j = i+1; j < 4; j++){
+      vec_plane_vertices[1] = vec_atoms[j];
+      rad_plane_vertices[1] = rad_atoms[j];
+      for (char k = j+1; k < 4; k++){
+        vec_plane_vertices[2] = vec_atoms[k];
+        rad_plane_vertices[2] = rad_atoms[k];
+        
+        // remember that the origin is now wrong
+
+        if (isExcludedByTriplet(vec_vxl, rad_vxl, vec_plane_vertices, rad_plane_vertices, rad_probe, true, !sign)){return true;}
+
+      }
+    }
   }
-  */
 
   return false;
 }
@@ -305,7 +317,9 @@ bool Voxel::isExcludedByTriplet(
   const double& rad_vxl, 
   const std::array<Vector,4>& vec_atom,
   const std::array<double,4>& rad_atom,
-  const double& rad_probe)
+  const double& rad_probe,
+  const bool side_restr,
+  const bool sign)
 {
   // check if between atom1 and atom2 - done by isExcludedByPair
 //  double dist_vxl_12 = unitvec_12 * vec_vxl; // voxel vector component along 12
@@ -316,23 +330,28 @@ bool Voxel::isExcludedByTriplet(
   
   Vector vec_probe_normal = calcProbeVectorNormal(vec_atom, rad_atom, rad_probe, vec_probe_plane);
   
-  // let unitvec normal point towards vxl
-  vec_probe_normal = vec_probe_normal * ( signbit(vec_probe_normal*vec_vxl)? -1 : 1 );
-
-  // restricted triplet: set sign of normal vector
+  Vector vec_probe;
   
-  Vector vec_probe = vec_probe_plane + vec_probe_normal;
-
-  // restricted triplet: do not check whether inside tetrahedron
-  
-  // check whether vxl is inside tetrahedron spanned by atoms1-3 and probe 
-  std::array<Vector,4> vec_vertices; // vectors pointing to vertices of the tetrahedron
-  for (char i = 0; i<3; i++){
-    vec_vertices[i] = vec_atom[i];
+  // side restricted mode: the side of the plane on which the probe sits relative to the voxel is
+  // set by a function input
+  if (side_restr){
+    vec_probe = vec_probe_plane + vec_probe_normal * ( signbit(vec_probe_normal*vec_vxl)!=sign? -1 : 1 );
   }
-  vec_vertices[4] = vec_probe;
-
-  if (!isInsideTetrahedron(vec_vxl, vec_vertices)){return false;}
+  
+  // default mode: the probe always sits on the same side as the voxel
+  else {
+    vec_probe = vec_probe_plane + vec_probe_normal * ( signbit(vec_probe_normal*vec_vxl)? -1 : 1 );
+    
+    // check whether vxl is inside tetrahedron spanned by atoms1-3 and probe 
+    std::array<Vector,4> vec_vertices; // vectors pointing to vertices of the tetrahedron
+    {
+      for (char i = 0; i<3; i++){
+        vec_vertices[i] = vec_atom[i];
+      }
+      vec_vertices[3] = vec_probe;
+    }
+    if (!isInsideTetrahedron(vec_vxl, vec_vertices)){return false;} // stop, if not inside tetrahedron
+  }
   
   return isExcludedSetType(vec_vxl, rad_vxl, vec_probe, rad_probe);
 }
@@ -446,7 +465,7 @@ bool isInsideTetrahedron(
   // the voxel is on. The order of normals in norm_planes is integral to the
   // success of this method!
   // if all signs are the same, then the voxel is inside the tetrahedron
-  for (char i = 0; i < norm_planes.size(); i++){
+  for (int i = 0; i < 4; i++){
     if (!i){
       sign = signbit((vec_point-vec_vertices[i])*norm_planes[i]);
     }
