@@ -66,48 +66,69 @@ bool Ctrl::loadAtomFile(){
 }
 
 bool Ctrl::runCalculation(){
+  return runCalculation(
+      gui->getAtomFilepath(),
+      gui->getGridsize(),
+      gui->getDepth(),
+      gui->generateRadiusMap(),
+      gui->getProbe1Radius(),
+      gui->getProbe2Radius(),
+      gui->getProbeMode(),
+      gui->getAnalyzeUnitCell(),
+      gui->getMaxRad(),
+      gui->getIncludedElements(),
+      gui->generateChemicalFormulaFromGrid());
+}
+
+bool Ctrl::runCalculation(
+    std::string atom_filepath,
+    double grid_step,
+    int max_depth,
+    std::unordered_map<std::string, double> rad_map,
+    double rad_probe1,
+    double rad_probe2,
+    bool option_probe_mode,
+    bool option_unit_cell,
+    double max_rad,
+    std::vector<std::string> included_elements,
+    std::string chemical_formula){
   // create an instance of the model class
   // ensures, that there is only ever one instance of the model class
   if(current_calculation == NULL){
     current_calculation = new Model();
   }
 
-  if(!current_calculation->setProbeRadii(gui->getProbe1Radius(), gui->getProbe2Radius(), gui->getProbeMode())){
+  if(!current_calculation->setProbeRadii(rad_probe1, rad_probe2, option_probe_mode)){
     return false; // abort calculation if radius2 is smaller than radius 1
   }
 
-  // radius map is generated from grid in gui, then passed to model for calculation
-  current_calculation->setRadiusMap(gui->generateRadiusMap());
-
+  current_calculation->setRadiusMap(rad_map);
+  
   if(!current_calculation->createOutputFolder()){
     notifyUser("New output folder could not be created.\nThe output file(s) will be created in the program folder.");
   }
 
   // process atom data for unit cell analysis if the option it ticked
-  if(gui->getAnalyzeUnitCell()){
-    if(!current_calculation->processUnitCell(gui->getMaxRad(), gui->getProbe1Radius(), gui->getProbe2Radius(), gui->getGridsize())){
+  if(option_unit_cell){
+    if(!current_calculation->processUnitCell(max_rad, rad_probe1, rad_probe2, grid_step)){
       return false;
     }
   }
 
-  current_calculation->setAtomListForCalculation(gui->getIncludedElements(), gui->getAnalyzeUnitCell());
+  current_calculation->setAtomListForCalculation(included_elements, option_unit_cell);
   current_calculation->storeAtomsInTree();
 
-  notifyUser("Result for " + gui->generateChemicalFormulaFromGrid());
+  notifyUser("Result for " + chemical_formula);
 
-  // get user inputs
-  const double grid_step = gui->getGridsize();
-  const int max_depth = gui->getDepth();
-  const double r_probe = gui->getProbe1Radius();
   // set space size (size of box containing all atoms)
   current_calculation->defineCell(grid_step, max_depth);
   
-  current_calculation->linkAtomsToAdjacentAtoms(r_probe);
+  current_calculation->linkAtomsToAdjacentAtoms(rad_probe1);
 
   // generate result report
   std::vector<std::string> parameters;
   getGuiParameters(parameters);
-  current_calculation->createReport(gui->getAtomFilepath(), parameters);
+  current_calculation->createReport(atom_filepath, parameters);
 
   // measure time and run calculation
   auto start = std::chrono::steady_clock::now();

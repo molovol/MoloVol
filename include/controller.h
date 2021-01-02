@@ -3,6 +3,7 @@
 #define CONTROLLER_H
 
 #include <iostream>
+#include <unordered_map>
 #include <wx/wx.h>
 
 class Model;
@@ -12,6 +13,7 @@ class Ctrl{
     bool loadRadiusFile();
     bool loadAtomFile();
     bool runCalculation();
+    bool runCalculation(std::string,double,int,std::unordered_map<std::string, double>,double,double,bool,bool,double,std::vector<std::string>,std::string);
     void registerView(MainFrame* inp_gui);
     static Ctrl* getInstance();
     void getGuiParameters(std::vector<std::string>&);
