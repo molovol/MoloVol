@@ -126,8 +126,10 @@ bool Ctrl::runCalculation(
   current_calculation->linkAtomsToAdjacentAtoms(rad_probe1);
 
   // generate result report
+  /*
   std::vector<std::string> parameters = getGuiParameters();
   current_calculation->createReport(atom_filepath, parameters);
+  */
 
   // measure time and run calculation
   auto start = std::chrono::steady_clock::now();
