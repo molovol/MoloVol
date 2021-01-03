@@ -16,7 +16,7 @@ class Ctrl{
     bool runCalculation(std::string,double,int,std::unordered_map<std::string, double>,double,double,bool,bool,double,std::vector<std::string>,std::string);
     void registerView(MainFrame* inp_gui);
     static Ctrl* getInstance();
-    void getGuiParameters(std::vector<std::string>&);
+    std::vector<std::string> getGuiParameters();
     void notifyUser(std::string str);
 
   private:
