@@ -126,8 +126,7 @@ bool Ctrl::runCalculation(
   current_calculation->linkAtomsToAdjacentAtoms(rad_probe1);
 
   // generate result report
-  std::vector<std::string> parameters;
-  getGuiParameters(parameters);
+  std::vector<std::string> parameters = getGuiParameters();
   current_calculation->createReport(atom_filepath, parameters);
 
   // measure time and run calculation
@@ -142,29 +141,29 @@ bool Ctrl::runCalculation(
 }
 
 // generate parameter list for report
-void Ctrl::getGuiParameters(std::vector<std::string> &parameters){
+std::vector<std::string> Ctrl::getGuiParameters(){
+  std::vector<std::string> parameters;
   if(fileExtension(gui->getAtomFilepath()) == "pdb"){
-    if(gui->getIncludeHetatm()){
-      parameters.emplace_back("Include HETATM from pdb file");
-    }
-    else{
-      parameters.emplace_back("Exclude HETATM from pdb file");
-    }
+
+    parameters.push_back(std::string(((gui->getIncludeHetatm())? "Include" : "Exclude")) 
+        + std::string(" HETATM from pdb file"));
+
     if(gui->getAnalyzeUnitCell()){
-      parameters.emplace_back("Analyze crystal structure unit cell");
+      parameters.push_back("Analyze crystal structure unit cell");
     }
   }
   if(gui->getProbeMode()){
-    parameters.emplace_back("Probe mode: two probes");
-    parameters.emplace_back("Probe 1 radius: " + std::to_string(gui->getProbe1Radius()) + " A");
-    parameters.emplace_back("Probe 2 radius: " + std::to_string(gui->getProbe2Radius()) + " A");
+    parameters.push_back("Probe mode: two probes");
+    parameters.push_back("Probe 1 radius: " + std::to_string(gui->getProbe1Radius()) + " A");
+    parameters.push_back("Probe 2 radius: " + std::to_string(gui->getProbe2Radius()) + " A");
   }
   else{
-    parameters.emplace_back("Probe mode: one probe");
-    parameters.emplace_back("Probe radius: " + std::to_string(gui->getProbe1Radius()) + " A");
+    parameters.push_back("Probe mode: one probe");
+    parameters.push_back("Probe radius: " + std::to_string(gui->getProbe1Radius()) + " A");
   }
-  parameters.emplace_back("Grid step size (resolution): " + std::to_string(gui->getGridsize()) + " A");
-  parameters.emplace_back("Maximum tree depth (algorithm acceleration): " + std::to_string(gui->getDepth()));
+  parameters.push_back("Grid step size (resolution): " + std::to_string(gui->getGridsize()) + " A");
+  parameters.push_back("Maximum tree depth (algorithm acceleration): " + std::to_string(gui->getDepth()));
+  return parameters;
 }
 
 void Ctrl::notifyUser(std::string str){
