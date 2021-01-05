@@ -106,7 +106,6 @@ bool Ctrl::runCalculation(
   }
 
   // give a radius map to the model that may differ from the radius map that was originally imported
-  // where is it used then?
   current_calculation->setRadiusMap(rad_map);
   
   /* no point in making folders for each calculation
