@@ -45,6 +45,7 @@ class Model{
     // calls the Space constructor and creates a cell containing all atoms. Cell size is defined by atom positions
     void defineCell(const double&, const int&);
     void setAtomListForCalculation(const std::vector<std::string>&, bool);
+    void setAtomListForCalculation(const std::vector<std::string>&, std::vector<std::tuple<std::string, double, double, double>>&);
     void storeAtomsInTree();
     void linkAtomsToAdjacentAtoms(const double&);
     void linkToAdjacentAtoms(const double&, Atom&);
