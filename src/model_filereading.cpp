@@ -60,6 +60,9 @@ bool Model::readRadiusFileSetMaps(std::string& radius_path){
 //////////////////////
 
 bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
+  // it is very hard to tell what this function does, because of the heavy use of global variables.
+  // this function should ideally end in a set function, and the other functions should have return
+  // values if possible -JM
   clearAtomData();
 
   if (!readAtomFile(filepath, include_hetatm)){
