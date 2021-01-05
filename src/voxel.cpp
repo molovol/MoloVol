@@ -85,23 +85,9 @@ char Voxel::determineType(std::array<double,3> vxl_pos, const double max_depth)
       if (type=='a'){return type;}
     }
   }
-
+  
   // probe mode
-  
   { // TODO: FUNCTION?
-    /*
-    Atom probe_atom = Atom(); // initialise with empty atom
-    if (very_close_atoms.size() > 0) {probe_atom = very_close_atoms[0];}
-    else {
-      // TODO: just for testing, this is inefficient. write a function that returns the first atom close enough
-      std::vector<Atom> close_atoms = listFromTree(_atomtree.getRoot(), vxl_pos, 0, rad_max, _r_probe1, 0);
-      // probe_atom = firstFromTree(_atomtree.getRoot(), vxl_pos, 0, rad_max, _r_probe1, 0);
-      if (close_atoms.size()>0){
-        probe_atom = close_atoms[0];
-      }
-    }
-    */
-  
     // pass _r_probe1 as proper argument, so that this routine may be reused for two probe mode
     std::vector<Atom> close_atoms = listFromTree(_atomtree.getRoot(), vxl_pos, 0, rad_max, _r_probe1*2, 0);
     isProbeExcluded(vxl_pos, _r_probe1, r_vxl, close_atoms);

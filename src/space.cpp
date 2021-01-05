@@ -51,6 +51,12 @@ double Space::getVolume(){
   return unit_volume * total;
 }
 
+/*
+std::vector<double> Space::getVolume(std::vector<char> types_to_tally){
+  
+}
+*/
+
 //////////////////////
 // ACCESS FUNCTIONS //
 //////////////////////

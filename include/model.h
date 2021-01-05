@@ -16,7 +16,7 @@ class Space;
 class Model{
   public:
     // file reading
-    void readRadiiAndAtomNumFromFile(std::string&);
+    bool readRadiiAndAtomNumFromFile(std::string&);
     bool readAtomsFromFile(const std::string&, bool);
     void readFileXYZ(const std::string&);
     void readFilePDB(const std::string&, bool);

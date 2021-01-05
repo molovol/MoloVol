@@ -24,31 +24,30 @@ static inline std::vector<std::string> splitLine(std::string& line);
 // FILE IMPORT //
 /////////////////
 
-// reads radii from a file specified by the filepath and
-// stores them in an unordered map that is an attribute of
-// the Model object
-void Model::readRadiiAndAtomNumFromFile(std::string& filepath){
-  // clear unordered_maps to avoid keeping data from previous runs
-  raw_radius_map.clear();
-  elem_Z.clear();
+// generates two two maps for assigning a radius/ atomic number respectively, to a element symbol
+// sets the maps to members of the model class
+bool Model::readRadiiAndAtomNumFromFile(std::string& radius_path){
+  std::unordered_map<std::string, double> rad_map;
+  std::unordered_map<std::string, int> atomic_num_map;
 
   std::string line;
-  std::ifstream inp_file(filepath);
-
+  std::ifstream inp_file(radius_path);
   while(getline(inp_file,line)){
     std::vector<std::string> substrings = splitLine(line);
+    // substings[0]: Atomic Number
+    // substings[1]: Element Symbol
+    // substings[2]: Radius
     if(substrings.size() == 3){
       // TODO: make sure substrings[1] is converted to valid symbol
-      raw_radius_map[substrings[1]] = std::stod(substrings[2]);
-      elem_Z[substrings[1]] = std::stoi(substrings[0]);
+      rad_map[substrings[1]] = std::stod(substrings[2]);
+      atomic_num_map[substrings[1]] = std::stoi(substrings[0]);
     }
   }
-  // Notify the user if no radius is defined
-  // the program can continue running because the user can manually define radii
-  if (raw_radius_map.size() == 0) {
-    Ctrl::getInstance()->notifyUser("Invalid radii definition file!");
-    Ctrl::getInstance()->notifyUser("Please select a valid file or set radii manually.");
-  }
+
+  if (rad_map.size() == 0) {return false;}
+  raw_radius_map = rad_map;
+  elem_Z = atomic_num_map;
+  return true;
 }
 
 bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
