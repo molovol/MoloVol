@@ -40,32 +40,35 @@ bool Ctrl::loadRadiusFile(){
   if(!current_calculation->readRadiusFileSetMaps(radius_filepath)){
     notifyUser("Invalid radii definition file!");
     notifyUser("Please select a valid file or set radii manually.");
+    // shouldn't this return false? -JM
   }
-  // Refresh atom list with new radius map
+  // refresh atom list using new radius map
   gui->displayAtomList(current_calculation->generateAtomList());
   return true;
 }
 
 bool Ctrl::loadAtomFile(){
-
   // create an instance of the model class
   // ensures, that there is only ever one instance of the model class
   if(current_calculation == NULL){
     current_calculation = new Model();
   }
 
-  std::string atom_filepath = gui->getAtomFilepath();
+  bool successful_import;
+  try{successful_import = current_calculation->readAtomsFromFile(gui->getAtomFilepath(), gui->getIncludeHetatm());}
+  
+  catch (const ExceptIllegalFileExtension& e){
+    notifyUser("Invalid structure file format!");
+    successful_import = false;
+  }
+  catch (const ExceptInvalidInputFile& e){
+    notifyUser("Invalid structure file!");
+    successful_import = false;
+  }
 
-  if (!current_calculation->readAtomsFromFile(atom_filepath, gui->getIncludeHetatm())){
-    // refresh the atom list which is now empty due to invalid input file
-    gui->displayAtomList(current_calculation->generateAtomList());
-    return false;
-  }
-  else {
-    // get atom list from model and pass onto view
-    gui->displayAtomList(current_calculation->generateAtomList());
-    return true;
-  }
+  gui->displayAtomList(current_calculation->generateAtomList()); // update gui
+  
+  return successful_import;
 }
 
 bool Ctrl::runCalculation(){
