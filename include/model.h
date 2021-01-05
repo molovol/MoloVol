@@ -60,7 +60,6 @@ class Model{
     double cell_param[6]; // unit cell parameters in order: A, B, C, alpha, beta, gamma
     double cart_matrix[3][3]; // cartesian coordinates of vectors A, B, C
     std::string space_group;
-    std::unordered_map<std::string, double> raw_radius_map;
     std::unordered_map<std::string, double> radius_map;
     std::unordered_map<std::string, int> elem_Z;
     std::map<std::string, int> atom_amounts;

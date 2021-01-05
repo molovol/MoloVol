@@ -50,7 +50,7 @@ bool Model::readRadiusFileSetMaps(std::string& radius_path){
   }
 
   if (rad_map.size() == 0) {return false;}
-  raw_radius_map = rad_map; // TODO: Use set function
+  radius_map = rad_map; // TODO: Use set function
   elem_Z = atomic_num_map;
   return true;
 }
