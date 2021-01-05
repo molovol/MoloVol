@@ -61,17 +61,17 @@ std::unordered_map<std::string, double> Model::importRadiusMap(std::string& radi
 bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
   // it is very hard to tell what this function does, because of the heavy use of global variables.
   // this function should ideally end in a set function, and the other functions should have return
-  // values if possible -JM
+  // values -JM
   clearAtomData();
-
-  if (!readAtomFile(filepath, include_hetatm)){
-    Ctrl::getInstance()->notifyUser("Invalid structure file format!");
-    return false;
+  
+  try{
+    readAtomFile(filepath, include_hetatm);
+  } catch(const ExceptIllegalFileExtension& e) {
+    throw;
   }
 
   if (raw_atom_coordinates.size() == 0){ // If no atom is detected in the input file, the file is deemed invalid
-    Ctrl::getInstance()->notifyUser("Invalid structure file!");
-    return false;
+    throw ExceptInvalidInputFile();
   }
   return true;
 }
@@ -93,9 +93,7 @@ bool Model::readAtomFile(const std::string& filepath, bool include_hetatm){
   else if (fileExtension(filepath) == "pdb"){
     readFilePDB(filepath, include_hetatm);
   }
-  else { // The browser does not allow other file formats but a user could manually write the path to an invalid file
-    return false;
-  }
+  else {throw ExceptIllegalFileExtension();}
   return true;
 }
 
