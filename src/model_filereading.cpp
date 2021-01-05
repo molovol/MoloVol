@@ -20,6 +20,12 @@ bool isAtomLine(const std::vector<std::string>& substrings);
 std::string strToValidSymbol(std::string str);
 static inline std::vector<std::string> splitLine(std::string& line);
 
+struct RadiusFileBundle{ // data bundle for radius file import
+  std::unordered_map<std::string, double> rad_map;
+  std::unordered_map<std::string, int> atomic_num_map;
+};
+RadiusFileBundle importDataFromRadiusFile(const std::string& radius_path);
+
 ////////////////////////
 // RADIUS FILE IMPORT //
 ////////////////////////
@@ -32,27 +38,20 @@ bool Model::readRadiiAndAtomNumFromFile(std::string& radius_path){
 // generates two two maps for assigning a radius/ atomic number respectively, to a element symbol
 // sets the maps to members of the model class
 bool Model::readRadiusFileSetMaps(std::string& radius_path){
-  std::unordered_map<std::string, double> rad_map;
-  std::unordered_map<std::string, int> atomic_num_map;
+  
+  RadiusFileBundle data = importDataFromRadiusFile(radius_path);
 
-  std::string line;
-  std::ifstream inp_file(radius_path);
-  while(getline(inp_file,line)){
-    std::vector<std::string> substrings = splitLine(line);
-    // substings[0]: Atomic Number
-    // substings[1]: Element Symbol
-    // substings[2]: Radius
-    if(substrings.size() == 3){
-      // TODO: make sure substrings[1] is converted to valid symbol
-      rad_map[substrings[1]] = std::stod(substrings[2]);
-      atomic_num_map[substrings[1]] = std::stoi(substrings[0]);
-    }
-  }
-
-  if (rad_map.size() == 0) {return false;}
-  radius_map = rad_map; // TODO: Use set function
-  elem_Z = atomic_num_map;
+  if (data.rad_map.size() == 0) {return false;}
+  
+  setRadiusMap(data.rad_map);
+  elem_Z = data.atomic_num_map;
   return true;
+}
+
+// used for importing only the radius map from the radius file
+// needed for running the app from the command line
+std::unordered_map<std::string, double> Model::importRadiusMap(std::string& radius_path){
+  return importDataFromRadiusFile(radius_path).rad_map;
 }
 
 //////////////////////
@@ -76,7 +75,6 @@ bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
   }
   return true;
 }
-
 
 void Model::clearAtomData(){
   atom_amounts.clear();
@@ -294,3 +292,23 @@ std::string strToValidSymbol(std::string str){
   }
   return str;
 }
+
+RadiusFileBundle importDataFromRadiusFile(const std::string& radius_path){
+  RadiusFileBundle data;
+  
+  std::string line;
+  std::ifstream inp_file(radius_path);
+  while(getline(inp_file,line)){
+    std::vector<std::string> substrings = splitLine(line);
+    // substings[0]: Atomic Number
+    // substings[1]: Element Symbol
+    // substings[2]: Radius
+    if(substrings.size() == 3){
+      // TODO: make sure substrings[1] is converted to valid symbol
+      data.rad_map[substrings[1]] = std::stod(substrings[2]);
+      data.atomic_num_map[substrings[1]] = std::stoi(substrings[0]);
+    }
+  }
+  return data;
+}
+
