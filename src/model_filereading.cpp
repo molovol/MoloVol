@@ -113,15 +113,14 @@ void Model::readFileXYZ(const std::string& filepath){
       std::string valid_symbol = strToValidSymbol(substrings[0]);
       atom_amounts[valid_symbol]++; // adds one to counter for this symbol
 
-      // if a key leads to multiple z-values, set z-value to 0 (?)
+      // as a safety mechanism, if an element symbol is assigned two atomic numbers, default to 0
+      // so it becomes apparent laster on that something is wrong
       if (elem_Z.count(valid_symbol) > 0){
         elem_Z[valid_symbol] = 0;
       }
       // Stores the full list of atom coordinates from the input file
-      raw_atom_coordinates.emplace_back(valid_symbol, 
-          std::stod(substrings[1]), 
-          std::stod(substrings[2]), 
-          std::stod(substrings[3]));
+      raw_atom_coordinates.push_back(std::make_tuple(
+            valid_symbol, std::stod(substrings[1]), std::stod(substrings[2]), std::stod(substrings[3])));
     }
   }
   inp_file.close();
