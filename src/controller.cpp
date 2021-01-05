@@ -128,8 +128,6 @@ bool Ctrl::runCalculation(
 
   current_calculation->defineCell(grid_step, max_depth); // set size of the box containing all atoms
   
-//  current_calculation->linkAtomsToAdjacentAtoms(rad_probe1); // currently not in use
-
   // generate result report
   /*
   std::vector<std::string> parameters = getGuiParameters();

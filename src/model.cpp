@@ -39,40 +39,21 @@ bool Model::setProbeRadii(const double& r_1, const double& r_2, bool two_probe_m
   return true;
 }
 
-/*
-std::vector<Atom> Model::makeAtomList(const std::vector<std::string>& included_elements, bool useUnitCell){
-  std::vector<Atom> list_of_atoms;
-
-  for (int i = 0; i < atom_table; )
-
-}*/
-
 void Model::setAtomListForCalculation(const std::vector<std::string>& included_elements, bool useUnitCell){
   atoms.clear();
-  if(useUnitCell){
-    for(int i = 0; i < processed_atom_coordinates.size(); i++){
-      if(isIncluded(std::get<0>(processed_atom_coordinates[i]), included_elements)){
-        Atom at = Atom(std::get<1>(processed_atom_coordinates[i]),
-                       std::get<2>(processed_atom_coordinates[i]),
-                       std::get<3>(processed_atom_coordinates[i]),
-                       std::get<0>(processed_atom_coordinates[i]),
-                       radius_map[std::get<0>(processed_atom_coordinates[i])],
-                       elem_Z[std::get<0>(processed_atom_coordinates[i])]);
-        atoms.push_back(at);
-      }
-    }
-  }
-  else{
-    for(int i = 0; i < raw_atom_coordinates.size(); i++){
-      if(isIncluded(std::get<0>(raw_atom_coordinates[i]), included_elements)){
-        Atom at = Atom(std::get<1>(raw_atom_coordinates[i]),
-                       std::get<2>(raw_atom_coordinates[i]),
-                       std::get<3>(raw_atom_coordinates[i]),
-                       std::get<0>(raw_atom_coordinates[i]),
-                       radius_map[std::get<0>(raw_atom_coordinates[i])],
-                       elem_Z[std::get<0>(raw_atom_coordinates[i])]);
-        atoms.push_back(at);
-      }
+
+  std::vector<std::tuple<std::string,double,double,double>>& atom_coordinates 
+    = useUnitCell? processed_atom_coordinates : raw_atom_coordinates;
+
+  for(int i = 0; i < atom_coordinates.size(); i++){
+    if(isIncluded(std::get<0>(atom_coordinates[i]), included_elements)){
+      Atom at = Atom(std::get<1>(atom_coordinates[i]),
+                     std::get<2>(atom_coordinates[i]),
+                     std::get<3>(atom_coordinates[i]),
+                     std::get<0>(atom_coordinates[i]),
+                     radius_map[std::get<0>(atom_coordinates[i])],
+                     elem_Z[std::get<0>(atom_coordinates[i])]);
+      atoms.push_back(at);
     }
   }
 }
