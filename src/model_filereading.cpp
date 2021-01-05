@@ -24,9 +24,14 @@ static inline std::vector<std::string> splitLine(std::string& line);
 // FILE IMPORT //
 /////////////////
 
+// TODO: remove eventually
+bool Model::readRadiiAndAtomNumFromFile(std::string& radius_path){
+  return readRadiusFileSetMaps(radius_path);
+}
+
 // generates two two maps for assigning a radius/ atomic number respectively, to a element symbol
 // sets the maps to members of the model class
-bool Model::readRadiiAndAtomNumFromFile(std::string& radius_path){
+bool Model::readRadiusFileSetMaps(std::string& radius_path){
   std::unordered_map<std::string, double> rad_map;
   std::unordered_map<std::string, int> atomic_num_map;
 
@@ -45,7 +50,7 @@ bool Model::readRadiiAndAtomNumFromFile(std::string& radius_path){
   }
 
   if (rad_map.size() == 0) {return false;}
-  raw_radius_map = rad_map;
+  raw_radius_map = rad_map; // TODO: Use set function
   elem_Z = atomic_num_map;
   return true;
 }

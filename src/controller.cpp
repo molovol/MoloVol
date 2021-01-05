@@ -37,7 +37,7 @@ bool Ctrl::loadRadiusFile(){
   }
 
   std::string radius_filepath = gui->getRadiusFilepath();
-  if(!current_calculation->readRadiiAndAtomNumFromFile(radius_filepath)){
+  if(!current_calculation->readRadiusFileSetMaps(radius_filepath)){
     notifyUser("Invalid radii definition file!");
     notifyUser("Please select a valid file or set radii manually.");
   }
