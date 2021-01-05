@@ -15,9 +15,10 @@ struct Atom;
 class Space;
 class Model{
   public:
-    // file reading
+    // radius file import
     bool readRadiiAndAtomNumFromFile(std::string&); // depreciated, use readRadiusFileSetMaps() instead
     bool readRadiusFileSetMaps(std::string&);
+    // atom file import
     bool readAtomsFromFile(const std::string&, bool);
     void clearAtomData();
     bool readAtomFile(const std::string&, bool);
