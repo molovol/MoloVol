@@ -105,7 +105,9 @@ bool Ctrl::runCalculation(
     return false; // abort calculation if radius2 is smaller than radius 1
   }
 
-  current_calculation->setRadiusMap(rad_map); // what is this for?
+  // give a radius map to the model that may differ from the radius map that was originally imported
+  // where is it used then?
+  current_calculation->setRadiusMap(rad_map);
   
   /* no point in making folders for each calculation
   if(!current_calculation->createOutputFolder()){

@@ -108,10 +108,15 @@ void Model::calcVolume(){
   return;
 }
 
+// generates a simple table to be displayed by the GUI. only uses standard library and base types in order to 
+// avoid dependency issues
 std::vector<std::tuple<std::string, int, double>> Model::generateAtomList(){
   std::vector<std::tuple<std::string, int, double>> atoms_for_list;
+  // Element0: Elementy symbol
+  // Element1: Number of Atoms with that symbol
+  // Element2: Radius
   for(auto elem : atom_amounts){
-    atoms_for_list.emplace_back(elem.first, elem.second, raw_radius_map[elem.first]);
+    atoms_for_list.push_back(std::make_tuple(elem.first, elem.second, raw_radius_map[elem.first]));
   }
   return atoms_for_list;
 }
