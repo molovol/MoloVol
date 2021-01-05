@@ -39,6 +39,14 @@ bool Model::setProbeRadii(const double& r_1, const double& r_2, bool two_probe_m
   return true;
 }
 
+/*
+std::vector<Atom> Model::makeAtomList(const std::vector<std::string>& included_elements, bool useUnitCell){
+  std::vector<Atom> list_of_atoms;
+
+  for (int i = 0; i < atom_table; )
+
+}*/
+
 void Model::setAtomListForCalculation(const std::vector<std::string>& included_elements, bool useUnitCell){
   atoms.clear();
   if(useUnitCell){
@@ -89,8 +97,8 @@ void Model::linkAtomsToAdjacentAtoms(const double& r_probe){
 }
 
 void Model::calcVolume(){
-  cell.placeAtomsInGrid(atomtree, r_probe1);
-  cell.printGrid(); // for testing
+  cell.placeAtomsInGrid(atomtree, r_probe1); // assign each voxel in grid a type, defined by the atom positions
+  //cell.printGrid(); // for testing
   double volume = cell.getVolume();
 
   std::string message_to_user

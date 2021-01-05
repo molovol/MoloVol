@@ -37,7 +37,10 @@ bool Ctrl::loadRadiusFile(){
   }
 
   std::string radius_filepath = gui->getRadiusFilepath();
-  current_calculation->readRadiiAndAtomNumFromFile(radius_filepath);
+  if(!current_calculation->readRadiiAndAtomNumFromFile(radius_filepath)){
+    notifyUser("Invalid radii definition file!");
+    notifyUser("Please select a valid file or set radii manually.");
+  }
   // Refresh atom list with new radius map
   gui->displayAtomList(current_calculation->generateAtomList());
   return true;
@@ -102,11 +105,13 @@ bool Ctrl::runCalculation(
     return false; // abort calculation if radius2 is smaller than radius 1
   }
 
-  current_calculation->setRadiusMap(rad_map);
+  current_calculation->setRadiusMap(rad_map); // what is this for?
   
+  /* no point in making folders for each calculation
   if(!current_calculation->createOutputFolder()){
     notifyUser("New output folder could not be created.\nThe output file(s) will be created in the program folder.");
   }
+  */
 
   // process atom data for unit cell analysis if the option it ticked
   if(option_unit_cell){
@@ -115,15 +120,14 @@ bool Ctrl::runCalculation(
     }
   }
 
-  current_calculation->setAtomListForCalculation(included_elements, option_unit_cell);
-  current_calculation->storeAtomsInTree();
+  current_calculation->setAtomListForCalculation(included_elements, option_unit_cell); // what is this for?
+  current_calculation->storeAtomsInTree(); // place atoms in a binary tree for faster access
 
   notifyUser("Result for " + chemical_formula);
 
-  // set space size (size of box containing all atoms)
-  current_calculation->defineCell(grid_step, max_depth);
+  current_calculation->defineCell(grid_step, max_depth); // set size of the box containing all atoms
   
-  current_calculation->linkAtomsToAdjacentAtoms(rad_probe1);
+//  current_calculation->linkAtomsToAdjacentAtoms(rad_probe1); // currently not in use
 
   // generate result report
   /*
@@ -133,7 +137,7 @@ bool Ctrl::runCalculation(
 
   // measure time and run calculation
   auto start = std::chrono::steady_clock::now();
-  current_calculation->calcVolume();
+  current_calculation->calcVolume(); // assign voxel types and get the volume
   auto end = std::chrono::steady_clock::now();
   std::chrono::duration<double> elapsed_seconds = end-start;
 
