@@ -40,10 +40,12 @@ bool Model::setProbeRadii(const double& r_1, const double& r_2, bool two_probe_m
 }
 
 void Model::setAtomListForCalculation(const std::vector<std::string>& included_elements, bool useUnitCell){
-  atoms.clear();
+  return setAtomListForCalculation(included_elements, useUnitCell? processed_atom_coordinates : raw_atom_coordinates);
+}
 
-  std::vector<std::tuple<std::string,double,double,double>>& atom_coordinates 
-    = useUnitCell? processed_atom_coordinates : raw_atom_coordinates;
+void Model::setAtomListForCalculation(const std::vector<std::string>& included_elements, 
+    std::vector<std::tuple<std::string,double,double,double>>& atom_coordinates){
+  atoms.clear();
 
   for(int i = 0; i < atom_coordinates.size(); i++){
     if(isIncluded(std::get<0>(atom_coordinates[i]), included_elements)){
