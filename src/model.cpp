@@ -116,7 +116,7 @@ std::vector<std::tuple<std::string, int, double>> Model::generateAtomList(){
   // Element1: Number of Atoms with that symbol
   // Element2: Radius
   for(auto elem : atom_amounts){
-    atoms_for_list.push_back(std::make_tuple(elem.first, elem.second, raw_radius_map[elem.first]));
+    atoms_for_list.push_back(std::make_tuple(elem.first, elem.second, radius_map[elem.first]));
   }
   return atoms_for_list;
 }
