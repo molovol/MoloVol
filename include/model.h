@@ -10,6 +10,7 @@
 #include <map>
 #include <unordered_map>
 
+struct CalcResultBundle;
 class AtomTree;
 struct Atom;
 class Space;
@@ -25,6 +26,8 @@ class Model{
     bool readAtomFile(const std::string&, bool);
     void readFileXYZ(const std::string&);
     void readFilePDB(const std::string&, bool);
+
+    std::vector<std::string> listElementsInStructure();
 
     bool getSymmetryElements(std::string, std::vector<int>&, std::vector<double>&);
     bool createOutputFolder();
@@ -49,7 +52,7 @@ class Model{
     void storeAtomsInTree();
     void linkAtomsToAdjacentAtoms(const double&);
     void linkToAdjacentAtoms(const double&, Atom&);
-    void calcVolume();
+    CalcResultBundle calcVolume();
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void setRadiusMap(std::unordered_map<std::string, double> map);
     bool setProbeRadii(const double&, const double&, bool);
@@ -70,6 +73,16 @@ class Model{
     Space cell;
     double r_probe1 = 0;
     double r_probe2 = 0;
+};
+
+struct CalcResultBundle{
+  std::map<char,double> volumes;
+  double type_assignment_elapsed_seconds;
+  double volume_tally_elapsed_seconds;
+
+  double getTime(){
+    return type_assignment_elapsed_seconds+volume_tally_elapsed_seconds;
+  }
 };
 
 #endif

@@ -168,6 +168,14 @@ void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
   inp_file.close();
 }
 
+std::vector<std::string> Model::listElementsInStructure(){
+  std::vector<std::string> list;
+  for (auto elem : atom_amounts){
+    list.push_back(elem.first);
+  }
+  return list;
+}
+
 bool Model::getSymmetryElements(std::string group, std::vector<int> &sym_matrix_XYZ, std::vector<double> &sym_matrix_fraction){
   for (int i = 0; i<group.size(); i++) { // convert space group to upper case chars to compare with the list
     group[i] = toupper(group[i]);
