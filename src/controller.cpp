@@ -88,7 +88,10 @@ bool Ctrl::runFromCommandLine(
 
   std::vector<std::string> included_elements = current_calculation->listElementsInStructure();
 
+  to_gui = false;
   runCalculation(atom_filepath, grid_step, max_depth, rad_map, included_elements, rad_probe1);
+  to_gui = true;
+  
   return true;
 }
 
@@ -160,10 +163,10 @@ bool Ctrl::runCalculation(
   // measure time and run calculation
   CalcResultBundle data = current_calculation->calcVolume(); // assign voxel types and get the volume
 
-  notifyUser("Result for " + chemical_formula);
-  notifyUser("Elapsed time: " + std::to_string(data.getTime()) + " s");
-  notifyUser("VdW Volume: " + std::to_string(data.volumes['a']) + Symbol::angstrom() + Symbol::cubed());
-  notifyUser("Excluded Volume: " + std::to_string(data.volumes['x']) + Symbol::angstrom() + Symbol::cubed());
+  notifyUser("Result for " + chemical_formula, to_gui);
+  notifyUser("Elapsed time: " + std::to_string(data.getTime()) + " s", to_gui);
+  notifyUser("VdW Volume: " + std::to_string(data.volumes['a']) + " " + Symbol::angstrom() + Symbol::cubed(), to_gui);
+  notifyUser("Excluded Volume: " + std::to_string(data.volumes['x']) + " " + Symbol::angstrom() + Symbol::cubed(), to_gui);
 
   return true;
 }
@@ -194,7 +197,12 @@ std::vector<std::string> Ctrl::getGuiParameters(){
   return parameters;
 }
 
-void Ctrl::notifyUser(std::string str){
+void Ctrl::notifyUser(std::string str, bool to_gui){
   str = "\n" + str;
-  gui->appendOutput(str);
+  if (to_gui){
+    gui->appendOutput(str);
+  }
+  else {
+    std::cout << str;
+  }    
 }
