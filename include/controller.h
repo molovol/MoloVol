@@ -28,7 +28,7 @@ class Ctrl{
     void registerView(MainFrame* inp_gui);
     static Ctrl* getInstance();
     std::vector<std::string> getGuiParameters(); // confusing name, this is not a getter function
-    void notifyUser(std::string str);
+    void notifyUser(std::string str, bool = true);
     bool runFromCommandLine(std::string, std::string, double, int, double);
 
   private:
@@ -38,6 +38,7 @@ class Ctrl{
     static Ctrl* instance;
     static MainFrame* gui;
 
+    bool to_gui = true; // determines whether to print to console or to GUI
 };
 
 
