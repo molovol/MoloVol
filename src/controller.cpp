@@ -4,8 +4,10 @@
 #include "atom.h" // i don't know why
 #include "model.h"
 #include "misc.h"
+#include "special_chars.h"
 #include <chrono>
 #include <utility>
+#include <map>
 
 ///////////////////////
 // STATIC ATTRIBUTES //
@@ -71,18 +73,37 @@ bool Ctrl::loadAtomFile(){
   return successful_import;
 }
 
+// function that allows running a calculation with minimal inputs, without the GUI
+bool Ctrl::runFromCommandLine(
+    std::string atom_filepath,
+    std::string radius_filepath,
+    double grid_step,
+    int max_depth,
+    double rad_probe1){
+  if(current_calculation == NULL){current_calculation = new Model();}
+
+  std::unordered_map<std::string, double> rad_map = current_calculation->importRadiusMap(radius_filepath);
+  current_calculation->setRadiusMap(rad_map);
+  current_calculation->readAtomsFromFile(atom_filepath, false);
+
+  std::vector<std::string> included_elements = current_calculation->listElementsInStructure();
+
+  runCalculation(atom_filepath, grid_step, max_depth, rad_map, included_elements, rad_probe1);
+  return true;
+}
+
 bool Ctrl::runCalculation(){
   return runCalculation(
       gui->getAtomFilepath(),
       gui->getGridsize(),
       gui->getDepth(),
       gui->generateRadiusMap(),
+      gui->getIncludedElements(),
       gui->getProbe1Radius(),
       gui->getProbe2Radius(),
       gui->getProbeMode(),
       gui->getAnalyzeUnitCell(),
       gui->getMaxRad(),
-      gui->getIncludedElements(),
       gui->generateChemicalFormulaFromGrid());
 }
 
@@ -91,12 +112,12 @@ bool Ctrl::runCalculation(
     double grid_step,
     int max_depth,
     std::unordered_map<std::string, double> rad_map,
+    std::vector<std::string> included_elements,
     double rad_probe1,
     double rad_probe2,
     bool option_probe_mode,
     bool option_unit_cell,
     double max_rad,
-    std::vector<std::string> included_elements,
     std::string chemical_formula){
   // create an instance of the model class
   // ensures, that there is only ever one instance of the model class
@@ -127,7 +148,6 @@ bool Ctrl::runCalculation(
   current_calculation->setAtomListForCalculation(included_elements, option_unit_cell); // what is this for?
   current_calculation->storeAtomsInTree(); // place atoms in a binary tree for faster access
 
-  notifyUser("Result for " + chemical_formula);
 
   current_calculation->defineCell(grid_step, max_depth); // set size of the box containing all atoms
   
@@ -138,12 +158,11 @@ bool Ctrl::runCalculation(
   */
 
   // measure time and run calculation
-  auto start = std::chrono::steady_clock::now();
-  current_calculation->calcVolume(); // assign voxel types and get the volume
-  auto end = std::chrono::steady_clock::now();
-  std::chrono::duration<double> elapsed_seconds = end-start;
+  CalcResultBundle data = current_calculation->calcVolume(); // assign voxel types and get the volume
 
-  notifyUser("Elapsed time: " + std::to_string(elapsed_seconds.count()) + " s");
+  notifyUser("Result for " + chemical_formula);
+  notifyUser("Elapsed time: " + std::to_string(data.getTime()) + " s");
+  notifyUser("VdW Volume: " + std::to_string(data.volumes['a']) + Symbol::angstrom() + Symbol::cubed());
 
   return true;
 }

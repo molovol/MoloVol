@@ -79,16 +79,24 @@ void Model::linkAtomsToAdjacentAtoms(const double& r_probe){
   }
 }
 
-void Model::calcVolume(){
+CalcResultBundle Model::calcVolume(){
+  CalcResultBundle data;
+ 
+  auto start = std::chrono::steady_clock::now();
   cell.placeAtomsInGrid(atomtree, r_probe1); // assign each voxel in grid a type, defined by the atom positions
+  auto end = std::chrono::steady_clock::now();
+  data.type_assignment_elapsed_seconds = std::chrono::duration<double>(end-start).count();
+  
   //cell.printGrid(); // for testing
+  
+  start = std::chrono::steady_clock::now();
   double volume = cell.getVolume();
+  end = std::chrono::steady_clock::now();
+  data.volume_tally_elapsed_seconds = std::chrono::duration<double>(end-start).count();
+  
+  data.volumes['a'] = volume;
 
-  std::string message_to_user
-    = "Van der Waals Volume: " + std::to_string(volume) + " " + Symbol::angstrom() + Symbol::cubed();
-  Ctrl::getInstance()->notifyUser(message_to_user);
-
-  return;
+  return data;
 }
 
 // generates a simple table to be displayed by the GUI. only uses standard library and base types in order to 

@@ -13,11 +13,23 @@ class Ctrl{
     bool loadRadiusFile();
     bool loadAtomFile();
     bool runCalculation();
-    bool runCalculation(std::string,double,int,std::unordered_map<std::string, double>,double,double,bool,bool,double,std::vector<std::string>,std::string);
+    bool runCalculation(
+        std::string,
+        double,
+        int,
+        std::unordered_map<std::string, double>,
+        std::vector<std::string>,
+        double = 0,
+        double = 0,
+        bool = false,
+        bool = false,
+        double = 0,
+        std::string = "0");
     void registerView(MainFrame* inp_gui);
     static Ctrl* getInstance();
     std::vector<std::string> getGuiParameters(); // confusing name, this is not a getter function
     void notifyUser(std::string str);
+    bool runFromCommandLine(std::string, std::string, double, int, double);
 
   private:
     // consider making static pointer for model
@@ -26,7 +38,6 @@ class Ctrl{
     static Ctrl* instance;
     static MainFrame* gui;
 
-//    saveLastWritten(std::string
 };
 
 
