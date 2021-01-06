@@ -163,6 +163,7 @@ bool Ctrl::runCalculation(
   notifyUser("Result for " + chemical_formula);
   notifyUser("Elapsed time: " + std::to_string(data.getTime()) + " s");
   notifyUser("VdW Volume: " + std::to_string(data.volumes['a']) + Symbol::angstrom() + Symbol::cubed());
+  notifyUser("Excluded Volume: " + std::to_string(data.volumes['x']) + Symbol::angstrom() + Symbol::cubed());
 
   return true;
 }

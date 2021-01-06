@@ -36,19 +36,36 @@ void Space::placeAtomsInGrid(const AtomTree& atomtree, const double& r_probe){
   }      
 }
 
-double Space::getVolume(){
-  //printGrid();
-  // calc Volume
-  size_t total = 0;
-  size_t total_excluded = 0;
+std::map<char,double> Space::getVolume(){
+  std::vector<char> types_to_tally{'a','x'};
+  
+  std::vector<size_t> tally;
+  for (char i = 0; i < types_to_tally.size(); i++){
+    tally.push_back(0);
+  }
+
   for(size_t i = 0; i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]; i++){ // loop through all top level voxels
     // tally bottom level voxels
+    
+    for (char j = 0; j < types_to_tally.size(); j++){
+      tally[j] += getElement(i).tallyVoxelsOfType(types_to_tally[j],max_depth);
+    }
+/*
     total += getElement(i).tallyVoxelsOfType('a',max_depth);
     total_excluded += getElement(i).tallyVoxelsOfType('x',max_depth);
+    */
   }
   double unit_volume = pow(grid_size,3);
+
+  std::map<char,double> volumes;
+  for (char i = 0; i < types_to_tally.size(); i++){
+    volumes[types_to_tally[i]] = tally[i] * unit_volume;
+  }
+/*
   std::cout << "Probe inaccessible volume: " << unit_volume*total_excluded << std::endl;
   return unit_volume * total;
+  */
+  return volumes;
 }
 
 /*

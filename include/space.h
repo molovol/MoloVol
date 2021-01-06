@@ -5,6 +5,7 @@
 #include "voxel.h"
 #include <vector>
 #include <array>
+#include <map>
 
 class AtomTree;
 struct Atom;
@@ -23,7 +24,7 @@ class Space{
     void printGrid();
 
     void placeAtomsInGrid(const AtomTree&, const double&);
-    double getVolume();
+    std::map<char,double> getVolume();
   
   private:
     std::array <double,3> cart_min; // this is also the "origin" of the space

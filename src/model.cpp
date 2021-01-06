@@ -90,11 +90,10 @@ CalcResultBundle Model::calcVolume(){
   //cell.printGrid(); // for testing
   
   start = std::chrono::steady_clock::now();
-  double volume = cell.getVolume();
+  data.volumes = cell.getVolume();
   end = std::chrono::steady_clock::now();
   data.volume_tally_elapsed_seconds = std::chrono::duration<double>(end-start).count();
   
-  data.volumes['a'] = volume;
 
   return data;
 }
