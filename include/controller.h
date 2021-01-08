@@ -30,7 +30,6 @@ class Ctrl{
     static Ctrl* getInstance();
     std::vector<std::string> getGuiParameters(); // confusing name, this is not a getter function
     void notifyUser(std::string str, bool = true);
-//    bool unittestExcluded(std::string, std::string, double, int, double);
     bool unittestExcluded();
 
   private:

@@ -19,7 +19,7 @@ class Model{
     // radius file import
     bool readRadiiAndAtomNumFromFile(std::string&); // depreciated, use readRadiusFileSetMaps() instead
     bool readRadiusFileSetMaps(std::string&);
-    std::unordered_map<std::string, double> importRadiusMap(std::string&);
+    std::unordered_map<std::string, double> importRadiusMap(const std::string&);
     // atom file import
     bool readAtomsFromFile(const std::string&, bool);
     void clearAtomData();

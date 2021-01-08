@@ -50,7 +50,7 @@ bool Model::readRadiusFileSetMaps(std::string& radius_path){
 
 // used for importing only the radius map from the radius file
 // needed for running the app from the command line
-std::unordered_map<std::string, double> Model::importRadiusMap(std::string& radius_path){
+std::unordered_map<std::string, double> Model::importRadiusMap(const std::string& radius_path){
   return importDataFromRadiusFile(radius_path).rad_map;
 }
 
