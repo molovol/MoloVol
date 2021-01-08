@@ -31,6 +31,7 @@ class Ctrl{
     std::vector<std::string> getGuiParameters(); // confusing name, this is not a getter function
     void notifyUser(std::string str, bool = true);
     bool unittestExcluded();
+    bool unittestProtein();
 
   private:
     // consider making static pointer for model
