@@ -76,6 +76,7 @@ class Model{
 };
 
 struct CalcResultBundle{
+  bool success = true;
   std::map<char,double> volumes;
   double type_assignment_elapsed_seconds;
   double volume_tally_elapsed_seconds;

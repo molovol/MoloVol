@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <wx/wx.h>
 
+struct CalcResultBundle;
 class Model;
 class MainFrame;
 class Ctrl{
@@ -13,7 +14,7 @@ class Ctrl{
     bool loadRadiusFile();
     bool loadAtomFile();
     bool runCalculation();
-    bool runCalculation(
+    CalcResultBundle runCalculation(
         std::string,
         double,
         int,
@@ -29,7 +30,8 @@ class Ctrl{
     static Ctrl* getInstance();
     std::vector<std::string> getGuiParameters(); // confusing name, this is not a getter function
     void notifyUser(std::string str, bool = true);
-    bool runFromCommandLine(std::string, std::string, double, int, double);
+//    bool unittestExcluded(std::string, std::string, double, int, double);
+    bool unittestExcluded();
 
   private:
     // consider making static pointer for model
