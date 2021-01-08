@@ -35,6 +35,9 @@ $(TESTBUILDDIR)/%.o: $(TESTDIR)/%.$(SRCEXT)
 	@mkdir -p $(TESTBUILDDIR)
 	$(CC) $(CFLAGS) $(INC) -c `wx-config --cxxflags --libs` -o $@ $<
 
+probetest:
+	$(TARGET) -u excluded
+
 cleantest:
 	@echo " Cleaning Test Directory..."
 	@echo " $(RM) -r $(TESTBUILDDIR)"; $(RM) -r $(TESTBUILDDIR)
@@ -44,4 +47,4 @@ clean:
 	@echo " Cleaning..."; 
 	@echo " $(RM) -r $(BUILDDIR) $(TARGET)"; $(RM) -r $(BUILDDIR) $(TARGET)
 
-.PHONY: clean, test, cleantest
+.PHONY: clean, test, cleantest, probetest
