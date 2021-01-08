@@ -73,18 +73,9 @@ char Voxel::determineType(std::array<double,3> vxl_pos, const double max_depth)
   double r_vxl = calcRadiusOfInfluence(max_depth); // calculated every time, since max_depth may change
   
   double rad_max = _atomtree.getMaxRad();
-  std::vector<Atom> very_close_atoms = listFromTree(_atomtree.getRoot(), vxl_pos, r_vxl, rad_max, 0, 0);
- 
-  { // TODO: FUNCTION?
-    // can be further optimised: use traverTree function instead
-    // 2nd optimisation: higher level voxels with radii larger than the atoms will never be type 'a'. in
-    // these cases the function can abort once a type 'm' has been found
-    // is voxel inside an atom?
-    for (Atom atom : very_close_atoms){ 
-      isAtom(atom, distance(vxl_pos, atom.getPos()), r_vxl);
-      if (type=='a'){return type;}
-    }
-  }
+  
+  traverseTree(_atomtree.getRoot(), vxl_pos, rad_max, r_vxl, max_depth, 0);
+  if (type=='a'){return type;}
   
   // probe mode
   { // TODO: FUNCTION?
@@ -93,7 +84,6 @@ char Voxel::determineType(std::array<double,3> vxl_pos, const double max_depth)
     isProbeExcluded(vxl_pos, _r_probe1, r_vxl, close_atoms);
     if (type=='x'){return type;}
   }
-  
   // end probe mode
   
   if(type == 'm'){
@@ -166,36 +156,32 @@ std::vector<Atom> Voxel::listFromTree(
   return atom_list;
 }
 
-/* don' delete, could become useful later
-// use the properties of the binary tree to recursively traverse the tree and 
-// only check the voxel type with respect to relevant atoms. at the end of this 
-// method, the type of the voxel will have been set.
 void Voxel::traverseTree
   (const AtomNode* node, 
-   int dim, const double& at_rad, 
-   const double& vxl_rad, 
    const std::array<double,3> vxl_pos, 
+   const double& max_rad, 
+   const double& vxl_rad, 
    const double& max_depth,
-   bool& accessibility_checked){
+   const char dim){
 
-  if (node == NULL){return;}
+  if (node == NULL || type == 'a'){return;}
+  const Atom& atom = *(node->atom);
+
   // distance between atom and voxel along one dimension
-  double dist1D = distance(node->atom->getPos(), vxl_pos, dim);
+  double dist1D = distance(atom.getPos(), vxl_pos, dim);
  
-  // TODO: this condition is not optimised. _r_probe1 might be unneccessary here and slow down the algo
-  if (abs(dist1D) > (vxl_rad + at_rad + _r_probe1)){ // then atom is too far to matter for voxel type
-      traverseTree(dist1D < 0 ? node->left_child : node->right_child,
-				   (dim+1)%3, at_rad, vxl_rad, vxl_pos, max_depth, accessibility_checked);
+  if (abs(dist1D) > (vxl_rad + max_rad)){ // then atom is too far to matter for voxel type
+      traverseTree(dist1D < 0 ? node->left_child : node->right_child, vxl_pos, max_rad, vxl_rad, max_depth, (dim+1)%3);
   } else{ // then atom is close enough to influence voxel type
     // evaluate voxel type with respect to the found atom
-    determineTypeSingleAtom(*(node->atom), vxl_pos, max_depth, accessibility_checked);
+    isAtom(atom, distance(vxl_pos, atom.getPos()), vxl_rad);
+    if (type=='a'){return;}
     // continue with both children
     for (AtomNode* child : {node->left_child, node->right_child}){
-      traverseTree(child, (dim+1)%3, at_rad, vxl_rad, vxl_pos, max_depth, accessibility_checked);
+      traverseTree(child, vxl_pos, max_rad, vxl_rad, max_depth, (dim+1)%3);
     }
   }
 }
-*/
 
 ////////////////////
 // CHECK FOR TYPE //
