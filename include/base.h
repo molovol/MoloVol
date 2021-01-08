@@ -6,6 +6,7 @@
 #include <wx/wfstream.h>
 #include <wx/spinctrl.h>
 #include <wx/grid.h>
+#include <wx/cmdline.h>
 #include <wchar.h>
 #include <string>
 #include <iostream>
@@ -18,8 +19,12 @@ class MainApp: public wxApp
 {
   public:
     virtual bool OnInit();
+    virtual int OnRun();
 
   private:
+    void silenceGUI(bool);
+    bool isSilent();
+    bool _silent = false;
     // colours
     wxColour col_win = wxColour(160,160,160);
 };
@@ -51,8 +56,6 @@ class MainFrame: public wxFrame
     MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
 
   private:
-
-    double r_probe = 3; //* hard coded for testing purposes. eventually obtain from user input
 
     wxPanel* leftMainPanel;
       wxPanel* browsePanel;

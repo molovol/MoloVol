@@ -74,29 +74,33 @@ bool Ctrl::loadAtomFile(){
 }
 
 // function that allows running a calculation with minimal inputs, without the GUI
-bool Ctrl::runFromCommandLine(
+/*bool Ctrl::unittestExcluded(
     std::string atom_filepath,
     std::string radius_filepath,
     double grid_step,
     int max_depth,
-    double rad_probe1){
+    double rad_probe1){*/
+bool Ctrl::unittestExcluded(){
   if(current_calculation == NULL){current_calculation = new Model();}
-
+ 
+  // parameters for unittest:
+/*
+  // preparation for calling runCalculation()
   std::unordered_map<std::string, double> rad_map = current_calculation->importRadiusMap(radius_filepath);
   current_calculation->setRadiusMap(rad_map);
   current_calculation->readAtomsFromFile(atom_filepath, false);
-
   std::vector<std::string> included_elements = current_calculation->listElementsInStructure();
 
   to_gui = false;
   runCalculation(atom_filepath, grid_step, max_depth, rad_map, included_elements, rad_probe1);
   to_gui = true;
-  
+  */
   return true;
 }
 
+// called by user through GUI, where the data isn't needed afterwards
 bool Ctrl::runCalculation(){
-  return runCalculation(
+  CalcResultBundle data = runCalculation(
       gui->getAtomFilepath(),
       gui->getGridsize(),
       gui->getDepth(),
@@ -108,9 +112,19 @@ bool Ctrl::runCalculation(){
       gui->getAnalyzeUnitCell(),
       gui->getMaxRad(),
       gui->generateChemicalFormulaFromGrid());
+
+  if (data.success){
+    notifyUser("Result for " + gui->generateChemicalFormulaFromGrid(), to_gui);
+    notifyUser("Elapsed time: " + std::to_string(data.getTime()) + " s", to_gui);
+    notifyUser("VdW Volume: " + std::to_string(data.volumes['a']) + " " + Symbol::angstrom() + Symbol::cubed(), to_gui);
+    notifyUser("Excluded Volume: " + std::to_string(data.volumes['x']) + " " + Symbol::angstrom() + Symbol::cubed(), to_gui);
+    return true;
+  }
+  return false;
 }
 
-bool Ctrl::runCalculation(
+// general function that returns all data from the calculation
+CalcResultBundle Ctrl::runCalculation(
     std::string atom_filepath,
     double grid_step,
     int max_depth,
@@ -122,6 +136,7 @@ bool Ctrl::runCalculation(
     bool option_unit_cell,
     double max_rad,
     std::string chemical_formula){
+  CalcResultBundle data;
   // create an instance of the model class
   // ensures, that there is only ever one instance of the model class
   if(current_calculation == NULL){
@@ -129,7 +144,8 @@ bool Ctrl::runCalculation(
   }
 
   if(!current_calculation->setProbeRadii(rad_probe1, rad_probe2, option_probe_mode)){
-    return false; // abort calculation if radius2 is smaller than radius 1
+    data.success = false;
+    return data; // abort calculation if radius2 is smaller than radius 1
   }
 
   // give a radius map to the model that may differ from the radius map that was originally imported
@@ -144,13 +160,13 @@ bool Ctrl::runCalculation(
   // process atom data for unit cell analysis if the option it ticked
   if(option_unit_cell){
     if(!current_calculation->processUnitCell(max_rad, rad_probe1, rad_probe2, grid_step)){
-      return false;
+      data.success = false;
+      return data;
     }
   }
 
   current_calculation->setAtomListForCalculation(included_elements, option_unit_cell); // what is this for?
   current_calculation->storeAtomsInTree(); // place atoms in a binary tree for faster access
-
 
   current_calculation->defineCell(grid_step, max_depth); // set size of the box containing all atoms
   
@@ -161,14 +177,7 @@ bool Ctrl::runCalculation(
   */
 
   // measure time and run calculation
-  CalcResultBundle data = current_calculation->calcVolume(); // assign voxel types and get the volume
-
-  notifyUser("Result for " + chemical_formula, to_gui);
-  notifyUser("Elapsed time: " + std::to_string(data.getTime()) + " s", to_gui);
-  notifyUser("VdW Volume: " + std::to_string(data.volumes['a']) + " " + Symbol::angstrom() + Symbol::cubed(), to_gui);
-  notifyUser("Excluded Volume: " + std::to_string(data.volumes['x']) + " " + Symbol::angstrom() + Symbol::cubed(), to_gui);
-
-  return true;
+  return current_calculation->calcVolume(); // assign voxel types and get the volume
 }
 
 // generate parameter list for report
