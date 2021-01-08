@@ -29,16 +29,15 @@ class Voxel{
         std::array<double,3> pos, // voxel centre
         const double max_depth,
         bool&);
-  /* 
+    
     void traverseTree(
-        const AtomNode* node, 
-        int dim, 
-        const double& at_rad, 
-        const double& vxl_rad, 
-        const std::array<double,3> vxl_pos,
-        const double& max_depth,
-        bool&);
-    */
+        const AtomNode*, 
+        const std::array<double,3>,
+        const double&, 
+        const double&, 
+        const double&,
+        const char = 0); 
+    
     std::vector<Atom> listFromTree(
         const AtomNode*, 
         const std::array<double,3>&, 

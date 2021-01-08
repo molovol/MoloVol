@@ -19,7 +19,7 @@ void Space::placeAtomsInGrid(const AtomTree& atomtree, const double& r_probe){
   
   std::array<double,3> vxl_pos;
 
-  // save variable that all voxels need access to for their type determination
+  // save variable that all voxels need access to for their type determination as static members of Voxel class
   Voxel::storeUniversal(atomtree, grid_size, r_probe);
 
   for(size_t x = 0; x < n_gridsteps[0]; x++){
