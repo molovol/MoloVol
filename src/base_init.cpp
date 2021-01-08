@@ -31,11 +31,16 @@ bool MainApp::OnInit()
   assert(parser.Parse()==0);
   wxString unittest_id;
   if (parser.Found("u",&unittest_id)){
-    silenceGUI(true);
+    silenceGUI(true); // not really needed
+    std::cout << "Selected unit test: " << unittest_id << std::endl;
     if (unittest_id=="excluded"){
-      std::cout << "Selected unit test: " << unittest_id << std::endl;
       Ctrl::getInstance()->unittestExcluded();
     }
+    else if (unittest_id=="protein"){
+      Ctrl::getInstance()->unittestProtein();
+    }
+    else {
+      std::cout << "Invalid selection" << std::endl;}
     return true;
   }
   // initialise the GUI
