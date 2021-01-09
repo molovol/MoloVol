@@ -54,7 +54,7 @@ bool Ctrl::unittestProtein(){
   const int max_depth = 4;
   const double rad_probe1 = 0;
   const double expected_vdwVolume = 14337.422000;
-  const double expected_time = 152.656446-89-47.8-0.16;
+  const double expected_time = 152.656446-89-47.8+0.16;
   
   std::unordered_map<std::string, double> rad_map = current_calculation->importRadiusMap(radius_filepath);
   
