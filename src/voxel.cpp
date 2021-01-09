@@ -78,12 +78,12 @@ char Voxel::determineType(std::array<double,3> vxl_pos, const double max_depth)
   
   if (_r_probe1){
   // probe mode
-  { // TODO: FUNCTION?
-    // pass _r_probe1 as proper argument, so that this routine may be reused for two probe mode
-    std::vector<Atom> close_atoms = listFromTree(_atomtree.getRoot(), vxl_pos, 0, rad_max, _r_probe1*2, 0);
-    isProbeExcluded(vxl_pos, _r_probe1, r_vxl, close_atoms);
-    if (type=='x'){return type;}
-  }
+    { // TODO: FUNCTION?
+      // pass _r_probe1 as proper argument, so that this routine may be reused for two probe mode
+      std::vector<Atom> close_atoms = listFromTree(_atomtree.getRoot(), vxl_pos, 0, rad_max, _r_probe1*2, 0);
+      isProbeExcluded(vxl_pos, _r_probe1, r_vxl, close_atoms);
+      if (type=='x'){return type;}
+    }
   // end probe mode
   }
   if(type == 'm'){
@@ -174,7 +174,6 @@ void Voxel::traverseTree
   if (abs(dist1D) > (vxl_rad + max_rad)){ // then atom is too far to matter for voxel type
       traverseTree(dist1D < 0 ? node->left_child : node->right_child, vxl_pos, max_rad, vxl_rad, max_depth, exit_type, (dim+1)%3);
   } else{ // then atom is close enough to influence voxel type
-    // evaluate voxel type with respect to the found atom
     isAtom(atom, distance(vxl_pos, atom.getPos()), vxl_rad);
     if (type==exit_type){return;}
     // continue with both children
