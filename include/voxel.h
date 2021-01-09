@@ -18,7 +18,7 @@ class Voxel{
     void setType(char);
     char getType();
     
-    static void storeUniversal(AtomTree, double, double);
+    static void storeUniversal(AtomTree, double, double, int);
 
     char determineType(
         std::array<double,3> pos,
@@ -32,10 +32,11 @@ class Voxel{
     
     void traverseTree(
         const AtomNode*, 
-        const std::array<double,3>,
+        const std::array<double,3>&,
         const double&, 
         const double&, 
         const double&,
+        const char&,
         const char = 0); 
     
     std::vector<Atom> listFromTree(
@@ -56,8 +57,9 @@ class Voxel{
     static inline AtomTree _atomtree;
     static inline double _grid_size;
     static inline double _r_probe1;
+    static inline std::vector<double> rad_vxl_by_depth;
 
-    inline double calcRadiusOfInfluence(const double& max_depth);
+    static inline double calcRadiusOfInfluence(const double& max_depth);
 
     bool isAtom(const Atom& atom, const double& dist_vxl_at, const double& radius_of_influence); // inline not faster
     bool isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r_probe, const double&, const std::vector<Atom>&);
