@@ -76,7 +76,7 @@ char Voxel::determineType(std::array<double,3> vxl_pos, const double max_depth)
   traverseTree(_atomtree.getRoot(), vxl_pos, rad_max, r_vxl, max_depth, 'a', 0);
   if (type=='a'){return type;}
   
-  /*
+  if (_r_probe1){
   // probe mode
   { // TODO: FUNCTION?
     // pass _r_probe1 as proper argument, so that this routine may be reused for two probe mode
@@ -85,7 +85,7 @@ char Voxel::determineType(std::array<double,3> vxl_pos, const double max_depth)
     if (type=='x'){return type;}
   }
   // end probe mode
-  */
+  }
   if(type == 'm'){
     splitVoxel(vxl_pos, max_depth);
   }
