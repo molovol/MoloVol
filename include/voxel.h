@@ -39,13 +39,13 @@ class Voxel{
         const char&,
         const char = 0); 
     
-    std::vector<Atom> listFromTree(
+    static std::vector<Atom> listFromTree(
         const AtomNode*, 
         const std::array<double,3>&, 
         const double&,
         const double&,
         const double&,
-        const char);
+        const char=0);
 
     size_t tallyVoxelsOfType(const char volume_type, const int max_depth);
 
@@ -57,7 +57,8 @@ class Voxel{
     static inline AtomTree _atomtree;
     static inline double _grid_size;
     static inline double _r_probe1;
-    static inline std::vector<double> rad_vxl_by_depth;
+    static inline std::vector<Atom> _close_atoms;
+    static inline int _d = 6;
 
     static inline double calcRadiusOfInfluence(const double& max_depth);
 

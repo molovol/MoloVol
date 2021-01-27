@@ -52,9 +52,9 @@ bool Ctrl::unittestProtein(){
   const std::string radius_filepath = "./inputfile/radii.txt";
   const double grid_step = 0.1;
   const int max_depth = 4;
-  const double rad_probe1 = 0;
+  const double rad_probe1 = 0.5;
   const double expected_vdwVolume = 14337.422000;
-  const double expected_time = 152.656446-89-47.8+0.16;
+  const double expected_time = 241; //152.656446-89-47.8+0.16;
   
   std::unordered_map<std::string, double> rad_map = current_calculation->importRadiusMap(radius_filepath);
   
@@ -69,7 +69,7 @@ bool Ctrl::unittestProtein(){
     diff_time = data.getTime() - expected_time;
 
     printf("f: %40s, g: %4.1f, d: %4i, r: %4.1f\n", atom_filepath.c_str(), grid_step, max_depth, rad_probe1);
-    printf("Error vdW: %20.10f, Time: %10.5f s\n", error_vdwVolume, diff_time);
+    printf("Error vdW: %20.10f, Excluded: %20.10f, Time: %10.5f s\n", error_vdwVolume, data.volumes['x'], diff_time);
     printf("Type Assignment: %10.5f s, Volume Tally: %10.5f s\n", data.type_assignment_elapsed_seconds, data.volume_tally_elapsed_seconds);
   }
   else{

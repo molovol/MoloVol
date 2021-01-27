@@ -9,6 +9,7 @@
 // AUX FUNCTIONS //
 ///////////////////
 
+void breakpoint(){return;}
 inline double Voxel::calcRadiusOfInfluence(const double& max_depth){
   return max_depth != 0 ? 0.86602540378 * _grid_size * (pow(2,max_depth) - 1) : 0;
 }
@@ -80,8 +81,19 @@ char Voxel::determineType(std::array<double,3> vxl_pos, const double max_depth)
   // probe mode
     { // TODO: FUNCTION?
       // pass _r_probe1 as proper argument, so that this routine may be reused for two probe mode
-      std::vector<Atom> close_atoms = listFromTree(_atomtree.getRoot(), vxl_pos, 0, rad_max, _r_probe1*2, 0);
-      isProbeExcluded(vxl_pos, _r_probe1, r_vxl, close_atoms);
+     
+
+      // this saves a bit of time but not much
+      if (_d == 1 && max_depth < _d){
+      }
+      else{
+        _close_atoms = listFromTree(_atomtree.getRoot(), vxl_pos, r_vxl, rad_max, _r_probe1*2);
+      }
+      _d = max_depth;
+      
+      // _close_atoms = listFromTree(_atomtree.getRoot(), vxl_pos, r_vxl, rad_max, _r_probe1*2);
+
+      isProbeExcluded(vxl_pos, _r_probe1, r_vxl, _close_atoms);
       if (type=='x'){return type;}
     }
   // end probe mode
@@ -126,8 +138,8 @@ std::vector<Atom> Voxel::listFromTree(
   const std::array<double,3>& pos_point, // consider using custom vector class instead
   const double& rad_point, 
   const double& rad_max,
-  const double& max_dist=0, 
-  const char dim=0)
+  const double& max_dist, 
+  const char dim)
 {
   std::vector<Atom> atom_list;
   if (node == NULL){return atom_list;}
@@ -247,7 +259,6 @@ bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r
   return false;
 }
 
-void breakpoint(){return;}
 
 bool Voxel::isExcludedByQuadruplet(
     const Vector& vec_vxl, 
