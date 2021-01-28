@@ -4,6 +4,7 @@
 //#include "atomtree.h"
 #include <cmath> // abs, pow
 #include <cassert>
+#include <unordered_map>
 
 ///////////////////
 // AUX FUNCTIONS //
@@ -244,16 +245,19 @@ bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r
         
         if (!allAtomsClose(r_probe, atom_radii, vectors, 3)){continue;}
         if (isExcludedByTriplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe)){return true;}
-  
+        
         for (int l = k+1; l < close_atoms.size(); l++){
+          
           Atom atom4 = close_atoms[l];
           atom_radii[3] = atom4.getRad();
           vectors[3] = Vector(atom4.getPos()) - vec_offset;
 
           if (!allAtomsClose(r_probe, atom_radii, vectors, 4)){continue;}
-          if (isExcludedByQuadruplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe)){return true;}
+          if (isExcludedByQuadruplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe)){return true;} 
         }
+        
       }
+      
     }
   }
   return false;
@@ -371,18 +375,14 @@ bool Voxel::isExcludedByPair(
 
     double angle_atom1 = acos((pow(dist_atom1_probe,2) + pow(dist_atom1_atom2,2) - pow(dist_atom2_probe,2))/(2*dist_atom1_probe*dist_atom1_atom2));
     double angle_vxl1 = atan(vxl_orthogonal/vxl_parallel);
-
-    if (angle_atom1 > angle_vxl1){
-      double angle_atom2 = acos((pow(dist_atom2_probe,2) + pow(dist_atom1_atom2,2) - pow(dist_atom1_probe,2))/(2*dist_atom2_probe*dist_atom1_atom2));
-      double angle_vxl2 = atan(vxl_orthogonal/(dist_atom1_atom2-vxl_parallel));
-      if (angle_atom2 > angle_vxl2){ // then voxel is in triangle spanned by atoms and probe
-        double probe_parallel = ((pow(dist_atom1_probe,2) + pow(dist_atom1_atom2,2) - pow(dist_atom2_probe,2))/(2*dist_atom1_atom2));
-        double probe_orthogonal = pow(pow(dist_atom1_probe,2)-pow(probe_parallel,2),0.5);
-        
-        Vector vec_probe = probe_parallel * unitvec_parallel + probe_orthogonal * unitvec_orthogonal;
-
-        return isExcludedSetType(vec_vxl, rad_vxl, vec_probe, rad_probe);
-      }
+    
+    double probe_parallel = ((pow(dist_atom1_probe,2) + pow(dist_atom1_atom2,2) - pow(dist_atom2_probe,2))/(2*dist_atom1_atom2));
+    double probe_orthogonal = pow(pow(dist_atom1_probe,2)-pow(probe_parallel,2),0.5);
+    
+    Vector vec_probe = probe_parallel * unitvec_parallel + probe_orthogonal * unitvec_orthogonal;
+    
+    if (vec_vxl.isInsideTriangle({Vector(), vec_atat, vec_probe})){
+      return isExcludedSetType(vec_vxl, rad_vxl, vec_probe, rad_probe);
     }
   }
   return false;

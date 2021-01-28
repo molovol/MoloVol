@@ -41,6 +41,8 @@ struct Vector{
     bool operator!=(const Vector&) const;
     bool operator!=(const double&) const;
 
+    bool isInsideTriangle(const std::array<Vector,3>&) const;
+
   private:
     double squared() const;
     std::array<double,3> coord;

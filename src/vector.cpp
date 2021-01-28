@@ -96,6 +96,22 @@ bool Vector::operator==(const double& val) const {return this->isSameLength(val)
 bool Vector::operator!=(const Vector& vec) const {return !this->isSameLength(vec);}
 bool Vector::operator!=(const double& val) const {return !this->isSameLength(val);}
 
+bool Vector::isInsideTriangle(const std::array<Vector,3>& vec_vertices) const {
+  Vector vec_oop = crossproduct(vec_vertices[1]-vec_vertices[0],vec_vertices[2]-vec_vertices[0]);
+  
+  bool sign;
+  for (int i = 0; i < 3; i++){
+    int j = (i+1)%3;
+    if(!i){
+      sign = signbit(crossproduct(vec_oop,vec_vertices[j]-vec_vertices[i])*((*this)-vec_vertices[i]));
+    }
+    else if(sign != signbit(crossproduct(vec_oop,vec_vertices[j]-vec_vertices[i])*((*this)-vec_vertices[i]))){
+      return false;
+    }
+  }
+  return true;
+}
+
 ////////////////
 // OPERATIONS //
 ////////////////
