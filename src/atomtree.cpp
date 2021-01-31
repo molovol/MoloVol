@@ -31,7 +31,15 @@ std::vector<Atom>& AtomNode::getAtomList(){
 }
 
 Atom& AtomNode::getAtom() const {
-  return _atom_list[_atom_id];
+  return AtomNode::getAtom(_atom_id);
+}
+
+Atom& AtomNode::getAtom(const int atom_id){
+  return _atom_list[atom_id];
+}
+
+int AtomNode::getAtomId() const {
+  return _atom_id;
 }
 
 // OTHER

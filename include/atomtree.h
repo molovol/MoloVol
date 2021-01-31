@@ -15,6 +15,8 @@ class AtomNode{
     AtomNode* right_child;
   
     Atom& getAtom() const;
+    static Atom& getAtom(const int);
+    int getAtomId() const;
     void print(); // used for testing
     static void setAtomList(const std::vector<Atom>&);
     static std::vector<Atom>& getAtomList();
