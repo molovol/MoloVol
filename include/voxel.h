@@ -63,7 +63,6 @@ class Voxel{
     static inline double calcRadiusOfInfluence(const double& max_depth);
 
     bool isAtom(const Atom& atom, const double& dist_vxl_at, const double& radius_of_influence); // inline not faster
-    bool isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r_probe, const double&, const std::vector<Atom>&);
     bool isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r_probe, const double&, const std::vector<int>&);
     bool isExcludedByPair(const Vector&, const Vector&, const double&, const double&, const double&, const double&);
     bool isExcludedByTriplet(const Vector&, const double&, const std::array<Vector,4>&, const std::array<double,4>&, const double&, const bool = false);
