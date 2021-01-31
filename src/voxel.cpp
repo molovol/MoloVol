@@ -147,8 +147,8 @@ std::vector<Atom> Voxel::listFromTree(
   
   
   // distance between atom and point along one dimension
-  double dist1D = distance(node->atom->getPos(), pos_point, dim);
-  double rad_atom = node->atom->getRad();
+  double dist1D = distance(node->getAtom().getPos(), pos_point, dim);
+  double rad_atom = node->getAtom().getRad();
   
   std::vector<Atom> temp;
   if (abs(dist1D) > rad_point + rad_max + max_dist) { // then atom is too far
@@ -156,8 +156,8 @@ std::vector<Atom> Voxel::listFromTree(
       atom_list.insert(atom_list.end(), temp.begin(), temp.end());
   } 
   else { // then atom may be close enough
-    if (distance(node->atom->getPos(), pos_point) < rad_point + rad_atom + max_dist){
-      atom_list.push_back(*(node->atom));
+    if (distance(node->getAtom().getPos(), pos_point) < rad_point + rad_atom + max_dist){
+      atom_list.push_back(node->getAtom());
     }
     
     // continue with both children
@@ -179,7 +179,7 @@ void Voxel::traverseTree
    const char dim){
 
   if (node == NULL || type == exit_type){return;}
-  const Atom& atom = *(node->atom);
+  const Atom& atom = node->getAtom();
 
   // distance between atom and voxel along one dimension
   double dist1D = distance(atom.getPos(), vxl_pos, dim);
