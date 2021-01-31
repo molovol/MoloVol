@@ -81,8 +81,7 @@ char Voxel::determineType(std::array<double,3> vxl_pos, const double max_depth)
   if (_r_probe1){
   // probe mode
     { // TODO: FUNCTION?
-      // pass _r_probe1 as proper argument, so that this routine may be reused for two probe mode
-     
+      // pass _r_probe1 as proper argument, so that this routine may be reused for two probe mode 
 
       // this saves a bit of time but not much
       if (_d == 1 && max_depth < _d){
@@ -134,7 +133,7 @@ void Voxel::splitVoxel(const std::array<double,3>& vxl_pos, const double& max_de
 
 // go through a tree, starting from node. return a list of atoms that are a specified max distance (max_dist)
 // from a point with radius rad_point.
-std::vector<Atom> Voxel::listFromTree(
+std::vector<int> Voxel::listFromTree(
   const AtomNode* node, 
   const std::array<double,3>& pos_point, // consider using custom vector class instead
   const double& rad_point, 
@@ -142,31 +141,30 @@ std::vector<Atom> Voxel::listFromTree(
   const double& max_dist, 
   const char dim)
 {
-  std::vector<Atom> atom_list;
-  if (node == NULL){return atom_list;}
-  
+  std::vector<int> atom_id_list;
+  if (node == NULL){return atom_id_list;}
   
   // distance between atom and point along one dimension
   double dist1D = distance(node->getAtom().getPos(), pos_point, dim);
   double rad_atom = node->getAtom().getRad();
   
-  std::vector<Atom> temp;
+  std::vector<int> temp;
   if (abs(dist1D) > rad_point + rad_max + max_dist) { // then atom is too far
       temp = listFromTree(dist1D < 0 ? node->left_child : node->right_child, pos_point, rad_point, rad_max, max_dist, (dim+1)%3);
-      atom_list.insert(atom_list.end(), temp.begin(), temp.end());
+      atom_id_list.insert(atom_id_list.end(), temp.begin(), temp.end());
   } 
   else { // then atom may be close enough
     if (distance(node->getAtom().getPos(), pos_point) < rad_point + rad_atom + max_dist){
-      atom_list.push_back(node->getAtom());
+      atom_id_list.push_back(node->getAtomId());
     }
     
     // continue with both children
     for (AtomNode* child : {node->left_child, node->right_child}){
       temp = listFromTree(child, pos_point, rad_point, rad_max, max_dist, (dim+1)%3);
-      atom_list.insert(atom_list.end(), temp.begin(), temp.end());
+      atom_id_list.insert(atom_id_list.end(), temp.begin(), temp.end());
     }
   }
-  return atom_list;
+  return atom_id_list;
 }
 
 void Voxel::traverseTree
@@ -212,7 +210,7 @@ bool Voxel::isAtom(const Atom& atom, const double& dist_vxl_at, const double& ra
   return false;
 }
 
-
+// UNDER CONSTRUCTION
 bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r_probe, const double& radius_of_influence, const std::vector<Atom>& close_atoms){ 
   
   if(type == 'm'){return false;} // type 'm' can never be changed by probe
@@ -262,7 +260,60 @@ bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r
   }
   return false;
 }
+// UNDER CONSTRUCTION
 
+bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r_probe, const double& radius_of_influence, const std::vector<int>& close_atom_ids){ 
+  
+  if(type == 'm'){return false;} // type 'm' can never be changed by probe
+  
+  for (int i = 0; i < close_atom_ids.size(); i++){
+    Atom atom1 = AtomNode::getAtom(close_atom_ids[i]);
+    // for simplicity all vectors are shifted by -vec_offset, so that atom1 is in the origin
+    Vector vec_offset = Vector(atom1.getPos());
+    
+    std::array<double,4> atom_radii;
+    std::array<Vector,4> vectors;
+    
+    vectors[0] = Vector(); // not strictly necessary
+    atom_radii[0] = atom1.getRad();
+  
+    Vector vec_vxl = Vector(vxl_pos) - vec_offset;
+    
+    for (int j = i+1; j < close_atom_ids.size(); j++){
+      Atom atom2 = AtomNode::getAtom(close_atom_ids[j]);
+      //Atom atom2 = close_atoms[j];
+      atom_radii[1] = atom2.getRad();
+      vectors[1] = Vector(atom2.getPos()) - vec_offset;
+  
+      if (!allAtomsClose(r_probe, atom_radii, vectors, 2)){continue;}
+      if (isExcludedByPair(vec_vxl, vectors[1], atom_radii[0], atom_radii[1], r_probe, radius_of_influence)){return true;}
+      
+      for (int k = j+1; k < close_atom_ids.size(); k++){
+        //Atom atom3 = close_atoms[k];
+        Atom atom3 = AtomNode::getAtom(close_atom_ids[k]);
+        atom_radii[2] = atom3.getRad();
+        vectors[2] = Vector(atom3.getPos()) - vec_offset;
+        
+        if (!allAtomsClose(r_probe, atom_radii, vectors, 3)){continue;}
+        if (isExcludedByTriplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe)){return true;}
+        
+        for (int l = k+1; l < close_atom_ids.size(); l++){
+          
+          //Atom atom4 = close_atoms[l];
+          Atom atom4 = AtomNode::getAtom(close_atom_ids[l]);
+          atom_radii[3] = atom4.getRad();
+          vectors[3] = Vector(atom4.getPos()) - vec_offset;
+
+          if (!allAtomsClose(r_probe, atom_radii, vectors, 4)){continue;}
+          if (isExcludedByQuadruplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe)){return true;} 
+        }
+        
+      }
+      
+    }
+  }
+  return false;
+}
 
 bool Voxel::isExcludedByQuadruplet(
     const Vector& vec_vxl, 
