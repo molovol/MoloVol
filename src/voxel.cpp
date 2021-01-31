@@ -210,58 +210,6 @@ bool Voxel::isAtom(const Atom& atom, const double& dist_vxl_at, const double& ra
   return false;
 }
 
-// UNDER CONSTRUCTION
-bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r_probe, const double& radius_of_influence, const std::vector<Atom>& close_atoms){ 
-  
-  if(type == 'm'){return false;} // type 'm' can never be changed by probe
-  
-  for (int i = 0; i < close_atoms.size(); i++){
-    Atom atom1 = close_atoms[i];
-    // for simplicity all vectors are shifted by -vec_offset, so that atom1 is in the origin
-    Vector vec_offset = Vector(atom1.getPos());
-    
-    std::array<double,4> atom_radii;
-    std::array<Vector,4> vectors;
-    
-    vectors[0] = Vector(); // not strictly necessary
-    atom_radii[0] = atom1.getRad();
-  
-    Vector vec_vxl = Vector(vxl_pos) - vec_offset;
-    
-    for (int j = i+1; j < close_atoms.size(); j++){
-      Atom atom2 = close_atoms[j];
-      atom_radii[1] = atom2.getRad();
-      vectors[1] = Vector(atom2.getPos()) - vec_offset;
-  
-      if (!allAtomsClose(r_probe, atom_radii, vectors, 2)){continue;}
-      if (isExcludedByPair(vec_vxl, vectors[1], atom_radii[0], atom_radii[1], r_probe, radius_of_influence)){return true;}
-      
-      for (int k = j+1; k < close_atoms.size(); k++){
-        Atom atom3 = close_atoms[k];
-        atom_radii[2] = atom3.getRad();
-        vectors[2] = Vector(atom3.getPos()) - vec_offset;
-        
-        if (!allAtomsClose(r_probe, atom_radii, vectors, 3)){continue;}
-        if (isExcludedByTriplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe)){return true;}
-        
-        for (int l = k+1; l < close_atoms.size(); l++){
-          
-          Atom atom4 = close_atoms[l];
-          atom_radii[3] = atom4.getRad();
-          vectors[3] = Vector(atom4.getPos()) - vec_offset;
-
-          if (!allAtomsClose(r_probe, atom_radii, vectors, 4)){continue;}
-          if (isExcludedByQuadruplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe)){return true;} 
-        }
-        
-      }
-      
-    }
-  }
-  return false;
-}
-// UNDER CONSTRUCTION
-
 bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r_probe, const double& radius_of_influence, const std::vector<int>& close_atom_ids){ 
   
   if(type == 'm'){return false;} // type 'm' can never be changed by probe
