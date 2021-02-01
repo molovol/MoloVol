@@ -234,10 +234,10 @@ bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r
       atom_radii[1] = atom2.getRad();
       vectors[1] = Vector(atom2.getPos()) - vec_offset;
       
+      int pair_id = close_atom_ids[i] + AtomNode::getAtomList().size()*close_atom_ids[j];
+
       if (!allAtomsClose(r_probe, atom_radii, vectors, 2)){continue;}
-      if (isExcludedByPair(vec_vxl, vectors[1], atom_radii[0], atom_radii[1], r_probe, radius_of_influence, 
-        close_atom_ids[i] + AtomNode::getAtomList().size()*close_atom_ids[j]
-            )){return true;}
+      if (isExcludedByPair(vec_vxl, vectors[1], atom_radii[0], atom_radii[1], r_probe, radius_of_influence, pair_id)){return true;}
       
       for (int k = j+1; k < close_atom_ids.size(); k++){
         //Atom atom3 = close_atoms[k];
@@ -245,6 +245,8 @@ bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r
         atom_radii[2] = atom3.getRad();
         vectors[2] = Vector(atom3.getPos()) - vec_offset;
         
+//        int triplet_id = close_atom_ids[i] + AtomNode::getAtomList().size()*close_atom_ids[j] + pow(AtomNode::getAtomList().size(),2)*close_atom_ids[k];
+
         if (!allAtomsClose(r_probe, atom_radii, vectors, 3)){continue;}
         if (isExcludedByTriplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe)){return true;}
         
@@ -385,7 +387,6 @@ bool Voxel::isExcludedByPair(
     Vector unitvec_orthogonal = (vec_vxl-_pair_data[pair_id].unitvec_parallel*vxl_parallel).normalise();
     
     Vector vec_probe = _pair_data[pair_id].probe_parallel * unitvec_parallel + _pair_data[pair_id].probe_orthogonal * unitvec_orthogonal;
-    //Vector vec_probe = probe_parallel * unitvec_parallel + probe_orthogonal * unitvec_orthogonal;
 
     if (vec_vxl.isInsideTriangle({Vector(), vec_atat, vec_probe})){
       return isExcludedSetType(vec_vxl, rad_vxl, vec_probe, rad_probe);

@@ -88,7 +88,7 @@ struct TripletBundle {
 };
 
 struct PairBundle {
-  PairBundle() : unitvec_parallel(Vector()), probe_parallel(0), probe_orthogonal(0){}
+  PairBundle(){}
   PairBundle(Vector unitvec_parallel, double probe_parallel, double probe_orthogonal)
     : unitvec_parallel(unitvec_parallel), probe_parallel(probe_parallel), probe_orthogonal(probe_orthogonal){}
 
