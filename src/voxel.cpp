@@ -68,6 +68,7 @@ void Voxel::storeUniversal(AtomTree atomtree, double grid_size, double r_probe1,
   _atomtree = atomtree;
   _grid_size = grid_size;
   _r_probe1 = r_probe1;
+  _pair_data.clear();
 }
 
 char Voxel::determineType(std::array<double,3> vxl_pos, const double max_depth)
@@ -232,9 +233,11 @@ bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r
       //Atom atom2 = close_atoms[j];
       atom_radii[1] = atom2.getRad();
       vectors[1] = Vector(atom2.getPos()) - vec_offset;
-  
+      
       if (!allAtomsClose(r_probe, atom_radii, vectors, 2)){continue;}
-      if (isExcludedByPair(vec_vxl, vectors[1], atom_radii[0], atom_radii[1], r_probe, radius_of_influence)){return true;}
+      if (isExcludedByPair(vec_vxl, vectors[1], atom_radii[0], atom_radii[1], r_probe, radius_of_influence, 
+        close_atom_ids[i] + AtomNode::getAtomList().size()*close_atom_ids[j]
+            )){return true;}
       
       for (int k = j+1; k < close_atom_ids.size(); k++){
         //Atom atom3 = close_atoms[k];
@@ -359,27 +362,31 @@ bool Voxel::isExcludedByPair(
     const double& rad_atom1, 
     const double& rad_atom2, 
     const double& rad_probe, 
-    const double& rad_vxl)
+    const double& rad_vxl,
+    int pair_id)
 {
+
   Vector unitvec_parallel = vec_atat.normalise();
   double vxl_parallel = vec_vxl * unitvec_parallel; 
   if (vxl_parallel > 0 && vec_atat > vxl_parallel){ // then voxel is between atoms
+     
+    if (_pair_data.find(pair_id) == _pair_data.end()){
     
-    Vector unitvec_orthogonal = (vec_vxl-unitvec_parallel*vxl_parallel).normalise();
-    double vxl_orthogonal = vec_vxl * unitvec_orthogonal; 
+      // TODO: consider making a function that produces vec_probe and takes either PairBundle or values as args
+      double dist_atom1_probe = rad_atom1 + rad_probe;
+      double dist_atom2_probe = rad_atom2 + rad_probe;
+      double dist_atom1_atom2 = vec_atat.length();
+      
+      double probe_parallel = ((pow(dist_atom1_probe,2) + pow(dist_atom1_atom2,2) - pow(dist_atom2_probe,2))/(2*dist_atom1_atom2));
+      double probe_orthogonal = pow(pow(dist_atom1_probe,2)-pow(probe_parallel,2),0.5);
+      
+      Voxel::_pair_data[pair_id] = PairBundle(unitvec_parallel, probe_parallel, probe_orthogonal);
+    }
+    Vector unitvec_orthogonal = (vec_vxl-_pair_data[pair_id].unitvec_parallel*vxl_parallel).normalise();
     
-    double dist_atom1_probe = rad_atom1 + rad_probe;
-    double dist_atom2_probe = rad_atom2 + rad_probe;
-    double dist_atom1_atom2 = vec_atat.length();
+    Vector vec_probe = _pair_data[pair_id].probe_parallel * unitvec_parallel + _pair_data[pair_id].probe_orthogonal * unitvec_orthogonal;
+    //Vector vec_probe = probe_parallel * unitvec_parallel + probe_orthogonal * unitvec_orthogonal;
 
-    double angle_atom1 = acos((pow(dist_atom1_probe,2) + pow(dist_atom1_atom2,2) - pow(dist_atom2_probe,2))/(2*dist_atom1_probe*dist_atom1_atom2));
-    double angle_vxl1 = atan(vxl_orthogonal/vxl_parallel);
-    
-    double probe_parallel = ((pow(dist_atom1_probe,2) + pow(dist_atom1_atom2,2) - pow(dist_atom2_probe,2))/(2*dist_atom1_atom2));
-    double probe_orthogonal = pow(pow(dist_atom1_probe,2)-pow(probe_parallel,2),0.5);
-    
-    Vector vec_probe = probe_parallel * unitvec_parallel + probe_orthogonal * unitvec_orthogonal;
-    
     if (vec_vxl.isInsideTriangle({Vector(), vec_atat, vec_probe})){
       return isExcludedSetType(vec_vxl, rad_vxl, vec_probe, rad_probe);
     }
