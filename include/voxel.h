@@ -6,7 +6,10 @@
 #include "atomtree.h"
 #include <vector>
 #include <array>
+#include <unordered_map>
 
+struct TripletBundle;
+struct PairBundle;
 class AtomTree;
 struct Atom;
 struct AtomNode;
@@ -59,12 +62,14 @@ class Voxel{
     static inline double _r_probe1;
     static inline std::vector<int> _close_atoms;
     static inline int _d = 6;
+    static inline std::unordered_map<int,TripletBundle> _triplet_data;
+    static inline std::unordered_map<int,PairBundle> _pair_data;
 
     static inline double calcRadiusOfInfluence(const double& max_depth);
 
     bool isAtom(const Atom& atom, const double& dist_vxl_at, const double& radius_of_influence); // inline not faster
     bool isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r_probe, const double&, const std::vector<int>&);
-    bool isExcludedByPair(const Vector&, const Vector&, const double&, const double&, const double&, const double&);
+    bool isExcludedByPair(const Vector&, const Vector&, const double&, const double&, const double&, const double&, int);
     bool isExcludedByTriplet(const Vector&, const double&, const std::array<Vector,4>&, const std::array<double,4>&, const double&, const bool = false);
     bool isExcludedByQuadruplet(const Vector&, const double&, const std::array<Vector,4>&, const std::array<double,4>&, const double&);
     bool isExcludedSetType(const Vector&, const double&, const Vector&, const double&);
@@ -75,6 +80,21 @@ class Voxel{
     // 'a' : inside of atom
     // 'e' : empty
     // 'm' : mixed
+};
+
+struct TripletBundle {
+//  TripletBundle() ;
+
+};
+
+struct PairBundle {
+  PairBundle() : unitvec_parallel(Vector()), probe_parallel(0), probe_orthogonal(0){}
+  PairBundle(Vector unitvec_parallel, double probe_parallel, double probe_orthogonal)
+    : unitvec_parallel(unitvec_parallel), probe_parallel(probe_parallel), probe_orthogonal(probe_orthogonal){}
+
+  Vector unitvec_parallel;
+  double probe_parallel;
+  double probe_orthogonal;
 };
 
 #endif
