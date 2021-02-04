@@ -69,6 +69,7 @@ void Voxel::storeUniversal(AtomTree atomtree, double grid_size, double r_probe1,
   _grid_size = grid_size;
   _r_probe1 = r_probe1;
   _pair_data.clear();
+  _triplet_data.clear();
 }
 
 char Voxel::determineType(std::array<double,3> vxl_pos, const double max_depth)
@@ -230,7 +231,6 @@ bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r
     
     for (int j = i+1; j < close_atom_ids.size(); j++){
       Atom atom2 = AtomNode::getAtom(close_atom_ids[j]);
-      //Atom atom2 = close_atoms[j];
       atom_radii[1] = atom2.getRad();
       vectors[1] = Vector(atom2.getPos()) - vec_offset;
       
@@ -240,19 +240,17 @@ bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r
       if (isExcludedByPair(vec_vxl, vectors[1], atom_radii[0], atom_radii[1], r_probe, radius_of_influence, pair_id)){return true;}
       
       for (int k = j+1; k < close_atom_ids.size(); k++){
-        //Atom atom3 = close_atoms[k];
         Atom atom3 = AtomNode::getAtom(close_atom_ids[k]);
         atom_radii[2] = atom3.getRad();
         vectors[2] = Vector(atom3.getPos()) - vec_offset;
         
-//        int triplet_id = close_atom_ids[i] + AtomNode::getAtomList().size()*close_atom_ids[j] + pow(AtomNode::getAtomList().size(),2)*close_atom_ids[k];
+        unsigned long long int triplet_id = close_atom_ids[i] + AtomNode::getAtomList().size()*close_atom_ids[j] + pow(AtomNode::getAtomList().size(),2)*close_atom_ids[k];
 
         if (!allAtomsClose(r_probe, atom_radii, vectors, 3)){continue;}
-        if (isExcludedByTriplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe)){return true;}
+        if (isExcludedByTriplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe, triplet_id)){return true;}
         
         for (int l = k+1; l < close_atom_ids.size(); l++){
           
-          //Atom atom4 = close_atoms[l];
           Atom atom4 = AtomNode::getAtom(close_atom_ids[l]);
           atom_radii[3] = atom4.getRad();
           vectors[3] = Vector(atom4.getPos()) - vec_offset;
@@ -284,7 +282,6 @@ bool Voxel::isExcludedByQuadruplet(
   std::array<Vector,4> vec_plane_vertices;
   std::array<double,4> rad_plane_vertices;
   for (char i = 0; i < 4; i++){
-//    vec_plane_vertices[0] = vec_atoms[i];
     rad_plane_vertices[0] = rad_atoms[i];
     for (char j = i+1; j < 4; j++){
       vec_plane_vertices[1] = vec_atoms[j]-vec_atoms[i];
@@ -296,7 +293,7 @@ bool Voxel::isExcludedByQuadruplet(
         // introducing a dummy voxel as a hack, in order to independantly evaluate the voxel accessibilty 
         // for every plane
         Voxel dummy = Voxel();
-        dummy.isExcludedByTriplet(vec_vxl-vec_atoms[i], rad_vxl, vec_plane_vertices, rad_plane_vertices, rad_probe, true);
+        dummy.isExcludedByTriplet(vec_vxl-vec_atoms[i], rad_vxl, vec_plane_vertices, rad_plane_vertices, rad_probe, 0, true);
         char type_from_plane = dummy.getType();
         
         // if any voxel is found to be completely accessible, then set type and end 
@@ -321,28 +318,35 @@ bool Voxel::isExcludedByTriplet(
   const std::array<Vector,4>& vec_atom,
   const std::array<double,4>& rad_atom,
   const double& rad_probe,
+  const unsigned long long int triplet_id,
   const bool side_restr)
 {
   // check if between atom1 and atom2 - done by isExcludedByPair
-//  double dist_vxl_12 = unitvec_12 * vec_vxl; // voxel vector component along 12
   
   if (!isPointBetween(vec_vxl, vec_atom[2])){return false;} // filter voxels outside range
   
-  Vector vec_probe_plane = calcProbeVectorInPlane(vec_atom, rad_atom, rad_probe);
+  if (triplet_id == 0 || _triplet_data.find(triplet_id) == _triplet_data.end()){
+
+    Vector vec_probe_plane = calcProbeVectorInPlane(vec_atom, rad_atom, rad_probe);
   
-  Vector vec_probe_normal = calcProbeVectorNormal(vec_atom, rad_atom, rad_probe, vec_probe_plane);
+    Vector vec_probe_normal = calcProbeVectorNormal(vec_atom, rad_atom, rad_probe, vec_probe_plane);
+
+    _triplet_data[triplet_id] = TripletBundle(vec_probe_plane, vec_probe_normal);
+  }
   
   Vector vec_probe;
   
   // side restricted mode: the probe always sits on the other side of the plane relative to 
   // the voxel. we do not check whether the voxel is inside the tetrahedron, because it never is
   if (side_restr){
-    vec_probe = vec_probe_plane + vec_probe_normal * ( signbit(vec_probe_normal*vec_vxl)? 1 : -1 );
+    vec_probe = _triplet_data[triplet_id].vec_probe_plane 
+      + _triplet_data[triplet_id].vec_probe_normal * ( signbit(_triplet_data[triplet_id].vec_probe_normal*vec_vxl)? 1 : -1 );
   }
   
   // default mode: the probe always sits on the same side as the voxel
   else {
-    vec_probe = vec_probe_plane + vec_probe_normal * ( signbit(vec_probe_normal*vec_vxl)? -1 : 1 );
+    vec_probe = _triplet_data[triplet_id].vec_probe_plane 
+      + _triplet_data[triplet_id].vec_probe_normal * ( signbit(_triplet_data[triplet_id].vec_probe_normal*vec_vxl)? -1 : 1 );
     
     // check whether vxl is inside tetrahedron spanned by atoms1-3 and probe 
     std::array<Vector,4> vec_vertices; // vectors pointing to vertices of the tetrahedron
@@ -382,7 +386,7 @@ bool Voxel::isExcludedByPair(
       double probe_parallel = ((pow(dist_atom1_probe,2) + pow(dist_atom1_atom2,2) - pow(dist_atom2_probe,2))/(2*dist_atom1_atom2));
       double probe_orthogonal = pow(pow(dist_atom1_probe,2)-pow(probe_parallel,2),0.5);
       
-      Voxel::_pair_data[pair_id] = PairBundle(unitvec_parallel, probe_parallel, probe_orthogonal);
+      _pair_data[pair_id] = PairBundle(unitvec_parallel, probe_parallel, probe_orthogonal);
     }
     Vector unitvec_orthogonal = (vec_vxl-_pair_data[pair_id].unitvec_parallel*vxl_parallel).normalise();
     
