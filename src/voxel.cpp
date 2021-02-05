@@ -105,15 +105,12 @@ void Voxel::splitVoxel(const Vector& vxl_pos, const double& max_depth){
     data.push_back(Voxel());
     // modify position
     factors = {
-      static_cast<double>((i%2) >= 1 ? 1 : -1),
-      static_cast<double>((i%4) >= 2 ? 1 : -1),
-      static_cast<double>( i    >= 4 ? 1 : -1)};
+      (i%2) >= 1 ? 1 : -1,
+      (i%4) >= 2 ? 1 : -1,
+       i    >= 4 ? 1 : -1};
    
     Vector new_pos = vxl_pos + factors * _grid_size * std::pow(2,max_depth-2);
-/*    for(int dim = 0; dim < 3; dim++){
-      new_pos[dim] = vxl_pos[dim] + factors[dim] * _grid_size * std::pow(2,max_depth-2);//why -2?
-    }
-    */
+    
     resultcount += data[i].determineType(new_pos, max_depth-1);
   }
 	//determine if all children have the same type

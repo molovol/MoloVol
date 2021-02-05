@@ -10,6 +10,7 @@ struct Vector{
     Vector();
     Vector(double, double, double);
     Vector(std::array<double,3>);
+    Vector(int, int, int);
     
     // access
     double& getCoordinate(char);

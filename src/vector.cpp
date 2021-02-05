@@ -15,6 +15,10 @@ Vector::Vector(double inp_x, double inp_y, double inp_z){
 Vector::Vector(std::array<double,3> inp_arr)
   :coord(inp_arr){}
 
+Vector::Vector(int inp_x, int inp_y, int inp_z){
+  coord = {static_cast<double>(inp_x), static_cast<double>(inp_y), static_cast<double>(inp_z)};
+}
+
 /////////////
 // METHODS //
 /////////////
