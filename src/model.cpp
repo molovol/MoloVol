@@ -93,7 +93,7 @@ CalcResultBundle Model::calcVolume(){
   data.volumes = cell.getVolume();
   end = std::chrono::steady_clock::now();
   data.volume_tally_elapsed_seconds = std::chrono::duration<double>(end-start).count();
-  
+ 
   return data;
 }
 

@@ -60,8 +60,7 @@ class Voxel{
     static inline AtomTree _atomtree;
     static inline double _grid_size;
     static inline double _r_probe1;
-    static inline std::vector<int> _close_atoms;
-    static inline int _d = 6;
+    //static inline std::vector<int> _close_atoms;
     static inline std::unordered_map<unsigned long long int,TripletBundle> _triplet_data;
     static inline std::unordered_map<int,PairBundle> _pair_data;
 
@@ -71,7 +70,7 @@ class Voxel{
     bool isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r_probe, const double&, const std::vector<int>&);
     bool isExcludedByPair(const Vector&, const Vector&, const double&, const double&, const double&, const double&, int);
     bool isExcludedByTriplet(const Vector&, const double&, const std::array<Vector,4>&, const std::array<double,4>&, const double&, const unsigned long long int, const bool = false);
-    bool isExcludedByQuadruplet(const Vector&, const double&, const std::array<Vector,4>&, const std::array<double,4>&, const double&);
+    bool isExcludedByQuadruplet(const Vector&, const double&, const std::array<Vector,4>&, const std::array<double,4>&, const double&, const std::vector<int>&);
     bool isExcludedSetType(const Vector&, const double&, const Vector&, const double&);
 
     std::vector<Voxel> data; // empty or exactly 8 elements
