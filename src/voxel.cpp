@@ -120,7 +120,6 @@ void Voxel::splitVoxel(const Vector& vxl_pos, const double& max_depth){
 	} else if (resultcount == 'e'*8) {
 	  type = 'e';
 	}
-  //
 }
 
 // go through a tree, starting from node. return a list of atoms that are a specified max distance
@@ -144,7 +143,8 @@ void Voxel::listFromTree(
       listFromTree(atom_id_list, dist1D<0? node->left_child : node->right_child, pos_point, rad_point, rad_max, max_dist, (dim+1)%3);
   }
   else { // then atom may be close enough
-    if (distance(node->getAtom().getPosVec(), pos_point) < rad_point + rad_atom + max_dist){
+    if ((pos_point-node->getAtom().getPosVec()) < rad_point + rad_atom + max_dist){
+//        distance(node->getAtom().getPosVec(), pos_point) < rad_point + rad_atom + max_dist){
       atom_id_list.push_back(node->getAtomId());
     }
     
