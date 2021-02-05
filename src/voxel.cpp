@@ -15,8 +15,7 @@ inline double Voxel::calcRadiusOfInfluence(const double& max_depth){
   return max_depth != 0 ? 0.86602540378 * _grid_size * (pow(2,max_depth) - 1) : 0;
 }
 
-bool allAtomsClose(
-    const double&, const std::array<double,4>&, const std::array<Vector,4>&, char); 
+bool allAtomsClose(const double&, const std::array<double,4>&, const std::array<Vector,4>&, char); 
 
 bool isInsideTetrahedron(const Vector&, const std::array<Vector,4>&, const std::array<Vector,4>&, bool&);
 bool isInsideTetrahedron(const Vector&, const std::array<Vector,4>&, const std::array<Vector,4>&);
@@ -84,18 +83,8 @@ char Voxel::determineType(std::array<double,3> vxl_pos, const double max_depth)
   // probe mode
     { // TODO: FUNCTION?
       // pass _r_probe1 as proper argument, so that this routine may be reused for two probe mode 
-
-      // this saves a bit of time but not much
-      if (_d == 1 && max_depth < _d){
-      }
-      else{
-        _close_atoms = listFromTree(_atomtree.getRoot(), vxl_pos, r_vxl, rad_max, _r_probe1*2);
-      }
-      _d = max_depth;
-      
-      // _close_atoms = listFromTree(_atomtree.getRoot(), vxl_pos, r_vxl, rad_max, _r_probe1*2);
-
-      isProbeExcluded(vxl_pos, _r_probe1, r_vxl, _close_atoms);
+      std::vector<int> close_atoms = listFromTree(_atomtree.getRoot(), vxl_pos, r_vxl, rad_max, _r_probe1*2); // pretty expensive by itself
+      isProbeExcluded(vxl_pos, _r_probe1, r_vxl, close_atoms);
       if (type=='x'){return type;}
     }
   // end probe mode
@@ -133,7 +122,7 @@ void Voxel::splitVoxel(const std::array<double,3>& vxl_pos, const double& max_de
   //
 }
 
-// go through a tree, starting from node. return a list of atoms that are a specified max distance (max_dist)
+// go through a tree, starting from node. return a list of atoms that are a specified max distance
 // from a point with radius rad_point.
 std::vector<int> Voxel::listFromTree(
   const AtomNode* node, 
@@ -145,16 +134,16 @@ std::vector<int> Voxel::listFromTree(
 {
   std::vector<int> atom_id_list;
   if (node == NULL){return atom_id_list;}
-  
+ 
   // distance between atom and point along one dimension
   double dist1D = distance(node->getAtom().getPos(), pos_point, dim);
   double rad_atom = node->getAtom().getRad();
-  
+ 
   std::vector<int> temp;
   if (abs(dist1D) > rad_point + rad_max + max_dist) { // then atom is too far
       temp = listFromTree(dist1D < 0 ? node->left_child : node->right_child, pos_point, rad_point, rad_max, max_dist, (dim+1)%3);
       atom_id_list.insert(atom_id_list.end(), temp.begin(), temp.end());
-  } 
+  }
   else { // then atom may be close enough
     if (distance(node->getAtom().getPos(), pos_point) < rad_point + rad_atom + max_dist){
       atom_id_list.push_back(node->getAtomId());
@@ -224,9 +213,7 @@ bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r
     std::array<double,4> atom_radii;
     std::array<Vector,4> vectors;
     
-    vectors[0] = Vector(); // not strictly necessary
     atom_radii[0] = atom1.getRad();
-  
     Vector vec_vxl = Vector(vxl_pos) - vec_offset;
     
     for (int j = i+1; j < close_atom_ids.size(); j++){
@@ -244,23 +231,24 @@ bool Voxel::isProbeExcluded(const std::array<double,3>& vxl_pos, const double& r
         atom_radii[2] = atom3.getRad();
         vectors[2] = Vector(atom3.getPos()) - vec_offset;
         
+//        std::array<unsigned long long int, 4> triplet_ids;
+//        triplet_ids[0] = close_atom_ids[i] + AtomNode::getAtomList().size()*close_atom_ids[j] + pow(AtomNode::getAtomList().size(),2)*close_atom_ids[k];
         unsigned long long int triplet_id = close_atom_ids[i] + AtomNode::getAtomList().size()*close_atom_ids[j] + pow(AtomNode::getAtomList().size(),2)*close_atom_ids[k];
 
         if (!allAtomsClose(r_probe, atom_radii, vectors, 3)){continue;}
         if (isExcludedByTriplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe, triplet_id)){return true;}
         
         for (int l = k+1; l < close_atom_ids.size(); l++){
-          
+        
+        
           Atom atom4 = AtomNode::getAtom(close_atom_ids[l]);
           atom_radii[3] = atom4.getRad();
           vectors[3] = Vector(atom4.getPos()) - vec_offset;
 
           if (!allAtomsClose(r_probe, atom_radii, vectors, 4)){continue;}
-          if (isExcludedByQuadruplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe)){return true;} 
+          if (isExcludedByQuadruplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe, close_atom_ids)){return true;} 
         }
-        
       }
-      
     }
   }
   return false;
@@ -271,7 +259,8 @@ bool Voxel::isExcludedByQuadruplet(
     const double& rad_vxl, 
     const std::array<Vector,4>& vec_atoms,
     const std::array<double,4>& rad_atoms,
-    const double& rad_probe)
+    const double& rad_probe,
+    const std::vector<int>& close_atom_ids)
 {
   bool sign;
   if (!isInsideTetrahedron(vec_vxl, vec_atoms, sign)){return false;}
@@ -289,6 +278,8 @@ bool Voxel::isExcludedByQuadruplet(
       for (char k = j+1; k < 4; k++){
         vec_plane_vertices[2] = vec_atoms[k]-vec_atoms[i];
         rad_plane_vertices[2] = rad_atoms[k];
+        
+//        unsigned long long int triplet_id = close_atom_ids[i] + AtomNode::getAtomList().size()*close_atom_ids[j] + pow(AtomNode::getAtomList().size(),2)*close_atom_ids[k];
         
         // introducing a dummy voxel as a hack, in order to independantly evaluate the voxel accessibilty 
         // for every plane
@@ -374,27 +365,25 @@ bool Voxel::isExcludedByPair(
 
   Vector unitvec_parallel = vec_atat.normalise();
   double vxl_parallel = vec_vxl * unitvec_parallel; 
-  if (vxl_parallel > 0 && vec_atat > vxl_parallel){ // then voxel is between atoms
-     
-    if (_pair_data.find(pair_id) == _pair_data.end()){
+   
+  if (_pair_data.find(pair_id) == _pair_data.end()){
+  
+    // TODO: consider making a function that produces vec_probe and takes either PairBundle or values as args
+    double dist_atom1_probe = rad_atom1 + rad_probe;
+    double dist_atom2_probe = rad_atom2 + rad_probe;
+    double dist_atom1_atom2 = vec_atat.length();
     
-      // TODO: consider making a function that produces vec_probe and takes either PairBundle or values as args
-      double dist_atom1_probe = rad_atom1 + rad_probe;
-      double dist_atom2_probe = rad_atom2 + rad_probe;
-      double dist_atom1_atom2 = vec_atat.length();
-      
-      double probe_parallel = ((pow(dist_atom1_probe,2) + pow(dist_atom1_atom2,2) - pow(dist_atom2_probe,2))/(2*dist_atom1_atom2));
-      double probe_orthogonal = pow(pow(dist_atom1_probe,2)-pow(probe_parallel,2),0.5);
-      
-      _pair_data[pair_id] = PairBundle(unitvec_parallel, probe_parallel, probe_orthogonal);
-    }
-    Vector unitvec_orthogonal = (vec_vxl-_pair_data[pair_id].unitvec_parallel*vxl_parallel).normalise();
+    double probe_parallel = ((pow(dist_atom1_probe,2) + pow(dist_atom1_atom2,2) - pow(dist_atom2_probe,2))/(2*dist_atom1_atom2));
+    double probe_orthogonal = pow(pow(dist_atom1_probe,2)-pow(probe_parallel,2),0.5);
     
-    Vector vec_probe = _pair_data[pair_id].probe_parallel * unitvec_parallel + _pair_data[pair_id].probe_orthogonal * unitvec_orthogonal;
+    _pair_data[pair_id] = PairBundle(unitvec_parallel, probe_parallel, probe_orthogonal);
+  }
+  Vector unitvec_orthogonal = (vec_vxl-_pair_data[pair_id].unitvec_parallel*vxl_parallel).normalise();
+  
+  Vector vec_probe = _pair_data[pair_id].probe_parallel * unitvec_parallel + _pair_data[pair_id].probe_orthogonal * unitvec_orthogonal;
 
-    if (vec_vxl.isInsideTriangle({Vector(), vec_atat, vec_probe})){
-      return isExcludedSetType(vec_vxl, rad_vxl, vec_probe, rad_probe);
-    }
+  if (vec_vxl.isInsideTriangle({Vector(), vec_atat, vec_probe})){
+    return isExcludedSetType(vec_vxl, rad_vxl, vec_probe, rad_probe);
   }
   return false;
 }
