@@ -23,9 +23,8 @@ class Voxel{
     
     static void storeUniversal(AtomTree, double, double, int);
 
-    char determineType(
-        std::array<double,3> pos,
-        const double max_depth);
+    char determineType(std::array<double,3>, const double);
+//    char determineType(std::array<double,3>, const double, const std::vector<int>);
     
     void determineTypeSingleAtom(
         const Atom& atom, 
@@ -42,8 +41,9 @@ class Voxel{
         const char&,
         const char = 0); 
     
-    static std::vector<int> listFromTree(
-        const AtomNode*, 
+    static void listFromTree(
+        std::vector<int>&,
+        const AtomNode*,
         const std::array<double,3>&, 
         const double&,
         const double&,

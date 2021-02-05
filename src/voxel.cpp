@@ -71,27 +71,36 @@ void Voxel::storeUniversal(AtomTree atomtree, double grid_size, double r_probe1,
   _triplet_data.clear();
 }
 
-char Voxel::determineType(std::array<double,3> vxl_pos, const double max_depth)
-{
+/*
+char Voxel::determineType(std::array<double,3> vxl_pos, const double max_depth){
+  return determineType(vxl_pos, max_depth, close_atoms);
+}
+*/
+
+//char Voxel::determineType(std::array<double,3> vxl_pos, const double max_depth, const std::vector<int> close_atom_ids)
+char Voxel::determineType(std::array<double,3> vxl_pos, const double max_depth){
   double r_vxl = calcRadiusOfInfluence(max_depth); // calculated every time, since max_depth may change (not expensive) 
   double rad_max = _atomtree.getMaxRad();
-
+  
+  // IS VOXEL OF TYPE ATOM?
   traverseTree(_atomtree.getRoot(), vxl_pos, rad_max, r_vxl, max_depth, 'a', 0);
   if (type=='a'){return type;}
   
+  // IS VOXEL OF TYPE EXCLUDED?
   if (_r_probe1){
   // probe mode
     { // TODO: FUNCTION?
       // pass _r_probe1 as proper argument, so that this routine may be reused for two probe mode 
-      std::vector<int> close_atoms = listFromTree(_atomtree.getRoot(), vxl_pos, r_vxl, rad_max, _r_probe1*2); // pretty expensive by itself
-      isProbeExcluded(vxl_pos, _r_probe1, r_vxl, close_atoms);
+      std::vector<int> close_atom_ids;
+      listFromTree(close_atom_ids, _atomtree.getRoot(), vxl_pos, r_vxl, rad_max, _r_probe1*2);
+      isProbeExcluded(vxl_pos, _r_probe1, r_vxl, close_atom_ids);
       if (type=='x'){return type;}
     }
   // end probe mode
   }
-  if(type == 'm'){
-    splitVoxel(vxl_pos, max_depth);
-  }
+
+  // SPLIT VOXEL IF TYPE MIXED
+  if(type == 'm'){splitVoxel(vxl_pos, max_depth);}
 	return type;
 }
 
@@ -124,25 +133,23 @@ void Voxel::splitVoxel(const std::array<double,3>& vxl_pos, const double& max_de
 
 // go through a tree, starting from node. return a list of atoms that are a specified max distance
 // from a point with radius rad_point.
-std::vector<int> Voxel::listFromTree(
+void Voxel::listFromTree(
+  std::vector<int>& atom_id_list,
   const AtomNode* node, 
   const std::array<double,3>& pos_point, // consider using custom vector class instead
   const double& rad_point, 
-  const double& rad_max,
+  const double& rad_max, // ideally this value should be retrieved from node
   const double& max_dist, 
   const char dim)
 {
-  std::vector<int> atom_id_list;
-  if (node == NULL){return atom_id_list;}
+  if (node == NULL){return;}
  
   // distance between atom and point along one dimension
   double dist1D = distance(node->getAtom().getPos(), pos_point, dim);
   double rad_atom = node->getAtom().getRad();
  
-  std::vector<int> temp;
   if (abs(dist1D) > rad_point + rad_max + max_dist) { // then atom is too far
-      temp = listFromTree(dist1D < 0 ? node->left_child : node->right_child, pos_point, rad_point, rad_max, max_dist, (dim+1)%3);
-      atom_id_list.insert(atom_id_list.end(), temp.begin(), temp.end());
+      listFromTree(atom_id_list, dist1D<0? node->left_child : node->right_child, pos_point, rad_point, rad_max, max_dist, (dim+1)%3);
   }
   else { // then atom may be close enough
     if (distance(node->getAtom().getPos(), pos_point) < rad_point + rad_atom + max_dist){
@@ -151,11 +158,9 @@ std::vector<int> Voxel::listFromTree(
     
     // continue with both children
     for (AtomNode* child : {node->left_child, node->right_child}){
-      temp = listFromTree(child, pos_point, rad_point, rad_max, max_dist, (dim+1)%3);
-      atom_id_list.insert(atom_id_list.end(), temp.begin(), temp.end());
+      listFromTree(atom_id_list, child, pos_point, rad_point, rad_max, max_dist, (dim+1)%3);
     }
   }
-  return atom_id_list;
 }
 
 void Voxel::traverseTree
