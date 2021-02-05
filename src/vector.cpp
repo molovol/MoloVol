@@ -161,3 +161,11 @@ Vector crossproduct(const Vector& lhs, const Vector& rhs){
   retvec[2] = lhs[0]*rhs[1] - lhs[1]*rhs[0];
   return retvec;
 }
+
+double distance(const Vector& start, const Vector& end){
+  return (end-start).length();
+}
+
+double distance(const Vector& start, const Vector& end, const char dim){
+  return end[dim] - start[dim];
+}

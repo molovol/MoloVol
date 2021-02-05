@@ -6,22 +6,33 @@
 
 struct Vector{
   public:
+    // constructors
     Vector();
     Vector(double, double, double);
     Vector(std::array<double,3>);
     
-    void print() const; 
+    // access
     double& getCoordinate(char);
     double& operator[](char);
     const double& getCoordinate(char) const;
     const double& operator[](char) const;
     void setCoordinate(char,const double&);
     
+    // display
+    void print() const; 
+    
+    // isolated operations
     double length() const;
     Vector normalise() const; 
-    Vector normalize() const {return this->normalise();} 
+    Vector normalize() const {return normalise();}
+    
+    // relation to other vector
     double angle(const Vector&) const;
+    
+    // relation to multiple vectors
+    bool isInsideTriangle(const std::array<Vector,3>&) const;
 
+    // comparisons
     bool isLongerThan(const Vector&) const;
     bool isLongerThan(const double&) const;
     bool isShorterThan(const Vector&) const;
@@ -41,13 +52,15 @@ struct Vector{
     bool operator!=(const Vector&) const;
     bool operator!=(const double&) const;
 
-    bool isInsideTriangle(const std::array<Vector,3>&) const;
-
   private:
-    double squared() const;
+    // data
     std::array<double,3> coord;
+
+    // methods
+    double squared() const;
 };
 
+// arithmetic operators
 Vector add(Vector, const Vector&);
 Vector operator+(const Vector&, const Vector&);
 Vector operator-(const Vector&, const Vector&);
@@ -62,5 +75,8 @@ double dotproduct(const Vector&, const Vector&);
 double operator*(const Vector&, const Vector&);
 
 Vector crossproduct(const Vector&, const Vector&);
+
+double distance(const Vector&, const Vector&);
+double distance(const Vector&, const Vector&, const char);
 
 #endif

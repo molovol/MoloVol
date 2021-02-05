@@ -3,6 +3,7 @@
 #define ATOM_H
 
 #include "exception.h"
+#include "vector.h"
 #include <vector>
 #include <array>
 #include <iostream>
@@ -33,6 +34,10 @@ struct Atom{
 
   const std::array<double,3> getPos() const {
     return {pos_x, pos_y, pos_z};
+  }
+  
+  const Vector getPosVec() const {
+    return Vector(pos_x, pos_y, pos_z);
   }
 
   const double getRad() const {
