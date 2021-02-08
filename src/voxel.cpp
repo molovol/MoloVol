@@ -12,7 +12,7 @@
 
 void breakpoint(){return;}
 inline double Voxel::calcRadiusOfInfluence(const double& max_depth){
-  return max_depth != 0 ? 0.86602540378 * _grid_size * (pow(2,max_depth) - 1) : 0;
+  return max_depth != 0 ? 0.86602540378 * s_grid_size * (pow(2,max_depth) - 1) : 0;
 }
 
 bool allAtomsClose(const double&, const std::array<double,4>&, const std::array<Vector,4>&, char); 
@@ -64,29 +64,29 @@ void Voxel::setType(char input){
 //////////////
 
 void Voxel::storeUniversal(AtomTree atomtree, double grid_size, double r_probe1, int max_depth){
-  _atomtree = atomtree;
-  _grid_size = grid_size;
-  _r_probe1 = r_probe1;
-  _pair_data.clear();
-  _triplet_data.clear();
+  s_atomtree = atomtree;
+  s_grid_size = grid_size;
+  s_r_probe1 = r_probe1;
+  s_pair_data.clear();
+  s_triplet_data.clear();
 }
 
 char Voxel::determineType(Vector vxl_pos, const double max_depth){
   double r_vxl = calcRadiusOfInfluence(max_depth); // calculated every time, since max_depth may change (not expensive) 
-  double rad_max = _atomtree.getMaxRad();
+  double rad_max = s_atomtree.getMaxRad();
   
   // IS VOXEL OF TYPE ATOM?
-  traverseTree(_atomtree.getRoot(), vxl_pos, rad_max, r_vxl, max_depth, 'a', 0);
+  traverseTree(s_atomtree.getRoot(), vxl_pos, rad_max, r_vxl, max_depth, 'a', 0);
   if (type=='a'){return type;}
   
   // IS VOXEL OF TYPE EXCLUDED?
-  if (_r_probe1){
+  if (s_r_probe1){
   // probe mode
     { // TODO: FUNCTION?
-      // pass _r_probe1 as proper argument, so that this routine may be reused for two probe mode 
+      // pass s_r_probe1 as proper argument, so that this routine may be reused for two probe mode 
       std::vector<int> close_atom_ids;
-      listFromTree(close_atom_ids, _atomtree.getRoot(), vxl_pos, r_vxl, rad_max, _r_probe1*2);
-      isProbeExcluded(vxl_pos, _r_probe1, r_vxl, close_atom_ids);
+      listFromTree(close_atom_ids, s_atomtree.getRoot(), vxl_pos, r_vxl, rad_max, s_r_probe1*2);
+      isProbeExcluded(vxl_pos, s_r_probe1, r_vxl, close_atom_ids);
       if (type=='x'){return type;}
     }
   // end probe mode
@@ -109,7 +109,7 @@ void Voxel::splitVoxel(const Vector& vxl_pos, const double& max_depth){
       (i%4) >= 2 ? 1 : -1,
        i    >= 4 ? 1 : -1};
    
-    Vector new_pos = vxl_pos + factors * _grid_size * std::pow(2,max_depth-2);
+    Vector new_pos = vxl_pos + factors * s_grid_size * std::pow(2,max_depth-2);
     
     resultcount += data[i].determineType(new_pos, max_depth-1);
   }
@@ -127,7 +127,7 @@ void Voxel::splitVoxel(const Vector& vxl_pos, const double& max_depth){
 void Voxel::listFromTree(
   std::vector<int>& atom_id_list,
   const AtomNode* node, 
-  const Vector& pos_point, // consider using custom vector class instead
+  const Vector& pos_point,
   const double& rad_point, 
   const double& rad_max, // ideally this value should be retrieved from node
   const double& max_dist, 
@@ -144,7 +144,6 @@ void Voxel::listFromTree(
   }
   else { // then atom may be close enough
     if ((pos_point-node->getAtom().getPosVec()) < rad_point + rad_atom + max_dist){
-//        distance(node->getAtom().getPosVec(), pos_point) < rad_point + rad_atom + max_dist){
       atom_id_list.push_back(node->getAtomId());
     }
     
@@ -313,13 +312,13 @@ bool Voxel::isExcludedByTriplet(
   
   if (!isPointBetween(vec_vxl, vec_atom[2])){return false;} // filter voxels outside range
   
-  if (triplet_id == 0 || _triplet_data.find(triplet_id) == _triplet_data.end()){
+  if (triplet_id == 0 || s_triplet_data.find(triplet_id) == s_triplet_data.end()){
 
     Vector vec_probe_plane = calcProbeVectorInPlane(vec_atom, rad_atom, rad_probe);
   
     Vector vec_probe_normal = calcProbeVectorNormal(vec_atom, rad_atom, rad_probe, vec_probe_plane);
 
-    _triplet_data[triplet_id] = TripletBundle(vec_probe_plane, vec_probe_normal);
+    s_triplet_data[triplet_id] = TripletBundle(vec_probe_plane, vec_probe_normal);
   }
   
   Vector vec_probe;
@@ -327,14 +326,14 @@ bool Voxel::isExcludedByTriplet(
   // side restricted mode: the probe always sits on the other side of the plane relative to 
   // the voxel. we do not check whether the voxel is inside the tetrahedron, because it never is
   if (side_restr){
-    vec_probe = _triplet_data[triplet_id].vec_probe_plane 
-      + _triplet_data[triplet_id].vec_probe_normal * ( signbit(_triplet_data[triplet_id].vec_probe_normal*vec_vxl)? 1 : -1 );
+    vec_probe = s_triplet_data[triplet_id].vec_probe_plane 
+      + s_triplet_data[triplet_id].vec_probe_normal * ( signbit(s_triplet_data[triplet_id].vec_probe_normal*vec_vxl)? 1 : -1 );
   }
   
   // default mode: the probe always sits on the same side as the voxel
   else {
-    vec_probe = _triplet_data[triplet_id].vec_probe_plane 
-      + _triplet_data[triplet_id].vec_probe_normal * ( signbit(_triplet_data[triplet_id].vec_probe_normal*vec_vxl)? -1 : 1 );
+    vec_probe = s_triplet_data[triplet_id].vec_probe_plane 
+      + s_triplet_data[triplet_id].vec_probe_normal * ( signbit(s_triplet_data[triplet_id].vec_probe_normal*vec_vxl)? -1 : 1 );
     
     // check whether vxl is inside tetrahedron spanned by atoms1-3 and probe 
     std::array<Vector,4> vec_vertices; // vectors pointing to vertices of the tetrahedron
@@ -363,7 +362,7 @@ bool Voxel::isExcludedByPair(
   Vector unitvec_parallel = vec_atat.normalise();
   double vxl_parallel = vec_vxl * unitvec_parallel; 
    
-  if (_pair_data.find(pair_id) == _pair_data.end()){
+  if (s_pair_data.find(pair_id) == s_pair_data.end()){
   
     // TODO: consider making a function that produces vec_probe and takes either PairBundle or values as args
     double dist_atom1_probe = rad_atom1 + rad_probe;
@@ -373,11 +372,11 @@ bool Voxel::isExcludedByPair(
     double probe_parallel = ((pow(dist_atom1_probe,2) + pow(dist_atom1_atom2,2) - pow(dist_atom2_probe,2))/(2*dist_atom1_atom2));
     double probe_orthogonal = pow(pow(dist_atom1_probe,2)-pow(probe_parallel,2),0.5);
     
-    _pair_data[pair_id] = PairBundle(unitvec_parallel, probe_parallel, probe_orthogonal);
+    s_pair_data[pair_id] = PairBundle(unitvec_parallel, probe_parallel, probe_orthogonal);
   }
-  Vector unitvec_orthogonal = (vec_vxl-_pair_data[pair_id].unitvec_parallel*vxl_parallel).normalise();
+  Vector unitvec_orthogonal = (vec_vxl-s_pair_data[pair_id].unitvec_parallel*vxl_parallel).normalise();
   
-  Vector vec_probe = _pair_data[pair_id].probe_parallel * unitvec_parallel + _pair_data[pair_id].probe_orthogonal * unitvec_orthogonal;
+  Vector vec_probe = s_pair_data[pair_id].probe_parallel * unitvec_parallel + s_pair_data[pair_id].probe_orthogonal * unitvec_orthogonal;
 
   if (vec_vxl.isInsideTriangle({Vector(), vec_atat, vec_probe})){
     return isExcludedSetType(vec_vxl, rad_vxl, vec_probe, rad_probe);
@@ -538,3 +537,4 @@ Vector calcProbeVectorNormal(const std::array<Vector,4> vec_atom, const std::arr
 
   return unitvec_normal * pow((pow(rad_atom[0]+rad_probe,2) - vec_probe_plane*vec_probe_plane),0.5);
 }
+

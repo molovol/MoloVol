@@ -54,12 +54,11 @@ class Voxel{
     void splitVoxel(const Vector&, const double&); 
   private:
 
-    static inline AtomTree _atomtree;
-    static inline double _grid_size;
-    static inline double _r_probe1;
-    //static inline std::vector<int> _close_atoms;
-    static inline std::unordered_map<unsigned long long int,TripletBundle> _triplet_data;
-    static inline std::unordered_map<int,PairBundle> _pair_data;
+    static inline AtomTree s_atomtree;
+    static inline double s_grid_size;
+    static inline double s_r_probe1;
+    static inline std::unordered_map<unsigned long long int,TripletBundle> s_triplet_data;
+    static inline std::unordered_map<int,PairBundle> s_pair_data;
 
     static inline double calcRadiusOfInfluence(const double& max_depth);
 
