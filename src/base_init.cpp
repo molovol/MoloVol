@@ -39,6 +39,9 @@ bool MainApp::OnInit()
     else if (unittest_id=="protein"){
       Ctrl::getInstance()->unittestProtein();
     }
+    else if (unittest_id=="radius"){
+      Ctrl::getInstance()->unittestRadius();
+    }
     else {
       std::cout << "Invalid selection" << std::endl;}
     return true;

@@ -77,3 +77,35 @@ bool Ctrl::unittestProtein(){
   }
   return true;
 }
+
+bool Ctrl::unittestRadius(){
+  if(current_calculation == NULL){current_calculation = new Model();}
+ 
+  // parameters for unittest:
+  const std::string atom_filepath = "./inputfile/6s8y.xyz";
+  const std::string radius_filepath = "./inputfile/radii.txt";
+  const double grid_step = 0.5;
+  const int max_depth = 4;
+  
+  double rad_probe1 = 0.5;
+
+  std::unordered_map<std::string, double> rad_map = current_calculation->importRadiusMap(radius_filepath);
+  
+  for (double rad_probe1 = 0; rad_probe1 < 5; rad_probe1 += 0.1){
+
+    CalcResultBundle data;
+    current_calculation->readAtomsFromFile(atom_filepath, false);
+    std::vector<std::string> included_elements = current_calculation->listElementsInStructure();
+    data = runCalculation(atom_filepath, grid_step, max_depth, rad_map, included_elements, rad_probe1);
+    
+    if(data.success){
+  
+      printf("f: %40s, g: %4.1f, d: %4i, r: %4.1f\n", atom_filepath.c_str(), grid_step, max_depth, rad_probe1);
+      printf("Type Assignment: %10.5f s, Volume Tally: %10.5f s\n", data.type_assignment_elapsed_seconds, data.getTime());
+    }
+    else{
+      std::cout << "Calculation failed" << std::endl;
+    }
+  }
+  return true;
+}
