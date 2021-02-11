@@ -32,6 +32,7 @@ class Ctrl{
     void notifyUser(std::string str, bool = true);
     bool unittestExcluded();
     bool unittestProtein();
+    bool unittestRadius();
 
   private:
     // consider making static pointer for model

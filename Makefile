@@ -15,8 +15,8 @@ OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 TESTSOURCES := $(shell find $(TESTDIR) -type f -name *.$(SRCEXT))
 TESTOBJECTS := $(patsubst $(TESTDIR)/%,$(TESTBUILDDIR)/%,$(TESTSOURCES:.$(SRCEXT)=.o))
 
-CXXFLAGS := -O0 -g -std=c++17 -Wall -Werror 
-CFLAGS := -O0 -g -std=c++17 -Wno-unused-command-line-argument
+CXXFLAGS := -O3 -g -std=c++17 -Wall -Werror 
+CFLAGS := -O3 -g -std=c++17 -Wno-unused-command-line-argument
 INC := -I include
 
 $(TARGET): $(OBJECTS)
