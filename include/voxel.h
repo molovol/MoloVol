@@ -8,8 +8,26 @@
 #include <array>
 #include <unordered_map>
 
-struct TripletBundle;
-struct PairBundle;
+
+struct PairBundle {
+  PairBundle(){}
+  PairBundle(Vector unitvec_parallel, double probe_parallel, double probe_orthogonal)
+    : unitvec_parallel(unitvec_parallel), probe_parallel(probe_parallel), probe_orthogonal(probe_orthogonal){}
+
+  Vector unitvec_parallel;
+  double probe_parallel;
+  double probe_orthogonal;
+};
+
+struct TripletBundle {
+  TripletBundle(){}
+  TripletBundle(Vector vec_probe_plane, Vector vec_probe_normal)
+    : vec_probe_plane(vec_probe_plane), vec_probe_normal(vec_probe_normal){}
+
+  Vector vec_probe_plane;
+  Vector vec_probe_normal;
+};
+
 class AtomTree;
 struct Atom;
 struct AtomNode;
@@ -20,30 +38,30 @@ class Voxel{
     Voxel& access(const short& i);
     void setType(char);
     char getType();
-    
+
     static void storeUniversal(AtomTree, double, double, int);
 
     char determineType(Vector, const double);
-    
+
     void determineTypeSingleAtom(
-        const Atom& atom, 
+        const Atom& atom,
         std::array<double,3> pos, // voxel centre
         const double max_depth,
         bool&);
-    
+
     void traverseTree(
-        const AtomNode*, 
+        const AtomNode*,
         const Vector&,
-        const double&, 
-        const double&, 
+        const double&,
+        const double&,
         const double&,
         const char&,
-        const char = 0); 
-    
+        const char = 0);
+
     static void listFromTree(
         std::vector<int>&,
         const AtomNode*,
-        const Vector&, 
+        const Vector&,
         const double&,
         const double&,
         const double&,
@@ -51,7 +69,7 @@ class Voxel{
 
     size_t tallyVoxelsOfType(const char volume_type, const int max_depth);
 
-    void splitVoxel(const Vector&, const double&); 
+    void splitVoxel(const Vector&, const double&);
   private:
 
     static inline AtomTree s_atomtree;
@@ -77,23 +95,6 @@ class Voxel{
     // 'm' : mixed
 };
 
-struct TripletBundle {
-  TripletBundle(){}
-  TripletBundle(Vector vec_probe_plane, Vector vec_probe_normal)
-    : vec_probe_plane(vec_probe_plane), vec_probe_normal(vec_probe_normal){}
 
-  Vector vec_probe_plane;
-  Vector vec_probe_normal;
-};
-
-struct PairBundle {
-  PairBundle(){}
-  PairBundle(Vector unitvec_parallel, double probe_parallel, double probe_orthogonal)
-    : unitvec_parallel(unitvec_parallel), probe_parallel(probe_parallel), probe_orthogonal(probe_orthogonal){}
-
-  Vector unitvec_parallel;
-  double probe_parallel;
-  double probe_orthogonal;
-};
 
 #endif

@@ -4,6 +4,7 @@
 #include "atom.h"
 #include "misc.h"
 #include "special_chars.h"
+#include <chrono>
 #include <array>
 #include <string>
 #include <vector>
@@ -43,7 +44,7 @@ void Model::setAtomListForCalculation(const std::vector<std::string>& included_e
   return setAtomListForCalculation(included_elements, useUnitCell? processed_atom_coordinates : raw_atom_coordinates);
 }
 
-void Model::setAtomListForCalculation(const std::vector<std::string>& included_elements, 
+void Model::setAtomListForCalculation(const std::vector<std::string>& included_elements,
     std::vector<std::tuple<std::string,double,double,double>>& atom_coordinates){
   atoms.clear();
 
@@ -81,23 +82,23 @@ void Model::linkAtomsToAdjacentAtoms(const double& r_probe){
 
 CalcResultBundle Model::calcVolume(){
   CalcResultBundle data;
- 
+
   auto start = std::chrono::steady_clock::now();
   cell.placeAtomsInGrid(atomtree, r_probe1); // assign each voxel in grid a type, defined by the atom positions
   auto end = std::chrono::steady_clock::now();
   data.type_assignment_elapsed_seconds = std::chrono::duration<double>(end-start).count();
-  
+
   //cell.printGrid(); // for testing
-  
+
   start = std::chrono::steady_clock::now();
   data.volumes = cell.getVolume();
   end = std::chrono::steady_clock::now();
   data.volume_tally_elapsed_seconds = std::chrono::duration<double>(end-start).count();
- 
+
   return data;
 }
 
-// generates a simple table to be displayed by the GUI. only uses standard library and base types in order to 
+// generates a simple table to be displayed by the GUI. only uses standard library and base types in order to
 // avoid dependency issues
 std::vector<std::tuple<std::string, int, double>> Model::generateAtomList(){
   std::vector<std::tuple<std::string, int, double>> atoms_for_list;
