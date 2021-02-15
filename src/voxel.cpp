@@ -34,7 +34,7 @@ bool isPointBetween(const Vector& vec_point, const Vector& vec_bounds);
 /////////////////
 
 Voxel::Voxel(){
-  type = 'e';
+  type = 0;
 }
 
 ////////////
@@ -63,6 +63,7 @@ void Voxel::setType(char input){
 // SET TYPE //
 //////////////
 
+// function to call before beginning the type assignment routine in order to prepare static variables
 void Voxel::storeUniversal(AtomTree atomtree, double grid_size, double r_probe1, int max_depth){
   s_atomtree = atomtree;
   s_grid_size = grid_size;
@@ -71,35 +72,25 @@ void Voxel::storeUniversal(AtomTree atomtree, double grid_size, double r_probe1,
   s_triplet_data.clear();
 }
 
-char Voxel::determineType(Vector vxl_pos, const double max_depth){
-  double r_vxl = calcRadiusOfInfluence(max_depth); // calculated every time, since max_depth may change (not expensive) 
-  double rad_max = s_atomtree.getMaxRad();
-  
-  // IS VOXEL OF TYPE ATOM?
-  traverseTree(s_atomtree.getRoot(), vxl_pos, rad_max, r_vxl, max_depth, 'a', 0);
-  if (type=='a'){return type;}
-  
-  // IS VOXEL OF TYPE EXCLUDED?
-  if (s_r_probe1){
-  // probe mode
-    { // TODO: FUNCTION?
-      // pass s_r_probe1 as proper argument, so that this routine may be reused for two probe mode 
-      std::vector<int> close_atom_ids;
-      listFromTree(close_atom_ids, s_atomtree.getRoot(), vxl_pos, r_vxl, rad_max, s_r_probe1*2);
-      isProbeExcluded(vxl_pos, s_r_probe1, r_vxl, close_atom_ids);
-      if (type=='x'){return type;}
-    }
-  // end probe mode
-  }
+// part of the type assigment routine. first evaluation is only concerned with the relation between 
+// voxels and atoms
+char Voxel::evalRelationToAtoms(Vector pos_vxl, const int max_depth){
+  double rad_vxl = calcRadiusOfInfluence(max_depth); // calculated every time, since max_depth may change (not expensive) 
+ 
+  traverseTree(s_atomtree.getRoot(), s_atomtree.getMaxRad(), pos_vxl, rad_vxl, s_r_probe1, max_depth);
 
-  // SPLIT VOXEL IF TYPE MIXED
-  if(type == 'm'){splitVoxel(vxl_pos, max_depth);}
-	return type;
+  if (type == 0){
+    setBitOn(type,0); // is assigned
+    setBitOn(type,3); // probe core
+  }
+  if (readBit(type,7)){splitVoxel(pos_vxl, max_depth);} // split if type mixed
+
+  return type;
 }
 
+// adds an array of size 8 to the voxel that contains 8 subvoxels and evaluates each subvoxel's type
 void Voxel::splitVoxel(const Vector& vxl_pos, const double& max_depth){
   // split into 8 subvoxels
-	short resultcount = 0;
   Vector factors;
   for(int i = 0; i < 8; i++){
     data.push_back(Voxel());
@@ -111,15 +102,40 @@ void Voxel::splitVoxel(const Vector& vxl_pos, const double& max_depth){
    
     Vector new_pos = vxl_pos + factors * s_grid_size * std::pow(2,max_depth-2);
     
-    resultcount += data[i].determineType(new_pos, max_depth-1);
+    data[i].evalRelationToAtoms(new_pos, max_depth-1);
   }
-	//determine if all children have the same type
-  // TODO: delete data vector in this case
-	if (resultcount == 'a'*8){
-	  type = 'a';
-	} else if (resultcount == 'e'*8) {
-	  type = 'e';
-	}
+}
+
+void Voxel::traverseTree
+  (const AtomNode* node, 
+   const double& rad_max, 
+   const Vector& pos_vxl, 
+   const double& rad_vxl, 
+   const double& rad_probe, 
+   const int& max_depth,
+   const char exit_type,
+   const char dim){
+
+  if (node == NULL || readBit(type,0)){return;}
+  const Atom& atom = node->getAtom();
+
+  // distance between atom and voxel along one dimension
+  double dist1D = distance(atom.getPosVec(), pos_vxl, dim);
+ 
+  if (abs(dist1D) > (rad_vxl + rad_max + rad_probe)){ // then atom is too far to matter for voxel type
+      traverseTree(dist1D < 0 ? node->left_child : node->right_child,
+          rad_max, pos_vxl, rad_vxl, rad_probe, max_depth, exit_type, (dim+1)%3);
+  } 
+  else{ // then atom is close enough to influence voxel type
+    if(isAtom(atom, pos_vxl, rad_vxl, rad_probe)){return;}
+    
+//    if (type==exit_type){return;}
+
+    // continue with both children
+    for (AtomNode* child : {node->left_child, node->right_child}){
+      traverseTree(child, rad_max, pos_vxl, rad_vxl, rad_probe, max_depth, exit_type, (dim+1)%3);
+    }
+  }
 }
 
 // go through a tree, starting from node. return a list of atoms that are a specified max distance
@@ -154,45 +170,35 @@ void Voxel::listFromTree(
   }
 }
 
-void Voxel::traverseTree
-  (const AtomNode* node, 
-   const Vector& vxl_pos, 
-   const double& max_rad, 
-   const double& vxl_rad, 
-   const double& max_depth,
-   const char& exit_type,
-   const char dim){
-
-  if (node == NULL || type == exit_type){return;}
-  const Atom& atom = node->getAtom();
-
-  // distance between atom and voxel along one dimension
-  double dist1D = distance(atom.getPosVec(), vxl_pos, dim);
- 
-  if (abs(dist1D) > (vxl_rad + max_rad)){ // then atom is too far to matter for voxel type
-      traverseTree(dist1D < 0 ? node->left_child : node->right_child, vxl_pos, max_rad, vxl_rad, max_depth, exit_type, (dim+1)%3);
-  } else{ // then atom is close enough to influence voxel type
-    isAtom(atom, distance(vxl_pos, atom.getPosVec()), vxl_rad);
-    if (type==exit_type){return;}
-    // continue with both children
-    for (AtomNode* child : {node->left_child, node->right_child}){
-      traverseTree(child, vxl_pos, max_rad, vxl_rad, max_depth, exit_type, (dim+1)%3);
-    }
-  }
-}
-
 ////////////////////
 // CHECK FOR TYPE //
 ////////////////////
 
-bool Voxel::isAtom(const Atom& atom, const double& dist_vxl_at, const double& radius_of_influence){
-  if(atom.rad > (dist_vxl_at + radius_of_influence)){ 
-    setType('a'); // in atom
+// assign a type based on the distance between a voxel and an atom
+bool Voxel::isAtom(const Atom& atom, const Vector& pos_vxl, const double rad_vxl, const double rad_probe){
+  Vector dist = pos_vxl - atom.getPosVec();
+  if(dist < atom.getRad() - rad_vxl){
+    type = 0;
+    setBitOn(type,1); // inside atom
+    setBitOn(type,0); // assigned
     return true;
   }
-  else if(atom.rad >= (dist_vxl_at - radius_of_influence)){
-    setType('m'); // mixed
-    return true;
+  else if (dist < atom.getRad() + rad_vxl){
+    if (readBit(type,1)){return false;} // if inside atom
+    type = 0;
+    setBitOn(type,1); // potentially inside atom
+    setBitOn(type,7); // mixed
+  }
+  else if (dist < atom.getRad() + rad_probe - rad_vxl){
+    if (readBit(type,1)){return false;} // if mixed or inside atom
+    type = 0;
+    setBitOn(type,4); // potential shell
+  } 
+  else if (dist < atom.getRad() + rad_probe + rad_vxl){
+    if (readBit(type,4) || readBit(type,1)){return false;} // if mixed, inside atom, or potential shell
+    type = 0;
+    setBitOn(type,4); // potentially shell
+    setBitOn(type,7); // mixed
   }
   return false;
 }
@@ -537,4 +543,3 @@ Vector calcProbeVectorNormal(const std::array<Vector,4> vec_atom, const std::arr
 
   return unitvec_normal * pow((pow(rad_atom[0]+rad_probe,2) - vec_probe_plane*vec_probe_plane),0.5);
 }
-

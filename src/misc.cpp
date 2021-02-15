@@ -11,4 +11,3 @@ std::string fileExtension(const std::string& path){
     return "invalid";
   }
 }
-
