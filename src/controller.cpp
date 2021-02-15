@@ -91,8 +91,8 @@ bool Ctrl::runCalculation(){
   if (data.success){
     notifyUser("Result for " + gui->generateChemicalFormulaFromGrid(), to_gui);
     notifyUser("Elapsed time: " + std::to_string(data.getTime()) + " s", to_gui);
-    notifyUser("VdW Volume: " + std::to_string(data.volumes['a']) + " " + Symbol::angstrom() + Symbol::cubed(), to_gui);
-    notifyUser("Excluded Volume: " + std::to_string(data.volumes['x']) + " " + Symbol::angstrom() + Symbol::cubed(), to_gui);
+    notifyUser("VdW Volume: " + std::to_string(data.volumes[0b00000011]) + " " + Symbol::angstrom() + Symbol::cubed(), to_gui);
+//    notifyUser("Excluded Volume: " + std::to_string(data.volumes[]) + " " + Symbol::angstrom() + Symbol::cubed(), to_gui);
     return true;
   }
   return false;

@@ -2,6 +2,7 @@
 #include "atom.h"
 #include "voxel.h"
 #include "atomtree.h"
+#include "misc.h"
 #include <cmath>
 #include <cassert>
 
@@ -29,7 +30,7 @@ void Space::placeAtomsInGrid(const AtomTree& atomtree, const double& r_probe){
       for(size_t z = 0; z < n_gridsteps[2]; z++){
         vxl_pos[2] = vxl_origin[2] + vxl_dist * (0.5 + z);
         // voxel position is deliberately not stored in voxel object to reduce memory cost
-        getElement(x,y,z).determineType(vxl_pos, max_depth);
+        getElement(x,y,z).evalRelationToAtoms(vxl_pos, max_depth);
       }
     }
     printf("%i%% done\n", int(100*(double(x)+1)/double(n_gridsteps[0])));
@@ -37,7 +38,7 @@ void Space::placeAtomsInGrid(const AtomTree& atomtree, const double& r_probe){
 }
 
 std::map<char,double> Space::getVolume(){
-  std::vector<char> types_to_tally{'a','x'};
+  std::vector<char> types_to_tally{0b00000011,0b00001001};
   
   std::vector<size_t> tally;
   for (char i = 0; i < types_to_tally.size(); i++){
@@ -50,10 +51,6 @@ std::map<char,double> Space::getVolume(){
     for (char j = 0; j < types_to_tally.size(); j++){
       tally[j] += getElement(i).tallyVoxelsOfType(types_to_tally[j],max_depth);
     }
-/*
-    total += getElement(i).tallyVoxelsOfType('a',max_depth);
-    total_excluded += getElement(i).tallyVoxelsOfType('x',max_depth);
-    */
   }
   double unit_volume = pow(grid_size,3);
 
@@ -153,7 +150,7 @@ void Space::printGrid(){
     // print matrix
     for(size_t y = y_min; y < y_max; y++){
       for(size_t x = x_min; x < x_max; x++){
-        char to_print = (getElement(x,y,z).getType() == 'a')? 'A' : getElement(x,y,z).getType();
+        char to_print = (getElement(x,y,z).getType() == 0b00000010)? 'A' : getElement(x,y,z).getType();
         std::cout << to_print << " ";
       }
       std::cout << std::endl;

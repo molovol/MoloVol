@@ -22,23 +22,10 @@ class Voxel{
     char getType();
     
     static void storeUniversal(AtomTree, double, double, int);
-
-    char determineType(Vector, const double);
-    
-    void determineTypeSingleAtom(
-        const Atom& atom, 
-        std::array<double,3> pos, // voxel centre
-        const double max_depth,
-        bool&);
-    
-    void traverseTree(
-        const AtomNode*, 
-        const Vector&,
-        const double&, 
-        const double&, 
-        const double&,
-        const char&,
-        const char = 0); 
+    char evalRelationToAtoms(Vector, const int);
+    void traverseTree(const AtomNode*, const double&, const Vector&, const double&, const double&, const int&, 
+        const char = 0b00000011, const char = 0); 
+    void splitVoxel(const Vector&, const double&); 
     
     static void listFromTree(
         std::vector<int>&,
@@ -48,35 +35,34 @@ class Voxel{
         const double&,
         const double&,
         const char=0);
-
+    
     size_t tallyVoxelsOfType(const char volume_type, const int max_depth);
-
-    void splitVoxel(const Vector&, const double&); 
   private:
 
     static inline AtomTree s_atomtree;
     static inline double s_grid_size;
     static inline double s_r_probe1;
+    // DEPRECIATED
     static inline std::unordered_map<unsigned long long int,TripletBundle> s_triplet_data;
     static inline std::unordered_map<int,PairBundle> s_pair_data;
+    // DEPRECIATED
 
     static inline double calcRadiusOfInfluence(const double& max_depth);
 
-    bool isAtom(const Atom& atom, const double& dist_vxl_at, const double& radius_of_influence); // inline not faster
+    bool isAtom(const Atom&, const Vector&, const double, const double);
+    // DEPRECIATED
     bool isProbeExcluded(const Vector& vxl_pos, const double& r_probe, const double&, const std::vector<int>&);
     bool isExcludedByPair(const Vector&, const Vector&, const double&, const double&, const double&, const double&, int);
     bool isExcludedByTriplet(const Vector&, const double&, const std::array<Vector,4>&, const std::array<double,4>&, const double&, const unsigned long long int, const bool = false);
     bool isExcludedByQuadruplet(const Vector&, const double&, const std::array<Vector,4>&, const std::array<double,4>&, const double&, const std::vector<int>&);
     bool isExcludedSetType(const Vector&, const double&, const Vector&, const double&);
+    // DEPRECIATED
 
     std::vector<Voxel> data; // empty or exactly 8 elements
     char type;
-    // types
-    // 'a' : inside of atom
-    // 'e' : empty
-    // 'm' : mixed
 };
 
+// DEPRECIATED
 struct TripletBundle {
   TripletBundle(){}
   TripletBundle(Vector vec_probe_plane, Vector vec_probe_normal)
@@ -95,5 +81,6 @@ struct PairBundle {
   double probe_parallel;
   double probe_orthogonal;
 };
+// DEPRECIATED
 
 #endif
