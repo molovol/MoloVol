@@ -133,7 +133,7 @@ bool Ctrl::unittestSurfaceMap(){
     printf("vdW: %20.10f, Excluded: %20.10f, Time: %10.5f s\n"
         , data.volumes[0b00000011], data.volumes[0b00000101], data.getTime());
 
-    current_calculation->writeSurfaceMap("/output");
+    current_calculation->writeSurfaceMap("output");
   }
   else{
     std::cout << "Calculation failed" << std::endl;
