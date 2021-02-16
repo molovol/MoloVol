@@ -190,3 +190,7 @@ void Ctrl::notifyUser(std::string str, bool to_gui){
     std::cout << str;
   }    
 }
+  
+void Ctrl::exportSurfaceMap(std::string output_dir){
+  current_calculation->writeSurfaceMap(output_dir);
+}

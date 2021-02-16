@@ -27,6 +27,9 @@ class Model{
     void readFileXYZ(const std::string&);
     void readFilePDB(const std::string&, bool);
 
+    // export
+    void writeSurfaceMap(std::string);
+
     std::vector<std::string> listElementsInStructure();
 
     bool getSymmetryElements(std::string, std::vector<int>&, std::vector<double>&);
