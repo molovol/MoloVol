@@ -101,11 +101,42 @@ bool Ctrl::unittestRadius(){
     if(data.success){
   
       printf("f: %40s, g: %4.1f, d: %4i, r: %4.1f\n", atom_filepath.c_str(), grid_step, max_depth, rad_probe1);
-      printf("Type Assignment: %10.5f s, Volume Tally: %10.5f s\n", data.type_assignment_elapsed_seconds, data.getTime());
+      printf("Time elapsed: %10.5f s\n", data.getTime());
     }
     else{
       std::cout << "Calculation failed" << std::endl;
     }
+  }
+  return true;
+}
+
+bool Ctrl::unittestSurfaceMap(){
+  if(current_calculation == NULL){current_calculation = new Model();}
+ 
+  // parameters for unittest:
+  const std::string atom_filepath = "./inputfile/hydrogen.xyz";
+  const std::string radius_filepath = "./inputfile/radii.txt";
+  const double grid_step = 0.1;
+  const int max_depth = 0;
+  
+  double rad_probe1 = 0;
+
+  std::unordered_map<std::string, double> rad_map = current_calculation->importRadiusMap(radius_filepath);
+  
+  CalcResultBundle data;
+  current_calculation->readAtomsFromFile(atom_filepath, false);
+  std::vector<std::string> included_elements = current_calculation->listElementsInStructure();
+  data = runCalculation(atom_filepath, grid_step, max_depth, rad_map, included_elements, rad_probe1);
+  if(data.success){
+
+    printf("f: %40s, g: %4.1f, d: %4i, r: %4.1f\n", atom_filepath.c_str(), grid_step, max_depth, rad_probe1);
+    printf("vdW: %20.10f, Excluded: %20.10f, Time: %10.5f s\n"
+        , data.volumes[0b00000011], data.volumes[0b00000101], data.getTime());
+
+    current_calculation->writeSurfaceMap("/output");
+  }
+  else{
+    std::cout << "Calculation failed" << std::endl;
   }
   return true;
 }
