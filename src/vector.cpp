@@ -64,27 +64,27 @@ double Vector::angle(const Vector& vec) const {
 }
 
 bool Vector::isLongerThan(const Vector& vecToCompare) const {
-  return (this->squared() > vecToCompare.squared()); 
+  return (this->squared() > vecToCompare.squared());
 }
 
 bool Vector::isLongerThan(const double& valToCompare) const {
-  return (this->squared() > (valToCompare*valToCompare)); 
+  return (this->squared() > (valToCompare*valToCompare));
 }
 
 bool Vector::isShorterThan(const Vector& vecToCompare) const{
-  return (this->squared() < vecToCompare.squared()); 
+  return (this->squared() < vecToCompare.squared());
 }
 
 bool Vector::isShorterThan(const double& valToCompare) const{
-  return (this->squared() < (valToCompare*valToCompare)); 
+  return (this->squared() < (valToCompare*valToCompare));
 }
 
 bool Vector::isSameLength(const Vector& vecToCompare) const{
-  return (this->squared() == vecToCompare.squared()); 
+  return (this->squared() == vecToCompare.squared());
 }
 
 bool Vector::isSameLength(const double& valToCompare) const{
-  return (this->squared() == (valToCompare*valToCompare)); 
+  return (this->squared() == (valToCompare*valToCompare));
 }
 
 bool Vector::operator>(const Vector& vec) const {return this->isLongerThan(vec);}
@@ -102,14 +102,14 @@ bool Vector::operator!=(const double& val) const {return !this->isSameLength(val
 
 bool Vector::isInsideTriangle(const std::array<Vector,3>& vec_vertices) const {
   Vector vec_oop = crossproduct(vec_vertices[1]-vec_vertices[0],vec_vertices[2]-vec_vertices[0]);
-  
+
   bool sign;
   for (int i = 0; i < 3; i++){
     int j = (i+1)%3;
     if(!i){
-      sign = signbit(crossproduct(vec_oop,vec_vertices[j]-vec_vertices[i])*((*this)-vec_vertices[i]));
+      sign = std::signbit(crossproduct(vec_oop,vec_vertices[j]-vec_vertices[i])*((*this)-vec_vertices[i]));
     }
-    else if(sign != signbit(crossproduct(vec_oop,vec_vertices[j]-vec_vertices[i])*((*this)-vec_vertices[i]))){
+    else if(sign != std::signbit(crossproduct(vec_oop,vec_vertices[j]-vec_vertices[i])*((*this)-vec_vertices[i]))){
       return false;
     }
   }
@@ -138,7 +138,7 @@ Vector operator-(const Vector& lhs, const Vector& rhs){
 Vector scale(Vector vec, const double& scalar){
   for (char i = 0; i<3; i++){
     vec.setCoordinate(i, vec.getCoordinate(i) * scalar);
-  } 
+  }
   return vec;
 }
 
