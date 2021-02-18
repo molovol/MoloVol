@@ -117,7 +117,7 @@ bool Ctrl::unittestSurfaceMap(){
   const std::string atom_filepath = "./inputfile/hydrogen.xyz";
   const std::string radius_filepath = "./inputfile/radii.txt";
   const double grid_step = 0.1;
-  const int max_depth = 0;
+  const int max_depth = 1;
   
   double rad_probe1 = 0;
 
