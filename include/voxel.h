@@ -4,6 +4,7 @@
 
 #include "vector.h"
 #include "atomtree.h"
+#include "container3d.h"
 #include <vector>
 #include <array>
 #include <unordered_map>
@@ -54,6 +55,8 @@ class Voxel{
         const char=0);
     
     size_t tallyVoxelsOfType(const char volume_type, const int max_depth);
+
+    void fillTypeMatrix(Container3D<char>&, std::array<unsigned int,3>, int);
   private:
 
     static inline AtomTree s_atomtree;

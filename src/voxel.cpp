@@ -1,7 +1,6 @@
 #include "voxel.h"
 #include "misc.h"
 #include "atom.h"
-//#include "atomtree.h"
 #include <cmath> // abs, pow
 #include <cassert>
 #include <unordered_map>
@@ -542,4 +541,41 @@ Vector calcProbeVectorNormal(const std::array<Vector,4> vec_atom, const std::arr
   Vector unitvec_normal = crossproduct(vec_atom[1],vec_atom[2]).normalise();
 
   return unitvec_normal * pow((pow(rad_atom[0]+rad_probe,2) - vec_probe_plane*vec_probe_plane),0.5);
+}
+
+/////////////////
+// OUTPUT TYPE //
+/////////////////
+
+void Voxel::fillTypeMatrix(
+    Container3D<char>& type_matrix, 
+    std::array<unsigned int,3> block_start, 
+    int remaining_depth){
+  if (remaining_depth == 0){
+    type_matrix.getElement(block_start) = type;
+  }
+  else if (data.empty()){
+    for (unsigned int i = block_start[0]; i < block_start[0]+pow(2,remaining_depth); i++){
+      for (unsigned int j = block_start[1]; j < block_start[1]+pow(2,remaining_depth); j++){
+        for (unsigned int k = block_start[2]; k < block_start[2]+pow(2,remaining_depth); k++){
+          type_matrix.getElement(i,j,k) = type;
+        }
+      }
+    }
+  }
+  else {
+    std::array<unsigned int,3> new_start;
+    std::array<unsigned int,3> new_end;
+    for (char i = 0; i < 2; i++){
+      new_start[0] = block_start[0] + i*pow(2,remaining_depth-1);
+      for (char j = 0; j < 2; j++){
+        new_start[1] = block_start[1] + j*pow(2,remaining_depth-1);
+        for (char k = 0; k < 2; k++){
+          new_start[2] = block_start[2] + k*pow(2,remaining_depth-1);
+
+          access(i,j,k).fillTypeMatrix(type_matrix, new_start, remaining_depth-1);
+        }
+      }
+    }
+  }
 }

@@ -3,167 +3,9 @@
 #include "voxel.h"
 #include "atomtree.h"
 #include "misc.h"
+#include "exception.h"
 #include <cmath>
 #include <cassert>
-
-/////////////////
-// VOLUME COMP //
-/////////////////
-
-// sets all voxel's types, determined by the input atoms
-void Space::placeAtomsInGrid(const AtomTree& atomtree, const double& r_probe){
-  // calculate position of first voxel
-  const std::array<double,3> vxl_origin = getOrigin();
-  
-  // calculate side length of top level voxel
-  const double vxl_dist = grid_size * pow(2,max_depth);
-  
-  std::array<double,3> vxl_pos;
-
-  // save variable that all voxels need access to for their type determination as static members of Voxel class
-  Voxel::storeUniversal(atomtree, grid_size, r_probe, max_depth);
-
-  for(size_t x = 0; x < n_gridsteps[0]; x++){
-    vxl_pos[0] = vxl_origin[0] + vxl_dist * (0.5 + x);
-    for(size_t y = 0; y < n_gridsteps[1]; y++){
-      vxl_pos[1] = vxl_origin[1] + vxl_dist * (0.5 + y);
-      for(size_t z = 0; z < n_gridsteps[2]; z++){
-        vxl_pos[2] = vxl_origin[2] + vxl_dist * (0.5 + z);
-        // voxel position is deliberately not stored in voxel object to reduce memory cost
-        getElement(x,y,z).evalRelationToAtoms(vxl_pos, max_depth);
-      }
-    }
-    printf("%i%% done\n", int(100*(double(x)+1)/double(n_gridsteps[0])));
-  }      
-}
-
-std::map<char,double> Space::getVolume(){
-  std::vector<char> types_to_tally{0b00000011,0b00001001};
-  
-  std::vector<size_t> tally;
-  for (char i = 0; i < types_to_tally.size(); i++){
-    tally.push_back(0);
-  }
-
-  for(size_t i = 0; i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]; i++){ // loop through all top level voxels
-    // tally bottom level voxels
-    
-    for (char j = 0; j < types_to_tally.size(); j++){
-      tally[j] += getElement(i).tallyVoxelsOfType(types_to_tally[j],max_depth);
-    }
-  }
-  double unit_volume = pow(grid_size,3);
-
-  std::map<char,double> volumes;
-  for (char i = 0; i < types_to_tally.size(); i++){
-    volumes[types_to_tally[i]] = tally[i] * unit_volume;
-  }
-/*
-  std::cout << "Probe inaccessible volume: " << unit_volume*total_excluded << std::endl;
-  return unit_volume * total;
-  */
-  return volumes;
-}
-
-/*
-std::vector<double> Space::getVolume(std::vector<char> types_to_tally){
-  
-}
-*/
-
-//////////////////////
-// ACCESS FUNCTIONS //
-//////////////////////
-
-std::array<double,3> Space::getMin(){
-  return cart_min;
-}
-
-std::array<double,3> Space::getOrigin(){
-  return getMin();
-}
-
-std::array<double,3> Space::getMax(){
-  return cart_max;
-}
-
-std::array<double,3> Space::getSize(){
-  std::array<double,3> size;
-  for(int dim = 0; dim < 3; dim++){
-    size[dim] = cart_max[dim] - cart_min[dim];
-  }
-  return size;
-}
-
-Voxel& Space::getElement(const size_t &i){
-  assert(i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]); 
-  return grid[i];
-}
-
-Voxel& Space::getElement(const size_t &x, const size_t &y, const size_t &z){
-  // check if element is out of bounds
-  assert(x < n_gridsteps[0]);
-  assert(y < n_gridsteps[1]);
-  assert(z < n_gridsteps[2]);
-  return grid[z * n_gridsteps[0] * n_gridsteps[1] + y * n_gridsteps[0] + x];
-}
-
-// displays voxel grid types as matrix in the terminal. useful for debugging
-void Space::printGrid(){
-  char usr_inp = '\0';
-  int x_min = 0;
-  int y_min = 0;
-  
-  int x_max = ((n_gridsteps[0] >= 50)? 50: n_gridsteps[0]);
-  int y_max = ((n_gridsteps[1] >= 25)? 25: n_gridsteps[1]);
-
-  size_t z = 0;
-  std::cout << "Enter 'q' to quit; 'w', 'a', 's', 'd' for directional input; 'c' to continue in z direction; 'r' to go back in z direction" << std::endl;
-  while (usr_inp != 'q'){
-
-    // x and y coordinates
-    if (usr_inp == 'a'){x_min--; x_max--;}
-    else if (usr_inp == 'd'){x_min++; x_max++;}
-    else if (usr_inp == 's'){y_min++; y_max++;}
-    else if (usr_inp == 'w'){y_min--; y_max--;}
-    
-    if (x_min < 0){x_min++; x_max++;}
-    if (y_min < 0){y_min++; y_max++;}
-    if (x_max > n_gridsteps[0]){x_min--; x_max--;}
-    if (y_max > n_gridsteps[1]){y_min--; y_max--;}
-    
-    // z coordinate
-    if (usr_inp == 'r'){
-      if (z==0){
-        std::cout << "z position at min. " << std::endl;
-      }
-      else{z--;}
-    }
-    else if (usr_inp == 'c'){
-      z++;
-      if (z >= n_gridsteps[2]){
-        z--;
-        std::cout << "z position at max. " << std::endl;
-      }
-    }
-    
-    // print matrix
-    for(size_t y = y_min; y < y_max; y++){
-      for(size_t x = x_min; x < x_max; x++){
-        char to_print = (getElement(x,y,z).getType() == 0b00000010)? 'A' : getElement(x,y,z).getType();
-        std::cout << to_print << " ";
-      }
-      std::cout << std::endl;
-    }
-    
-    // get user input
-    std::cout << std::endl;
-    std::cout << "INPUT: ";
-    std::cin >> usr_inp;
-  }
-  return;
-}
-
 
 /////////////////
 // CONSTRUCTOR //
@@ -233,6 +75,200 @@ void Space::setGrid(){
     grid.push_back(Voxel());
   }
   
+  return;
+}
+
+/////////////////
+// VOLUME COMP //
+/////////////////
+
+// sets all voxel's types, determined by the input atoms
+void Space::placeAtomsInGrid(const AtomTree& atomtree, const double& r_probe){
+  // calculate position of first voxel
+  const std::array<double,3> vxl_origin = getOrigin();
+  
+  // calculate side length of top level voxel
+  const double vxl_dist = grid_size * pow(2,max_depth);
+  
+  std::array<double,3> vxl_pos;
+
+  // save variable that all voxels need access to for their type determination as static members of Voxel class
+  Voxel::storeUniversal(atomtree, grid_size, r_probe, max_depth);
+
+  for(size_t x = 0; x < n_gridsteps[0]; x++){
+    vxl_pos[0] = vxl_origin[0] + vxl_dist * (0.5 + x);
+    for(size_t y = 0; y < n_gridsteps[1]; y++){
+      vxl_pos[1] = vxl_origin[1] + vxl_dist * (0.5 + y);
+      for(size_t z = 0; z < n_gridsteps[2]; z++){
+        vxl_pos[2] = vxl_origin[2] + vxl_dist * (0.5 + z);
+        // voxel position is deliberately not stored in voxel object to reduce memory cost
+        getElement(x,y,z).evalRelationToAtoms(vxl_pos, max_depth);
+      }
+    }
+    printf("%i%% done\n", int(100*(double(x)+1)/double(n_gridsteps[0])));
+  }      
+}
+
+std::map<char,double> Space::getVolume(){
+  std::vector<char> types_to_tally{0b00000011,0b00001001};
+  
+  std::vector<size_t> tally;
+  for (char i = 0; i < types_to_tally.size(); i++){
+    tally.push_back(0);
+  }
+
+  for(size_t i = 0; i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]; i++){ // loop through all top level voxels
+    // tally bottom level voxels
+    
+    for (char j = 0; j < types_to_tally.size(); j++){
+      tally[j] += getElement(i).tallyVoxelsOfType(types_to_tally[j],max_depth);
+    }
+  }
+  double unit_volume = pow(grid_size,3);
+
+  std::map<char,double> volumes;
+  for (char i = 0; i < types_to_tally.size(); i++){
+    volumes[types_to_tally[i]] = tally[i] * unit_volume;
+  }
+/*
+  std::cout << "Probe inaccessible volume: " << unit_volume*total_excluded << std::endl;
+  return unit_volume * total;
+  */
+  return volumes;
+}
+
+////////////
+// OUTPUT //
+////////////
+
+Container3D<char> Space::generateTypeMatrix(){
+  
+  std::array<unsigned int,3> n_voxels = gridstepsOnLevel(0);
+
+  Container3D<char> type_matrix = Container3D<char>(n_voxels);
+  
+  std::array<unsigned int,3> block_start = {0,0,0};
+  for (size_t i = 0; i < n_gridsteps[0]; i++){
+    block_start[0] = i*pow(2,max_depth);
+    for (size_t j = 0; j < n_gridsteps[1]; j++){
+      block_start[1] = j*pow(2,max_depth);
+      for (size_t k = 0; k < n_gridsteps[2]; k++){
+        block_start[2] = k*pow(2,max_depth);
+        getElement(i,j,k).fillTypeMatrix(type_matrix, block_start, max_depth);
+      }
+    }
+  }
+  
+  type_matrix.print();
+
+  return type_matrix; 
+}
+
+//////////////////////
+// ACCESS FUNCTIONS //
+//////////////////////
+
+std::array<double,3> Space::getMin(){
+  return cart_min;
+}
+
+std::array<double,3> Space::getOrigin(){
+  return getMin();
+}
+
+std::array<double,3> Space::getMax(){
+  return cart_max;
+}
+
+std::array<double,3> Space::getSize(){
+  std::array<double,3> size;
+  for(int dim = 0; dim < 3; dim++){
+    size[dim] = cart_max[dim] - cart_min[dim];
+  }
+  return size;
+}
+
+Voxel& Space::getElement(const size_t &i){
+  assert(i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]); 
+  return grid[i];
+}
+
+Voxel& Space::getElement(const size_t &x, const size_t &y, const size_t &z){
+  // check if element is out of bounds
+  assert(x < n_gridsteps[0]);
+  assert(y < n_gridsteps[1]);
+  assert(z < n_gridsteps[2]);
+  return grid[z * n_gridsteps[0] * n_gridsteps[1] + y * n_gridsteps[0] + x];
+}
+
+std::array<size_t,3> Space::getGridsteps(){
+  return n_gridsteps;
+}
+
+const std::array<unsigned int,3> Space::gridstepsOnLevel(const int level) const {
+  if (level > max_depth){
+    throw ExceptIllegalFunctionCall();
+  }
+  std::array<unsigned int,3> n_voxels;
+  for (char i = 0; i < 3; i++){
+    n_voxels[i] = n_gridsteps[i] * pow(8,max_depth-level);
+  }
+  return n_voxels;
+}
+
+// displays voxel grid types as matrix in the terminal. useful for debugging
+void Space::printGrid(){
+  char usr_inp = '\0';
+  int x_min = 0;
+  int y_min = 0;
+  
+  int x_max = ((n_gridsteps[0] >= 50)? 50: n_gridsteps[0]);
+  int y_max = ((n_gridsteps[1] >= 25)? 25: n_gridsteps[1]);
+
+  size_t z = 0;
+  std::cout << "Enter 'q' to quit; 'w', 'a', 's', 'd' for directional input; 'c' to continue in z direction; 'r' to go back in z direction" << std::endl;
+  while (usr_inp != 'q'){
+
+    // x and y coordinates
+    if (usr_inp == 'a'){x_min--; x_max--;}
+    else if (usr_inp == 'd'){x_min++; x_max++;}
+    else if (usr_inp == 's'){y_min++; y_max++;}
+    else if (usr_inp == 'w'){y_min--; y_max--;}
+    
+    if (x_min < 0){x_min++; x_max++;}
+    if (y_min < 0){y_min++; y_max++;}
+    if (x_max > n_gridsteps[0]){x_min--; x_max--;}
+    if (y_max > n_gridsteps[1]){y_min--; y_max--;}
+    
+    // z coordinate
+    if (usr_inp == 'r'){
+      if (z==0){
+        std::cout << "z position at min. " << std::endl;
+      }
+      else{z--;}
+    }
+    else if (usr_inp == 'c'){
+      z++;
+      if (z >= n_gridsteps[2]){
+        z--;
+        std::cout << "z position at max. " << std::endl;
+      }
+    }
+    
+    // print matrix
+    for(size_t y = y_min; y < y_max; y++){
+      for(size_t x = x_min; x < x_max; x++){
+        char to_print = (getElement(x,y,z).getType() == 0b00000010)? 'A' : getElement(x,y,z).getType();
+        std::cout << to_print << " ";
+      }
+      std::cout << std::endl;
+    }
+    
+    // get user input
+    std::cout << std::endl;
+    std::cout << "INPUT: ";
+    std::cin >> usr_inp;
+  }
   return;
 }
 
