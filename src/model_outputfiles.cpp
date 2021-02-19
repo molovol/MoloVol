@@ -67,7 +67,7 @@ void Model::writeSurfaceMap(std::string output_dir){
   // assemble data
   Container3D<char> surface_map = cell.generateTypeTensor();
   // save commonly used variable
-  std::array<unsigned int,3> n_elements = surface_map.getNumElements();
+  std::array<unsigned long int,3> n_elements = surface_map.getNumElements();
   double vxl_length = cell.getResolution();
   // create map for assigning numbers to types
   std::map<char,int> typeToNum = 

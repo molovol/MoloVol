@@ -549,7 +549,7 @@ Vector calcProbeVectorNormal(const std::array<Vector,4> vec_atom, const std::arr
 
 void Voxel::fillTypeTensor(
     Container3D<char>& type_tensor, 
-    const std::array<unsigned int,3> block_start, 
+    const std::array<unsigned long int,3> block_start, 
     const int remaining_depth){
   if (remaining_depth == 0){
     type_tensor.getElement(block_start) = type;
@@ -564,7 +564,7 @@ void Voxel::fillTypeTensor(
     }
   }
   else {
-    std::array<unsigned int,3> new_start;
+    std::array<unsigned long int,3> new_start;
     for (char i = 0; i < 2; i++){
       new_start[0] = block_start[0] + i*pow(2,remaining_depth-1);
       for (char j = 0; j < 2; j++){

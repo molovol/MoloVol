@@ -46,7 +46,7 @@ class Space{
     
     void setBoundaries(const std::vector<Atom>&);
     void setGrid();
-    const std::array<unsigned int,3> gridstepsOnLvl(const int) const;
+    const std::array<unsigned long int,3> gridstepsOnLvl(const int) const;
     
 };
 
