@@ -144,7 +144,7 @@ std::map<char,double> Space::getVolume(){
 Container3D<char> Space::generateTypeTensor(){
  
   // reserve memory
-  Container3D<char> type_tensor = Container3D<char>(gridstepsOnLevel(0));
+  Container3D<char> type_tensor = Container3D<char>(gridstepsOnLvl(0));
   
   std::array<unsigned int,3> block_start = {0,0,0};
   int n_bot_lvl_vxl = pow(2,max_depth);
@@ -186,6 +186,10 @@ std::array<double,3> Space::getSize(){
   return size;
 }
 
+double Space::getResolution() const {
+  return grid_size;
+}
+
 Voxel& Space::getElement(const size_t &i){
   assert(i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]); 
   return grid[i];
@@ -202,8 +206,17 @@ Voxel& Space::getElement(const size_t &x, const size_t &y, const size_t &z){
 std::array<size_t,3> Space::getGridsteps(){
   return n_gridsteps;
 }
+    
+unsigned int Space::totalVxlOnLvl(const int lvl) const{
+  unsigned int total = 1;
+  const std::array<unsigned int,3> gridsteps = gridstepsOnLvl(lvl);
+  for (char i = 0; i < 3; i++){
+    total *= gridsteps[i];
+  }
+  return total;
+}
 
-const std::array<unsigned int,3> Space::gridstepsOnLevel(const int level) const {
+const std::array<unsigned int,3> Space::gridstepsOnLvl(const int level) const {
   if (level > max_depth){throw ExceptIllegalFunctionCall();}
   std::array<unsigned int,3> n_voxels;
   for (char i = 0; i < 3; i++){

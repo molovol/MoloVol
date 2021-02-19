@@ -22,11 +22,12 @@ class Space{
     std::array <double,3> getOrigin(); // same as getMin();
     std::array <double,3> getMax();
     std::array <double,3> getSize();
+    double getResolution() const;
 
     Voxel& getElement(const size_t &x, const size_t &y, const size_t &z);
     Voxel& getElement(const size_t &i);
     std::array<size_t,3> getGridsteps();
-    const std::array<unsigned int,3> gridstepsOnLevel(const int) const;
+    unsigned int totalVxlOnLvl(const int) const;
 
     // output
     Container3D<char> generateTypeTensor(); 
@@ -38,15 +39,14 @@ class Space{
   private:
     std::array <double,3> cart_min; // this is also the "origin" of the space
     std::array <double,3> cart_max;
-    // member function for constructor
-    void setBoundaries(const std::vector<Atom>&);
-  
     std::vector<Voxel> grid;
     std::array<size_t,3> n_gridsteps; // number of top level voxels in x,y,z direction 
-    void setGrid();
-
     double grid_size;
     int max_depth; // for voxels
+    
+    void setBoundaries(const std::vector<Atom>&);
+    void setGrid();
+    const std::array<unsigned int,3> gridstepsOnLvl(const int) const;
     
 };
 
