@@ -207,8 +207,8 @@ std::array<size_t,3> Space::getGridsteps(){
   return n_gridsteps;
 }
     
-unsigned int Space::totalVxlOnLvl(const int lvl) const{
-  unsigned int total = 1;
+unsigned long int Space::totalVxlOnLvl(const int lvl) const{
+  unsigned long int total = 1;
   const std::array<unsigned int,3> gridsteps = gridstepsOnLvl(lvl);
   for (char i = 0; i < 3; i++){
     total *= gridsteps[i];
