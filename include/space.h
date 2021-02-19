@@ -27,7 +27,7 @@ class Space{
     Voxel& getElement(const size_t &x, const size_t &y, const size_t &z);
     Voxel& getElement(const size_t &i);
     std::array<size_t,3> getGridsteps();
-    unsigned int totalVxlOnLvl(const int) const;
+    unsigned long int totalVxlOnLvl(const int) const;
 
     // output
     Container3D<char> generateTypeTensor(); 
