@@ -56,7 +56,7 @@ class Voxel{
     
     size_t tallyVoxelsOfType(const char volume_type, const int max_depth);
 
-    void fillTypeMatrix(Container3D<char>&, std::array<unsigned int,3>, int);
+    void fillTypeTensor(Container3D<char>&, const std::array<unsigned int,3>, const int);
   private:
 
     static inline AtomTree s_atomtree;

@@ -29,7 +29,7 @@ class Space{
     const std::array<unsigned int,3> gridstepsOnLevel(const int) const;
 
     // output
-    Container3D<char> generateTypeMatrix(); 
+    Container3D<char> generateTypeTensor(); 
     void printGrid();
 
     // type evaluation
