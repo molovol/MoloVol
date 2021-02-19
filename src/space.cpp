@@ -141,27 +141,25 @@ std::map<char,double> Space::getVolume(){
 // OUTPUT //
 ////////////
 
-Container3D<char> Space::generateTypeMatrix(){
-  
-  std::array<unsigned int,3> n_voxels = gridstepsOnLevel(0);
-
-  Container3D<char> type_matrix = Container3D<char>(n_voxels);
+Container3D<char> Space::generateTypeTensor(){
+ 
+  // reserve memory
+  Container3D<char> type_tensor = Container3D<char>(gridstepsOnLevel(0));
   
   std::array<unsigned int,3> block_start = {0,0,0};
+  int n_bot_lvl_vxl = pow(2,max_depth);
   for (size_t i = 0; i < n_gridsteps[0]; i++){
-    block_start[0] = i*pow(2,max_depth);
+    block_start[0] = i*n_bot_lvl_vxl;
     for (size_t j = 0; j < n_gridsteps[1]; j++){
-      block_start[1] = j*pow(2,max_depth);
+      block_start[1] = j*n_bot_lvl_vxl;
       for (size_t k = 0; k < n_gridsteps[2]; k++){
-        block_start[2] = k*pow(2,max_depth);
-        getElement(i,j,k).fillTypeMatrix(type_matrix, block_start, max_depth);
+        block_start[2] = k*n_bot_lvl_vxl;
+        getElement(i,j,k).fillTypeTensor(type_tensor, block_start, max_depth);
       }
     }
   }
   
-  type_matrix.print();
-
-  return type_matrix; 
+  return type_tensor; 
 }
 
 //////////////////////
@@ -206,9 +204,7 @@ std::array<size_t,3> Space::getGridsteps(){
 }
 
 const std::array<unsigned int,3> Space::gridstepsOnLevel(const int level) const {
-  if (level > max_depth){
-    throw ExceptIllegalFunctionCall();
-  }
+  if (level > max_depth){throw ExceptIllegalFunctionCall();}
   std::array<unsigned int,3> n_voxels;
   for (char i = 0; i < 3; i++){
     n_voxels[i] = n_gridsteps[i] * pow(2,max_depth-level);

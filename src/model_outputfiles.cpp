@@ -76,7 +76,7 @@ void Model::writeSurfaceMap(std::string output_dir){
   // create a large 3D container for the whole grid
   // args: number of top level voxels in each direction, depth
 
-  Container3D<char> surface_map = cell.generateTypeMatrix();
+  Container3D<char> surface_map = cell.generateTypeTensor();
 
   // for every top level voxel: create a 3D container of types
   
