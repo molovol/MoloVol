@@ -45,7 +45,7 @@ void MainFrame::OnCalc(wxCommandEvent& event){
 
   // TODO: Make button to call the following
   // "OnExport(output_dir)"
-  //Ctrl::getInstance()->exportSurfaceMap("output");
+  Ctrl::getInstance()->exportSurfaceMap("output");
 
   wxYield(); // is this necessary?
   // without wxYield, the clicks on disabled buttons are queued

@@ -36,6 +36,10 @@ class Container3D{
       }
       return _data[coord[2] * _n_elements[0] * _n_elements[1] + coord[1] * _n_elements[0] + coord[0]];
     }
+
+    std::array<unsigned int,3> getNumElements() const {
+      return _n_elements;
+    }
    
     void print(){
       for (unsigned int i = 0; i<_n_elements[0]; i++){
