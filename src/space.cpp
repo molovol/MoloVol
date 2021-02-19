@@ -146,7 +146,7 @@ Container3D<char> Space::generateTypeTensor(){
   // reserve memory
   Container3D<char> type_tensor = Container3D<char>(gridstepsOnLvl(0));
   
-  std::array<unsigned int,3> block_start = {0,0,0};
+  std::array<unsigned long int,3> block_start = {0,0,0};
   int n_bot_lvl_vxl = pow(2,max_depth);
   for (size_t i = 0; i < n_gridsteps[0]; i++){
     block_start[0] = i*n_bot_lvl_vxl;
@@ -209,16 +209,16 @@ std::array<size_t,3> Space::getGridsteps(){
     
 unsigned long int Space::totalVxlOnLvl(const int lvl) const{
   unsigned long int total = 1;
-  const std::array<unsigned int,3> gridsteps = gridstepsOnLvl(lvl);
+  const std::array<unsigned long int,3> gridsteps = gridstepsOnLvl(lvl);
   for (char i = 0; i < 3; i++){
     total *= gridsteps[i];
   }
   return total;
 }
 
-const std::array<unsigned int,3> Space::gridstepsOnLvl(const int level) const {
+const std::array<unsigned long int,3> Space::gridstepsOnLvl(const int level) const {
   if (level > max_depth){throw ExceptIllegalFunctionCall();}
-  std::array<unsigned int,3> n_voxels;
+  std::array<unsigned long int,3> n_voxels;
   for (char i = 0; i < 3; i++){
     n_voxels[i] = n_gridsteps[i] * pow(2,max_depth-level);
   }
