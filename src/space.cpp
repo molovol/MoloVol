@@ -211,7 +211,7 @@ const std::array<unsigned int,3> Space::gridstepsOnLevel(const int level) const 
   }
   std::array<unsigned int,3> n_voxels;
   for (char i = 0; i < 3; i++){
-    n_voxels[i] = n_gridsteps[i] * pow(8,max_depth-level);
+    n_voxels[i] = n_gridsteps[i] * pow(2,max_depth-level);
   }
   return n_voxels;
 }
