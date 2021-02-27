@@ -9,6 +9,7 @@
 #include <array>
 #include <unordered_map>
 
+// DEPRECIATED
 struct PairBundle {
   PairBundle(){}
   PairBundle(Vector unitvec_parallel, double probe_parallel, double probe_orthogonal)
@@ -27,6 +28,7 @@ struct TripletBundle {
   Vector vec_probe_plane;
   Vector vec_probe_normal;
 };
+// DEPRECIATED
 
 class AtomTree;
 struct Atom;
@@ -34,8 +36,8 @@ struct AtomNode;
 class Voxel{
   public:
     Voxel();
-    Voxel& access(const short& x, const short& y, const short& z);
-    Voxel& access(const short& i);
+    Voxel& getSubvoxel(const short& x, const short& y, const short& z);
+    Voxel& getSubvoxel(const short& i);
     void setType(char);
     char getType();
 

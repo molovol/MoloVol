@@ -40,12 +40,12 @@ Voxel::Voxel(){
 // ACCESS //
 ////////////
 
-Voxel& Voxel::access(const short& x, const short& y, const short& z){
+Voxel& Voxel::getSubvoxel(const short& x, const short& y, const short& z){
   assert(x*y*z < 8);
   return data[4 * z + 2 * y + x];
 }
 
-Voxel& Voxel::access(const short& i){
+Voxel& Voxel::getSubvoxel(const short& i){
   assert(i <= 8);
   return data[i];
 }
@@ -572,7 +572,7 @@ void Voxel::fillTypeTensor(
         for (char k = 0; k < 2; k++){
           new_start[2] = block_start[2] + k*pow(2,remaining_depth-1);
 
-          access(i,j,k).fillTypeTensor(type_tensor, new_start, remaining_depth-1);
+          getSubvoxel(i,j,k).fillTypeTensor(type_tensor, new_start, remaining_depth-1);
         }
       }
     }

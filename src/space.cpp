@@ -203,6 +203,11 @@ Voxel& Space::getElement(const size_t &x, const size_t &y, const size_t &z){
   return grid[z * n_gridsteps[0] * n_gridsteps[1] + y * n_gridsteps[0] + x];
 }
 
+/*
+Voxel& Space::getVoxel(unsigned int x, unsigned int y, unsigned int z, int level){
+  
+}*/
+
 std::array<size_t,3> Space::getGridsteps(){
   return n_gridsteps;
 }
