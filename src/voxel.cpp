@@ -50,6 +50,10 @@ Voxel& Voxel::getSubvoxel(const short& i){
   return data[i];
 }
 
+bool Voxel::hasSubvoxel(){
+  return !data.empty();
+}
+
 char Voxel::getType(){
   return type;
 }

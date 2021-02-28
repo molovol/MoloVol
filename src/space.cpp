@@ -203,10 +203,19 @@ Voxel& Space::getElement(const size_t &x, const size_t &y, const size_t &z){
   return grid[z * n_gridsteps[0] * n_gridsteps[1] + y * n_gridsteps[0] + x];
 }
 
-/*
-Voxel& Space::getVoxel(unsigned int x, unsigned int y, unsigned int z, int level){
-  
-}*/
+Voxel& Space::getVoxel(unsigned int x, unsigned int y, unsigned int z, int lvl){
+  assert(max_depth >= lvl);
+  // ptr needed in order to reassign variable in loop and return reference in the end
+  Voxel* ptr_sub_vxl = &getElement(x/int(pow(2,max_depth-lvl)), y/int(pow(2,max_depth-lvl)), z/int(pow(2,max_depth-lvl)));
+
+  for (int current_lvl = max_depth-1; current_lvl>=lvl && ptr_sub_vxl->hasSubvoxel(); current_lvl--){
+    ptr_sub_vxl = &(ptr_sub_vxl->getSubvoxel(
+        (x/int(pow(2,current_lvl-lvl)))%2, 
+        (y/int(pow(2,current_lvl-lvl)))%2, 
+        (z/int(pow(2,current_lvl-lvl)))%2));
+  }
+  return *ptr_sub_vxl;
+}
 
 std::array<size_t,3> Space::getGridsteps(){
   return n_gridsteps;
@@ -229,19 +238,46 @@ const std::array<unsigned long int,3> Space::gridstepsOnLvl(const int level) con
   }
   return n_voxels;
 }
+ 
+////////////////
+// PRINT GRID //
+////////////////
+
+std::array<size_t,3> makeIndices(std::array<size_t,3> indices, int depth){
+  for (char i = 0; i < 3; i++){
+    indices[i] *= pow(2,depth);
+  }
+  return indices;
+}
 
 // displays voxel grid types as matrix in the terminal. useful for debugging
 void Space::printGrid(){
-  char usr_inp = '\0';
+  
+  int depth = 0;
+  std::array<size_t,3> indices = makeIndices(n_gridsteps, depth);
+
   int x_min = 0;
   int y_min = 0;
   
-  int x_max = ((n_gridsteps[0] >= 50)? 50: n_gridsteps[0]);
-  int y_max = ((n_gridsteps[1] >= 25)? 25: n_gridsteps[1]);
+  int x_max = ((indices[0] >= 50)? 50: indices[0]);
+  int y_max = ((indices[1] >= 25)? 25: indices[1]);
 
   size_t z = 0;
-  std::cout << "Enter 'q' to quit; 'w', 'a', 's', 'd' for directional input; 'c' to continue in z direction; 'r' to go back in z direction" << std::endl;
+  std::cout << "Enter 'q' to quit; 'w', 'a', 's', 'd' for directional input; 'c' to continue in z direction; 'r' to go back in z direction. Enter '+' or '-' to change the octree depth." << std::endl;
+  char usr_inp = '\0';
   while (usr_inp != 'q'){
+  
+    // if depth is changed, reset view
+    if (usr_inp == '+' || usr_inp == '-'){
+      if (usr_inp == '+' && depth < max_depth){depth++;}
+      else if (usr_inp == '-' && depth > 0){depth--;}
+      indices = makeIndices(n_gridsteps,depth);
+      x_min = 0;
+      y_min = 0;
+      x_max = ((indices[0] >= 50)? 50: indices[0]);
+      y_max = ((indices[1] >= 25)? 25: indices[1]);
+      z = 0;
+    }
 
     // x and y coordinates
     if (usr_inp == 'a'){x_min--; x_max--;}
@@ -251,8 +287,8 @@ void Space::printGrid(){
     
     if (x_min < 0){x_min++; x_max++;}
     if (y_min < 0){y_min++; y_max++;}
-    if (x_max > n_gridsteps[0]){x_min--; x_max--;}
-    if (y_max > n_gridsteps[1]){y_min--; y_max--;}
+    if (x_max > indices[0]){x_min--; x_max--;}
+    if (y_max > indices[1]){y_min--; y_max--;}
     
     // z coordinate
     if (usr_inp == 'r'){
@@ -263,7 +299,7 @@ void Space::printGrid(){
     }
     else if (usr_inp == 'c'){
       z++;
-      if (z >= n_gridsteps[2]){
+      if (z >= indices[2]){
         z--;
         std::cout << "z position at max. " << std::endl;
       }
@@ -272,7 +308,7 @@ void Space::printGrid(){
     // print matrix
     for(size_t y = y_min; y < y_max; y++){
       for(size_t x = x_min; x < x_max; x++){
-        char to_print = (getElement(x,y,z).getType() == 0b00000010)? 'A' : getElement(x,y,z).getType();
+        char to_print = (getVoxel(x,y,z,max_depth-depth).getType() == 0b00000011)? 'A' : 'O';
         std::cout << to_print << " ";
       }
       std::cout << std::endl;
@@ -283,6 +319,5 @@ void Space::printGrid(){
     std::cout << "INPUT: ";
     std::cin >> usr_inp;
   }
-  return;
 }
 

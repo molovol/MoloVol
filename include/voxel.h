@@ -38,6 +38,7 @@ class Voxel{
     Voxel();
     Voxel& getSubvoxel(const short& x, const short& y, const short& z);
     Voxel& getSubvoxel(const short& i);
+    bool hasSubvoxel();
     void setType(char);
     char getType();
 

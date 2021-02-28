@@ -22,6 +22,7 @@ class Space{
     std::array <double,3> getOrigin(); // same as getMin();
     std::array <double,3> getMax();
     std::array <double,3> getSize();
+    Voxel& getVoxel(unsigned int, unsigned int, unsigned int, int);
     double getResolution() const;
 
     Voxel& getElement(const size_t &x, const size_t &y, const size_t &z);
