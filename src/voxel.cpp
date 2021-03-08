@@ -173,6 +173,29 @@ void Voxel::listFromTree(
   }
 }
 
+void findClosest(){}
+
+char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const unsigned lvl){
+  if (data.empty()){
+    findClosest();
+  }
+  else {
+    std::array<unsigned int,3> index_subvxl;
+    for (char x = 0; x < 2; x++){
+      index_subvxl[0] = index[0]*2 + x;
+      for (char y = 0; y < 2; y++){
+        index_subvxl[1] = index[1]*2 + y;
+        for (char z = 0; z < 2; z++){
+          index_subvxl[2] = index[2]*2 + z;
+          
+          getSubvoxel(x,y,z).evalRelationToVoxels(index_subvxl, lvl-1);
+        }
+      }
+    }
+  }
+  return type;
+}
+
 ////////////////////
 // CHECK FOR TYPE //
 ////////////////////
@@ -412,12 +435,12 @@ bool Voxel::isExcludedSetType(const Vector& vec_vxl, const double& rad_vxl, cons
 ///////////
 
 // TODO: Optimise. Allow for tallying multiples types at once
-size_t Voxel::tallyVoxelsOfType(const char volume_type, const int max_depth)
+unsigned int Voxel::tallyVoxelsOfType(const char volume_type, const int max_depth)
 {
   // if voxel is of type "mixed" (i.e. data vector is not empty)
   if(!data.empty()){
     // then total number of voxels is given by tallying all subvoxels
-    size_t total = 0;
+    unsigned int total = 0;
     for(int i = 0; i < 8; i++){
       total += data[i].tallyVoxelsOfType(volume_type, max_depth-1);
     }
