@@ -64,14 +64,14 @@ void Space::setBoundaries(const std::vector<Atom> &atoms){
 // based on the grid step and the octree max_depth, this function produces a
 // 3D grid (in form of a 1D vector) that contains all top level voxels.
 void Space::setGrid(){
-  size_t n_voxels = 1;
+  unsigned int n_voxels = 1;
   
   for(int dim = 0; dim < 3; dim++){
     n_gridsteps[dim] = std::ceil (std::ceil( (getSize())[dim] / grid_size ) / std::pow(2,max_depth) );
     n_voxels *= n_gridsteps[dim];
   }
   
-  for(size_t i = 0; i < n_voxels; i++){
+  for(unsigned int i = 0; i < n_voxels; i++){
     grid.push_back(Voxel());
   }
   
@@ -90,34 +90,44 @@ void Space::placeAtomsInGrid(const AtomTree& atomtree, const double& r_probe){
   // calculate side length of top level voxel
   const double vxl_dist = grid_size * pow(2,max_depth);
   
-  std::array<double,3> vxl_pos;
-
   // save variable that all voxels need access to for their type determination as static members of Voxel class
   Voxel::storeUniversal(atomtree, grid_size, r_probe, max_depth);
 
-  for(size_t x = 0; x < n_gridsteps[0]; x++){
+  // TODO: wrap this in function
+  std::array<double,3> vxl_pos;
+  for(unsigned int x = 0; x < n_gridsteps[0]; x++){
     vxl_pos[0] = vxl_origin[0] + vxl_dist * (0.5 + x);
-    for(size_t y = 0; y < n_gridsteps[1]; y++){
+    for(unsigned int y = 0; y < n_gridsteps[1]; y++){
       vxl_pos[1] = vxl_origin[1] + vxl_dist * (0.5 + y);
-      for(size_t z = 0; z < n_gridsteps[2]; z++){
+      for(unsigned int z = 0; z < n_gridsteps[2]; z++){
         vxl_pos[2] = vxl_origin[2] + vxl_dist * (0.5 + z);
         // voxel position is deliberately not stored in voxel object to reduce memory cost
         getElement(x,y,z).evalRelationToAtoms(vxl_pos, max_depth);
       }
     }
     printf("%i%% done\n", int(100*(double(x)+1)/double(n_gridsteps[0])));
-  }      
+  }
+
+  std::array<unsigned int,3> vxl_index;
+  for(vxl_index[0] = 0; vxl_index[0] < n_gridsteps[0]; vxl_index[0]++){
+    for(vxl_index[1] = 0; vxl_index[1] < n_gridsteps[1]; vxl_index[1]++){
+      for(vxl_index[2] = 0; vxl_index[2] < n_gridsteps[2]; vxl_index[2]++){
+        getElement(vxl_index).evalRelationToVoxels(vxl_index, max_depth);
+      }
+    }
+    printf("%i%% done\n", int(100*(double(vxl_index[0])+1)/double(n_gridsteps[0])));
+  }
 }
 
 std::map<char,double> Space::getVolume(){
   std::vector<char> types_to_tally{0b00000011,0b00001001};
   
-  std::vector<size_t> tally;
+  std::vector<unsigned int> tally;
   for (char i = 0; i < types_to_tally.size(); i++){
     tally.push_back(0);
   }
 
-  for(size_t i = 0; i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]; i++){ // loop through all top level voxels
+  for(unsigned int i = 0; i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]; i++){ // loop through all top level voxels
     // tally bottom level voxels
     
     for (char j = 0; j < types_to_tally.size(); j++){
@@ -148,11 +158,11 @@ Container3D<char> Space::generateTypeTensor(){
   
   std::array<unsigned long int,3> block_start = {0,0,0};
   int n_bot_lvl_vxl = pow(2,max_depth);
-  for (size_t i = 0; i < n_gridsteps[0]; i++){
+  for (unsigned int i = 0; i < n_gridsteps[0]; i++){
     block_start[0] = i*n_bot_lvl_vxl;
-    for (size_t j = 0; j < n_gridsteps[1]; j++){
+    for (unsigned int j = 0; j < n_gridsteps[1]; j++){
       block_start[1] = j*n_bot_lvl_vxl;
-      for (size_t k = 0; k < n_gridsteps[2]; k++){
+      for (unsigned int k = 0; k < n_gridsteps[2]; k++){
         block_start[2] = k*n_bot_lvl_vxl;
         getElement(i,j,k).fillTypeTensor(type_tensor, block_start, max_depth);
       }
@@ -190,18 +200,28 @@ double Space::getResolution() const {
   return grid_size;
 }
 
-Voxel& Space::getElement(const size_t &i){
+/////////////////
+// GET ELEMENT //
+/////////////////
+
+Voxel& Space::getElement(const unsigned int i){
   assert(i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]); 
   return grid[i];
 }
 
-Voxel& Space::getElement(const size_t &x, const size_t &y, const size_t &z){
+Voxel& Space::getElement(const unsigned int x, const unsigned int y, const unsigned int z){
   // check if element is out of bounds
   assert(x < n_gridsteps[0]);
   assert(y < n_gridsteps[1]);
   assert(z < n_gridsteps[2]);
   return grid[z * n_gridsteps[0] * n_gridsteps[1] + y * n_gridsteps[0] + x];
 }
+
+Voxel& Space::getElement(const std::array<unsigned int,3> arr){
+  return grid[arr[2] * n_gridsteps[0] * n_gridsteps[1] + arr[1] * n_gridsteps[0] + arr[0]];
+}
+
+/////////////////
 
 Voxel& Space::getVoxel(unsigned int x, unsigned int y, unsigned int z, int lvl){
   assert(max_depth >= lvl);
@@ -217,7 +237,7 @@ Voxel& Space::getVoxel(unsigned int x, unsigned int y, unsigned int z, int lvl){
   return *ptr_sub_vxl;
 }
 
-std::array<size_t,3> Space::getGridsteps(){
+std::array<unsigned int,3> Space::getGridsteps(){
   return n_gridsteps;
 }
     
@@ -243,7 +263,7 @@ const std::array<unsigned long int,3> Space::gridstepsOnLvl(const int level) con
 // PRINT GRID //
 ////////////////
 
-std::array<size_t,3> makeIndices(std::array<size_t,3> indices, int depth){
+std::array<unsigned int,3> makeIndices(std::array<unsigned int,3> indices, int depth){
   for (char i = 0; i < 3; i++){
     indices[i] *= pow(2,depth);
   }
@@ -254,7 +274,7 @@ std::array<size_t,3> makeIndices(std::array<size_t,3> indices, int depth){
 void Space::printGrid(){
   
   int depth = 0;
-  std::array<size_t,3> indices = makeIndices(n_gridsteps, depth);
+  std::array<unsigned int,3> indices = makeIndices(n_gridsteps, depth);
 
   int x_min = 0;
   int y_min = 0;
@@ -262,7 +282,7 @@ void Space::printGrid(){
   int x_max = ((indices[0] >= 50)? 50: indices[0]);
   int y_max = ((indices[1] >= 25)? 25: indices[1]);
 
-  size_t z = 0;
+  unsigned int z = 0;
   std::cout << "Enter 'q' to quit; 'w', 'a', 's', 'd' for directional input; 'c' to continue in z direction; 'r' to go back in z direction. Enter '+' or '-' to change the octree depth." << std::endl;
   char usr_inp = '\0';
   while (usr_inp != 'q'){
@@ -306,8 +326,8 @@ void Space::printGrid(){
     }
     
     // print matrix
-    for(size_t y = y_min; y < y_max; y++){
-      for(size_t x = x_min; x < x_max; x++){
+    for(unsigned int y = y_min; y < y_max; y++){
+      for(unsigned int x = x_min; x < x_max; x++){
         char to_print = (getVoxel(x,y,z,max_depth-depth).getType() == 0b00000011)? 'A' : 'O';
         std::cout << to_print << " ";
       }

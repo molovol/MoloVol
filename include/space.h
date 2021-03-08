@@ -25,9 +25,10 @@ class Space{
     Voxel& getVoxel(unsigned int, unsigned int, unsigned int, int);
     double getResolution() const;
 
-    Voxel& getElement(const size_t &x, const size_t &y, const size_t &z);
-    Voxel& getElement(const size_t &i);
-    std::array<size_t,3> getGridsteps();
+    Voxel& getElement(const unsigned int);
+    Voxel& getElement(const unsigned int, const unsigned int, const unsigned int);
+    Voxel& getElement(const std::array<unsigned int,3>);
+    std::array<unsigned int,3> getGridsteps();
     unsigned long int totalVxlOnLvl(const int) const;
 
     // output
@@ -41,7 +42,7 @@ class Space{
     std::array <double,3> cart_min; // this is also the "origin" of the space
     std::array <double,3> cart_max;
     std::vector<Voxel> grid;
-    std::array<size_t,3> n_gridsteps; // number of top level voxels in x,y,z direction 
+    std::array<unsigned int,3> n_gridsteps; // number of top level voxels in x,y,z direction 
     double grid_size;
     int max_depth; // for voxels
     

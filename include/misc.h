@@ -18,6 +18,14 @@ inline double distance(const std::array<double,3> &start, const std::array<doubl
 
 std::string fileExtension(const std::string& path);
 
+template <typename T>
+void print(std::array<T,3> arr){
+  for (T elem : arr){
+    std::cout << elem << " ";
+  }
+  std::cout << std::endl;
+}
+
 ////////////////////
 // BIT OPERATIONS //
 ////////////////////
