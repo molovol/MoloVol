@@ -173,10 +173,17 @@ void Voxel::listFromTree(
   }
 }
 
-void findClosest(){}
+void findClosest(){
+  // calculate upper bound for neighbour voxels and medium bound
+  // iterate over neighbours
+  // check whether neighbour of type core is inside bounds from space class (add static member)
+  // if yes, change type to confirmed shell
+  // if partially, change type to mixed
+  // if no, change type to excluded
+}
 
 char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const unsigned lvl){
-  if (data.empty()){
+  if (data.empty()){ // and type is unsassigned
     findClosest();
   }
   else {
@@ -187,7 +194,7 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
         index_subvxl[1] = index[1]*2 + y;
         for (char z = 0; z < 2; z++){
           index_subvxl[2] = index[2]*2 + z;
-          
+          // check type is unassigned
           getSubvoxel(x,y,z).evalRelationToVoxels(index_subvxl, lvl-1);
         }
       }
