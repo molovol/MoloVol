@@ -329,6 +329,10 @@ void Space::printGrid(){
     for(unsigned int y = y_min; y < y_max; y++){
       for(unsigned int x = x_min; x < x_max; x++){
         char to_print = (getVoxel(x,y,z,max_depth-depth).getType() == 0b00000011)? 'A' : 'O';
+        if (!readBit(getVoxel(x,y,z,max_depth-depth).getType(),0)){
+          to_print = '?';
+        }
+        
         std::cout << to_print << " ";
       }
       std::cout << std::endl;
