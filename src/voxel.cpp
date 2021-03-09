@@ -13,7 +13,9 @@ void breakpoint(){return;}
 inline double Voxel::calcRadiusOfInfluence(const double& max_depth){
   return max_depth != 0 ? 0.86602540378 * s_grid_size * (pow(2,max_depth) - 1) : 0;
 }
+char mergeTypes(std::vector<Voxel>);
 
+// DEPRECIATED
 bool allAtomsClose(const double&, const std::array<double,4>&, const std::array<Vector,4>&, char);
 
 bool isInsideTetrahedron(const Vector&, const std::array<Vector,4>&, const std::array<Vector,4>&, bool&);
@@ -27,6 +29,7 @@ Vector calcProbeVectorInPlane(const std::array<Vector,4>, const std::array<doubl
 Vector calcProbeVectorNormal(const std::array<Vector,4>, const std::array<double,4>&, const double&, const Vector&);
 
 bool isPointBetween(const Vector& vec_point, const Vector& vec_bounds);
+// DEPRECIATED
 
 /////////////////
 // CONSTRUCTOR //
@@ -107,6 +110,7 @@ void Voxel::splitVoxel(const Vector& vxl_pos, const double& max_depth){
     
     data[i].evalRelationToAtoms(new_pos, max_depth-1);
   }
+  setType(mergeTypes(data));
 }
 
 void Voxel::traverseTree
@@ -576,6 +580,20 @@ Vector calcProbeVectorNormal(const std::array<Vector,4> vec_atom, const std::arr
 
   return unitvec_normal * pow((pow(rad_atom[0]+rad_probe,2) - vec_probe_plane*vec_probe_plane),0.5);
 }
+
+// combines the types of subvoxels into a new type for the parent. performs bitwise OR for bits 1-6
+// and a bitwise AND for bit 0. sets bit 7 to true
+char mergeTypes(std::vector<Voxel> sub_vxls){
+  char parent_type = 0;
+  bool confirmed = true;
+  for (Voxel sub_vxl : sub_vxls){
+    parent_type = parent_type | sub_vxl.getType();
+    confirmed &= readBit(sub_vxl.getType(),0);
+  }
+  setBit(parent_type,0,confirmed);
+  setBitOn(parent_type,7);
+  return parent_type;
+} 
 
 /////////////////
 // OUTPUT TYPE //
