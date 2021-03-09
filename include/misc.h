@@ -42,6 +42,16 @@ void printBinary(const T var){
 }
 
 template <typename T>
+void setBitOn(T& var, const unsigned pos){
+  var |= 1 << pos;
+}
+
+template <typename T>
+void setBitOff(T& var, const unsigned pos){
+  var &= ~(1 << pos);
+}
+
+template <typename T>
 void setBit(T& var, const unsigned pos, const bool state){
   if (state){
     setBitOn(var,pos);
@@ -49,16 +59,6 @@ void setBit(T& var, const unsigned pos, const bool state){
   else {
     setBitOff(var,pos);
   }
-}
-
-template <typename T>
-void setBitOn(T& var, const unsigned pos){
-  var |= 1 << pos;
-}
-
-template <typename T>
-void setBitOff(T& var, const unsigned pos){
-  var &= 0 << pos;
 }
 
 template <typename T>
