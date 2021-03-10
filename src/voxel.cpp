@@ -13,7 +13,7 @@ void breakpoint(){return;}
 inline double Voxel::calcRadiusOfInfluence(const double& max_depth){
   return max_depth != 0 ? 0.86602540378 * s_grid_size * (pow(2,max_depth) - 1) : 0;
 }
-char mergeTypes(std::vector<Voxel>);
+char mergeTypes(std::vector<Voxel>&);
 
 // DEPRECIATED
 bool allAtomsClose(const double&, const std::array<double,4>&, const std::array<Vector,4>&, char);
@@ -187,7 +187,10 @@ void findClosest(){
 }
 
 char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const unsigned lvl){
-  if (data.empty()){ // and type is unsassigned
+  // if voxel (including all subvoxels) have been assigned, then return immediately
+  if (readBit(type,0)){return type;}
+  // if voxel has no children 
+  else if (data.empty()){
     findClosest();
   }
   else {
@@ -583,7 +586,7 @@ Vector calcProbeVectorNormal(const std::array<Vector,4> vec_atom, const std::arr
 
 // combines the types of subvoxels into a new type for the parent. performs bitwise OR for bits 1-6
 // and a bitwise AND for bit 0. sets bit 7 to true
-char mergeTypes(std::vector<Voxel> sub_vxls){
+char mergeTypes(std::vector<Voxel>& sub_vxls){
   char parent_type = 0;
   bool confirmed = true;
   for (Voxel sub_vxl : sub_vxls){
