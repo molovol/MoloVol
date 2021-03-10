@@ -1,4 +1,5 @@
 #include "voxel.h"
+#include "space.h"
 #include "misc.h"
 #include "atom.h"
 #include <cmath> // abs, pow
@@ -70,10 +71,12 @@ void Voxel::setType(char input){
 //////////////
 
 // function to call before beginning the type assignment routine in order to prepare static variables
-void Voxel::storeUniversal(AtomTree atomtree, double grid_size, double r_probe1, int max_depth){
+void Voxel::storeUniversal(Space* cell, AtomTree atomtree, double grid_size, double r_probe1, int max_depth){
+  s_cell = cell;
   s_atomtree = atomtree;
   s_grid_size = grid_size;
   s_r_probe1 = r_probe1;
+  //
   s_pair_data.clear();
   s_triplet_data.clear();
 }
@@ -177,13 +180,103 @@ void Voxel::listFromTree(
   }
 }
 
-void findClosest(){
+// AUX FOR 2ND ROUND
+std::vector<std::array<unsigned int,3>> sumOfThreeSquares(unsigned long int n){
+  std::vector<std::array<unsigned int,3>> list_of_roots;
+  std::array<unsigned int,3> roots;
+  for (unsigned int x = 0; x <= std::sqrt(n); x++){
+    unsigned int diff = n - std::pow(x,2);
+    for (unsigned int y = x; y <= std::sqrt(diff); y++){
+      unsigned int z_sqr = diff - pow(y,2);
+      unsigned int z = std::sqrt(z_sqr);
+      if (z_sqr == std::pow(z,2) && z >= y){
+        list_of_roots.push_back({x,y,z});
+      }
+    }
+  }
+  return list_of_roots;
+}
+
+template <typename T>
+void swap(T& i, T& j){
+  int temp = i;
+  i = j;
+  j = temp;
+}
+
+void signCombinations(std::vector<std::array<int,3>>& list, std::array<int,3> arr){
+  // following two lines check whether any element is zero
+  for (int sign = 0; sign < ((arr[2]==0)? 4 : 8); sign += ((arr[0]==0)? 2 : 1)){ // loop over sign combinations
+    if (arr[1]==0 && sign%4 > 1){continue;} // skip if middle element is 0
+    list.push_back({
+      static_cast<int>((pow(-1, sign    %2))*arr[0]),
+      static_cast<int>((pow(-1,(sign/2) %2))*arr[1]),
+      static_cast<int>((pow(-1,(sign/4) %2))*arr[2])
+    });
+  }
+}
+
+void signCombinations(std::vector<std::array<int,3>>& list, std::array<unsigned int,3> inp_arr){
+  std::array<int,3> arr;
+  for (char i = 0; i < 3; i++){arr[i] = int(inp_arr[i]);}
+  signCombinations(list, arr);
+}
+
+std::vector<std::array<int,3>> logPermutations(const std::array<unsigned int,3> inp_arr){
+  std::vector<std::array<int,3>> list;
+  signCombinations(list, inp_arr); // initial order
+  for (int i = 0; i < 2; i++){
+    for (int j = i+1; j < ((inp_arr[1]==inp_arr[2])? 2 : 3); j++){
+      std::array<unsigned int,3> arr = inp_arr;
+      if (arr[i] != arr[j]){ // if i and j are different, swap and store
+        swap(arr[i], arr[j]);
+        signCombinations(list, arr);
+        if (i!=1 && arr[1]!=arr[2]){ // if 1 and 2 are different, swap and store
+          swap(arr[1], arr[2]);
+          signCombinations(list, arr);
+        }
+      }
+    }
+  }
+  return list;
+}
+
+void Voxel::findClosest(const std::array<unsigned int,3>& index){
+  // assume type to be excluded
+  type = 0b00000101;
   // calculate upper bound for neighbour voxels and medium bound
+  unsigned int upp_lim = 3*std::pow(int(s_r_probe1/(std::sqrt(3)*s_grid_size))+1,2);
+
+  std::array<unsigned int,3> gridsteps = s_cell->getGridsteps(); // TODO: generalise for any depth
   // iterate over neighbours
+  for (unsigned int n = 0; n < upp_lim; n++){
   // check whether neighbour of type core is inside bounds from space class (add static member)
-  // if yes, change type to confirmed shell
-  // if partially, change type to mixed
-  // if no, change type to excluded
+    // get all combinations of thee integers whose sum equals n
+    std::vector<std::array<unsigned int,3>> list_of_roots = sumOfThreeSquares(n);
+    for (std::array<unsigned int,3> roots : list_of_roots){
+      // get all sign combinations for each integer combinations
+      std::vector<std::array<int,3>> perm = logPermutations(roots); // TODO: consider computing once rather than every time
+      for (std::array<int,3> coord : perm){
+        // add central index array and coord array
+        for (char i = 0; i < 3; i++){
+          coord[i] = coord[i] + index[i];
+        }
+        // check whether coord is inside cell bounds
+        bool in_bounds = true;
+        for (char i = 0; i < 3; i++){
+          in_bounds &= coord[i] >= 0 && coord[i] < gridsteps[i];
+        }
+        // if neighbour type is core, then set this voxel to shell
+        if (in_bounds){
+          char n_type = (s_cell->getVoxel(coord,0)).getType(); // TODO: GENERALISE FOR ANY LVL
+          if (n_type == 0b00001001){
+            type = 0b00010001;
+            return;
+          }
+        }
+      }
+    }
+  }
 }
 
 char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const unsigned lvl){
@@ -191,7 +284,7 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
   if (readBit(type,0)){return type;}
   // if voxel has no children 
   else if (data.empty()){
-    findClosest();
+    findClosest(index);
   }
   else {
     std::array<unsigned int,3> index_subvxl;

@@ -30,6 +30,7 @@ struct TripletBundle {
 };
 // DEPRECIATED
 
+class Space;
 class AtomTree;
 struct Atom;
 struct AtomNode;
@@ -42,7 +43,7 @@ class Voxel{
     void setType(char);
     char getType();
 
-    static void storeUniversal(AtomTree, double, double, int);
+    static void storeUniversal(Space*, AtomTree, double, double, int);
     char evalRelationToAtoms(Vector, const int);
     void traverseTree(const AtomNode*, const double&, const Vector&, const double&, const double&, const int&, 
         const char = 0b00000011, const char = 0); 
@@ -63,7 +64,7 @@ class Voxel{
 
     void fillTypeTensor(Container3D<char>&, const std::array<unsigned long int,3>, const int);
   private:
-
+    static inline Space* s_cell;
     static inline AtomTree s_atomtree;
     static inline double s_grid_size;
     static inline double s_r_probe1;
@@ -75,6 +76,8 @@ class Voxel{
     static inline double calcRadiusOfInfluence(const double& max_depth);
 
     bool isAtom(const Atom&, const Vector&, const double, const double);
+
+    void findClosest(const std::array<unsigned int,3>&);
     // DEPRECIATED
     bool isProbeExcluded(const Vector& vxl_pos, const double& r_probe, const double&, const std::vector<int>&);
     bool isExcludedByPair(const Vector&, const Vector&, const double&, const double&, const double&, const double&, int);

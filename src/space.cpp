@@ -91,7 +91,7 @@ void Space::placeAtomsInGrid(const AtomTree& atomtree, const double& r_probe){
   const double vxl_dist = grid_size * pow(2,max_depth);
   
   // save variable that all voxels need access to for their type determination as static members of Voxel class
-  Voxel::storeUniversal(atomtree, grid_size, r_probe, max_depth);
+  Voxel::storeUniversal(this, atomtree, grid_size, r_probe, max_depth);
 
   // TODO: wrap this in function
   std::array<double,3> vxl_pos;
@@ -120,7 +120,7 @@ void Space::placeAtomsInGrid(const AtomTree& atomtree, const double& r_probe){
 }
 
 std::map<char,double> Space::getVolume(){
-  std::vector<char> types_to_tally{0b00000011,0b00001001};
+  std::vector<char> types_to_tally{0b00000011,0b00000101};
   
   std::vector<unsigned int> tally;
   for (char i = 0; i < types_to_tally.size(); i++){
@@ -237,6 +237,10 @@ Voxel& Space::getVoxel(unsigned int x, unsigned int y, unsigned int z, int lvl){
   return *ptr_sub_vxl;
 }
 
+Voxel& Space::getVoxel(std::array<int,3> arr, int lvl){
+  return getVoxel(arr[0], arr[1], arr[2], lvl);
+}
+
 std::array<unsigned int,3> Space::getGridsteps(){
   return n_gridsteps;
 }
@@ -329,9 +333,8 @@ void Space::printGrid(){
     for(unsigned int y = y_min; y < y_max; y++){
       for(unsigned int x = x_min; x < x_max; x++){
         char to_print = (getVoxel(x,y,z,max_depth-depth).getType() == 0b00000011)? 'A' : 'O';
-        if (!readBit(getVoxel(x,y,z,max_depth-depth).getType(),0)){
-          to_print = '?';
-        }
+        if (!readBit(getVoxel(x,y,z,max_depth-depth).getType(),0)){to_print = '?';}
+        if (getVoxel(x,y,z,max_depth-depth).getType() == 0b00010001){to_print = 'S';}
         
         std::cout << to_print << " ";
       }
