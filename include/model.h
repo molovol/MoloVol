@@ -49,7 +49,7 @@ class Model{
 
     // controller-model communication
     // calls the Space constructor and creates a cell containing all atoms. Cell size is defined by atom positions
-    void defineCell(const double&, const int&);
+    void defineCell(const double, const int);
     void setAtomListForCalculation(const std::vector<std::string>&, bool);
     void setAtomListForCalculation(const std::vector<std::string>&, std::vector<std::tuple<std::string, double, double, double>>&);
     void storeAtomsInTree();
@@ -73,9 +73,9 @@ class Model{
     std::map<std::string, int> atom_amounts;
     std::vector<Atom> atoms;
     AtomTree atomtree;
-    Space cell;
-    double r_probe1 = 0;
-    double r_probe2 = 0;
+    Space _cell;
+    double _r_probe1 = 0;
+    double _r_probe2 = 0;
 };
 
 struct CalcResultBundle{

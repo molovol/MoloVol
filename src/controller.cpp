@@ -111,6 +111,7 @@ CalcResultBundle Ctrl::runCalculation(
     bool option_unit_cell,
     double max_rad,
     std::string chemical_formula){
+  // create output bundle
   CalcResultBundle data;
   // create an instance of the model class
   // ensures, that there is only ever one instance of the model class
@@ -118,12 +119,13 @@ CalcResultBundle Ctrl::runCalculation(
     current_calculation = new Model();
   }
 
+  // save probe radii inside model
   if(!current_calculation->setProbeRadii(rad_probe1, rad_probe2, option_probe_mode)){
     data.success = false;
-    return data; // abort calculation if radius2 is smaller than radius 1
+    return data;
   }
 
-  // give a radius map to the model that may differ from the radius map that was originally imported
+  // store a map containing the radii of all atoms
   current_calculation->setRadiusMap(rad_map);
   
   /* no point in making folders for each calculation
@@ -140,10 +142,12 @@ CalcResultBundle Ctrl::runCalculation(
     }
   }
 
-  current_calculation->setAtomListForCalculation(included_elements, option_unit_cell); // what is this for?
-  current_calculation->storeAtomsInTree(); // place atoms in a binary tree for faster access
-
-  current_calculation->defineCell(grid_step, max_depth); // set size of the box containing all atoms
+  // determine which atoms will be taken into account
+  current_calculation->setAtomListForCalculation(included_elements, option_unit_cell);
+  // place atoms in a binary tree for faster access
+  current_calculation->storeAtomsInTree();
+  // set size of the box containing all atoms
+  current_calculation->defineCell(grid_step, max_depth);
   
   // generate result report
   /*
@@ -151,8 +155,8 @@ CalcResultBundle Ctrl::runCalculation(
   current_calculation->createReport(atom_filepath, parameters);
   */
 
-  // measure time and run calculation
-  return current_calculation->calcVolume(); // assign voxel types and get the volume
+  // assign voxel types and store the volume(s)
+  return current_calculation->calcVolume(); 
 }
 
 // generate parameter list for report

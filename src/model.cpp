@@ -16,8 +16,8 @@
 
 inline bool isIncluded(const std::string&, const std::vector<std::string>&);
 
-void Model::defineCell(const double& grid_step, const int& max_depth){
-  cell = Space(atoms, grid_step, max_depth);
+void Model::defineCell(const double grid_step, const int max_depth){
+  _cell = Space(atoms, grid_step, max_depth);
   return;
 }
 
@@ -27,14 +27,14 @@ void Model::defineCell(const double& grid_step, const int& max_depth){
 // Not sure about the name of the section
 
 bool Model::setProbeRadii(const double& r_1, const double& r_2, bool two_probe_mode){
-  r_probe1 = r_1;
+  _r_probe1 = r_1;
   if (two_probe_mode){
     if (r_1 > r_2){
     Ctrl::getInstance()->notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.");
     return false;
     }
     else{
-      r_probe2 = r_2;
+      _r_probe2 = r_2;
     }
   }
   return true;
@@ -84,14 +84,14 @@ CalcResultBundle Model::calcVolume(){
   CalcResultBundle data;
 
   auto start = std::chrono::steady_clock::now();
-  cell.placeAtomsInGrid(atomtree, r_probe1); // assign each voxel in grid a type, defined by the atom positions
+  _cell.placeAtomsInGrid(atomtree, _r_probe1); // assign each voxel in grid a type, defined by the atom positions
   auto end = std::chrono::steady_clock::now();
   data.type_assignment_elapsed_seconds = std::chrono::duration<double>(end-start).count();
   
-  //cell.printGrid(); // for testing
+  //_cell.printGrid(); // for testing
   
   start = std::chrono::steady_clock::now();
-  data.volumes = cell.getVolume();
+  data.volumes = _cell.getVolume();
   end = std::chrono::steady_clock::now();
   data.volume_tally_elapsed_seconds = std::chrono::duration<double>(end-start).count();
 
@@ -117,8 +117,8 @@ void Model::setRadiusMap(std::unordered_map<std::string, double> map){
 }
 
 void Model::debug(){
-  std::array<double,3> cell_min = cell.getMin();
-  std::array<double,3> cell_max = cell.getMax();
+  std::array<double,3> cell_min = _cell.getMin();
+  std::array<double,3> cell_max = _cell.getMax();
 
   for(int dim = 0; dim < 3; dim++){
     std::cout << "Cell Limit in Dim " << dim << ":" << cell_min[dim] << " and " << cell_max[dim] << std::endl;
