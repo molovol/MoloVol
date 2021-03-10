@@ -15,7 +15,7 @@ class Space{
   public:
     // constructors
     Space() = default;
-    Space(std::vector<Atom>&, const double&, const int&);
+    Space(std::vector<Atom>&, const double, const int, const double);
 
     // access
     std::array <double,3> getMin();
@@ -46,7 +46,7 @@ class Space{
     double grid_size;
     int max_depth; // for voxels
     
-    void setBoundaries(const std::vector<Atom>&);
+    void setBoundaries(const std::vector<Atom>&, const double);
     void setGrid();
     const std::array<unsigned long int,3> gridstepsOnLvl(const int) const;
     
