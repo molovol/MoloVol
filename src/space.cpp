@@ -11,9 +11,9 @@
 // CONSTRUCTOR //
 /////////////////
 
-Space::Space(std::vector<Atom> &atoms, const double& bottom_level_voxel_dist, const int& depth)
-  :grid_size(bottom_level_voxel_dist), max_depth(depth){
-  setBoundaries(atoms);
+Space::Space(std::vector<Atom> &atoms, const double bot_lvl_vxl_dist, const int depth, const double r_probe1)
+  :grid_size(bot_lvl_vxl_dist), max_depth(depth){
+  setBoundaries(atoms,r_probe1+2*bot_lvl_vxl_dist);
   setGrid();
 }
 
@@ -26,7 +26,7 @@ Space::Space(std::vector<Atom> &atoms, const double& bottom_level_voxel_dist, co
 // three cartesian directions out of all atoms. Also finds max
 // radius of all atoms and sets the space boundaries slightly so
 // that all atoms fit the space.
-void Space::setBoundaries(const std::vector<Atom> &atoms){
+void Space::setBoundaries(const std::vector<Atom> &atoms, const double add_space){
   double max_radius = 0;
   for(int at = 0; at < atoms.size(); at++){
     std::array<double,3> atom_pos = atoms[at].getPos();
@@ -55,8 +55,8 @@ void Space::setBoundaries(const std::vector<Atom> &atoms){
   }
   // expand boundaries by a little more than the largest atom found
   for(int dim = 0; dim < 3; dim++){ 
-    cart_min[dim] -= (1.1 * max_radius);
-    cart_max[dim] += (1.1 * max_radius);    
+    cart_min[dim] -= (add_space + max_radius);
+    cart_max[dim] += (add_space + max_radius);    
   }
   return;
 }

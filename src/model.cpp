@@ -17,7 +17,7 @@
 inline bool isIncluded(const std::string&, const std::vector<std::string>&);
 
 void Model::defineCell(const double grid_step, const int max_depth){
-  _cell = Space(atoms, grid_step, max_depth);
+  _cell = Space(atoms, grid_step, max_depth, _r_probe1);
   return;
 }
 
