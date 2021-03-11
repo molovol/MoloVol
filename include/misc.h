@@ -26,6 +26,14 @@ void print(std::array<T,3> arr){
   std::cout << std::endl;
 }
 
+template <typename T>
+void swap(T& i, T& j){
+  int temp = i;
+  i = j;
+  j = temp;
+}
+
+
 ////////////////////
 // BIT OPERATIONS //
 ////////////////////

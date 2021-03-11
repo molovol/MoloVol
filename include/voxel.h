@@ -44,6 +44,7 @@ class Voxel{
     char getType();
 
     static void storeUniversal(Space*, AtomTree, double, double, int);
+    static void computeIndices();
     char evalRelationToAtoms(Vector, const int);
     void traverseTree(const AtomNode*, const double&, const Vector&, const double&, const double&, const int&, 
         const char = 0b00000011, const char = 0); 
@@ -68,6 +69,7 @@ class Voxel{
     static inline AtomTree s_atomtree;
     static inline double s_grid_size;
     static inline double s_r_probe1;
+    static inline std::vector<std::vector<std::array<int,3>>> s_search_indices;
     // DEPRECIATED
     static inline std::unordered_map<unsigned long long int,TripletBundle> s_triplet_data;
     static inline std::unordered_map<int,PairBundle> s_pair_data;
