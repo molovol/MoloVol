@@ -10,7 +10,6 @@
 // AUX FUNCTIONS //
 ///////////////////
 
-void breakpoint(){return;}
 inline double Voxel::calcRadiusOfInfluence(const double& max_depth){
   return max_depth != 0 ? 0.86602540378 * s_grid_size * (pow(2,max_depth) - 1) : 0;
 }
@@ -36,35 +35,26 @@ bool isPointBetween(const Vector& vec_point, const Vector& vec_bounds);
 // CONSTRUCTOR //
 /////////////////
 
-Voxel::Voxel(){
-  type = 0;
-}
+Voxel::Voxel(){type = 0;}
 
 ////////////
 // ACCESS //
 ////////////
 
+// data
 Voxel& Voxel::getSubvoxel(const short& x, const short& y, const short& z){
   assert(x*y*z < 8);
   return data[4 * z + 2 * y + x];
 }
-
 Voxel& Voxel::getSubvoxel(const short& i){
   assert(i <= 8);
   return data[i];
 }
+bool Voxel::hasSubvoxel(){return !data.empty();}
 
-bool Voxel::hasSubvoxel(){
-  return !data.empty();
-}
-
-char Voxel::getType(){
-  return type;
-}
-
-void Voxel::setType(char input){
-  type = input;
-}
+// type
+char Voxel::getType(){return type;}
+void Voxel::setType(char input){type = input;}
 
 //////////////
 // SET TYPE //
@@ -76,10 +66,16 @@ void Voxel::storeUniversal(Space* cell, AtomTree atomtree, double grid_size, dou
   s_atomtree = atomtree;
   s_grid_size = grid_size;
   s_r_probe1 = r_probe1;
+
+  computeIndices();
   //
   s_pair_data.clear();
   s_triplet_data.clear();
 }
+
+///////////////////////////////
+// TYPE ASSIGNMENT 1ST ROUND //
+///////////////////////////////
 
 // part of the type assigment routine. first evaluation is only concerned with the relation between 
 // voxels and atoms
@@ -88,10 +84,7 @@ char Voxel::evalRelationToAtoms(Vector pos_vxl, const int max_depth){
  
   traverseTree(s_atomtree.getRoot(), s_atomtree.getMaxRad(), pos_vxl, rad_vxl, s_r_probe1, max_depth);
 
-  if (type == 0){
-    setBitOn(type,0); // is assigned
-    setBitOn(type,3); // probe core
-  }
+  if (type == 0){type = 0b00001001;}
   if (readBit(type,7)){splitVoxel(pos_vxl, max_depth);} // split if type mixed
 
   return type;
@@ -116,6 +109,7 @@ void Voxel::splitVoxel(const Vector& vxl_pos, const double& max_depth){
   setType(mergeTypes(data));
 }
 
+// goes through all close atoms to determine a voxel's type
 void Voxel::traverseTree
   (const AtomNode* node, 
    const double& rad_max, 
@@ -139,8 +133,6 @@ void Voxel::traverseTree
   else{ // then atom is close enough to influence voxel type
     if(isAtom(atom, pos_vxl, rad_vxl, rad_probe)){return;}
     
-//    if (type==exit_type){return;}
-
     // continue with both children
     for (AtomNode* child : {node->left_child, node->right_child}){
       traverseTree(child, rad_max, pos_vxl, rad_vxl, rad_probe, max_depth, exit_type, (dim+1)%3);
@@ -148,6 +140,29 @@ void Voxel::traverseTree
   }
 }
 
+// assign a type based on the distance between a voxel and an atom
+bool Voxel::isAtom(const Atom& atom, const Vector& pos_vxl, const double rad_vxl, const double rad_probe){
+  Vector dist = pos_vxl - atom.getPosVec();
+  if(dist < atom.getRad() - rad_vxl){
+    type = 0b00000011;
+    return true;
+  }
+  else if (dist < atom.getRad() + rad_vxl){
+    if (readBit(type,1)){return false;} // if inside atom
+    type = 0b10000010;
+  }
+  else if (dist < atom.getRad() + rad_probe - rad_vxl){
+    if (readBit(type,1)){return false;} // if mixed or inside atom
+    type = 0b00010000;
+  } 
+  else if (dist < atom.getRad() + rad_probe + rad_vxl){
+    if (readBit(type,4) || readBit(type,1)){return false;} // if mixed, inside atom, or potential shell
+    type = 0b10010000;
+  }
+  return false;
+}
+
+// not currently in use
 // go through a tree, starting from node. return a list of atoms that are a specified max distance
 // from a point with radius rad_point.
 void Voxel::listFromTree(
@@ -180,110 +195,15 @@ void Voxel::listFromTree(
   }
 }
 
-// AUX FOR 2ND ROUND
-std::vector<std::array<unsigned int,3>> sumOfThreeSquares(unsigned long int n){
-  std::vector<std::array<unsigned int,3>> list_of_roots;
-  std::array<unsigned int,3> roots;
-  for (unsigned int x = 0; x <= std::sqrt(n); x++){
-    unsigned int diff = n - std::pow(x,2);
-    for (unsigned int y = x; y <= std::sqrt(diff); y++){
-      unsigned int z_sqr = diff - pow(y,2);
-      unsigned int z = std::sqrt(z_sqr);
-      if (z_sqr == std::pow(z,2) && z >= y){
-        list_of_roots.push_back({x,y,z});
-      }
-    }
-  }
-  return list_of_roots;
-}
-
-template <typename T>
-void swap(T& i, T& j){
-  int temp = i;
-  i = j;
-  j = temp;
-}
-
-void signCombinations(std::vector<std::array<int,3>>& list, std::array<int,3> arr){
-  // following two lines check whether any element is zero
-  for (int sign = 0; sign < ((arr[2]==0)? 4 : 8); sign += ((arr[0]==0)? 2 : 1)){ // loop over sign combinations
-    if (arr[1]==0 && sign%4 > 1){continue;} // skip if middle element is 0
-    list.push_back({
-      static_cast<int>((pow(-1, sign    %2))*arr[0]),
-      static_cast<int>((pow(-1,(sign/2) %2))*arr[1]),
-      static_cast<int>((pow(-1,(sign/4) %2))*arr[2])
-    });
-  }
-}
-
-void signCombinations(std::vector<std::array<int,3>>& list, std::array<unsigned int,3> inp_arr){
-  std::array<int,3> arr;
-  for (char i = 0; i < 3; i++){arr[i] = int(inp_arr[i]);}
-  signCombinations(list, arr);
-}
-
-std::vector<std::array<int,3>> logPermutations(const std::array<unsigned int,3> inp_arr){
-  std::vector<std::array<int,3>> list;
-  signCombinations(list, inp_arr); // initial order
-  for (int i = 0; i < 2; i++){
-    for (int j = i+1; j < ((inp_arr[1]==inp_arr[2])? 2 : 3); j++){
-      std::array<unsigned int,3> arr = inp_arr;
-      if (arr[i] != arr[j]){ // if i and j are different, swap and store
-        swap(arr[i], arr[j]);
-        signCombinations(list, arr);
-        if (i!=1 && arr[1]!=arr[2]){ // if 1 and 2 are different, swap and store
-          swap(arr[1], arr[2]);
-          signCombinations(list, arr);
-        }
-      }
-    }
-  }
-  return list;
-}
-
-void Voxel::findClosest(const std::array<unsigned int,3>& index){
-  // assume type to be excluded
-  type = 0b00000101;
-  // calculate upper bound for neighbour voxels and medium bound
-  unsigned int upp_lim = 3*std::pow(int(s_r_probe1/(std::sqrt(3)*s_grid_size))+1,2);
-
-  std::array<unsigned int,3> gridsteps = s_cell->getGridsteps(); // TODO: generalise for any depth
-  // iterate over neighbours
-  for (unsigned int n = 0; n < upp_lim; n++){
-  // check whether neighbour of type core is inside bounds from space class (add static member)
-    // get all combinations of thee integers whose sum equals n
-    std::vector<std::array<unsigned int,3>> list_of_roots = sumOfThreeSquares(n);
-    for (std::array<unsigned int,3> roots : list_of_roots){
-      // get all sign combinations for each integer combinations
-      std::vector<std::array<int,3>> perm = logPermutations(roots); // TODO: consider computing once rather than every time
-      for (std::array<int,3> coord : perm){
-        // add central index array and coord array
-        for (char i = 0; i < 3; i++){
-          coord[i] = coord[i] + index[i];
-        }
-        // check whether coord is inside cell bounds
-        bool in_bounds = true;
-        for (char i = 0; i < 3; i++){
-          in_bounds &= coord[i] >= 0 && coord[i] < gridsteps[i];
-        }
-        // if neighbour type is core, then set this voxel to shell
-        if (in_bounds){
-          char n_type = (s_cell->getVoxel(coord,0)).getType(); // TODO: GENERALISE FOR ANY LVL
-          if (n_type == 0b00001001){
-            type = 0b00010001;
-            return;
-          }
-        }
-      }
-    }
-  }
-}
+///////////////////////////////
+// TYPE ASSIGNMENT 2ND ROUND //
+///////////////////////////////
 
 char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const unsigned lvl){
   // if voxel (including all subvoxels) have been assigned, then return immediately
   if (readBit(type,0)){return type;}
   // if voxel has no children 
-  else if (data.empty()){
+  else if (!hasSubvoxel()){
     findClosest(index);
   }
   else {
@@ -303,39 +223,116 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
   return type;
 }
 
+void Voxel::findClosest(const std::array<unsigned int,3>& index){
+  // assume type to be excluded
+  type = 0b00000101;
+  
+  std::array<unsigned int,3> gridsteps = s_cell->getGridsteps(); // TODO: generalise for any depth
+  // iterate over neighbours
+  for (int n = 1; n < Voxel::s_search_indices.size(); n++){
+    for (std::array<int,3> coord : Voxel::s_search_indices[n]){
+      // add central index array and coord array
+      for (char i = 0; i < 3; i++){
+        coord[i] = coord[i] + index[i];
+      }
+      // check whether coord is inside cell bounds
+      bool in_bounds = true;
+      for (char i = 0; i < 3; i++){
+        in_bounds &= coord[i] >= 0 && coord[i] < gridsteps[i];
+      }
+      // if neighbour type is core, then set this voxel to shell
+      if (in_bounds){
+        char n_type = (s_cell->getVoxel(coord,0)).getType(); // TODO: GENERALISE FOR ANY LVL
+        if (n_type == 0b00001001){
+          type = 0b00010001;
+          return;
+        }
+      }
+    }
+  }
+}
+
+// called in storeUniversal
+std::vector<std::array<unsigned int,3>> sumOfThreeSquares(unsigned long int);
+std::vector<std::array<int,3>> logPermutations(const std::array<unsigned int,3>);
+void signCombinations(std::vector<std::array<int,3>>&, std::array<int,3>);
+void signCombinations(std::vector<std::array<int,3>>&, std::array<unsigned int,3>);
+
+void Voxel::computeIndices(){
+  s_search_indices.clear();
+  // calculate upper bound for neighbour voxels and medium bound
+  unsigned int upp_lim = 3*std::pow(int(s_r_probe1/(std::sqrt(3)*s_grid_size))+1,2); 
+  for (unsigned int n = 0; n <= upp_lim; n++){
+    // get all combinations of thee integers whose sum equals n
+    std::vector<std::array<unsigned int,3>> list_of_roots = sumOfThreeSquares(n);
+    for (std::array<unsigned int,3> roots : list_of_roots){
+      // get all sign combinations for each integer combinations
+      s_search_indices.push_back(logPermutations(roots)); // TODO: consider computing once rather than every time
+    }
+  }
+}
+
+// list all unique combinations of three integers, whose sum added results in n
+std::vector<std::array<unsigned int,3>> sumOfThreeSquares(unsigned long int n){
+  std::vector<std::array<unsigned int,3>> list_of_roots;
+  std::array<unsigned int,3> roots;
+  for (unsigned int x = 0; x <= std::sqrt(n); x++){
+    unsigned int diff = n - std::pow(x,2);
+    for (unsigned int y = x; y <= std::sqrt(diff); y++){
+      unsigned int z_sqr = diff - pow(y,2);
+      unsigned int z = std::sqrt(z_sqr);
+      if (z_sqr == std::pow(z,2) && z >= y){
+        list_of_roots.push_back({x,y,z});
+      }
+    }
+  }
+  return list_of_roots;
+}
+
+// given an array of size three, return all permutations of those three numbers
+std::vector<std::array<int,3>> logPermutations(const std::array<unsigned int,3> inp_arr){
+  std::vector<std::array<int,3>> list;
+  signCombinations(list, inp_arr); // initial order
+  for (int i = 0; i < 2; i++){
+    for (int j = i+1; j < ((inp_arr[1]==inp_arr[2])? 2 : 3); j++){
+      std::array<unsigned int,3> arr = inp_arr;
+      if (arr[i] != arr[j]){ // if i and j are different, swap and store
+        swap(arr[i], arr[j]);
+        signCombinations(list, arr);
+        if (i!=1 && arr[1]!=arr[2]){ // if 1 and 2 are different, swap and store
+          swap(arr[1], arr[2]);
+          signCombinations(list, arr);
+        }
+      }
+    }
+  }
+  return list;
+}
+
+// to a vector, append all sign combinations of the number in an array of size 3
+void signCombinations(std::vector<std::array<int,3>>& list, std::array<int,3> arr){
+  // following two lines check whether any element is zero
+  for (int sign = 0; sign < ((arr[2]==0)? 4 : 8); sign += ((arr[0]==0)? 2 : 1)){ // loop over sign combinations
+    if (arr[1]==0 && sign%4 > 1){continue;} // skip if middle element is 0
+    list.push_back({
+      static_cast<int>((pow(-1, sign    %2))*arr[0]),
+      static_cast<int>((pow(-1,(sign/2) %2))*arr[1]),
+      static_cast<int>((pow(-1,(sign/4) %2))*arr[2])
+    });
+  }
+}
+
+void signCombinations(std::vector<std::array<int,3>>& list, std::array<unsigned int,3> inp_arr){
+  std::array<int,3> arr;
+  for (char i = 0; i < 3; i++){arr[i] = int(inp_arr[i]);}
+  signCombinations(list, arr);
+}
+
 ////////////////////
 // CHECK FOR TYPE //
 ////////////////////
 
-// assign a type based on the distance between a voxel and an atom
-bool Voxel::isAtom(const Atom& atom, const Vector& pos_vxl, const double rad_vxl, const double rad_probe){
-  Vector dist = pos_vxl - atom.getPosVec();
-  if(dist < atom.getRad() - rad_vxl){
-    type = 0;
-    setBitOn(type,1); // inside atom
-    setBitOn(type,0); // assigned
-    return true;
-  }
-  else if (dist < atom.getRad() + rad_vxl){
-    if (readBit(type,1)){return false;} // if inside atom
-    type = 0;
-    setBitOn(type,1); // potentially inside atom
-    setBitOn(type,7); // mixed
-  }
-  else if (dist < atom.getRad() + rad_probe - rad_vxl){
-    if (readBit(type,1)){return false;} // if mixed or inside atom
-    type = 0;
-    setBitOn(type,4); // potential shell
-  } 
-  else if (dist < atom.getRad() + rad_probe + rad_vxl){
-    if (readBit(type,4) || readBit(type,1)){return false;} // if mixed, inside atom, or potential shell
-    type = 0;
-    setBitOn(type,4); // potentially shell
-    setBitOn(type,7); // mixed
-  }
-  return false;
-}
-
+// not currently used
 bool Voxel::isProbeExcluded(const Vector& vxl_pos, const double& r_probe, const double& radius_of_influence, const std::vector<int>& close_atom_ids){
 
   if(type == 'm'){return false;} // type 'm' can never be changed by probe
