@@ -24,6 +24,7 @@ class Space{
     std::array <double,3> getSize();
     Voxel& getVoxel(unsigned int, unsigned int, unsigned int, int);
     Voxel& getVoxel(std::array<int,3>, int);
+    bool coordInBounds(const std::array<int,3>&);
     double getResolution() const;
 
     Voxel& getElement(const unsigned int);

@@ -56,9 +56,9 @@ bool Voxel::hasSubvoxel(){return !data.empty();}
 char Voxel::getType(){return type;}
 void Voxel::setType(char input){type = input;}
 
-//////////////
-// SET TYPE //
-//////////////
+/////////////////////////////////
+// TYPE ASSIGNMENT PREPARATION //
+/////////////////////////////////
 
 // function to call before beginning the type assignment routine in order to prepare static variables
 void Voxel::storeUniversal(Space* cell, AtomTree atomtree, double grid_size, double r_probe1, int max_depth){
@@ -71,6 +71,83 @@ void Voxel::storeUniversal(Space* cell, AtomTree atomtree, double grid_size, dou
   //
   s_pair_data.clear();
   s_triplet_data.clear();
+}
+
+// needed for second part of type assignment
+std::vector<std::array<unsigned int,3>> sumOfThreeSquares(unsigned long int);
+std::vector<std::array<int,3>> logPermutations(const std::array<unsigned int,3>);
+void signCombinations(std::vector<std::array<int,3>>&, std::array<int,3>);
+void signCombinations(std::vector<std::array<int,3>>&, std::array<unsigned int,3>);
+
+void Voxel::computeIndices(){
+  s_search_indices.clear();
+  // calculate upper bound for neighbour voxels and medium bound
+  unsigned int upp_lim = int(s_r_probe1/s_grid_size+0.0001);
+  upp_lim = std::pow(upp_lim,2)+upp_lim; 
+  for (unsigned int n = 0; n <= upp_lim; n++){
+    // get all combinations of three integers whose sum equals n
+    std::vector<std::array<unsigned int,3>> list_of_roots = sumOfThreeSquares(n);
+    for (std::array<unsigned int,3> roots : list_of_roots){
+      // get all sign combinations for each integer combinations
+      s_search_indices.push_back(logPermutations(roots));
+    }
+  }
+}
+
+// list all unique combinations of three integers, whose sum added results in n
+std::vector<std::array<unsigned int,3>> sumOfThreeSquares(unsigned long int n){
+  std::vector<std::array<unsigned int,3>> list_of_roots;
+  std::array<unsigned int,3> roots;
+  for (unsigned int x = 0; x <= std::sqrt(n); x++){
+    unsigned int diff = n - std::pow(x,2);
+    for (unsigned int y = x; y <= std::sqrt(diff); y++){
+      unsigned int z_sqr = diff - pow(y,2);
+      unsigned int z = std::sqrt(z_sqr);
+      if (z_sqr == std::pow(z,2) && z >= y){
+        list_of_roots.push_back({x,y,z});
+      }
+    }
+  }
+  return list_of_roots;
+}
+
+// given an array of size three, return all permutations of those three numbers
+std::vector<std::array<int,3>> logPermutations(const std::array<unsigned int,3> inp_arr){
+  std::vector<std::array<int,3>> list;
+  signCombinations(list, inp_arr); // initial order
+  for (int i = 0; i < 2; i++){
+    for (int j = i+1; j < ((inp_arr[1]==inp_arr[2])? 2 : 3); j++){
+      std::array<unsigned int,3> arr = inp_arr;
+      if (arr[i] != arr[j]){ // if i and j are different, swap and store
+        swap(arr[i], arr[j]);
+        signCombinations(list, arr);
+        if (i!=1 && arr[1]!=arr[2]){ // if 1 and 2 are different, swap and store
+          swap(arr[1], arr[2]);
+          signCombinations(list, arr);
+        }
+      }
+    }
+  }
+  return list;
+}
+
+// to a vector, append all sign combinations of the number in an array of size 3
+void signCombinations(std::vector<std::array<int,3>>& list, std::array<int,3> arr){
+  // following two lines check whether any element is zero
+  for (int sign = 0; sign < ((arr[2]==0)? 4 : 8); sign += ((arr[0]==0)? 2 : 1)){ // loop over sign combinations
+    if (arr[1]==0 && sign%4 > 1){continue;} // skip if middle element is 0
+    list.push_back({
+      static_cast<int>((pow(-1, sign    %2))*arr[0]),
+      static_cast<int>((pow(-1,(sign/2) %2))*arr[1]),
+      static_cast<int>((pow(-1,(sign/4) %2))*arr[2])
+    });
+  }
+}
+
+void signCombinations(std::vector<std::array<int,3>>& list, std::array<unsigned int,3> inp_arr){
+  std::array<int,3> arr;
+  for (char i = 0; i < 3; i++){arr[i] = int(inp_arr[i]);}
+  signCombinations(list, arr);
 }
 
 ///////////////////////////////
@@ -214,7 +291,6 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
         index_subvxl[1] = index[1]*2 + y;
         for (char z = 0; z < 2; z++){
           index_subvxl[2] = index[2]*2 + z;
-          // check type is unassigned
           getSubvoxel(x,y,z).evalRelationToVoxels(index_subvxl, lvl-1);
         }
       }
@@ -224,24 +300,20 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
 }
 
 void Voxel::findClosest(const std::array<unsigned int,3>& index){
+  // TODO: add a new case when lvl is != 0
   // assume type to be excluded
   type = 0b00000101;
   
   std::array<unsigned int,3> gridsteps = s_cell->getGridsteps(); // TODO: generalise for any depth
   // iterate over neighbours
-  for (int n = 1; n < Voxel::s_search_indices.size(); n++){
+  for (int n = Voxel::s_search_indices.size()-1; n > 0; n--){
     for (std::array<int,3> coord : Voxel::s_search_indices[n]){
       // add central index array and coord array
       for (char i = 0; i < 3; i++){
         coord[i] = coord[i] + index[i];
       }
-      // check whether coord is inside cell bounds
-      bool in_bounds = true;
-      for (char i = 0; i < 3; i++){
-        in_bounds &= coord[i] >= 0 && coord[i] < gridsteps[i];
-      }
       // if neighbour type is core, then set this voxel to shell
-      if (in_bounds){
+      if (s_cell->coordInBounds(coord)){
         char n_type = (s_cell->getVoxel(coord,0)).getType(); // TODO: GENERALISE FOR ANY LVL
         if (n_type == 0b00001001){
           type = 0b00010001;
@@ -250,82 +322,6 @@ void Voxel::findClosest(const std::array<unsigned int,3>& index){
       }
     }
   }
-}
-
-// called in storeUniversal
-std::vector<std::array<unsigned int,3>> sumOfThreeSquares(unsigned long int);
-std::vector<std::array<int,3>> logPermutations(const std::array<unsigned int,3>);
-void signCombinations(std::vector<std::array<int,3>>&, std::array<int,3>);
-void signCombinations(std::vector<std::array<int,3>>&, std::array<unsigned int,3>);
-
-void Voxel::computeIndices(){
-  s_search_indices.clear();
-  // calculate upper bound for neighbour voxels and medium bound
-  unsigned int upp_lim = 3*std::pow(int(s_r_probe1/(std::sqrt(3)*s_grid_size))+1,2); 
-  for (unsigned int n = 0; n <= upp_lim; n++){
-    // get all combinations of thee integers whose sum equals n
-    std::vector<std::array<unsigned int,3>> list_of_roots = sumOfThreeSquares(n);
-    for (std::array<unsigned int,3> roots : list_of_roots){
-      // get all sign combinations for each integer combinations
-      s_search_indices.push_back(logPermutations(roots)); // TODO: consider computing once rather than every time
-    }
-  }
-}
-
-// list all unique combinations of three integers, whose sum added results in n
-std::vector<std::array<unsigned int,3>> sumOfThreeSquares(unsigned long int n){
-  std::vector<std::array<unsigned int,3>> list_of_roots;
-  std::array<unsigned int,3> roots;
-  for (unsigned int x = 0; x <= std::sqrt(n); x++){
-    unsigned int diff = n - std::pow(x,2);
-    for (unsigned int y = x; y <= std::sqrt(diff); y++){
-      unsigned int z_sqr = diff - pow(y,2);
-      unsigned int z = std::sqrt(z_sqr);
-      if (z_sqr == std::pow(z,2) && z >= y){
-        list_of_roots.push_back({x,y,z});
-      }
-    }
-  }
-  return list_of_roots;
-}
-
-// given an array of size three, return all permutations of those three numbers
-std::vector<std::array<int,3>> logPermutations(const std::array<unsigned int,3> inp_arr){
-  std::vector<std::array<int,3>> list;
-  signCombinations(list, inp_arr); // initial order
-  for (int i = 0; i < 2; i++){
-    for (int j = i+1; j < ((inp_arr[1]==inp_arr[2])? 2 : 3); j++){
-      std::array<unsigned int,3> arr = inp_arr;
-      if (arr[i] != arr[j]){ // if i and j are different, swap and store
-        swap(arr[i], arr[j]);
-        signCombinations(list, arr);
-        if (i!=1 && arr[1]!=arr[2]){ // if 1 and 2 are different, swap and store
-          swap(arr[1], arr[2]);
-          signCombinations(list, arr);
-        }
-      }
-    }
-  }
-  return list;
-}
-
-// to a vector, append all sign combinations of the number in an array of size 3
-void signCombinations(std::vector<std::array<int,3>>& list, std::array<int,3> arr){
-  // following two lines check whether any element is zero
-  for (int sign = 0; sign < ((arr[2]==0)? 4 : 8); sign += ((arr[0]==0)? 2 : 1)){ // loop over sign combinations
-    if (arr[1]==0 && sign%4 > 1){continue;} // skip if middle element is 0
-    list.push_back({
-      static_cast<int>((pow(-1, sign    %2))*arr[0]),
-      static_cast<int>((pow(-1,(sign/2) %2))*arr[1]),
-      static_cast<int>((pow(-1,(sign/4) %2))*arr[2])
-    });
-  }
-}
-
-void signCombinations(std::vector<std::array<int,3>>& list, std::array<unsigned int,3> inp_arr){
-  std::array<int,3> arr;
-  for (char i = 0; i < 3; i++){arr[i] = int(inp_arr[i]);}
-  signCombinations(list, arr);
 }
 
 ////////////////////
