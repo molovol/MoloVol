@@ -99,6 +99,7 @@ bool Ctrl::unittestRadius(){
     if(data.success){
   
       printf("f: %40s, g: %4.1f, d: %4i, r: %4.1f\n", atom_filepath.c_str(), grid_step, max_depth, rad_probe1);
+      printf("vdW: %20.10f, Excluded: %20.10f\n", data.volumes[0b00000011], data.volumes[0b00000101]);
       printf("Time elapsed: %10.5f s\n", data.getTime());
     }
     else{

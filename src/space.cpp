@@ -240,6 +240,14 @@ Voxel& Space::getVoxel(unsigned int x, unsigned int y, unsigned int z, int lvl){
 Voxel& Space::getVoxel(std::array<int,3> arr, int lvl){
   return getVoxel(arr[0], arr[1], arr[2], lvl);
 }
+      
+// check whether coord is inside grid bounds
+bool Space::coordInBounds(const std::array<int,3>& coord){
+  for (char i = 0; i < 3; i++){
+    if(coord[i] < 0 || coord[i] >= n_gridsteps[i]){return false;}
+  }
+  return true;
+}
 
 std::array<unsigned int,3> Space::getGridsteps(){
   return n_gridsteps;
