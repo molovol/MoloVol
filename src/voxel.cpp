@@ -281,11 +281,10 @@ void Voxel::listFromTree(
 char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const unsigned lvl){
   // if voxel (including all subvoxels) have been assigned, then return immediately
   if (readBit(type,0)){return type;}
-  // if voxel has no children 
-  else if (!hasSubvoxel()){
+  else if (!hasSubvoxel()){ // vxl has no children
     findClosest(index, lvl);
   }
-  else {
+  else { // vxl has children
     std::array<unsigned int,3> index_subvxl;
     for (char x = 0; x < 2; x++){
       index_subvxl[0] = index[0]*2 + x;
@@ -297,19 +296,36 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
         }
       }
     }
+    setType(mergeTypes(data));
+  }
+  if (!readBit(type,0)){ // if voxel not assigned
+    splitVoxel(index, lvl);
   }
   return type;
 }
 
-template <typename T1, typename T2>
-std::array<T1,3> add(std::array<T1,3> arr1, const std::array<T2,3>& arr2){
-  for (char i = 0; i < 3; i++){
-    arr1[i] += arr2[i];
+// adds an array of size 8 to the voxel that contains 8 subvoxels and evaluates each subvoxel's type
+void Voxel::splitVoxel(const std::array<unsigned int,3>& vxl_ind, const unsigned lvl){
+  data = std::vector<Voxel>(8); 
+  std::array<unsigned int,3> subvxl_ind;
+  for (char x = 0; x < 2; x++){
+    subvxl_ind[0] = vxl_ind[0]*2 + x;
+    for (char y = 0; y < 2; y++){
+      subvxl_ind[1] = vxl_ind[1]*2 + y;
+      for (char z = 0; z < 2; z++){
+        subvxl_ind[2] = vxl_ind[2]*2 + z;
+        getSubvoxel(x,y,z).evalRelationToVoxels(subvxl_ind, lvl-1);
+      }
+    }
   }
-  return arr1;
+  setType(mergeTypes(data));
 }
 
 void Voxel::findClosest(const std::array<unsigned int,3>& index, const unsigned lvl){
+  if(lvl > 0){
+    type = 0;
+    return;
+  }
   type = 0b00000101; // type excluded
 
   // maximum distance between neighbour voxels that need to be assessed (in units of voxel side length at lvl)
@@ -326,14 +342,14 @@ void Voxel::findClosest(const std::array<unsigned int,3>& index, const unsigned 
         coord[i] = coord[i] + index[i];
       }
       // if neighbour type is core, then set this voxel to shell
-      if (s_cell->coordInBounds(coord)){
+      if (s_cell->coordInBounds(coord, lvl)){
         char n_type = (s_cell->getVoxel(coord,lvl)).getType();
         if (n_type == 0b00001001){
           if (n <= safe_lim){
             type = 0b00010001; // type shell
           }
           else {
-            type = 0b10000000; // type mixed
+//            type = 0; // split voxel later
           }
           return;
         }

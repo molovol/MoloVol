@@ -242,9 +242,9 @@ Voxel& Space::getVoxel(std::array<int,3> arr, int lvl){
 }
       
 // check whether coord is inside grid bounds
-bool Space::coordInBounds(const std::array<int,3>& coord){
+bool Space::coordInBounds(const std::array<int,3>& coord, const unsigned lvl){
   for (char i = 0; i < 3; i++){
-    if(coord[i] < 0 || coord[i] >= n_gridsteps[i]){return false;}
+    if(coord[i] < 0 || coord[i] >= n_gridsteps[i] * std::pow(2,max_depth-lvl)){return false;}
   }
   return true;
 }
@@ -343,6 +343,7 @@ void Space::printGrid(){
         char to_print = (getVoxel(x,y,z,max_depth-depth).getType() == 0b00000011)? 'A' : 'O';
         if (!readBit(getVoxel(x,y,z,max_depth-depth).getType(),0)){to_print = '?';}
         if (getVoxel(x,y,z,max_depth-depth).getType() == 0b00010001){to_print = 'S';}
+        if (getVoxel(x,y,z,max_depth-depth).getType() == 0b00000101){to_print = 'X';}
         
         std::cout << to_print << " ";
       }
