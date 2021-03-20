@@ -79,7 +79,7 @@ class Voxel{
 
     bool isAtom(const Atom&, const Vector&, const double, const double);
 
-    void findClosest(const std::array<unsigned int,3>&);
+    void findClosest(const std::array<unsigned int,3>&, const unsigned);
     // DEPRECIATED
     bool isProbeExcluded(const Vector& vxl_pos, const double& r_probe, const double&, const std::vector<int>&);
     bool isExcludedByPair(const Vector&, const Vector&, const double&, const double&, const double&, const double&, int);

@@ -81,15 +81,17 @@ void signCombinations(std::vector<std::array<int,3>>&, std::array<unsigned int,3
 
 void Voxel::computeIndices(){
   s_search_indices.clear();
-  // calculate upper bound for neighbour voxels and medium bound
-  unsigned int upp_lim = int(s_r_probe1/s_grid_size+0.0001);
-  upp_lim = std::pow(upp_lim,2)+upp_lim; 
+  // calculate upper bound for neighbour voxels
+  unsigned int upp_lim = std::pow(s_r_probe1/s_grid_size + std::sqrt(2)/4,2);
+  
+  s_search_indices = std::vector<std::vector<std::array<int,3>>>(upp_lim+1);
   for (unsigned int n = 0; n <= upp_lim; n++){
     // get all combinations of three integers whose sum equals n
     std::vector<std::array<unsigned int,3>> list_of_roots = sumOfThreeSquares(n);
     for (std::array<unsigned int,3> roots : list_of_roots){
-      // get all sign combinations for each integer combinations
-      s_search_indices.push_back(logPermutations(roots));
+      // get all sign combinations for each integer combination
+      std::vector<std::array<int,3>> temp = logPermutations(roots);
+      s_search_indices[n].insert(std::end(s_search_indices[n]), std::begin(temp), std::end(temp));
     }
   }
 }
@@ -281,7 +283,7 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
   if (readBit(type,0)){return type;}
   // if voxel has no children 
   else if (!hasSubvoxel()){
-    findClosest(index);
+    findClosest(index, lvl);
   }
   else {
     std::array<unsigned int,3> index_subvxl;
@@ -299,24 +301,40 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
   return type;
 }
 
-void Voxel::findClosest(const std::array<unsigned int,3>& index){
-  // TODO: add a new case when lvl is != 0
-  // assume type to be excluded
-  type = 0b00000101;
-  
-  std::array<unsigned int,3> gridsteps = s_cell->getGridsteps(); // TODO: generalise for any depth
-  // iterate over neighbours
-  for (int n = Voxel::s_search_indices.size()-1; n > 0; n--){
+template <typename T1, typename T2>
+std::array<T1,3> add(std::array<T1,3> arr1, const std::array<T2,3>& arr2){
+  for (char i = 0; i < 3; i++){
+    arr1[i] += arr2[i];
+  }
+  return arr1;
+}
+
+void Voxel::findClosest(const std::array<unsigned int,3>& index, const unsigned lvl){
+  type = 0b00000101; // type excluded
+
+  // maximum distance between neighbour voxels that need to be assessed (in units of voxel side length at lvl)
+  double max_dist = s_r_probe1/(s_grid_size*std::pow(2,lvl)) + std::sqrt(2)/4;
+  // squared max distance between neighbours, where voxels do not have to be split
+  unsigned int safe_lim = std::pow( max_dist - ((1-1/std::pow(2,lvl)) * std::sqrt(3)/2) , 2);
+  // squared max distance between neighbours, that need to be assessed
+  unsigned int upp_lim = std::pow(max_dist,2);
+
+  for (int n = 0; n <= upp_lim; ++n){
     for (std::array<int,3> coord : Voxel::s_search_indices[n]){
-      // add central index array and coord array
+      //coord = add(coord, index);
       for (char i = 0; i < 3; i++){
         coord[i] = coord[i] + index[i];
       }
       // if neighbour type is core, then set this voxel to shell
       if (s_cell->coordInBounds(coord)){
-        char n_type = (s_cell->getVoxel(coord,0)).getType(); // TODO: GENERALISE FOR ANY LVL
+        char n_type = (s_cell->getVoxel(coord,lvl)).getType();
         if (n_type == 0b00001001){
-          type = 0b00010001;
+          if (n <= safe_lim){
+            type = 0b00010001; // type shell
+          }
+          else {
+            type = 0b10000000; // type mixed
+          }
           return;
         }
       }
