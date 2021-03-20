@@ -49,6 +49,7 @@ class Voxel{
     void traverseTree(const AtomNode*, const double&, const Vector&, const double&, const double&, const int&, 
         const char = 0b00000011, const char = 0); 
     void splitVoxel(const Vector&, const double&); 
+    void splitVoxel(const std::array<unsigned int,3>&, const unsigned);
         
     char evalRelationToVoxels(const std::array<unsigned int,3>&, const unsigned);
     

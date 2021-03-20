@@ -33,6 +33,13 @@ void swap(T& i, T& j){
   j = temp;
 }
 
+template <typename T1, typename T2>
+std::array<T1,3> add(std::array<T1,3> arr1, const std::array<T2,3>& arr2){
+  for (char i = 0; i < 3; i++){
+    arr1[i] += arr2[i];
+  }
+  return arr1;
+}
 
 ////////////////////
 // BIT OPERATIONS //
