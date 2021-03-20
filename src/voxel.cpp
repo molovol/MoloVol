@@ -322,10 +322,6 @@ void Voxel::splitVoxel(const std::array<unsigned int,3>& vxl_ind, const unsigned
 }
 
 void Voxel::findClosest(const std::array<unsigned int,3>& index, const unsigned lvl){
-  if(lvl > 0){
-    type = 0;
-    return;
-  }
   type = 0b00000101; // type excluded
 
   // maximum distance between neighbour voxels that need to be assessed (in units of voxel side length at lvl)
@@ -333,9 +329,10 @@ void Voxel::findClosest(const std::array<unsigned int,3>& index, const unsigned 
   // squared max distance between neighbours, where voxels do not have to be split
   unsigned int safe_lim = std::pow( max_dist - ((1-1/std::pow(2,lvl)) * std::sqrt(3)/2) , 2);
   // squared max distance between neighbours, that need to be assessed
-  unsigned int upp_lim = std::pow(max_dist,2);
+  unsigned int upp_lim = std::pow( max_dist + std::ceil( ((1-1/std::pow(2,lvl)) * std::sqrt(3)/2) ) , 2);
+  std::cout << upp_lim << " " << Voxel::s_search_indices.size() << std::endl;
 
-  for (int n = 0; n <= upp_lim; ++n){
+  for (int n = upp_lim; n > 0; --n){
     for (std::array<int,3> coord : Voxel::s_search_indices[n]){
       //coord = add(coord, index);
       for (char i = 0; i < 3; i++){
@@ -349,7 +346,7 @@ void Voxel::findClosest(const std::array<unsigned int,3>& index, const unsigned 
             type = 0b00010001; // type shell
           }
           else {
-//            type = 0; // split voxel later
+            type = 0; // split voxel later
           }
           return;
         }

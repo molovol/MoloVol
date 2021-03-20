@@ -88,7 +88,7 @@ CalcResultBundle Model::calcVolume(){
   auto end = std::chrono::steady_clock::now();
   data.type_assignment_elapsed_seconds = std::chrono::duration<double>(end-start).count();
   
-  //_cell.printGrid(); // for testing
+  _cell.printGrid(); // for testing
   
   start = std::chrono::steady_clock::now();
   data.volumes = _cell.getVolume();
