@@ -65,10 +65,10 @@ void Model::writeXYZfile(std::vector<std::tuple<std::string, double, double, dou
 void Model::writeSurfaceMap(std::string output_dir){
   
   // assemble data
-  Container3D<char> surface_map = cell.generateTypeTensor();
+  Container3D<char> surface_map = _cell.generateTypeTensor();
   // save commonly used variable
   std::array<unsigned long int,3> n_elements = surface_map.getNumElements();
-  double vxl_length = cell.getResolution();
+  double vxl_length = _cell.getResolution();
   // create map for assigning numbers to types
   std::map<char,int> typeToNum = 
     {{0b00000011, 0},
@@ -97,7 +97,7 @@ void Model::writeSurfaceMap(std::string output_dir){
   // line
   output_file << "origin ";
   for (char i = 0; i < 3; i++){
-    output_file << ' ' << cell.getMin()[i] + vxl_length/2;
+    output_file << ' ' << _cell.getMin()[i] + vxl_length/2;
   }
   output_file << '\n';
   // 3 lines
@@ -115,7 +115,7 @@ void Model::writeSurfaceMap(std::string output_dir){
   }
   output_file << '\n';
   // line
-  output_file << "object 3 class array type float rank 0 items " << cell.totalVxlOnLvl(0) << "\n";
+  output_file << "object 3 class array type float rank 0 items " << _cell.totalVxlOnLvl(0) << "\n";
   // data
   int column = 0;
   for(size_t x = 0; x < n_elements[0]; x++){

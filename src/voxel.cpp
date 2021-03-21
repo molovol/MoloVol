@@ -222,7 +222,16 @@ void Voxel::traverseTree
 // assign a type based on the distance between a voxel and an atom
 bool Voxel::isAtom(const Atom& atom, const Vector& pos_vxl, const double rad_vxl, const double rad_probe){
   Vector dist = pos_vxl - atom.getPosVec();
-  if(dist < atom.getRad() - rad_vxl){
+  /*
+  printf("VXL");
+  pos_vxl.print();
+  printf("ATOM");
+  atom.getPosVec().print();
+  printf("DIST");
+  dist.print();
+  printf("ATOM RAD: %2.6f; VXL RAD: %2.6f", atom.getRad(), rad_vxl)*/
+
+  if((dist < atom.getRad() - rad_vxl) && (0 < atom.getRad() - rad_vxl)){
     type = 0b00000011;
     return true;
   }
@@ -230,7 +239,7 @@ bool Voxel::isAtom(const Atom& atom, const Vector& pos_vxl, const double rad_vxl
     if (readBit(type,1)){return false;} // if inside atom
     type = 0b10000010;
   }
-  else if (dist < atom.getRad() + rad_probe - rad_vxl){
+  else if ((dist < atom.getRad() + rad_probe - rad_vxl) && (0 < atom.getRad() + rad_probe - rad_vxl)){
     if (readBit(type,1)){return false;} // if mixed or inside atom
     type = 0b00010000;
   } 
@@ -330,7 +339,6 @@ void Voxel::findClosest(const std::array<unsigned int,3>& index, const unsigned 
   unsigned int safe_lim = std::pow( max_dist - ((1-1/std::pow(2,lvl)) * std::sqrt(3)/2) , 2);
   // squared max distance between neighbours, that need to be assessed
   unsigned int upp_lim = std::pow( max_dist + std::ceil( ((1-1/std::pow(2,lvl)) * std::sqrt(3)/2) ) , 2);
-  std::cout << upp_lim << " " << Voxel::s_search_indices.size() << std::endl;
 
   for (int n = upp_lim; n > 0; --n){
     for (std::array<int,3> coord : Voxel::s_search_indices[n]){
