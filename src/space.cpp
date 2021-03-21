@@ -107,7 +107,7 @@ void Space::placeAtomsInGrid(const AtomTree& atomtree, const double& r_probe){
     }
     printf("%i%% done\n", int(100*(double(x)+1)/double(n_gridsteps[0])));
   }
-
+  // TODO: Wrap this in function
   std::array<unsigned int,3> vxl_index;
   for(vxl_index[0] = 0; vxl_index[0] < n_gridsteps[0]; vxl_index[0]++){
     for(vxl_index[1] = 0; vxl_index[1] < n_gridsteps[1]; vxl_index[1]++){

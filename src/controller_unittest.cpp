@@ -82,10 +82,10 @@ bool Ctrl::unittestRadius(){
   if(current_calculation == NULL){current_calculation = new Model();}
  
   // parameters for unittest:
-  const std::string atom_filepath = "./inputfile/probetest_pair.xyz";
+  const std::string atom_filepath = "./inputfile/hydrogen.xyz";
   const std::string radius_filepath = "./inputfile/radii.txt";
   const double grid_step = 0.1;
-  const int max_depth = 1;
+  const int max_depth = 6;
   
   std::unordered_map<std::string, double> rad_map = current_calculation->importRadiusMap(radius_filepath);
   
