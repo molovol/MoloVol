@@ -222,14 +222,6 @@ void Voxel::traverseTree
 // assign a type based on the distance between a voxel and an atom
 bool Voxel::isAtom(const Atom& atom, const Vector& pos_vxl, const double rad_vxl, const double rad_probe){
   Vector dist = pos_vxl - atom.getPosVec();
-  /*
-  printf("VXL");
-  pos_vxl.print();
-  printf("ATOM");
-  atom.getPosVec().print();
-  printf("DIST");
-  dist.print();
-  printf("ATOM RAD: %2.6f; VXL RAD: %2.6f", atom.getRad(), rad_vxl)*/
 
   if((dist < atom.getRad() - rad_vxl) && (0 < atom.getRad() - rad_vxl)){
     type = 0b00000011;
@@ -338,18 +330,15 @@ void Voxel::findClosest(const std::array<unsigned int,3>& index, const unsigned 
   // squared max distance between neighbours, where voxels do not have to be split
   unsigned int safe_lim = std::pow( max_dist - ((1-1/std::pow(2,lvl)) * std::sqrt(3)/2) , 2);
   // squared max distance between neighbours, that need to be assessed
-  unsigned int upp_lim = std::pow( max_dist + std::ceil( ((1-1/std::pow(2,lvl)) * std::sqrt(3)/2) ) , 2);
+  unsigned int upp_lim = std::pow( max_dist + ((1-1/std::pow(2,lvl)) * std::sqrt(3)*2 ) , 2);
 
   for (int n = upp_lim; n > 0; --n){
     for (std::array<int,3> coord : Voxel::s_search_indices[n]){
-      //coord = add(coord, index);
-      for (char i = 0; i < 3; i++){
-        coord[i] = coord[i] + index[i];
-      }
+      coord = add(coord, index);
       // if neighbour type is core, then set this voxel to shell
       if (s_cell->coordInBounds(coord, lvl)){
         char n_type = (s_cell->getVoxel(coord,lvl)).getType();
-        if (n_type == 0b00001001){
+        if (readBit(n_type,3)){
           if (n <= safe_lim){
             type = 0b00010001; // type shell
           }
