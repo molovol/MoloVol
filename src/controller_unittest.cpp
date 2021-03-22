@@ -82,28 +82,30 @@ bool Ctrl::unittestRadius(){
   if(current_calculation == NULL){current_calculation = new Model();}
  
   // parameters for unittest:
-  const std::string atom_filepath = "./inputfile/hydrogen.xyz";
+  const std::string atom_filepath = "./inputfile/probetest_quadruplet.xyz";
   const std::string radius_filepath = "./inputfile/radii.txt";
   const double grid_step = 0.1;
-  const int max_depth = 6;
-  
-  std::unordered_map<std::string, double> rad_map = current_calculation->importRadiusMap(radius_filepath);
-  
-  for (double rad_probe1 = 1.2; rad_probe1 < 1.25; rad_probe1 += 0.1){
-
-    CalcResultBundle data;
-    current_calculation->readAtomsFromFile(atom_filepath, false);
-    std::vector<std::string> included_elements = current_calculation->listElementsInStructure();
-    data = runCalculation(atom_filepath, grid_step, max_depth, rad_map, included_elements, rad_probe1);
+  int max_depth = 6;
+  for (max_depth = 0; max_depth < 3; max_depth++){
     
-    if(data.success){
+    std::unordered_map<std::string, double> rad_map = current_calculation->importRadiusMap(radius_filepath);
+    
+    for (double rad_probe1 = 1.2; rad_probe1 < 1.25; rad_probe1 += 0.1){
   
-      printf("f: %40s, g: %4.1f, d: %4i, r: %4.1f\n", atom_filepath.c_str(), grid_step, max_depth, rad_probe1);
-      printf("vdW: %20.10f, Excluded: %20.10f\n", data.volumes[0b00000011], data.volumes[0b00000101]);
-      printf("Time elapsed: %10.5f s\n", data.getTime());
-    }
-    else{
-      std::cout << "Calculation failed" << std::endl;
+      CalcResultBundle data;
+      current_calculation->readAtomsFromFile(atom_filepath, false);
+      std::vector<std::string> included_elements = current_calculation->listElementsInStructure();
+      data = runCalculation(atom_filepath, grid_step, max_depth, rad_map, included_elements, rad_probe1);
+      
+      if(data.success){
+    
+        printf("f: %40s, g: %4.1f, d: %4i, r: %4.1f\n", atom_filepath.c_str(), grid_step, max_depth, rad_probe1);
+        printf("vdW: %20.10f, Excluded: %20.10f\n", data.volumes[0b00000011], data.volumes[0b00000101]);
+        printf("Time elapsed: %10.5f s\n", data.getTime());
+      }
+      else{
+        std::cout << "Calculation failed" << std::endl;
+      }
     }
   }
   return true;
