@@ -30,6 +30,20 @@ struct TripletBundle {
 };
 // DEPRECIATED
 
+struct SearchIndex{
+  public:
+    SearchIndex();
+    SearchIndex(const double, const double, const unsigned int);
+    const std::vector<std::array<int,3>>& operator[](unsigned int);
+    unsigned int getUppLim(unsigned int);
+    unsigned int getSafeLim(unsigned int);
+    std::vector<std::vector<std::array<int,3>>> computeIndices(unsigned int);
+  private:
+    std::vector<std::vector<std::array<int,3>>> _index_list;
+    std::vector<unsigned> _upp_lim;
+    std::vector<unsigned> _safe_lim;
+};
+
 class Space;
 class AtomTree;
 struct Atom;
@@ -45,6 +59,7 @@ class Voxel{
 
     static void storeUniversal(Space*, AtomTree, double, double, int);
     static void computeIndices();
+    static void computeIndices(unsigned int);
     char evalRelationToAtoms(Vector, const int);
     void traverseTree(const AtomNode*, const double&, const Vector&, const double&, const double&, const int&, 
         const char = 0b00000011, const char = 0); 
@@ -70,7 +85,7 @@ class Voxel{
     static inline AtomTree s_atomtree;
     static inline double s_grid_size;
     static inline double s_r_probe1;
-    static inline std::vector<std::vector<std::array<int,3>>> s_search_indices;
+    static inline SearchIndex s_search_indices;
     // DEPRECIATED
     static inline std::unordered_map<unsigned long long int,TripletBundle> s_triplet_data;
     static inline std::unordered_map<int,PairBundle> s_pair_data;
@@ -80,7 +95,7 @@ class Voxel{
 
     bool isAtom(const Atom&, const Vector&, const double, const double);
 
-    void findClosest(const std::array<unsigned int,3>&, const unsigned);
+    void searchForCore(const std::array<unsigned int,3>&, const unsigned);
     // DEPRECIATED
     bool isProbeExcluded(const Vector& vxl_pos, const double& r_probe, const double&, const std::vector<int>&);
     bool isExcludedByPair(const Vector&, const Vector&, const double&, const double&, const double&, const double&, int);
