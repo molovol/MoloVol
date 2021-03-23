@@ -33,6 +33,7 @@ class Space{
     std::array<unsigned int,3> getGridsteps();
     unsigned long int totalVxlOnLvl(const int) const;
 
+    int getMaxDepth(){return max_depth;}
     // output
     Container3D<char> generateTypeTensor(); 
     void printGrid();

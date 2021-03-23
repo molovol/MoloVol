@@ -31,69 +31,63 @@ Vector calcProbeVectorNormal(const std::array<Vector,4>, const std::array<double
 bool isPointBetween(const Vector& vec_point, const Vector& vec_bounds);
 // DEPRECIATED
 
-/////////////////
-// CONSTRUCTOR //
-/////////////////
+/////////////////////////
+// SEARCH INDEX STRUCT //
+/////////////////////////
+// this struct is used to store the relative indices of neighbour voxels in increasing distance,
+// as well as the upper search distance limits for every level. this only needs to be created once
+// before the calculation
 
-Voxel::Voxel(){type = 0;}
-
-////////////
-// ACCESS //
-////////////
-
-// data
-Voxel& Voxel::getSubvoxel(const short& x, const short& y, const short& z){
-  assert(x*y*z < 8);
-  return data[4 * z + 2 * y + x];
-}
-Voxel& Voxel::getSubvoxel(const short& i){
-  assert(i <= 8);
-  return data[i];
-}
-bool Voxel::hasSubvoxel(){return !data.empty();}
-
-// type
-char Voxel::getType(){return type;}
-void Voxel::setType(char input){type = input;}
-
-/////////////////////////////////
-// TYPE ASSIGNMENT PREPARATION //
-/////////////////////////////////
-
-// function to call before beginning the type assignment routine in order to prepare static variables
-void Voxel::storeUniversal(Space* cell, AtomTree atomtree, double grid_size, double r_probe1, int max_depth){
-  s_cell = cell;
-  s_atomtree = atomtree;
-  s_grid_size = grid_size;
-  s_r_probe1 = r_probe1;
-
-  computeIndices();
-  //
-  s_pair_data.clear();
-  s_triplet_data.clear();
-}
-
-// needed for second part of type assignment
+// function declarations for functions used in SearchIndex initialisation
 std::vector<std::array<unsigned int,3>> sumOfThreeSquares(unsigned long int);
 std::vector<std::array<int,3>> logPermutations(const std::array<unsigned int,3>);
 void signCombinations(std::vector<std::array<int,3>>&, std::array<int,3>);
 void signCombinations(std::vector<std::array<int,3>>&, std::array<unsigned int,3>);
 
-void Voxel::computeIndices(){
-  s_search_indices.clear();
-  // calculate upper bound for neighbour voxels
-  unsigned int upp_lim = std::pow(s_r_probe1/s_grid_size + std::sqrt(2)/4,2);
-  
-  s_search_indices = std::vector<std::vector<std::array<int,3>>>(upp_lim+1);
+// constructors
+SearchIndex::SearchIndex(){}
+
+SearchIndex::SearchIndex(const double r_probe, const double resolution, const unsigned int max_depth){
+  _safe_lim = std::vector<unsigned int>(max_depth+1);
+  _upp_lim = std::vector<unsigned int>(max_depth+1);
+  for (unsigned int lvl = 0; lvl <= max_depth; ++lvl){
+    // maximum distance between neighbour voxels that need to be assessed (in units of voxel side length at lvl)
+    double max_dist = r_probe/(resolution*std::pow(2,lvl)) + std::sqrt(2)/4;
+    // squared max distance between neighbours, where voxels do not have to be split
+    _safe_lim[lvl] = std::pow( max_dist - ((1-1/std::pow(2,lvl)) * std::sqrt(3)/2) , 2);
+    // squared max distance between neighbours, that need to be assessed
+    _upp_lim[lvl] = std::pow( max_dist + ((1-1/std::pow(2,lvl)) * std::sqrt(3)*2 ) , 2);
+  }
+  unsigned int max_element = *std::max_element(_upp_lim.begin(), _upp_lim.end());
+  _index_list = computeIndices(max_element);
+}
+
+// access
+const std::vector<std::array<int,3>>& SearchIndex::operator[](unsigned int i){
+  return _index_list[i];
+}
+
+unsigned int SearchIndex::getUppLim(unsigned int lvl){
+  return _upp_lim[lvl];
+}
+
+unsigned int SearchIndex::getSafeLim(unsigned int lvl){
+  return _safe_lim[lvl];
+}
+
+// initialisation of indices
+std::vector<std::vector<std::array<int,3>>> SearchIndex::computeIndices(unsigned int upp_lim){
+  std::vector<std::vector<std::array<int,3>>> search_indices = std::vector<std::vector<std::array<int,3>>>(upp_lim+1);
   for (unsigned int n = 0; n <= upp_lim; n++){
     // get all combinations of three integers whose sum equals n
     std::vector<std::array<unsigned int,3>> list_of_roots = sumOfThreeSquares(n);
     for (std::array<unsigned int,3> roots : list_of_roots){
       // get all sign combinations for each integer combination
       std::vector<std::array<int,3>> temp = logPermutations(roots);
-      s_search_indices[n].insert(std::end(s_search_indices[n]), std::begin(temp), std::end(temp));
+      search_indices[n].insert(std::end(search_indices[n]), std::begin(temp), std::end(temp));
     }
   }
+  return search_indices;
 }
 
 // list all unique combinations of three integers, whose sum added results in n
@@ -150,6 +144,47 @@ void signCombinations(std::vector<std::array<int,3>>& list, std::array<unsigned 
   std::array<int,3> arr;
   for (char i = 0; i < 3; i++){arr[i] = int(inp_arr[i]);}
   signCombinations(list, arr);
+}
+
+/////////////////
+// CONSTRUCTOR //
+/////////////////
+
+Voxel::Voxel(){type = 0;}
+
+////////////
+// ACCESS //
+////////////
+
+// data
+Voxel& Voxel::getSubvoxel(const short& x, const short& y, const short& z){
+  assert(x*y*z < 8);
+  return data[4 * z + 2 * y + x];
+}
+Voxel& Voxel::getSubvoxel(const short& i){
+  assert(i <= 8);
+  return data[i];
+}
+bool Voxel::hasSubvoxel(){return !data.empty();}
+
+// type
+char Voxel::getType(){return type;}
+void Voxel::setType(char input){type = input;}
+
+/////////////////////////////////
+// TYPE ASSIGNMENT PREPARATION //
+/////////////////////////////////
+
+// function to call before beginning the type assignment routine in order to prepare static variables
+void Voxel::storeUniversal(Space* cell, AtomTree atomtree, double grid_size, double r_probe1, int max_depth){
+  s_cell = cell;
+  s_atomtree = atomtree;
+  s_grid_size = grid_size;
+  s_r_probe1 = r_probe1;
+  s_search_indices = SearchIndex(r_probe1, grid_size, cell->getMaxDepth());
+  //
+  s_pair_data.clear();
+  s_triplet_data.clear();
 }
 
 ///////////////////////////////
@@ -283,7 +318,7 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
   // if voxel (including all subvoxels) have been assigned, then return immediately
   if (readBit(type,0)){return type;}
   else if (!hasSubvoxel()){ // vxl has no children
-    findClosest(index, lvl);
+    searchForCore(index, lvl);
   }
   else { // vxl has children
     std::array<unsigned int,3> index_subvxl;
@@ -322,24 +357,16 @@ void Voxel::splitVoxel(const std::array<unsigned int,3>& vxl_ind, const unsigned
   setType(mergeTypes(data));
 }
 
-void Voxel::findClosest(const std::array<unsigned int,3>& index, const unsigned lvl){
+void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigned lvl){
   type = 0b00000101; // type excluded
-
-  // maximum distance between neighbour voxels that need to be assessed (in units of voxel side length at lvl)
-  double max_dist = s_r_probe1/(s_grid_size*std::pow(2,lvl)) + std::sqrt(2)/4;
-  // squared max distance between neighbours, where voxels do not have to be split
-  unsigned int safe_lim = std::pow( max_dist - ((1-1/std::pow(2,lvl)) * std::sqrt(3)/2) , 2);
-  // squared max distance between neighbours, that need to be assessed
-  unsigned int upp_lim = std::pow( max_dist + ((1-1/std::pow(2,lvl)) * std::sqrt(3)*2 ) , 2);
-
-  for (int n = upp_lim; n > 0; --n){
+  for (int n = Voxel::s_search_indices.getUppLim(lvl); n > 0; --n){
     for (std::array<int,3> coord : Voxel::s_search_indices[n]){
       coord = add(coord, index);
       // if neighbour type is core, then set this voxel to shell
       if (s_cell->coordInBounds(coord, lvl)){
         char n_type = (s_cell->getVoxel(coord,lvl)).getType();
         if (readBit(n_type,3)){
-          if (n <= safe_lim){
+          if (n <= Voxel::s_search_indices.getSafeLim(lvl)){
             type = 0b00010001; // type shell
           }
           else {
@@ -352,11 +379,11 @@ void Voxel::findClosest(const std::array<unsigned int,3>& index, const unsigned 
   }
 }
 
-////////////////////
-// CHECK FOR TYPE //
-////////////////////
-
+//////////////////////////////
+// GEOMETRY BASED ALGORITHM //
+//////////////////////////////
 // not currently used
+
 bool Voxel::isProbeExcluded(const Vector& vxl_pos, const double& r_probe, const double& radius_of_influence, const std::vector<int>& close_atom_ids){
 
   if(type == 'm'){return false;} // type 'm' can never be changed by probe
@@ -716,6 +743,7 @@ char mergeTypes(std::vector<Voxel>& sub_vxls){
 // OUTPUT TYPE //
 /////////////////
 
+// function for generating a 3D tensor filled with the types of the voxel
 void Voxel::fillTypeTensor(
     Container3D<char>& type_tensor, 
     const std::array<unsigned long int,3> block_start, 
