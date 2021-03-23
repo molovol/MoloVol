@@ -84,12 +84,12 @@ bool Ctrl::unittestRadius(){
   // parameters for unittest:
   const std::string atom_filepath = "./inputfile/probetest_pair.xyz";
   const std::string radius_filepath = "./inputfile/radii.txt";
+  
+  std::unordered_map<std::string, double> rad_map = current_calculation->importRadiusMap(radius_filepath);
   for (int max_depth = 4; max_depth < 5; max_depth++){
-    for (double grid_step = 1; grid_step>0; grid_step-=0.1){
-      
-      std::unordered_map<std::string, double> rad_map = current_calculation->importRadiusMap(radius_filepath);
-      
+    for (double grid_step = 1; grid_step>0.1; grid_step-=0.01){
       for (double rad_probe1 = 1.2; rad_probe1 < 1.25; rad_probe1 += 0.1){
+      
     
         CalcResultBundle data;
         current_calculation->readAtomsFromFile(atom_filepath, false);
@@ -97,7 +97,6 @@ bool Ctrl::unittestRadius(){
         data = runCalculation(atom_filepath, grid_step, max_depth, rad_map, included_elements, rad_probe1);
         
         if(data.success){
-      
           printf("f: %40s, g: %4.1f, d: %4i, r: %4.1f\n", atom_filepath.c_str(), grid_step, max_depth, rad_probe1);
           printf("vdW: %20.10f, Excluded: %20.10f\n", data.volumes[0b00000011], data.volumes[0b00000101]);
           printf("Time elapsed: %10.5f s\n", data.getTime());
