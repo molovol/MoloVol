@@ -88,7 +88,8 @@ bool Ctrl::unittestRadius(){
   std::unordered_map<std::string, double> rad_map = current_calculation->importRadiusMap(radius_filepath);
   for (int max_depth = 4; max_depth < 5; max_depth++){
     for (double grid_step = 1; grid_step>0.01; grid_step-=0.01){
-      for (double rad_probe1 = 2; rad_probe1 < 2.01; rad_probe1 += 0.1){
+      {double rad_probe1 = 1.2;
+        //for (double rad_probe1 = 2; rad_probe1 < 2.01; rad_probe1 += 0.1){
       
     
         CalcResultBundle data;
