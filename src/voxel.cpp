@@ -342,15 +342,11 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
   return type;
 }
 
-// adds an array of size 8 to the voxel that contains 8 subvoxels and evaluates each subvoxel's type
-void Voxel::splitVoxel(const std::array<unsigned int,3>& vxl_ind, const unsigned lvl){
-  data = std::vector<Voxel>(8); 
-  evalRelationToVoxels(vxl_ind, lvl, true);
-}
-
 void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigned lvl, bool split){
   type = 0b00000101; // type excluded
-  for (int n = Voxel::s_search_indices.getUppLim(lvl); n > (split? Voxel::s_search_indices.getSafeLim(lvl+1)/4 : 0); --n){
+  int upper_bound =  Voxel::s_search_indices.getUppLim(lvl);
+  int lower_bound = (split? Voxel::s_search_indices.getSafeLim(lvl+1)*4 : 0);
+  for (int n = upper_bound; n > lower_bound; --n){
     for (std::array<int,3> coord : Voxel::s_search_indices[n]){
       coord = add(coord, index);
       // if neighbour type is core, then set this voxel to shell
@@ -368,6 +364,12 @@ void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
       }
     }
   }
+}
+
+// adds an array of size 8 to the voxel that contains 8 subvoxels and evaluates each subvoxel's type
+void Voxel::splitVoxel(const std::array<unsigned int,3>& vxl_ind, const unsigned lvl){
+  data = std::vector<Voxel>(8); 
+  evalRelationToVoxels(vxl_ind, lvl, true);
 }
 
 //////////////////////////////
