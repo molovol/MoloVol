@@ -316,11 +316,11 @@ void Voxel::listFromTree(
 // TYPE ASSIGNMENT 2ND ROUND //
 ///////////////////////////////
 
-char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const unsigned lvl){
+char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const unsigned lvl, bool split){
   // if voxel (including all subvoxels) have been assigned, then return immediately
   if (readBit(type,0)){return type;}
   else if (!hasSubvoxel()){ // vxl has no children
-    searchForCore(index, lvl);
+    searchForCore(index, lvl, split);
   }
   else { // vxl has children
     std::array<unsigned int,3> index_subvxl;
@@ -330,7 +330,7 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
         index_subvxl[1] = index[1]*2 + y;
         for (char z = 0; z < 2; z++){
           index_subvxl[2] = index[2]*2 + z;
-          getSubvoxel(x,y,z).evalRelationToVoxels(index_subvxl, lvl-1);
+          getSubvoxel(x,y,z).evalRelationToVoxels(index_subvxl, lvl-1, split);
         }
       }
     }
@@ -345,23 +345,12 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
 // adds an array of size 8 to the voxel that contains 8 subvoxels and evaluates each subvoxel's type
 void Voxel::splitVoxel(const std::array<unsigned int,3>& vxl_ind, const unsigned lvl){
   data = std::vector<Voxel>(8); 
-  std::array<unsigned int,3> subvxl_ind;
-  for (char x = 0; x < 2; x++){
-    subvxl_ind[0] = vxl_ind[0]*2 + x;
-    for (char y = 0; y < 2; y++){
-      subvxl_ind[1] = vxl_ind[1]*2 + y;
-      for (char z = 0; z < 2; z++){
-        subvxl_ind[2] = vxl_ind[2]*2 + z;
-        getSubvoxel(x,y,z).evalRelationToVoxels(subvxl_ind, lvl-1);
-      }
-    }
-  }
-  setType(mergeTypes(data));
+  evalRelationToVoxels(vxl_ind, lvl, true);
 }
 
-void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigned lvl){
+void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigned lvl, bool split){
   type = 0b00000101; // type excluded
-  for (int n = Voxel::s_search_indices.getUppLim(lvl); n > 0; --n){
+  for (int n = Voxel::s_search_indices.getUppLim(lvl); n > (split? Voxel::s_search_indices.getSafeLim(lvl+1)/4 : 0); --n){
     for (std::array<int,3> coord : Voxel::s_search_indices[n]){
       coord = add(coord, index);
       // if neighbour type is core, then set this voxel to shell
