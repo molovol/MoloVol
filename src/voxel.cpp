@@ -47,16 +47,16 @@ void signCombinations(std::vector<std::array<int,3>>&, std::array<unsigned int,3
 // constructors
 SearchIndex::SearchIndex(){}
 
-SearchIndex::SearchIndex(const double r_probe, const double resolution, const unsigned int max_depth){
+SearchIndex::SearchIndex(const double r_probe, const double grid_size, const unsigned int max_depth){
   _safe_lim = std::vector<unsigned int>(max_depth+1);
   _upp_lim = std::vector<unsigned int>(max_depth+1);
   for (unsigned int lvl = 0; lvl <= max_depth; ++lvl){
     // maximum distance between neighbour voxels that need to be assessed (in units of voxel side length at lvl)
-    double max_dist = r_probe/(resolution*std::pow(2,lvl)) + std::sqrt(2)/4;
+    double max_dist = r_probe/(grid_size*std::pow(2,lvl)) + std::sqrt(2)/4;
     // voxel radius in units of voxel side length at current lvl
     double vxl_radius = std::sqrt(3) * (1-1/std::pow(2,lvl));
     // squared max distance between neighbours, where voxels do not have to be split
-    _safe_lim[lvl] = (0 > max_dist - vxl_radius/2)? 0 : std::pow( max_dist - (vxl_radius/2) , 2);
+    _safe_lim[lvl] = (0 > max_dist - 2*vxl_radius)? 0 : std::pow( max_dist - (vxl_radius/2) , 2);
     // squared max distance between neighbours, that need to be assessed
     _upp_lim[lvl] = std::pow( max_dist + 2*vxl_radius , 2);
   }
