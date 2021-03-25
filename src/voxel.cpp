@@ -56,7 +56,7 @@ SearchIndex::SearchIndex(const double r_probe, const double grid_size, const uns
     // voxel radius in units of voxel side length at current lvl
     double vxl_radius = std::sqrt(3) * (1-1/std::pow(2,lvl));
     // squared max distance between neighbours, where voxels do not have to be split
-    _safe_lim[lvl] = (0 > max_dist - 2*vxl_radius)? 0 : std::pow( max_dist - (vxl_radius/2) , 2);
+    _safe_lim[lvl] = (0 > max_dist - 2*vxl_radius)? 0 : std::pow( max_dist - (2*vxl_radius) , 2);
     // squared max distance between neighbours, that need to be assessed
     _upp_lim[lvl] = std::pow( max_dist + 2*vxl_radius , 2);
   }
@@ -346,19 +346,14 @@ void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
   type = 0b00000101; // type excluded
   int upper_bound =  Voxel::s_search_indices.getUppLim(lvl);
   int lower_bound = (split? Voxel::s_search_indices.getSafeLim(lvl+1)*4 : 0);
-  for (int n = upper_bound; n > lower_bound; --n){
+  for (int n = lower_bound; n <= upper_bound; ++n){
     for (std::array<int,3> coord : Voxel::s_search_indices[n]){
       coord = add(coord, index);
       // if neighbour type is core, then set this voxel to shell
       if (s_cell->coordInBounds(coord, lvl)){
         char n_type = (s_cell->getVoxel(coord,lvl)).getType();
         if (readBit(n_type,3)){
-          if (n <= Voxel::s_search_indices.getSafeLim(lvl)){
-            type = 0b00010001; // type shell
-          }
-          else {
-            type = 0; // split voxel later
-          }
+          type = (n <= Voxel::s_search_indices.getSafeLim(lvl))? 0b00010001 : 0;
           return;
         }
       }
@@ -586,7 +581,7 @@ bool Voxel::isExcludedSetType(const Vector& vec_vxl, const double& rad_vxl, cons
 unsigned int Voxel::tallyVoxelsOfType(const char volume_type, const int max_depth)
 {
   // if voxel is of type "mixed" (i.e. data vector is not empty)
-  if(!data.empty()){
+  if(hasSubvoxel()){
     // then total number of voxels is given by tallying all subvoxels
     unsigned int total = 0;
     for(int i = 0; i < 8; i++){
