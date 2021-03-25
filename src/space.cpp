@@ -88,6 +88,9 @@ void Space::placeAtomsInGrid(const AtomTree& atomtree, const double& r_probe){
   Voxel::prepareTypeAssignment(this, atomtree, grid_size, r_probe, max_depth);
 
   assignAtomVsCore();
+
+
+
   assignShellVsVoid();
 }
   
@@ -156,10 +159,9 @@ std::map<char,double> Space::getVolume(){
 ////////////
 
 Container3D<char> Space::generateTypeTensor(){
- 
   // reserve memory
   Container3D<char> type_tensor = Container3D<char>(gridstepsOnLvl(0));
-  
+ 
   std::array<unsigned long int,3> block_start = {0,0,0};
   int n_bot_lvl_vxl = pow(2,max_depth);
   for (unsigned int i = 0; i < n_gridsteps[0]; i++){
@@ -171,8 +173,7 @@ Container3D<char> Space::generateTypeTensor(){
         getElement(i,j,k).fillTypeTensor(type_tensor, block_start, max_depth);
       }
     }
-  }
-  
+  } 
   return type_tensor; 
 }
 

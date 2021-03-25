@@ -165,7 +165,7 @@ Voxel& Voxel::getSubvoxel(const short& x, const short& y, const short& z){
 Voxel& Voxel::getSubvoxel(const short& i){
   return data[i];
 }
-bool Voxel::hasSubvoxel(){return !data.empty();}
+bool Voxel::hasSubvoxel(){return readBit(type,7);}
 
 // type
 char Voxel::getType(){return type;}
@@ -350,7 +350,7 @@ void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
       if (s_cell->coordInBounds(coord, lvl)){
         char n_type = (s_cell->getVoxel(coord,lvl)).getType();
         if (readBit(n_type,3)){
-          type = (n <= Voxel::s_search_indices.getSafeLim(lvl))? 0b00010001 : 0;
+          type = (n <= Voxel::s_search_indices.getSafeLim(lvl))? 0b00010001 : 0b10000000;
           return;
         }
       }
@@ -362,6 +362,7 @@ void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
 void Voxel::splitVoxel(const std::array<unsigned int,3>& vxl_ind, const unsigned lvl){
   data = std::vector<Voxel>(8); 
   evalRelationToVoxels(vxl_ind, lvl, true);
+  setType(mergeTypes(data));
 }
 
 //////////////////////////////
