@@ -160,11 +160,9 @@ Voxel::Voxel(){type = 0;}
 
 // data
 Voxel& Voxel::getSubvoxel(const short& x, const short& y, const short& z){
-  assert(x*y*z < 8);
   return data[4 * z + 2 * y + x];
 }
 Voxel& Voxel::getSubvoxel(const short& i){
-  assert(i <= 8);
   return data[i];
 }
 bool Voxel::hasSubvoxel(){return !data.empty();}
@@ -192,7 +190,6 @@ void Voxel::prepareTypeAssignment(Space* cell, AtomTree atomtree, double grid_si
 ///////////////////////////////
 // TYPE ASSIGNMENT 1ST ROUND //
 ///////////////////////////////
-
 // part of the type assigment routine. first evaluation is only concerned with the relation between 
 // voxels and atoms
 char Voxel::evalRelationToAtoms(Vector pos_vxl, const int max_depth){

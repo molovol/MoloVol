@@ -88,7 +88,6 @@ void Space::placeAtomsInGrid(const AtomTree& atomtree, const double& r_probe){
   Voxel::prepareTypeAssignment(this, atomtree, grid_size, r_probe, max_depth);
 
   assignAtomVsCore();
-
   assignShellVsVoid();
 }
   
@@ -216,9 +215,6 @@ Voxel& Space::getElement(const unsigned int i){
 
 Voxel& Space::getElement(const unsigned int x, const unsigned int y, const unsigned int z){
   // check if element is out of bounds
-  assert(x < n_gridsteps[0]);
-  assert(y < n_gridsteps[1]);
-  assert(z < n_gridsteps[2]);
   return grid[z * n_gridsteps[0] * n_gridsteps[1] + y * n_gridsteps[0] + x];
 }
 
@@ -229,15 +225,16 @@ Voxel& Space::getElement(const std::array<unsigned int,3> arr){
 /////////////////
 
 Voxel& Space::getVoxel(unsigned int x, unsigned int y, unsigned int z, int lvl){
-  assert(max_depth >= lvl);
   // ptr needed in order to reassign variable in loop and return reference in the end
-  Voxel* ptr_sub_vxl = &getElement(x/int(pow(2,max_depth-lvl)), y/int(pow(2,max_depth-lvl)), z/int(pow(2,max_depth-lvl)));
+  int div = pow(2,max_depth-lvl);
+  Voxel* ptr_sub_vxl = &getElement(x/div, y/div, z/div);
 
-  for (int current_lvl = max_depth-1; current_lvl>=lvl && ptr_sub_vxl->hasSubvoxel(); current_lvl--){
+  for (int current_lvl = max_depth-1-lvl; current_lvl>=0 && ptr_sub_vxl->hasSubvoxel(); --current_lvl){
+    div = (pow(2,current_lvl));
     ptr_sub_vxl = &(ptr_sub_vxl->getSubvoxel(
-        (x/int(pow(2,current_lvl-lvl)))%2, 
-        (y/int(pow(2,current_lvl-lvl)))%2, 
-        (z/int(pow(2,current_lvl-lvl)))%2));
+          (x/div)%2, 
+          (y/div)%2, 
+          (z/div)%2));
   }
   return *ptr_sub_vxl;
 }
