@@ -226,10 +226,8 @@ Voxel& Space::getElement(const std::array<unsigned int,3> arr){
 Voxel& Space::getVoxel(unsigned int x, unsigned int y, unsigned int z, int lvl){
   assert(max_depth >= lvl);
   // ptr needed in order to reassign variable in loop and return reference in the end
-  // top lvl voxel
   Voxel* ptr_sub_vxl = &getElement(x/int(pow(2,max_depth-lvl)), y/int(pow(2,max_depth-lvl)), z/int(pow(2,max_depth-lvl)));
 
-  // descending octree
   for (int current_lvl = max_depth-1; current_lvl>=lvl && ptr_sub_vxl->hasSubvoxel(); current_lvl--){
     ptr_sub_vxl = &(ptr_sub_vxl->getSubvoxel(
         (x/int(pow(2,current_lvl-lvl)))%2, 
