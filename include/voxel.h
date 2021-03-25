@@ -57,7 +57,7 @@ class Voxel{
     void setType(char);
     char getType();
 
-    static void storeUniversal(Space*, AtomTree, double, double, int);
+    static void prepareTypeAssignment(Space*, AtomTree, double, double, int);
     static void computeIndices();
     static void computeIndices(unsigned int);
     char evalRelationToAtoms(Vector, const int);
