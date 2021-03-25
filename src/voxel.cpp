@@ -178,7 +178,7 @@ void Voxel::setType(char input){type = input;}
 /////////////////////////////////
 
 // function to call before beginning the type assignment routine in order to prepare static variables
-void Voxel::storeUniversal(Space* cell, AtomTree atomtree, double grid_size, double r_probe1, int max_depth){
+void Voxel::prepareTypeAssignment(Space* cell, AtomTree atomtree, double grid_size, double r_probe1, int max_depth){
   s_cell = cell;
   s_atomtree = atomtree;
   s_grid_size = grid_size;
@@ -361,7 +361,7 @@ void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
   }
 }
 
-// adds an array of size 8 to the voxel that contains 8 subvoxels and evaluates each subvoxel's type
+// adds an array of size 8 to the voxel that contains 8 subvoxels
 void Voxel::splitVoxel(const std::array<unsigned int,3>& vxl_ind, const unsigned lvl){
   data = std::vector<Voxel>(8); 
   evalRelationToVoxels(vxl_ind, lvl, true);

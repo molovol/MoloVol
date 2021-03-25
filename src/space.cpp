@@ -78,22 +78,25 @@ void Space::setGrid(){
   return;
 }
 
-/////////////////
-// VOLUME COMP //
-/////////////////
+/////////////////////
+// TYPE ASSIGNMENT //
+/////////////////////
 
 // sets all voxel's types, determined by the input atoms
 void Space::placeAtomsInGrid(const AtomTree& atomtree, const double& r_probe){
+  // save variable that all voxels need access to for their type determination as static members of Voxel class
+  Voxel::prepareTypeAssignment(this, atomtree, grid_size, r_probe, max_depth);
+
+  assignAtomVsCore();
+
+  assignShellVsVoid();
+}
+  
+void Space::assignAtomVsCore(){
   // calculate position of first voxel
   const std::array<double,3> vxl_origin = getOrigin();
-  
   // calculate side length of top level voxel
   const double vxl_dist = grid_size * pow(2,max_depth);
-  
-  // save variable that all voxels need access to for their type determination as static members of Voxel class
-  Voxel::storeUniversal(this, atomtree, grid_size, r_probe, max_depth);
-
-  // TODO: wrap this in function
   std::array<double,3> vxl_pos;
   for(unsigned int x = 0; x < n_gridsteps[0]; x++){
     vxl_pos[0] = vxl_origin[0] + vxl_dist * (0.5 + x);
@@ -107,7 +110,9 @@ void Space::placeAtomsInGrid(const AtomTree& atomtree, const double& r_probe){
     }
     printf("%i%% done\n", int(100*(double(x)+1)/double(n_gridsteps[0])));
   }
-  // TODO: Wrap this in function
+}
+
+void Space::assignShellVsVoid(){
   std::array<unsigned int,3> vxl_index;
   for(vxl_index[0] = 0; vxl_index[0] < n_gridsteps[0]; vxl_index[0]++){
     for(vxl_index[1] = 0; vxl_index[1] < n_gridsteps[1]; vxl_index[1]++){
