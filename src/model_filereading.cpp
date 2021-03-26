@@ -20,45 +20,72 @@ bool isAtomLine(const std::vector<std::string>& substrings);
 std::string strToValidSymbol(std::string str);
 static inline std::vector<std::string> splitLine(std::string& line);
 
-/////////////////
-// FILE IMPORT //
-/////////////////
+struct RadiusFileBundle{ // data bundle for radius file import
+  std::unordered_map<std::string, double> rad_map;
+  std::unordered_map<std::string, int> atomic_num_map;
+};
+RadiusFileBundle importDataFromRadiusFile(const std::string& radius_path);
 
-// reads radii from a file specified by the filepath and
-// stores them in an unordered map that is an attribute of
-// the Model object
-void Model::readRadiiAndAtomNumFromFile(std::string& filepath){
-  // clear unordered_maps to avoid keeping data from previous runs
-  raw_radius_map.clear();
-  elem_Z.clear();
+////////////////////////
+// RADIUS FILE IMPORT //
+////////////////////////
 
-  std::string line;
-  std::ifstream inp_file(filepath);
-
-  while(getline(inp_file,line)){
-    std::vector<std::string> substrings = splitLine(line);
-    if(substrings.size() == 3){
-      // TODO: make sure substrings[1] is converted to valid symbol
-      raw_radius_map[substrings[1]] = std::stod(substrings[2]);
-      elem_Z[substrings[1]] = std::stoi(substrings[0]);
-    }
-  }
-  // Notify the user if no radius is defined
-  // the program can continue running because the user can manually define radii
-  if (raw_radius_map.size() == 0) {
-    Ctrl::getInstance()->notifyUser("Invalid radii definition file!");
-    Ctrl::getInstance()->notifyUser("Please select a valid file or set radii manually.");
-  }
+// TODO: remove eventually
+bool Model::readRadiiAndAtomNumFromFile(std::string& radius_path){
+  return readRadiusFileSetMaps(radius_path);
 }
 
+// generates two two maps for assigning a radius/ atomic number respectively, to a element symbol
+// sets the maps to members of the model class
+bool Model::readRadiusFileSetMaps(std::string& radius_path){
+
+  RadiusFileBundle data = importDataFromRadiusFile(radius_path);
+
+  if (data.rad_map.size() == 0) {return false;}
+
+  setRadiusMap(data.rad_map);
+  elem_Z = data.atomic_num_map;
+  return true;
+}
+
+// used for importing only the radius map from the radius file
+// needed for running the app from the command line
+std::unordered_map<std::string, double> Model::importRadiusMap(const std::string& radius_path){
+  return importDataFromRadiusFile(radius_path).rad_map;
+}
+
+//////////////////////
+// ATOM FILE IMPORT //
+//////////////////////
+
 bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
-  // clear previous data
+  // it is very hard to tell what this function does, because of the heavy use of global variables.
+  // this function should ideally end in a set function, and the other functions should have return
+  // values -JM
+  clearAtomData();
+
+  try{
+    readAtomFile(filepath, include_hetatm);
+  } catch(const ExceptIllegalFileExtension& e) {
+    throw;
+  }
+
+  if (raw_atom_coordinates.size() == 0){ // If no atom is detected in the input file, the file is deemed invalid
+    throw ExceptInvalidInputFile();
+  }
+  return true;
+}
+
+void Model::clearAtomData(){
   atom_amounts.clear();
   raw_atom_coordinates.clear();
   space_group = "";
   for(int i = 0; i < 6; i++){
     cell_param[i] = 0;
   }
+}
+
+bool Model::readAtomFile(const std::string& filepath, bool include_hetatm){
 
   if (fileExtension(filepath) == "xyz"){
     readFileXYZ(filepath);
@@ -66,14 +93,7 @@ bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
   else if (fileExtension(filepath) == "pdb"){
     readFilePDB(filepath, include_hetatm);
   }
-  else { // The browser does not allow other file formats but a user could manually write the path to an invalid file
-    Ctrl::getInstance()->notifyUser("Invalid structure file format!");
-    return false;
-  }
-  if (raw_atom_coordinates.size() == 0){ // If no atom is detected in the input file, the file is deemed invalid
-    Ctrl::getInstance()->notifyUser("Invalid structure file!");
-    return false;
-  }
+  else {throw ExceptIllegalFileExtension();}
   return true;
 }
 
@@ -83,28 +103,26 @@ void Model::readFileXYZ(const std::string& filepath){
   std::string line;
   std::ifstream inp_file(filepath);
 
-  // iterate through lines
   while(getline(inp_file,line)){
-    // divide line into "words"
     std::vector<std::string> substrings = splitLine(line);
+    // substrings[0]: Element Symbol
+    // substrings[1,2,3]: Coordinates
     // create new atom and add to storage vector if line format corresponds to Element_Symbol x y z
     if (isAtomLine(substrings)) {
 
       std::string valid_symbol = strToValidSymbol(substrings[0]);
       atom_amounts[valid_symbol]++; // adds one to counter for this symbol
 
-      // if a key leads to multiple z-values, set z-value to 0 (?)
+      // as a safety mechanism, if an element symbol is assigned two atomic numbers, default to 0
+      // so it becomes apparent laster on that something is wrong
       if (elem_Z.count(valid_symbol) > 0){
         elem_Z[valid_symbol] = 0;
       }
       // Stores the full list of atom coordinates from the input file
-      raw_atom_coordinates.emplace_back(valid_symbol,
-                                        std::stod(substrings[1]),
-                                        std::stod(substrings[2]),
-                                        std::stod(substrings[3]));
+      raw_atom_coordinates.push_back(std::make_tuple(
+            valid_symbol, std::stod(substrings[1]), std::stod(substrings[2]), std::stod(substrings[3])));
     }
   }
-  // file has been read
   inp_file.close();
 }
 
@@ -150,8 +168,16 @@ void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
   inp_file.close();
 }
 
+std::vector<std::string> Model::listElementsInStructure(){
+  std::vector<std::string> list;
+  for (auto elem : atom_amounts){
+    list.push_back(elem.first);
+  }
+  return list;
+}
+
 bool Model::getSymmetryElements(std::string group, std::vector<int> &sym_matrix_XYZ, std::vector<double> &sym_matrix_fraction){
-  for (int i = 0; i<group.size(); i++) { // convert space group to upper case chars to compare with the list
+  for (size_t i = 0; i < group.size(); i++) { // convert space group to upper case chars to compare with the list
     group[i] = toupper(group[i]);
   }
   group = "'" + group + "'";
@@ -252,7 +278,7 @@ bool isAtomLine(const std::vector<std::string>& substrings) {
 // reads a string and converts it to valid atom symbol: first character uppercase followed by lowercase characters
 std::string strToValidSymbol(std::string str){
   // iterate over all characters in string
-  for (int i = 0; i<str.size(); i++) {
+  for (size_t i = 0; i<str.size(); i++) {
 // TODO: decide whether non-alphabetic characters should be erased or not
 //    if (isalpha(str[i])){
       // only for first character in sequence, convert to uppercase
@@ -271,3 +297,23 @@ std::string strToValidSymbol(std::string str){
   }
   return str;
 }
+
+RadiusFileBundle importDataFromRadiusFile(const std::string& radius_path){
+  RadiusFileBundle data;
+
+  std::string line;
+  std::ifstream inp_file(radius_path);
+  while(getline(inp_file,line)){
+    std::vector<std::string> substrings = splitLine(line);
+    // substings[0]: Atomic Number
+    // substings[1]: Element Symbol
+    // substings[2]: Radius
+    if(substrings.size() == 3){
+      // TODO: make sure substrings[1] is converted to valid symbol
+      data.rad_map[substrings[1]] = std::stod(substrings[2]);
+      data.atomic_num_map[substrings[1]] = std::stoi(substrings[0]);
+    }
+  }
+  return data;
+}
+

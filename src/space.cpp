@@ -9,36 +9,70 @@
 // VOLUME COMP //
 /////////////////
 
-void Space::placeAtomsInGrid(const AtomTree& atomtree){
+// sets all voxel's types, determined by the input atoms
+void Space::placeAtomsInGrid(const AtomTree& atomtree, const double& r_probe){
   // calculate position of first voxel
   const std::array<double,3> vxl_origin = getOrigin();
-  
+
   // calculate side length of top level voxel
   const double vxl_dist = grid_size * pow(2,max_depth);
-  
+
+  std::array<double,3> vxl_pos;
+
+  // save variable that all voxels need access to for their type determination
+  Voxel::storeUniversal(atomtree, grid_size, r_probe);
+
   for(size_t x = 0; x < n_gridsteps[0]; x++){
+    vxl_pos[0] = vxl_origin[0] + vxl_dist * (0.5 + x);
     for(size_t y = 0; y < n_gridsteps[1]; y++){
+      vxl_pos[1] = vxl_origin[1] + vxl_dist * (0.5 + y);
       for(size_t z = 0; z < n_gridsteps[2]; z++){
-		// origin of the cell has to be offset by half the grid size
-        std::array<double,3> vxl_pos = {vxl_origin[0] + vxl_dist/2 + vxl_dist * x,
-										vxl_origin[1] + vxl_dist/2 + vxl_dist * y,
-										vxl_origin[2] + vxl_dist/2 + vxl_dist * z};
-        getElement(x,y,z).determineType(vxl_pos, grid_size, max_depth, atomtree);
+        vxl_pos[2] = vxl_origin[2] + vxl_dist * (0.5 + z);
+        // voxel position is deliberately not stored in voxel object to reduce memory cost
+        getElement(x,y,z).determineType(vxl_pos, max_depth);
       }
     }
-  }      
+    printf("%i%% done\n", int(100*(double(x)+1)/double(n_gridsteps[0])));
+  }
 }
 
-double Space::getVolume(){
-  // calc Volume
-  size_t total = 0;
+std::map<char,double> Space::getVolume(){
+  std::vector<char> types_to_tally{'a','x'};
+
+  std::vector<size_t> tally;
+  for (size_t i = 0; i < types_to_tally.size(); i++){
+    tally.push_back(0);
+  }
+
   for(size_t i = 0; i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]; i++){ // loop through all top level voxels
     // tally bottom level voxels
+
+    for (size_t j = 0; j < types_to_tally.size(); j++){
+      tally[j] += getElement(i).tallyVoxelsOfType(types_to_tally[j],max_depth);
+    }
+/*
     total += getElement(i).tallyVoxelsOfType('a',max_depth);
+    total_excluded += getElement(i).tallyVoxelsOfType('x',max_depth);
+    */
   }
   double unit_volume = pow(grid_size,3);
+
+  std::map<char,double> volumes;
+  for (size_t i = 0; i < types_to_tally.size(); i++){
+    volumes[types_to_tally[i]] = tally[i] * unit_volume;
+  }
+/*
+  std::cout << "Probe inaccessible volume: " << unit_volume*total_excluded << std::endl;
   return unit_volume * total;
+  */
+  return volumes;
 }
+
+/*
+std::vector<double> Space::getVolume(std::vector<char> types_to_tally){
+
+}
+*/
 
 //////////////////////
 // ACCESS FUNCTIONS //
@@ -65,7 +99,7 @@ std::array<double,3> Space::getSize(){
 }
 
 Voxel& Space::getElement(const size_t &i){
-  assert(i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]); 
+  assert(i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]);
   return grid[i];
 }
 
@@ -80,11 +114,11 @@ Voxel& Space::getElement(const size_t &x, const size_t &y, const size_t &z){
 // displays voxel grid types as matrix in the terminal. useful for debugging
 void Space::printGrid(){
   char usr_inp = '\0';
-  int x_min = 0;
-  int y_min = 0;
-  
-  int x_max = ((n_gridsteps[0] >= 25)? 25: n_gridsteps[0]);
-  int y_max = ((n_gridsteps[1] >= 25)? 25: n_gridsteps[1]);
+  size_t x_min = 0;
+  size_t y_min = 0;
+
+  size_t x_max = ((n_gridsteps[0] >= 50)? 50: n_gridsteps[0]);
+  size_t y_max = ((n_gridsteps[1] >= 25)? 25: n_gridsteps[1]);
 
   size_t z = 0;
   std::cout << "Enter 'q' to quit; 'w', 'a', 's', 'd' for directional input; 'c' to continue in z direction; 'r' to go back in z direction" << std::endl;
@@ -95,16 +129,16 @@ void Space::printGrid(){
     else if (usr_inp == 'd'){x_min++; x_max++;}
     else if (usr_inp == 's'){y_min++; y_max++;}
     else if (usr_inp == 'w'){y_min--; y_max--;}
-    
+
     if (x_min < 0){x_min++; x_max++;}
     if (y_min < 0){y_min++; y_max++;}
     if (x_max > n_gridsteps[0]){x_min--; x_max--;}
     if (y_max > n_gridsteps[1]){y_min--; y_max--;}
-    
+
     // z coordinate
     if (usr_inp == 'r'){
       if (z==0){
-        std::cout << "z position at min. ";
+        std::cout << "z position at min. " << std::endl;
       }
       else{z--;}
     }
@@ -112,18 +146,19 @@ void Space::printGrid(){
       z++;
       if (z >= n_gridsteps[2]){
         z--;
-        std::cout << "z position at max. ";
+        std::cout << "z position at max. " << std::endl;
       }
     }
-    
+
     // print matrix
     for(size_t y = y_min; y < y_max; y++){
       for(size_t x = x_min; x < x_max; x++){
-        std::cout << getElement(x,y,z).getType();
+        char to_print = (getElement(x,y,z).getType() == 'a')? 'A' : getElement(x,y,z).getType();
+        std::cout << to_print << " ";
       }
       std::cout << std::endl;
     }
-    
+
     // get user input
     std::cout << std::endl;
     std::cout << "INPUT: ";
@@ -152,25 +187,22 @@ Space::Space(std::vector<Atom> &atoms, const double& bottom_level_voxel_dist, co
 // three cartesian directions out of all atoms. Also finds max
 // radius of all atoms and sets the space boundaries slightly so
 // that all atoms fit the space.
-//void Space::findMinMaxFromAtoms
-void Space::setBoundaries
-  (std::vector<Atom> &atoms)
-{
+void Space::setBoundaries(const std::vector<Atom> &atoms){
   double max_radius = 0;
-  for(int at = 0; at < atoms.size(); at++){
-    std::array<double,3> atom_pos = {atoms[at].pos_x, atoms[at].pos_y, atoms[at].pos_z}; // atom positions are correct
-  
+  for(size_t at = 0; at < atoms.size(); at++){
+    std::array<double,3> atom_pos = atoms[at].getPos();
+
     // if we are at the first atom, then the atom position is min/max by default
     if(at == 0){
       cart_min = atom_pos;
       cart_max = atom_pos;
       max_radius = atoms[at].rad;
     }
-    
+
     // after the first atom, begin comparing the atom positions to min/max and save if exceeds previously saved values
     else{
-      for(int dim = 0; dim < 3; dim++){ 
-        if(atom_pos[dim] > cart_max[dim]){ 
+      for(int dim = 0; dim < 3; dim++){
+        if(atom_pos[dim] > cart_max[dim]){
           cart_max[dim] = atom_pos[dim];
         }
         if(atom_pos[dim] < cart_min[dim]){
@@ -183,9 +215,9 @@ void Space::setBoundaries
     }
   }
   // expand boundaries by a little more than the largest atom found
-  for(int dim = 0; dim < 3; dim++){ 
+  for(int dim = 0; dim < 3; dim++){
     cart_min[dim] -= (1.1 * max_radius);
-    cart_max[dim] += (1.1 * max_radius);    
+    cart_max[dim] += (1.1 * max_radius);
   }
   return;
 }
@@ -194,16 +226,16 @@ void Space::setBoundaries
 // 3D grid (in form of a 1D vector) that contains all top level voxels.
 void Space::setGrid(){
   size_t n_voxels = 1;
-  
+
   for(int dim = 0; dim < 3; dim++){
     n_gridsteps[dim] = std::ceil (std::ceil( (getSize())[dim] / grid_size ) / std::pow(2,max_depth) );
     n_voxels *= n_gridsteps[dim];
   }
-  
+
   for(size_t i = 0; i < n_voxels; i++){
     grid.push_back(Voxel());
   }
-  
+
   return;
 }
 

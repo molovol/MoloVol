@@ -72,7 +72,7 @@ void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>
     atomListGrid->DeleteRows(0, atomListGrid->GetNumberRows());
   }
 
-  for (int row = 0; row < symbol_number_radius.size(); row++) {
+  for (size_t row = 0; row < symbol_number_radius.size(); row++) {
     atomListGrid->AppendRows(1, true);
     // column 1 (symbol of atom)
     atomListGrid->SetCellValue(row, 1, std::get<0>(symbol_number_radius[row]));

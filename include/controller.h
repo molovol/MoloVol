@@ -3,8 +3,10 @@
 #define CONTROLLER_H
 
 #include <iostream>
+#include <unordered_map>
 #include <wx/wx.h>
 
+struct CalcResultBundle;
 class Model;
 class MainFrame;
 class Ctrl{
@@ -12,10 +14,28 @@ class Ctrl{
     bool loadRadiusFile();
     bool loadAtomFile();
     bool runCalculation();
+    CalcResultBundle runCalculation(
+        std::string,
+        double,
+        int,
+        std::unordered_map<std::string, double>,
+        std::vector<std::string>,
+        double = 0,
+        double = 0,
+        bool = false,
+        bool = false,
+        double = 0,
+        std::string = "0");
     void registerView(MainFrame* inp_gui);
     static Ctrl* getInstance();
-    void getGuiParameters(std::vector<std::string>&);
-    void notifyUser(std::string str);
+    std::vector<std::string> getGuiParameters(); // confusing name, this is not a getter function
+    void notifyUser(std::string str, bool = true);
+    void exportSurfaceMap(std::string);
+    // unit tests
+    bool unittestExcluded();
+    bool unittestProtein();
+    bool unittestRadius();
+    bool unittestSurfaceMap();
 
   private:
     // consider making static pointer for model
@@ -24,7 +44,7 @@ class Ctrl{
     static Ctrl* instance;
     static MainFrame* gui;
 
-//    saveLastWritten(std::string
+    bool to_gui = true; // determines whether to print to console or to GUI
 };
 
 
