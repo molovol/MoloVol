@@ -2,7 +2,9 @@
 #include "model.h"
 #include "controller.h"
 #include "atom.h"
+#include "misc.h"
 #include "special_chars.h"
+#include <chrono>
 #include <array>
 #include <string>
 #include <vector>
@@ -24,32 +26,37 @@ void Model::defineCell(const double& grid_step, const int& max_depth){
 ///////////////////////////
 // Not sure about the name of the section
 
-void Model::setAtomListForCalculation(const std::vector<std::string>& included_elements, bool useUnitCell){
-  atoms.clear();
-  if(useUnitCell){
-    for(int i = 0; i < processed_atom_coordinates.size(); i++){
-      if(isIncluded(std::get<0>(processed_atom_coordinates[i]), included_elements)){
-        Atom at = Atom(std::get<1>(processed_atom_coordinates[i]),
-                       std::get<2>(processed_atom_coordinates[i]),
-                       std::get<3>(processed_atom_coordinates[i]),
-                       std::get<0>(processed_atom_coordinates[i]),
-                       radius_map[std::get<0>(processed_atom_coordinates[i])],
-                       elem_Z[std::get<0>(processed_atom_coordinates[i])]);
-        atoms.push_back(at);
-      }
+bool Model::setProbeRadii(const double& r_1, const double& r_2, bool two_probe_mode){
+  r_probe1 = r_1;
+  if (two_probe_mode){
+    if (r_1 > r_2){
+    Ctrl::getInstance()->notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.");
+    return false;
+    }
+    else{
+      r_probe2 = r_2;
     }
   }
-  else{
-    for(int i = 0; i < raw_atom_coordinates.size(); i++){
-      if(isIncluded(std::get<0>(raw_atom_coordinates[i]), included_elements)){
-        Atom at = Atom(std::get<1>(raw_atom_coordinates[i]),
-                       std::get<2>(raw_atom_coordinates[i]),
-                       std::get<3>(raw_atom_coordinates[i]),
-                       std::get<0>(raw_atom_coordinates[i]),
-                       radius_map[std::get<0>(raw_atom_coordinates[i])],
-                       elem_Z[std::get<0>(raw_atom_coordinates[i])]);
-        atoms.push_back(at);
-      }
+  return true;
+}
+
+void Model::setAtomListForCalculation(const std::vector<std::string>& included_elements, bool useUnitCell){
+  return setAtomListForCalculation(included_elements, useUnitCell? processed_atom_coordinates : raw_atom_coordinates);
+}
+
+void Model::setAtomListForCalculation(const std::vector<std::string>& included_elements,
+    std::vector<std::tuple<std::string,double,double,double>>& atom_coordinates){
+  atoms.clear();
+
+  for(size_t i = 0; i < atom_coordinates.size(); i++){
+    if(isIncluded(std::get<0>(atom_coordinates[i]), included_elements)){
+      Atom at = Atom(std::get<1>(atom_coordinates[i]),
+                     std::get<2>(atom_coordinates[i]),
+                     std::get<3>(atom_coordinates[i]),
+                     std::get<0>(atom_coordinates[i]),
+                     radius_map[std::get<0>(atom_coordinates[i])],
+                     elem_Z[std::get<0>(atom_coordinates[i])]);
+      atoms.push_back(at);
     }
   }
 }
@@ -58,26 +65,48 @@ void Model::storeAtomsInTree(){
   atomtree = AtomTree(atoms);
 }
 
-void Model::findCloseAtoms(const double& r_probe){
-  //TODO
-  return;
+void Model::linkToAdjacentAtoms(const double& r_probe, Atom& at){
+  if (at.adjacent_atoms.empty()){
+    at.adjacent_atoms = atomtree.findAdjacent(at, 2*r_probe);
+    for (Atom* adjacent_at : at.adjacent_atoms){
+      linkToAdjacentAtoms(r_probe, *adjacent_at);
+    }
+  }
 }
 
-void Model::calcVolume(){
-  cell.placeAtomsInGrid(atomtree);
-  double volume = cell.getVolume();
-
-  std::string message_to_user
-    = "Van der Waals Volume: " + std::to_string(volume) + " " + Symbol::angstrom() + Symbol::cubed();
-  Ctrl::getInstance()->notifyUser(message_to_user);
-
-  return;
+void Model::linkAtomsToAdjacentAtoms(const double& r_probe){
+  for (Atom& at : atoms){
+    linkToAdjacentAtoms(r_probe, at);
+  }
 }
 
+CalcResultBundle Model::calcVolume(){
+  CalcResultBundle data;
+
+  auto start = std::chrono::steady_clock::now();
+  cell.placeAtomsInGrid(atomtree, r_probe1); // assign each voxel in grid a type, defined by the atom positions
+  auto end = std::chrono::steady_clock::now();
+  data.type_assignment_elapsed_seconds = std::chrono::duration<double>(end-start).count();
+
+  //cell.printGrid(); // for testing
+
+  start = std::chrono::steady_clock::now();
+  data.volumes = cell.getVolume();
+  end = std::chrono::steady_clock::now();
+  data.volume_tally_elapsed_seconds = std::chrono::duration<double>(end-start).count();
+
+  return data;
+}
+
+// generates a simple table to be displayed by the GUI. only uses standard library and base types in order to
+// avoid dependency issues
 std::vector<std::tuple<std::string, int, double>> Model::generateAtomList(){
   std::vector<std::tuple<std::string, int, double>> atoms_for_list;
+  // Element0: Elementy symbol
+  // Element1: Number of Atoms with that symbol
+  // Element2: Radius
   for(auto elem : atom_amounts){
-    atoms_for_list.emplace_back(elem.first, elem.second, raw_radius_map[elem.first]);
+    atoms_for_list.push_back(std::make_tuple(elem.first, elem.second, radius_map[elem.first]));
   }
   return atoms_for_list;
 }
@@ -236,7 +265,7 @@ bool Model::symmetrizeUnitCell(){
       ABC_coord.emplace_back(std::get<0>(processed_atom_coordinates[i]), sym_abc[0], sym_abc[1], sym_abc[2]);
     }
   }
-  for (int i = 0; i < ABC_coord.size(); i++){ // converts new list of atoms after applying symmetry to cartesian coordinates
+  for (size_t i = 0; i < ABC_coord.size(); i++){ // converts new list of atoms after applying symmetry to cartesian coordinates
     double atom_xyz[3] = {0,0,0};
     double atom_abc[3] = {std::get<1>(ABC_coord[i]), std::get<2>(ABC_coord[i]), std::get<3>(ABC_coord[i])};
     for (int j = 0; j < 3; j++){
@@ -251,7 +280,7 @@ bool Model::symmetrizeUnitCell(){
 
 // 3) if atoms outside the orthogonal cell, move them inside
 void Model::moveAtomsInsideCell(){
-  for(int n = 0; n < processed_atom_coordinates.size(); n ++){
+  for(size_t n = 0; n < processed_atom_coordinates.size(); n ++){
     while(std::get<3>(processed_atom_coordinates[n]) < 0){ // need to start with Z axis because the unit cell C axis can have X and Y components
       std::get<3>(processed_atom_coordinates[n]) += cart_matrix[2][2];
       std::get<2>(processed_atom_coordinates[n]) += cart_matrix[2][1];
@@ -281,8 +310,8 @@ void Model::moveAtomsInsideCell(){
 
 // 4) remove duplicate atoms (allow 0.01-0.05 A error)
 void Model::removeDuplicateAtoms(){
-  for(int i = 0; i < processed_atom_coordinates.size(); i++){
-    for(int j = i+1; j < processed_atom_coordinates.size(); j++){
+  for(size_t i = 0; i < processed_atom_coordinates.size(); i++){
+    for(size_t j = i+1; j < processed_atom_coordinates.size(); j++){
       if(std::get<0>(processed_atom_coordinates[i]) == std::get<0>(processed_atom_coordinates[j]) &&
          std::abs(std::get<1>(processed_atom_coordinates[i])-std::get<1>(processed_atom_coordinates[j])) < 0.05 &&
          std::abs(std::get<2>(processed_atom_coordinates[i])-std::get<2>(processed_atom_coordinates[j])) < 0.05 &&
@@ -347,7 +376,7 @@ void Model::generateSupercell(double radius_limit){
 
 // 6) create atom map based on cell limits + radius= 2*(max_atom_rad+probe1+probe2+gridstep)
 void Model::generateUsefulAtomMapFromSupercell(double radius_limit){
-  for(int i = 0; i < processed_atom_coordinates.size(); i++){
+  for(size_t i = 0; i < processed_atom_coordinates.size(); i++){
     if(std::get<1>(processed_atom_coordinates[i]) < -radius_limit ||
        std::get<2>(processed_atom_coordinates[i]) < -radius_limit ||
        std::get<3>(processed_atom_coordinates[i]) < -radius_limit ||
