@@ -70,11 +70,7 @@ void Space::setGrid(){
     n_gridsteps[dim] = std::ceil (std::ceil( (getSize())[dim] / grid_size ) / std::pow(2,max_depth) );
     n_voxels *= n_gridsteps[dim];
   }
-  
-  for(unsigned int i = 0; i < n_voxels; i++){
-    grid.push_back(Voxel());
-  }
-  
+  _grid = Container3D<Voxel>(n_gridsteps);
   return;
 }
 
@@ -211,20 +207,20 @@ double Space::getResolution() const {
 
 Voxel& Space::getElement(const unsigned int i){
   //assert(i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]); 
-  return grid[i];
+  return _grid.getElement(i);
 }
 
 Voxel& Space::getElement(const unsigned int x, const unsigned int y, const unsigned int z){
   // check if element is out of bounds
-  return grid[z * n_gridsteps[0] * n_gridsteps[1] + y * n_gridsteps[0] + x];
+  return _grid.getElement(x,y,z);
 }
 
 Voxel& Space::getElement(const std::array<unsigned int,3> arr){
-  return grid[arr[2] * n_gridsteps[0] * n_gridsteps[1] + arr[1] * n_gridsteps[0] + arr[0]];
+  return _grid.getElement(arr);
 }
 
 Voxel& Space::getElement(const std::array<int,3> arr){
-  return grid[arr[2] * n_gridsteps[0] * n_gridsteps[1] + arr[1] * n_gridsteps[0] + arr[0]];
+  return _grid.getElement(arr);
 }
 
 /////////////////
