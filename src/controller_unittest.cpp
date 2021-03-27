@@ -86,9 +86,10 @@ bool Ctrl::unittestRadius(){
   const std::string radius_filepath = "./inputfile/radii.txt";
   
   std::unordered_map<std::string, double> rad_map = current_calculation->importRadiusMap(radius_filepath);
-  {int max_depth = 1;
+  {int max_depth = 0;
     //for (int max_depth = 4; max_depth < ; max_depth++){
-    for (double grid_step = 1; grid_step>0.01; grid_step-=0.01){
+    {double grid_step = 0.1;
+      //for (double grid_step = 1; grid_step>0.01; grid_step-=0.01){
       {double rad_probe1 = 1.2;
         //for (double rad_probe1 = 2; rad_probe1 < 2.01; rad_probe1 += 0.1){
       

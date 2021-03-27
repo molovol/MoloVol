@@ -77,7 +77,7 @@ void setBit(T& var, const unsigned pos, const bool state){
 }
 
 template <typename T>
-bool readBit(const T var, const unsigned pos){
+inline bool readBit(const T var, const unsigned pos){
   return (var & ( 1 << pos )) >> pos;
 }
 

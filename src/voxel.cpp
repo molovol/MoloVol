@@ -341,19 +341,13 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
 
 void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigned lvl, bool split){
   type = 0b00000101; // type excluded
-  int upper_bound =  Voxel::s_search_indices.getUppLim(lvl);
-  int lower_bound = (split? Voxel::s_search_indices.getSafeLim(lvl+1)*4 : 0);
-  for (int n = lower_bound; n <= upper_bound; ++n){
+  for (int n = (split? Voxel::s_search_indices.getSafeLim(lvl+1)*4 : 1); n <= Voxel::s_search_indices.getUppLim(lvl); ++n){
     for (std::array<int,3> coord : Voxel::s_search_indices[n]){
       coord = add(coord, index);
-      // if neighbour type is core, then set this voxel to shell
-      if (s_cell->coordInBounds(coord, lvl)){
-        char n_type = (s_cell->getVoxel(coord,lvl)).getType();
-        if (readBit(n_type,3)){
-          type = (n <= Voxel::s_search_indices.getSafeLim(lvl))? 0b00010001 : 0b10000000;
-          return;
-        }
-      }
+      if (readBit((s_cell->getVoxel(coord,lvl)).getType(),3)){
+        type = (n <= Voxel::s_search_indices.getSafeLim(lvl))? 0b00010001 : 0b10000000;
+        return;
+      }        
     }
   }
 }

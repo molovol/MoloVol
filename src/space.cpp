@@ -210,7 +210,7 @@ double Space::getResolution() const {
 /////////////////
 
 Voxel& Space::getElement(const unsigned int i){
-  assert(i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]); 
+  //assert(i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]); 
   return grid[i];
 }
 
@@ -223,25 +223,29 @@ Voxel& Space::getElement(const std::array<unsigned int,3> arr){
   return grid[arr[2] * n_gridsteps[0] * n_gridsteps[1] + arr[1] * n_gridsteps[0] + arr[0]];
 }
 
+Voxel& Space::getElement(const std::array<int,3> arr){
+  return grid[arr[2] * n_gridsteps[0] * n_gridsteps[1] + arr[1] * n_gridsteps[0] + arr[0]];
+}
+
 /////////////////
 
-Voxel& Space::getVoxel(unsigned int x, unsigned int y, unsigned int z, int lvl){
+Voxel& Space::getVoxel(const std::array<int,3>& arr, int lvl){
   // ptr needed in order to reassign variable in loop and return reference in the end
   int div = pow(2,max_depth-lvl);
-  Voxel* ptr_sub_vxl = &getElement(x/div, y/div, z/div);
-
-  for (int current_lvl = max_depth-1-lvl; current_lvl>=0 && ptr_sub_vxl->hasSubvoxel(); --current_lvl){
+  Voxel* ptr_sub_vxl = &getElement(arr[0]/div, arr[1]/div, arr[2]/div);
+  for (int current_lvl = max_depth-1-lvl;ptr_sub_vxl->hasSubvoxel() && current_lvl>=0 ; --current_lvl){
     div = (pow(2,current_lvl));
     ptr_sub_vxl = &(ptr_sub_vxl->getSubvoxel(
-          (x/div)%2, 
-          (y/div)%2, 
-          (z/div)%2));
+          (arr[0]/div)%2, 
+          (arr[1]/div)%2, 
+          (arr[2]/div)%2));
   }
+  
   return *ptr_sub_vxl;
 }
 
-Voxel& Space::getVoxel(std::array<int,3> arr, int lvl){
-  return getVoxel(arr[0], arr[1], arr[2], lvl);
+Voxel& Space::getVoxel(int x, int y, int z, int lvl){
+  return getVoxel({x,y,z}, lvl);
 }
       
 // check whether coord is inside grid bounds
