@@ -22,14 +22,15 @@ class Space{
     std::array <double,3> getOrigin(); // same as getMin();
     std::array <double,3> getMax();
     std::array <double,3> getSize();
-    Voxel& getVoxel(unsigned int, unsigned int, unsigned int, int);
-    Voxel& getVoxel(std::array<int,3>, int);
+    Voxel& getVoxel(int, int, int, int);
+    Voxel& getVoxel(const std::array<int,3>&, int);
     bool coordInBounds(const std::array<int,3>&, const unsigned);
     double getResolution() const;
 
     Voxel& getElement(const unsigned int);
     Voxel& getElement(const unsigned int, const unsigned int, const unsigned int);
     Voxel& getElement(const std::array<unsigned int,3>);
+    Voxel& getElement(const std::array<int,3>);
     std::array<unsigned int,3> getGridsteps();
     unsigned long int totalVxlOnLvl(const int) const;
 
@@ -41,6 +42,7 @@ class Space{
     // type evaluation
     void placeAtomsInGrid(const AtomTree&, const double&);
     std::map<char,double> getVolume();
+
   private:
     std::array <double,3> cart_min; // this is also the "origin" of the space
     std::array <double,3> cart_max;
