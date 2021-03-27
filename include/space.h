@@ -24,8 +24,8 @@ class Space{
     std::array <double,3> getSize();
     Voxel& getVoxel(int, int, int, int);
     Voxel& getVoxel(const std::array<int,3>&, int);
-    bool coordInBounds(const std::array<int,3>&, const unsigned);
-    double getResolution() const;
+    bool coordInBounds(const std::array<int,3>&, const unsigned); // not in use
+    double getResolution() const; // misnamed
 
     Voxel& getElement(const unsigned int);
     Voxel& getElement(const unsigned int, const unsigned int, const unsigned int);
@@ -46,7 +46,8 @@ class Space{
   private:
     std::array <double,3> cart_min; // this is also the "origin" of the space
     std::array <double,3> cart_max;
-    std::vector<Voxel> grid;
+    Container3D<Voxel> _grid;
+//    std::vector<Voxel> grid;
     std::array<unsigned int,3> n_gridsteps; // number of top level voxels in x,y,z direction 
     double grid_size;
     int max_depth; // for voxels
