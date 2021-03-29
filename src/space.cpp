@@ -64,13 +64,16 @@ void Space::setBoundaries(const std::vector<Atom> &atoms, const double add_space
 // based on the grid step and the octree max_depth, this function produces a
 // 3D grid (in form of a 1D vector) that contains all top level voxels.
 void Space::setGrid(){
-  unsigned int n_voxels = 1;
-  
-  for(int dim = 0; dim < 3; dim++){
+  _grid.clear();
+  for (int dim = 0; dim < 3; dim++){
     n_gridsteps[dim] = std::ceil (std::ceil( (getSize())[dim] / grid_size ) / std::pow(2,max_depth) );
-    n_voxels *= n_gridsteps[dim];
   }
-  _grid = Container3D<Voxel>(n_gridsteps);
+  for (int lvl = 0; lvl <= max_depth; ++lvl){
+    _grid.push_back(Container3D<Voxel>
+        (n_gridsteps[0]*pow(2,max_depth-lvl), 
+         n_gridsteps[1]*pow(2,max_depth-lvl), 
+         n_gridsteps[2]*pow(2,max_depth-lvl)));
+  }
   return;
 }
 
@@ -207,20 +210,20 @@ double Space::getResolution() const {
 
 Voxel& Space::getElement(const unsigned int i){
   //assert(i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]); 
-  return _grid.getElement(i);
+  return _grid[0].getElement(i);
 }
 
 Voxel& Space::getElement(const unsigned int x, const unsigned int y, const unsigned int z){
   // check if element is out of bounds
-  return _grid.getElement(x,y,z);
+  return _grid[0].getElement(x,y,z);
 }
 
 Voxel& Space::getElement(const std::array<unsigned int,3> arr){
-  return _grid.getElement(arr);
+  return _grid[0].getElement(arr);
 }
 
 Voxel& Space::getElement(const std::array<int,3> arr){
-  return _grid.getElement(arr);
+  return _grid[0].getElement(arr);
 }
 
 /////////////////
