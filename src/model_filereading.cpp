@@ -38,11 +38,11 @@ bool Model::readRadiiAndAtomNumFromFile(std::string& radius_path){
 // generates two two maps for assigning a radius/ atomic number respectively, to a element symbol
 // sets the maps to members of the model class
 bool Model::readRadiusFileSetMaps(std::string& radius_path){
-  
+
   RadiusFileBundle data = importDataFromRadiusFile(radius_path);
 
   if (data.rad_map.size() == 0) {return false;}
-  
+
   setRadiusMap(data.rad_map);
   elem_Z = data.atomic_num_map;
   return true;
@@ -63,7 +63,7 @@ bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
   // this function should ideally end in a set function, and the other functions should have return
   // values -JM
   clearAtomData();
-  
+
   try{
     readAtomFile(filepath, include_hetatm);
   } catch(const ExceptIllegalFileExtension& e) {
@@ -106,7 +106,7 @@ void Model::readFileXYZ(const std::string& filepath){
   while(getline(inp_file,line)){
     std::vector<std::string> substrings = splitLine(line);
     // substrings[0]: Element Symbol
-    // substrings[1,2,3]: Coordinates 
+    // substrings[1,2,3]: Coordinates
     // create new atom and add to storage vector if line format corresponds to Element_Symbol x y z
     if (isAtomLine(substrings)) {
 
@@ -177,7 +177,7 @@ std::vector<std::string> Model::listElementsInStructure(){
 }
 
 bool Model::getSymmetryElements(std::string group, std::vector<int> &sym_matrix_XYZ, std::vector<double> &sym_matrix_fraction){
-  for (int i = 0; i<group.size(); i++) { // convert space group to upper case chars to compare with the list
+  for (size_t i = 0; i<group.size(); i++) { // convert space group to upper case chars to compare with the list
     group[i] = toupper(group[i]);
   }
   group = "'" + group + "'";
@@ -278,7 +278,7 @@ bool isAtomLine(const std::vector<std::string>& substrings) {
 // reads a string and converts it to valid atom symbol: first character uppercase followed by lowercase characters
 std::string strToValidSymbol(std::string str){
   // iterate over all characters in string
-  for (int i = 0; i<str.size(); i++) {
+  for (size_t i = 0; i<str.size(); i++) {
 // TODO: decide whether non-alphabetic characters should be erased or not
 //    if (isalpha(str[i])){
       // only for first character in sequence, convert to uppercase
@@ -300,7 +300,7 @@ std::string strToValidSymbol(std::string str){
 
 RadiusFileBundle importDataFromRadiusFile(const std::string& radius_path){
   RadiusFileBundle data;
-  
+
   std::string line;
   std::ifstream inp_file(radius_path);
   while(getline(inp_file,line)){

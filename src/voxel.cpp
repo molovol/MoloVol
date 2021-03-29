@@ -3,6 +3,7 @@
 #include "misc.h"
 #include "atom.h"
 #include <cmath> // abs, pow
+#include <algorithm> // max_element
 #include <cassert>
 #include <unordered_map>
 
@@ -95,6 +96,7 @@ std::vector<std::vector<std::array<int,3>>> SearchIndex::computeIndices(unsigned
 // list all unique combinations of three integers, whose sum added results in n
 std::vector<std::array<unsigned int,3>> sumOfThreeSquares(unsigned long int n){
   std::vector<std::array<unsigned int,3>> list_of_roots;
+  // TODO roots is unused => remove ?
   std::array<unsigned int,3> roots;
   for (unsigned int x = 0; x <= std::sqrt(n); x++){
     unsigned int diff = n - std::pow(x,2);
@@ -190,11 +192,11 @@ void Voxel::prepareTypeAssignment(Space* cell, AtomTree atomtree, double grid_si
 ///////////////////////////////
 // TYPE ASSIGNMENT 1ST ROUND //
 ///////////////////////////////
-// part of the type assigment routine. first evaluation is only concerned with the relation between 
+// part of the type assigment routine. first evaluation is only concerned with the relation between
 // voxels and atoms
 char Voxel::evalRelationToAtoms(Vector pos_vxl, const int max_depth){
-  double rad_vxl = calcRadiusOfInfluence(max_depth); // calculated every time, since max_depth may change (not expensive) 
- 
+  double rad_vxl = calcRadiusOfInfluence(max_depth); // calculated every time, since max_depth may change (not expensive)
+
   traverseTree(s_atomtree.getRoot(), s_atomtree.getMaxRad(), pos_vxl, rad_vxl, s_r_probe1, max_depth);
 
   if (type == 0){type = 0b00001001;}
@@ -216,7 +218,7 @@ void Voxel::splitVoxel(const Vector& vxl_pos, const double& max_depth){
        i    >= 4 ? 1 : -1};
 
     Vector new_pos = vxl_pos + factors * s_grid_size * std::pow(2,max_depth-2);
-    
+
     data[i].evalRelationToAtoms(new_pos, max_depth-1);
   }
   setType(mergeTypes(data));
@@ -224,11 +226,11 @@ void Voxel::splitVoxel(const Vector& vxl_pos, const double& max_depth){
 
 // goes through all close atoms to determine a voxel's type
 void Voxel::traverseTree
-  (const AtomNode* node, 
-   const double& rad_max, 
-   const Vector& pos_vxl, 
-   const double& rad_vxl, 
-   const double& rad_probe, 
+  (const AtomNode* node,
+   const double& rad_max,
+   const Vector& pos_vxl,
+   const double& rad_vxl,
+   const double& rad_probe,
    const int& max_depth,
    const char exit_type,
    const char dim){
@@ -238,14 +240,14 @@ void Voxel::traverseTree
 
   // distance between atom and voxel along one dimension
   double dist1D = distance(atom.getPosVec(), pos_vxl, dim);
- 
+
   if (abs(dist1D) > (rad_vxl + rad_max + rad_probe)){ // then atom is too far to matter for voxel type
       traverseTree(dist1D < 0 ? node->left_child : node->right_child,
           rad_max, pos_vxl, rad_vxl, rad_probe, max_depth, exit_type, (dim+1)%3);
-  } 
+  }
   else{ // then atom is close enough to influence voxel type
     if(isAtom(atom, pos_vxl, rad_vxl, rad_probe)){return;}
-    
+
     // continue with both children
     for (AtomNode* child : {node->left_child, node->right_child}){
       traverseTree(child, rad_max, pos_vxl, rad_vxl, rad_probe, max_depth, exit_type, (dim+1)%3);
@@ -268,7 +270,7 @@ bool Voxel::isAtom(const Atom& atom, const Vector& pos_vxl, const double rad_vxl
   else if ((dist < atom.getRad() + rad_probe - rad_vxl) && (0 < atom.getRad() + rad_probe - rad_vxl)){
     if (readBit(type,1)){return false;} // if mixed or inside atom
     type = 0b00010000;
-  } 
+  }
   else if (dist < atom.getRad() + rad_probe + rad_vxl){
     if (readBit(type,4) || readBit(type,1)){return false;} // if mixed, inside atom, or potential shell
     type = 0b10010000;
@@ -341,20 +343,20 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
 
 void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigned lvl, bool split){
   type = 0b00000101; // type excluded
-  for (int n = (split? Voxel::s_search_indices.getSafeLim(lvl+1)*4 : 1); n <= Voxel::s_search_indices.getUppLim(lvl); ++n){
+  for (unsigned int n = (split? Voxel::s_search_indices.getSafeLim(lvl+1)*4 : 1); n <= Voxel::s_search_indices.getUppLim(lvl); ++n){
     for (std::array<int,3> coord : Voxel::s_search_indices[n]){
       coord = add(coord, index);
       if (readBit((s_cell->getVxlFromGrid(coord,lvl)).getType(),3)){
         type = (n <= Voxel::s_search_indices.getSafeLim(lvl))? 0b00010001 : 0b10000000;
         return;
-      }        
+      }
     }
   }
 }
 
 // adds an array of size 8 to the voxel that contains 8 subvoxels
 void Voxel::splitVoxel(const std::array<unsigned int,3>& vxl_ind, const unsigned lvl){
-  data = std::vector<Voxel>(8); 
+  data = std::vector<Voxel>(8);
   evalRelationToVoxels(vxl_ind, lvl, true);
   setType(mergeTypes(data));
 }
@@ -599,6 +601,7 @@ bool allAtomsClose(
     const std::array<Vector,4>& vectors,
     char n_atoms)
 {
+  // TODO all_atoms_close is unused => remove ?
   bool all_atoms_close = true;
 
   Vector last_added = vectors[n_atoms-1];
@@ -717,7 +720,7 @@ char mergeTypes(std::vector<Voxel>& sub_vxls){
   setBit(parent_type,0,confirmed);
   setBitOn(parent_type,7);
   return parent_type;
-} 
+}
 
 /////////////////
 // OUTPUT TYPE //
@@ -725,8 +728,8 @@ char mergeTypes(std::vector<Voxel>& sub_vxls){
 
 // function for generating a 3D tensor filled with the types of the voxel
 void Voxel::fillTypeTensor(
-    Container3D<char>& type_tensor, 
-    const std::array<unsigned long int,3> block_start, 
+    Container3D<char>& type_tensor,
+    const std::array<unsigned long int,3> block_start,
     const int remaining_depth){
   if (remaining_depth == 0){
     type_tensor.getElement(block_start) = type;

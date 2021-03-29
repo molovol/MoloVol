@@ -48,7 +48,7 @@ void Model::setAtomListForCalculation(const std::vector<std::string>& included_e
     std::vector<std::tuple<std::string,double,double,double>>& atom_coordinates){
   atoms.clear();
 
-  for(int i = 0; i < atom_coordinates.size(); i++){
+  for(size_t i = 0; i < atom_coordinates.size(); i++){
     if(isIncluded(std::get<0>(atom_coordinates[i]), included_elements)){
       Atom at = Atom(std::get<1>(atom_coordinates[i]),
                      std::get<2>(atom_coordinates[i]),
@@ -87,9 +87,9 @@ CalcResultBundle Model::calcVolume(){
   _cell.placeAtomsInGrid(atomtree, _r_probe1); // assign each voxel in grid a type, defined by the atom positions
   auto end = std::chrono::steady_clock::now();
   data.type_assignment_elapsed_seconds = std::chrono::duration<double>(end-start).count();
-  
+
   //_cell.printGrid(); // for testing
-  
+
   start = std::chrono::steady_clock::now();
   data.volumes = _cell.getVolume();
   end = std::chrono::steady_clock::now();
@@ -265,7 +265,7 @@ bool Model::symmetrizeUnitCell(){
       ABC_coord.emplace_back(std::get<0>(processed_atom_coordinates[i]), sym_abc[0], sym_abc[1], sym_abc[2]);
     }
   }
-  for (int i = 0; i < ABC_coord.size(); i++){ // converts new list of atoms after applying symmetry to cartesian coordinates
+  for (size_t i = 0; i < ABC_coord.size(); i++){ // converts new list of atoms after applying symmetry to cartesian coordinates
     double atom_xyz[3] = {0,0,0};
     double atom_abc[3] = {std::get<1>(ABC_coord[i]), std::get<2>(ABC_coord[i]), std::get<3>(ABC_coord[i])};
     for (int j = 0; j < 3; j++){
@@ -280,7 +280,7 @@ bool Model::symmetrizeUnitCell(){
 
 // 3) if atoms outside the orthogonal cell, move them inside
 void Model::moveAtomsInsideCell(){
-  for(int n = 0; n < processed_atom_coordinates.size(); n ++){
+  for(size_t n = 0; n < processed_atom_coordinates.size(); n ++){
     while(std::get<3>(processed_atom_coordinates[n]) < 0){ // need to start with Z axis because the unit cell C axis can have X and Y components
       std::get<3>(processed_atom_coordinates[n]) += cart_matrix[2][2];
       std::get<2>(processed_atom_coordinates[n]) += cart_matrix[2][1];
@@ -310,8 +310,8 @@ void Model::moveAtomsInsideCell(){
 
 // 4) remove duplicate atoms (allow 0.01-0.05 A error)
 void Model::removeDuplicateAtoms(){
-  for(int i = 0; i < processed_atom_coordinates.size(); i++){
-    for(int j = i+1; j < processed_atom_coordinates.size(); j++){
+  for(size_t i = 0; i < processed_atom_coordinates.size(); i++){
+    for(size_t j = i+1; j < processed_atom_coordinates.size(); j++){
       if(std::get<0>(processed_atom_coordinates[i]) == std::get<0>(processed_atom_coordinates[j]) &&
          std::abs(std::get<1>(processed_atom_coordinates[i])-std::get<1>(processed_atom_coordinates[j])) < 0.05 &&
          std::abs(std::get<2>(processed_atom_coordinates[i])-std::get<2>(processed_atom_coordinates[j])) < 0.05 &&
@@ -376,7 +376,7 @@ void Model::generateSupercell(double radius_limit){
 
 // 6) create atom map based on cell limits + radius= 2*(max_atom_rad+probe1+probe2+gridstep)
 void Model::generateUsefulAtomMapFromSupercell(double radius_limit){
-  for(int i = 0; i < processed_atom_coordinates.size(); i++){
+  for(size_t i = 0; i < processed_atom_coordinates.size(); i++){
     if(std::get<1>(processed_atom_coordinates[i]) < -radius_limit ||
        std::get<2>(processed_atom_coordinates[i]) < -radius_limit ||
        std::get<3>(processed_atom_coordinates[i]) < -radius_limit ||

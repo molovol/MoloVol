@@ -36,7 +36,7 @@ void Model::createReport(std::string input_filepath, std::vector<std::string> pa
   std::ofstream output_report(output_folder+"/MoloVol result report.txt");
   output_report << "MoloVol program: calculation results report\n\n";
   output_report << "Structure file analyzed: " << input_filepath << "\n";
-  for(int i = 0; i < parameters.size(); i++){
+  for(size_t i = 0; i < parameters.size(); i++){
     output_report << parameters[i] << "\n";
   }
   output_report.close();
@@ -49,7 +49,7 @@ void Model::createReport(std::string input_filepath, std::vector<std::string> pa
 void Model::writeXYZfile(std::vector<std::tuple<std::string, double, double, double>> &atom_coordinates, std::string output_type){
   std::ofstream output_structure(output_folder+"/structure_"+output_type+".xyz");
   output_structure << output_type << "\nStructure generated with MoloVol\n\n";
-  for(int i = 0; i < atom_coordinates.size(); i++){
+  for(size_t i = 0; i < atom_coordinates.size(); i++){
     output_structure << std::get<0>(atom_coordinates[i]) << " ";
     output_structure << std::to_string(std::get<1>(atom_coordinates[i])) << " ";
     output_structure << std::to_string(std::get<2>(atom_coordinates[i])) << " ";
@@ -63,14 +63,14 @@ void Model::writeXYZfile(std::vector<std::tuple<std::string, double, double, dou
 ////////////////////////
 
 void Model::writeSurfaceMap(std::string output_dir){
-  
+
   // assemble data
   Container3D<char> surface_map = _cell.generateTypeTensor();
   // save commonly used variable
   std::array<unsigned long int,3> n_elements = surface_map.getNumElements();
   double vxl_length = _cell.getResolution();
   // create map for assigning numbers to types
-  std::map<char,int> typeToNum = 
+  std::map<char,int> typeToNum =
     {{0b00000011, 0},
      {0b00000101, 2},
      {0b00001001, 6},
