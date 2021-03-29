@@ -87,14 +87,15 @@ class Voxel{
     static inline double s_r_probe1;
     static inline SearchIndex s_search_indices;
     // DEPRECIATED
-    static inline std::unordered_map<unsigned long long int,TripletBundle> s_triplet_data;
-    static inline std::unordered_map<int,PairBundle> s_pair_data;
+//    static inline std::unordered_map<unsigned long long int,TripletBundle> s_triplet_data;
+//    static inline std::unordered_map<int,PairBundle> s_pair_data;
     // DEPRECIATED
 
     static inline double calcRadiusOfInfluence(const double& max_depth);
 
     bool isAtom(const Atom&, const Vector&, const double, const double);
     void searchForCore(const std::array<unsigned int,3>&, const unsigned, bool=false);
+    /*
     // DEPRECIATED
     bool isProbeExcluded(const Vector& vxl_pos, const double& r_probe, const double&, const std::vector<int>&);
     bool isExcludedByPair(const Vector&, const Vector&, const double&, const double&, const double&, const double&, int);
@@ -102,6 +103,7 @@ class Voxel{
     bool isExcludedByQuadruplet(const Vector&, const double&, const std::array<Vector,4>&, const std::array<double,4>&, const double&, const std::vector<int>&);
     bool isExcludedSetType(const Vector&, const double&, const Vector&, const double&);
     // DEPRECIATED
+    // */
 
     std::vector<Voxel> data; // empty or exactly 8 elements
     char type;
