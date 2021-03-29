@@ -35,7 +35,7 @@ void Model::createReport(std::string input_filepath, std::vector<std::string> pa
   std::ofstream output_report(output_folder+"/MoloVol result report.txt");
   output_report << "MoloVol program: calculation results report\n\n";
   output_report << "Structure file analyzed: " << input_filepath << "\n";
-  for(size_t i = 0; i < parameters.size(); i++){
+  for(int i = 0; i < parameters.size(); i++){
     output_report << parameters[i] << "\n";
   }
 
@@ -54,7 +54,7 @@ void Model::createReport(std::string input_filepath, std::vector<std::string> pa
 void Model::writeXYZfile(std::vector<std::tuple<std::string, double, double, double>> &atom_coordinates, std::string output_type){
   std::ofstream output_structure(output_folder+"/structure_"+output_type+".xyz");
   output_structure << output_type << "\nStructure generated with MoloVol\n\n";
-  for(size_t i = 0; i < atom_coordinates.size(); i++){
+  for(int i = 0; i < atom_coordinates.size(); i++){
     output_structure << std::get<0>(atom_coordinates[i]) << " ";
     output_structure << std::to_string(std::get<1>(atom_coordinates[i])) << " ";
     output_structure << std::to_string(std::get<2>(atom_coordinates[i])) << " ";

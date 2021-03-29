@@ -6,7 +6,6 @@ inputfile/*
 !inputfile/acetylene.xyz
 !inputfile/6s8y.xyz
 !inputfile/radii.txt
-!inputfile/probetest*
 .DS_store
 *.dSYM/Contents/Info.plist
 benchmark
@@ -14,6 +13,3 @@ benchmark
 xcuserdata/
 *.dSYM
 tags
-output/
-test/
-surface_map.dx
