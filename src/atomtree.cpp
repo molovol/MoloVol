@@ -9,46 +9,24 @@
 ///////////////////
 
 double findMaxRad(std::vector<Atom>& list_of_atoms);
-void findAdjacentRecursive(std::vector<Atom*>&, const Atom&, const double& shell_to_shell_dist, const double& min_distance, const AtomNode* node, int dim);
 
 //////////////
 // ATOMNODE //
 //////////////
 
-// CONSTRUCTOR
+AtomNode::AtomNode(Atom* at, AtomNode* left_node, AtomNode* right_node)
+    : atom(at), left_child(left_node), right_child(right_node) {}
 
-AtomNode::AtomNode(int atom_id, AtomNode* left_node, AtomNode* right_node) 
-    : _atom_id(atom_id), left_child(left_node), right_child(right_node) {}
-
-// ACCESS
-
-void AtomNode::setAtomList(const std::vector<Atom>& atom_list){
-  AtomNode::_atom_list = atom_list;
-}
-
-std::vector<Atom>& AtomNode::getAtomList(){
-  return _atom_list;
-}
-
-Atom& AtomNode::getAtom() const {
-  return AtomNode::getAtom(_atom_id);
-}
-
-Atom& AtomNode::getAtom(const int atom_id){
-  return _atom_list[atom_id];
-}
-
-int AtomNode::getAtomId() const {
-  return _atom_id;
-}
-
-// OTHER
-// for testing
 void AtomNode::print(){
-  std::cout << getAtom().symbol << "("
-    << getAtom().getCoordinate(0) << "," 
-    << getAtom().getCoordinate(1) << "," 
-    << getAtom().getCoordinate(2) << ")";
+  if(atom!=NULL){
+    std::cout << atom->symbol << "("
+      << atom->getCoordinate(0) << ","
+      << atom->getCoordinate(1) << ","
+      << atom->getCoordinate(2) << ")";
+  }
+  else{
+    std::cout << "n/A";
+  }
 
   std::cout << "(-";
   if(left_child!=NULL){
@@ -66,30 +44,40 @@ void AtomNode::print(){
 // ATOMTREE //
 //////////////
 
-// CONSTRUCTOR
+/////////////////
+// CONSTRUCTOR //
+/////////////////
 
 AtomTree::AtomTree(){
-  _root = NULL;
-  _max_rad = 0;
+  root = NULL;
+  max_rad = 0;
 }
 
 AtomTree::AtomTree(std::vector<Atom>& list_of_atoms){
-  AtomNode::setAtomList(list_of_atoms);
-  _root = buildTree(0, list_of_atoms.size(), 0);
+  root = buildTree(list_of_atoms, 0, list_of_atoms.size(), 0);
   // ideally, the maximum radius would be the largest radius among all children of a node.
   // this, however, may require running an algorithm for every tree node, increasing the
   // complexity of the operation. it is much simpler to use the maximum radius among all
   // atoms instead, sacrificing optimisation.
-  _max_rad = findMaxRad(list_of_atoms);
+  max_rad = findMaxRad(list_of_atoms);
 }
 
-// FUNCTIONS USED BY CONSTRUCTOR
+double findMaxRad(std::vector<Atom>& list_of_atoms){
+  double max_rad = 0;
+  for (size_t atom = 0; atom < list_of_atoms.size(); atom++){
+    if (list_of_atoms[atom].getRad() > max_rad){
+      max_rad = list_of_atoms[atom].getRad();
+    }
+  }
+  return max_rad;
+}
 
-// recursive function to generate a 3-d tree from a list of atoms
-// rather than copying the list of atoms in every recursion, or saving the partitioned
-// vectors, the original list of atoms is passed by reference and only the vector limits
-// are passed by value. any sorting during the tree building occurs in the original list
+    // recursive function to generate a 3-d tree from a list of atoms
+    // rather than copying the list of atoms in every recursion, or saving the partitioned
+    // vectors, the original list of atoms is passed by reference and only the vector limits
+    // are passed by value. any sorting during the tree building occurs in the original list
 AtomNode* AtomTree::buildTree(
+    std::vector<Atom>& list_of_atoms,
     int vec_first, // index of first vector element (default 0)
     int vec_end, // vector size (index of last element + 1)
     char dim){
@@ -99,39 +87,39 @@ AtomNode* AtomTree::buildTree(
   }
   // if list of atoms has exactly one atom left
   else if((vec_end-vec_first)==1){
-    return new AtomNode(vec_first,NULL,NULL);
+    return new AtomNode(&list_of_atoms[vec_first],NULL,NULL);
   }
 
   else{
-    quicksort(AtomNode::getAtomList(), vec_first, vec_end, dim);
+    quicksort(list_of_atoms, vec_first, vec_end, dim);
     int median = vec_first + (vec_end-vec_first)/2; // operation rounds down
     return new AtomNode(
-//        AtomNode::getAtomList()[median],
-        median,
-        buildTree(vec_first, median, (dim+1)%3), 
-        buildTree(median+1, vec_end, (dim+1)%3)); 
+       &list_of_atoms[median],
+        buildTree(list_of_atoms, vec_first, median, (dim+1)%3),
+        buildTree(list_of_atoms, median+1, vec_end, (dim+1)%3));
   }
 }
 
-double findMaxRad(std::vector<Atom>& list_of_atoms){
-  double max_rad = 0;
-  for (int atom = 0; atom < list_of_atoms.size(); atom++){
-    if (list_of_atoms[atom].getRad() > max_rad){
-      max_rad = list_of_atoms[atom].getRad();
-    }
+void AtomTree::print() const {
+  std::cout << "Printing Tree" << std::endl;
+  if(root == NULL){
+    std::cout << "Tree empty" << std::endl;
   }
-  return max_rad;
+  else{
+    root->print();
+  }
+  std::cout << std::endl;
+  return;
 }
 
-    
 void AtomTree::quicksort(std::vector<Atom>& list_of_atoms, const int& vec_first, const int& vec_end, const char& dim){
-  
+
   if(vec_first >= vec_end-1){
     return;
   }
-    
+
   double pivot = list_of_atoms[vec_end-1].getCoordinate(dim);
-  
+
   int cntr = vec_first;
 
   for(int i = vec_first; i < vec_end; i++){
@@ -153,55 +141,33 @@ void AtomTree::swap(Atom& a, Atom& b){
   return;
 }
 
-// for testing
-void AtomTree::print() const {
-  std::cout << "Printing Tree" << std::endl;
-  if(_root == NULL){
-    std::cout << "Tree empty" << std::endl;
-  }
-  else{
-    _root->print();
-  }
-  std::cout << std::endl;
-  return;
-}
+/////////////////////
+// DATA GENERATION //
+/////////////////////
 
-// ACCESS
-
-const double AtomTree::getMaxRad() const {
-  return _max_rad;
-}
-
-const AtomNode* AtomTree::getRoot() const {
-  return _root;
-}
-
-// NEIGHBOUR LIST
-
-// changes to AtomNode and AtomTree neccessitate a reevaluation of this function
+void findAdjacentRecursive(std::vector<Atom*>&, const Atom&, const double& shell_to_shell_dist, const double& min_distance, const AtomNode* node, int dim);
 std::vector<Atom*> AtomTree::findAdjacent(const Atom& at, const double& shell_to_shell_dist){
   std::vector<Atom*> list_of_adjacent;
   int dim = 0;
-  double min_distance = at.rad + _max_rad + shell_to_shell_dist;
+  double min_distance = at.rad + max_rad + shell_to_shell_dist;
 
-  findAdjacentRecursive(list_of_adjacent, at, shell_to_shell_dist, min_distance, _root, dim);
-  
+  findAdjacentRecursive(list_of_adjacent, at, shell_to_shell_dist, min_distance, root, dim);
+
   return list_of_adjacent;
 }
 
-// changes to AtomNode and AtomTree neccessitate a reevaluation of this function
 void findAdjacentRecursive(
-    std::vector<Atom*>& list_of_adjacent, 
+    std::vector<Atom*>& list_of_adjacent,
     const Atom& atom,
     const double& shell_to_shell_dist,
     const double& min_distance,
-    const AtomNode* node, 
+    const AtomNode* node,
     int dim){
-  
+
   if (node == NULL) {return;}
-  Atom* test_atom = &node->getAtom(); // for easier access
+  Atom* test_atom = node->atom; // for easier access
   double dist1D = distance(test_atom->getPos(), atom.getPos(), dim);
-  
+
   if (abs(dist1D) > min_distance){ // if atom is very far from test atom
     findAdjacentRecursive(
         list_of_adjacent,
@@ -224,3 +190,14 @@ void findAdjacentRecursive(
   }
 }
 
+////////////
+// ACCESS //
+////////////
+
+const double AtomTree::getMaxRad() const {
+  return max_rad;
+}
+
+const AtomNode* AtomTree::getRoot() const {
+  return root;
+}
