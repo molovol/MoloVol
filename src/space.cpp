@@ -244,7 +244,8 @@ Voxel& Space::getElement(const std::array<int,3> arr){
 /////////////////
 
 Voxel& Space::getVoxel(const std::array<int,3>& arr, int lvl){
-  if (getElement(arr,lvl).getType() == 0){
+  Voxel& vxl = getElement(arr,lvl);
+  if (vxl.getType() == 0){
     // ptr needed in order to reassign variable in loop and return reference in the end
     int div = pow(2,max_depth-lvl);
     Voxel* ptr_sub_vxl = &getElement(arr[0]/div, arr[1]/div, arr[2]/div);
@@ -255,9 +256,9 @@ Voxel& Space::getVoxel(const std::array<int,3>& arr, int lvl){
           (arr[1]/div)%2, 
           (arr[2]/div)%2));
     }
-    getElement(arr,lvl) = *ptr_sub_vxl;
+    vxl = *ptr_sub_vxl;
   }
-  return getElement(arr,lvl);
+  return vxl;
 }
 
 Voxel& Space::getVoxel(int x, int y, int z, int lvl){
