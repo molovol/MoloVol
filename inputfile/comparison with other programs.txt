@@ -1,0 +1,35 @@
+Internal cavities volumes calculated with PLATON software (version 2020-10-17):
+https://www.platonsoft.nl/platon/
+CALC SOLV command with the following parameters:
+vdw radii H 1.20 C 1.77 N 1.66 O 1.50 Fe 2.44 Ni 2.40 
+grid step 0.1 A
+probe 1.2 A
+
+Setup: 
+OS: Windows 10 professional
+RAM: 16 Gb
+CPU: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz, 2601 MHz, 6 cores, 12 logical processors
+Integrated GPU: Intel(R) UHD Graphics 630
+Dedicated GPU: NVIDIA GeForce GTX 1660 Ti
+Note: GPUs are probably not used by PLATON for CALC SOLV function
+
+Input structures:
+1)
+norc_cage_closed
+Note: Structure similar to norc_cage but for which the "holes" connecting the internal void to the outside are artificially blocked with benzene molecules
+742 atoms
+calculation time: 40 min
+RAM usage: 220 Mb (max value reached at the end of calculation)
+Internal void volume (probe occupied): 1108 A³
+External void volume (probe occupied): 19796 A³
+Total probe occupied volume: 20904 A³
+Unit cell volume: 27000 A³
+Probe excluded volume (deduced by substraction): 6096 A³
+
+2)
+Fullerene C60
+60 atoms
+calculation time: < 1 min
+Internal void volume: 16 A³
+
+
