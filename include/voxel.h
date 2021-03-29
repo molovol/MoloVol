@@ -9,7 +9,6 @@
 #include <array>
 #include <unordered_map>
 
-/*
 // DEPRECIATED
 struct PairBundle {
   PairBundle(){}
@@ -30,7 +29,6 @@ struct TripletBundle {
   Vector vec_probe_normal;
 };
 // DEPRECIATED
-*/
 
 struct SearchIndex{
   public:

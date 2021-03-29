@@ -14,7 +14,7 @@
 Space::Space(std::vector<Atom> &atoms, const double bot_lvl_vxl_dist, const int depth, const double r_probe1)
   :grid_size(bot_lvl_vxl_dist), max_depth(depth){
   setBoundaries(atoms,r_probe1+2*bot_lvl_vxl_dist);
-  initGrid();
+  setGrid();
 }
 
 ///////////////////////////////
@@ -63,7 +63,7 @@ void Space::setBoundaries(const std::vector<Atom> &atoms, const double add_space
 
 // based on the grid step and the octree max_depth, this function produces a
 // 3D grid (in form of a 1D vector) that contains all top level voxels.
-void Space::initGrid(){
+void Space::setGrid(){
   _grid.clear();
   for (int dim = 0; dim < 3; dim++){
     n_gridsteps[dim] = std::ceil (std::ceil( (getSize())[dim] / grid_size ) / std::pow(2,max_depth) );
@@ -87,43 +87,10 @@ void Space::placeAtomsInGrid(const AtomTree& atomtree, const double& r_probe){
   Voxel::prepareTypeAssignment(this, atomtree, grid_size, r_probe, max_depth);
 
   assignAtomVsCore();
-  
-  updateGrid();
+
+
 
   assignShellVsVoid();
-}
-
-// all voxels are contained in the top level voxels and their children stored in the space object. the space object
-// also contains a grid for every level that is used to accelerate access during neighbour search. this function
-// updates the grids
-// using pointers in the grid could make this step avoidable
-void Space::updateGrid(){
-  for (int x = 0; x < n_gridsteps[0]; ++x){
-    for (int y = 0; y < n_gridsteps[1]; ++y){
-      for (int z = 0; z < n_gridsteps[2]; ++z){
-        Voxel top_lvl_vxl = getTopVxl(x,y,z);
-        fillGrid(top_lvl_vxl, x, y, z, max_depth);
-      }
-    }
-  }
-}
-
-void Space::fillGrid(Voxel& vxl, int x, int y, int z, unsigned lvl){
-  getVxlFromGrid(x,y,z, lvl) = vxl;
-  if (lvl != 0) {
-    for (char i = 0; i<2; ++i){
-      for (char j = 0; j<2; ++j){
-        for (char k = 0; k<2; ++k){
-          if (!vxl.hasSubvoxel()){
-            fillGrid(vxl, x*2+i, y*2+j, z*2+k , lvl-1);
-          }
-          else {
-            fillGrid(vxl.getSubvoxel(i,j,k), x*2+i, y*2+j, z*2+k , lvl-1);
-          }
-        }
-      }
-    }
-  }
 }
   
 void Space::assignAtomVsCore(){
@@ -139,7 +106,7 @@ void Space::assignAtomVsCore(){
       for(unsigned int z = 0; z < n_gridsteps[2]; z++){
         vxl_pos[2] = vxl_origin[2] + vxl_dist * (0.5 + z);
         // voxel position is deliberately not stored in voxel object to reduce memory cost
-        getTopVxl(x,y,z).evalRelationToAtoms(vxl_pos, max_depth);
+        getElement(x,y,z).evalRelationToAtoms(vxl_pos, max_depth);
       }
     }
     printf("%i%% done\n", int(100*(double(x)+1)/double(n_gridsteps[0])));
@@ -151,7 +118,7 @@ void Space::assignShellVsVoid(){
   for(vxl_index[0] = 0; vxl_index[0] < n_gridsteps[0]; vxl_index[0]++){
     for(vxl_index[1] = 0; vxl_index[1] < n_gridsteps[1]; vxl_index[1]++){
       for(vxl_index[2] = 0; vxl_index[2] < n_gridsteps[2]; vxl_index[2]++){
-        getTopVxl(vxl_index).evalRelationToVoxels(vxl_index, max_depth);
+        getElement(vxl_index).evalRelationToVoxels(vxl_index, max_depth);
       }
     }
     printf("%i%% done\n", int(100*(double(vxl_index[0])+1)/double(n_gridsteps[0])));
@@ -170,7 +137,7 @@ std::map<char,double> Space::getVolume(){
     // tally bottom level voxels
     
     for (char j = 0; j < types_to_tally.size(); j++){
-      tally[j] += getTopVxl(i).tallyVoxelsOfType(types_to_tally[j],max_depth);
+      tally[j] += getElement(i).tallyVoxelsOfType(types_to_tally[j],max_depth);
     }
   }
   double unit_volume = pow(grid_size,3);
@@ -202,7 +169,7 @@ Container3D<char> Space::generateTypeTensor(){
       block_start[1] = j*n_bot_lvl_vxl;
       for (unsigned int k = 0; k < n_gridsteps[2]; k++){
         block_start[2] = k*n_bot_lvl_vxl;
-        getTopVxl(i,j,k).fillTypeTensor(type_tensor, block_start, max_depth);
+        getElement(i,j,k).fillTypeTensor(type_tensor, block_start, max_depth);
       }
     }
   } 
@@ -241,57 +208,61 @@ double Space::getResolution() const {
 // GET ELEMENT //
 /////////////////
 
-Voxel& Space::getVxlFromGrid(const unsigned int i, unsigned lvl){
+Voxel& Space::getElement(const unsigned int i, unsigned lvl){
   return _grid[lvl].getElement(i);
 }
 
-Voxel& Space::getVxlFromGrid(const unsigned int x, const unsigned int y, const unsigned int z, unsigned lvl){
+Voxel& Space::getElement(const unsigned int x, const unsigned int y, const unsigned int z, unsigned lvl){
   return _grid[lvl].getElement(x,y,z);
 }
 
-Voxel& Space::getVxlFromGrid(const std::array<unsigned int,3> arr, unsigned lvl){
+Voxel& Space::getElement(const std::array<unsigned int,3> arr, unsigned lvl){
   return _grid[lvl].getElement(arr);
 }
 
-Voxel& Space::getVxlFromGrid(const std::array<int,3> arr, unsigned lvl){
+Voxel& Space::getElement(const std::array<int,3> arr, unsigned lvl){
   return _grid[lvl].getElement(arr);
 }
 
-Voxel& Space::getTopVxl(const unsigned int i){
-  return getVxlFromGrid(i, max_depth); 
+Voxel& Space::getElement(const unsigned int i){
+  //assert(i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]); 
+  return _grid[max_depth].getElement(i);
 }
 
-Voxel& Space::getTopVxl(const unsigned int x, const unsigned int y, const unsigned int z){
-  return getVxlFromGrid(x, y, z, max_depth); 
+Voxel& Space::getElement(const unsigned int x, const unsigned int y, const unsigned int z){
+  return _grid[max_depth].getElement(x,y,z);
 }
 
-Voxel& Space::getTopVxl(const std::array<unsigned int,3> arr){
-  return getVxlFromGrid(arr, max_depth); 
+Voxel& Space::getElement(const std::array<unsigned int,3> arr){
+  return _grid[max_depth].getElement(arr);
 }
 
-Voxel& Space::getTopVxl(const std::array<int,3> arr){
-  return getVxlFromGrid(arr, max_depth); 
+Voxel& Space::getElement(const std::array<int,3> arr){
+  return _grid[max_depth].getElement(arr);
 }
 
 /////////////////
 
-Voxel& Space::getVxl(const std::array<int,3>& arr, int lvl){
-  Voxel& vxl = getVxlFromGrid(arr,lvl);
+Voxel& Space::getVoxel(const std::array<int,3>& arr, int lvl){
+  Voxel& vxl = getElement(arr,lvl);
   if (vxl.getType() == 0){
     // ptr needed in order to reassign variable in loop and return reference in the end
     int div = pow(2,max_depth-lvl);
-    Voxel* ptr_sub_vxl = &getTopVxl(arr[0]/div, arr[1]/div, arr[2]/div);
+    Voxel* ptr_sub_vxl = &getElement(arr[0]/div, arr[1]/div, arr[2]/div);
     for (int current_lvl = max_depth-1-lvl;ptr_sub_vxl->hasSubvoxel() && current_lvl>=0 ; --current_lvl){
       div = (pow(2,current_lvl));
-      ptr_sub_vxl = &(ptr_sub_vxl->getSubvoxel((arr[0]/div)%2, (arr[1]/div)%2, (arr[2]/div)%2));
+      ptr_sub_vxl = &(ptr_sub_vxl->getSubvoxel(
+          (arr[0]/div)%2, 
+          (arr[1]/div)%2, 
+          (arr[2]/div)%2));
     }
     vxl = *ptr_sub_vxl;
   }
   return vxl;
 }
 
-Voxel& Space::getVxl(int x, int y, int z, int lvl){
-  return getVxl({x,y,z}, lvl);
+Voxel& Space::getVoxel(int x, int y, int z, int lvl){
+  return getVoxel({x,y,z}, lvl);
 }
       
 // check whether coord is inside grid bounds
@@ -393,10 +364,10 @@ void Space::printGrid(){
     // print matrix
     for(unsigned int y = y_min; y < y_max; y++){
       for(unsigned int x = x_min; x < x_max; x++){
-        char to_print = (getVxl(x,y,z,max_depth-depth).getType() == 0b00000011)? 'A' : 'O';
-        if (!readBit(getVxl(x,y,z,max_depth-depth).getType(),0)){to_print = '?';}
-        if (getVxl(x,y,z,max_depth-depth).getType() == 0b00010001){to_print = 'S';}
-        if (getVxl(x,y,z,max_depth-depth).getType() == 0b00000101){to_print = 'X';}
+        char to_print = (getVoxel(x,y,z,max_depth-depth).getType() == 0b00000011)? 'A' : 'O';
+        if (!readBit(getVoxel(x,y,z,max_depth-depth).getType(),0)){to_print = '?';}
+        if (getVoxel(x,y,z,max_depth-depth).getType() == 0b00010001){to_print = 'S';}
+        if (getVoxel(x,y,z,max_depth-depth).getType() == 0b00000101){to_print = 'X';}
         
         std::cout << to_print << " ";
       }

@@ -22,20 +22,19 @@ class Space{
     std::array <double,3> getOrigin(); // same as getMin();
     std::array <double,3> getMax();
     std::array <double,3> getSize();
+    Voxel& getVoxel(int, int, int, int);
+    Voxel& getVoxel(const std::array<int,3>&, int);
     bool coordInBounds(const std::array<int,3>&, const unsigned); // not in use
     double getResolution() const; // misnamed
 
-    // get voxel
-    Voxel& getVxl(int, int, int, int);
-    Voxel& getVxl(const std::array<int,3>&, int);
-    Voxel& getVxlFromGrid(const unsigned int, unsigned);
-    Voxel& getVxlFromGrid(const unsigned int, const unsigned int, const unsigned int, unsigned);
-    Voxel& getVxlFromGrid(const std::array<unsigned int,3>, unsigned);
-    Voxel& getVxlFromGrid(const std::array<int,3>, unsigned);
-    Voxel& getTopVxl(const unsigned int);
-    Voxel& getTopVxl(const unsigned int, const unsigned int, const unsigned int);
-    Voxel& getTopVxl(const std::array<unsigned int,3>);
-    Voxel& getTopVxl(const std::array<int,3>);
+    Voxel& getElement(const unsigned int, unsigned);
+    Voxel& getElement(const unsigned int, const unsigned int, const unsigned int, unsigned);
+    Voxel& getElement(const std::array<unsigned int,3>, unsigned);
+    Voxel& getElement(const std::array<int,3>, unsigned);
+    Voxel& getElement(const unsigned int);
+    Voxel& getElement(const unsigned int, const unsigned int, const unsigned int);
+    Voxel& getElement(const std::array<unsigned int,3>);
+    Voxel& getElement(const std::array<int,3>);
     std::array<unsigned int,3> getGridsteps();
     unsigned long int totalVxlOnLvl(const int) const;
 
@@ -57,11 +56,7 @@ class Space{
     int max_depth; // for voxels
     
     void setBoundaries(const std::vector<Atom>&, const double);
-
-    void initGrid();
-    void updateGrid();
-    void fillGrid(Voxel& vxl, int x, int y, int z, unsigned lvl);
-
+    void setGrid();
     const std::array<unsigned long int,3> gridstepsOnLvl(const int) const;
     void assignAtomVsCore();
     void assignShellVsVoid();
