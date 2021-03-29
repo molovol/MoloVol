@@ -344,7 +344,7 @@ void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
   for (int n = (split? Voxel::s_search_indices.getSafeLim(lvl+1)*4 : 1); n <= Voxel::s_search_indices.getUppLim(lvl); ++n){
     for (std::array<int,3> coord : Voxel::s_search_indices[n]){
       coord = add(coord, index);
-      if (readBit((s_cell->getVoxel(coord,lvl)).getType(),3)){
+      if (readBit((s_cell->getVxlFromGrid(coord,lvl)).getType(),3)){
         type = (n <= Voxel::s_search_indices.getSafeLim(lvl))? 0b00010001 : 0b10000000;
         return;
       }        
