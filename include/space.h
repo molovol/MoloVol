@@ -46,8 +46,7 @@ class Space{
   private:
     std::array <double,3> cart_min; // this is also the "origin" of the space
     std::array <double,3> cart_max;
-    Container3D<Voxel> _grid;
-//    std::vector<Voxel> grid;
+    std::vector<Container3D<Voxel>> _grid;
     std::array<unsigned int,3> n_gridsteps; // number of top level voxels in x,y,z direction 
     double grid_size;
     int max_depth; // for voxels
