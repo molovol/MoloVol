@@ -3,10 +3,21 @@
 #define ATOM_H
 
 #include "exception.h"
+#include "vector.h"
+#include <vector>
 #include <array>
 #include <iostream>
 
-struct Atom{
+struct Atom{ 
+  Atom(){
+    pos_x = 0;
+    pos_y = 0;
+    pos_z = 0;
+    rad = -1;
+    number = -1;
+    symbol = "Empty";
+  }
+
   Atom(const double& x_inp, const double& y_inp, const double& z_inp, const std::string& symbol_inp, const double& rad_inp, const int& elem_Z_inp)
     : pos_x(x_inp),
       pos_y(y_inp),
@@ -14,14 +25,19 @@ struct Atom{
       rad(rad_inp),
       number(elem_Z_inp),
       symbol(symbol_inp) {}
+  // TODO destructor
 
   double pos_x, pos_y, pos_z, rad;
   unsigned int number;
   std::string symbol;
-  //std::vector<Atom*> close_atoms;
+  std::vector<Atom*> adjacent_atoms;
 
   const std::array<double,3> getPos() const {
     return {pos_x, pos_y, pos_z};
+  }
+  
+  const Vector getPosVec() const {
+    return Vector(pos_x, pos_y, pos_z);
   }
 
   const double getRad() const {
@@ -40,6 +56,9 @@ struct Atom{
     printf("Object: Atom {%s, (%1.3f, %1.3f, %1.3f)}", symbol.c_str(), pos_x, pos_y, pos_z);
     return;
   }
+
+  bool isValid() const {return (rad != -1);}
+
 };
 
 

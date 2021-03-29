@@ -5,24 +5,64 @@
 #endif
 
 #include "base.h"
+#include "controller.h"
+#include <cassert>
 
+// wxWidgets macro that contains the entry point, initialised the app, and calls wxApp::OnInit()
 IMPLEMENT_APP(MainApp)
 
 /////////////////////////////
 // MAIN APP IS INITIALISED //
 /////////////////////////////
 
+// contains all command line options
+static const wxCmdLineEntryDesc gCmdLineDesc[] = 
+{
+  { wxCMD_LINE_SWITCH, "s", "silent", "Silence GUI", wxCMD_LINE_VAL_NONE, 0},
+  { wxCMD_LINE_OPTION, "u", "unittest", "Run a unittest", wxCMD_LINE_VAL_STRING},
+  { wxCMD_LINE_NONE }
+};
+
+// first custom code that is run
 bool MainApp::OnInit()
 {
-  // initialise a new MainFrame object and have MainWin point to that object
+  wxCmdLineParser parser = wxCmdLineParser(argc,argv);
+  parser.SetDesc(gCmdLineDesc);
+  assert(parser.Parse()==0);
+  wxString unittest_id;
+  if (parser.Found("u",&unittest_id)){
+    silenceGUI(true); // not really needed
+    std::cout << "Selected unit test: " << unittest_id << std::endl;
+    if (unittest_id=="excluded"){
+      Ctrl::getInstance()->unittestExcluded();
+    }
+    else if (unittest_id=="protein"){
+      Ctrl::getInstance()->unittestProtein();
+    }
+    else if (unittest_id=="radius"){
+      Ctrl::getInstance()->unittestRadius();
+    }
+    else if (unittest_id=="surface"){
+      Ctrl::getInstance()->unittestSurfaceMap();
+    }
+    else {
+      std::cout << "Invalid selection" << std::endl;}
+    return true;
+  }
+  // initialise the GUI
   MainFrame* MainWin = new MainFrame(_("MoloVol"), wxDefaultPosition, wxDefaultSize);
   MainWin->SetBackgroundColour(col_win);
-  // call member function of the MainFrame object to set visibility
   MainWin->Show(true);
   SetTopWindow(MainWin);
   return true;
 };
 
+// OnRun() is called after OnInit() returns true. In order to suppress the GUI, the attribute "silent" has to
+// be toggled. this can be done through the command line
+int MainApp::OnRun(){
+  if (isSilent()){return 0;} // end application if GUI is silenced
+  else {return wxApp::OnRun();} // proceed normally
+}
 
 // set default states of GUI elements here
 void MainFrame::InitDefaultStates(){
@@ -52,6 +92,9 @@ void MainFrame::InitDefaultStates(){
     default_states[i] = false;
   }
 }
+
+void MainApp::silenceGUI(bool set){_silent = set;}
+bool MainApp::isSilent(){return _silent;}
 
 ////////////////////////////////////
 // INITIALISATION OF GUI ELEMENTS //

@@ -1,6 +1,8 @@
 
 #include "atomtree.h"
 #include "atom.h"
+#include "misc.h"
+#include <cmath>
 
 ///////////////////
 // AUX FUNCTIONS //
@@ -120,7 +122,8 @@ double findMaxRad(std::vector<Atom>& list_of_atoms){
   }
   return max_rad;
 }
- 
+
+    
 void AtomTree::quicksort(std::vector<Atom>& list_of_atoms, const int& vec_first, const int& vec_end, const char& dim){
   
   if(vec_first >= vec_end-1){
