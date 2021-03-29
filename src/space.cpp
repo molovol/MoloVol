@@ -210,20 +210,20 @@ double Space::getResolution() const {
 
 Voxel& Space::getElement(const unsigned int i){
   //assert(i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]); 
-  return _grid[0].getElement(i);
+  return _grid[max_depth].getElement(i);
 }
 
 Voxel& Space::getElement(const unsigned int x, const unsigned int y, const unsigned int z){
   // check if element is out of bounds
-  return _grid[0].getElement(x,y,z);
+  return _grid[max_depth].getElement(x,y,z);
 }
 
 Voxel& Space::getElement(const std::array<unsigned int,3> arr){
-  return _grid[0].getElement(arr);
+  return _grid[max_depth].getElement(arr);
 }
 
 Voxel& Space::getElement(const std::array<int,3> arr){
-  return _grid[0].getElement(arr);
+  return _grid[max_depth].getElement(arr);
 }
 
 /////////////////

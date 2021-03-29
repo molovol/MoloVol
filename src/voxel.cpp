@@ -183,8 +183,8 @@ void Voxel::prepareTypeAssignment(Space* cell, AtomTree atomtree, double grid_si
   s_r_probe1 = r_probe1;
   s_search_indices = SearchIndex(r_probe1, grid_size, cell->getMaxDepth());
   //
-  s_pair_data.clear();
-  s_triplet_data.clear();
+//  s_pair_data.clear();
+//  s_triplet_data.clear();
 }
 
 ///////////////////////////////
@@ -363,7 +363,7 @@ void Voxel::splitVoxel(const std::array<unsigned int,3>& vxl_ind, const unsigned
 // GEOMETRY BASED ALGORITHM //
 //////////////////////////////
 // not currently used
-
+/*
 bool Voxel::isProbeExcluded(const Vector& vxl_pos, const double& r_probe, const double& radius_of_influence, const std::vector<int>& close_atom_ids){
 
   if(type == 'm'){return false;} // type 'm' can never be changed by probe
@@ -564,7 +564,7 @@ bool Voxel::isExcludedSetType(const Vector& vec_vxl, const double& rad_vxl, cons
     return false;
   }
 }
-
+*/
 ///////////
 // TALLY //
 ///////////
