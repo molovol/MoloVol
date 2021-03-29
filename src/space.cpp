@@ -208,13 +208,28 @@ double Space::getResolution() const {
 // GET ELEMENT //
 /////////////////
 
+Voxel& Space::getElement(const unsigned int i, unsigned lvl){
+  return _grid[lvl].getElement(i);
+}
+
+Voxel& Space::getElement(const unsigned int x, const unsigned int y, const unsigned int z, unsigned lvl){
+  return _grid[lvl].getElement(x,y,z);
+}
+
+Voxel& Space::getElement(const std::array<unsigned int,3> arr, unsigned lvl){
+  return _grid[lvl].getElement(arr);
+}
+
+Voxel& Space::getElement(const std::array<int,3> arr, unsigned lvl){
+  return _grid[lvl].getElement(arr);
+}
+
 Voxel& Space::getElement(const unsigned int i){
   //assert(i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]); 
   return _grid[max_depth].getElement(i);
 }
 
 Voxel& Space::getElement(const unsigned int x, const unsigned int y, const unsigned int z){
-  // check if element is out of bounds
   return _grid[max_depth].getElement(x,y,z);
 }
 
@@ -229,18 +244,20 @@ Voxel& Space::getElement(const std::array<int,3> arr){
 /////////////////
 
 Voxel& Space::getVoxel(const std::array<int,3>& arr, int lvl){
-  // ptr needed in order to reassign variable in loop and return reference in the end
-  int div = pow(2,max_depth-lvl);
-  Voxel* ptr_sub_vxl = &getElement(arr[0]/div, arr[1]/div, arr[2]/div);
-  for (int current_lvl = max_depth-1-lvl;ptr_sub_vxl->hasSubvoxel() && current_lvl>=0 ; --current_lvl){
-    div = (pow(2,current_lvl));
-    ptr_sub_vxl = &(ptr_sub_vxl->getSubvoxel(
+  if (getElement(arr,lvl).getType() == 0){
+    // ptr needed in order to reassign variable in loop and return reference in the end
+    int div = pow(2,max_depth-lvl);
+    Voxel* ptr_sub_vxl = &getElement(arr[0]/div, arr[1]/div, arr[2]/div);
+    for (int current_lvl = max_depth-1-lvl;ptr_sub_vxl->hasSubvoxel() && current_lvl>=0 ; --current_lvl){
+      div = (pow(2,current_lvl));
+      ptr_sub_vxl = &(ptr_sub_vxl->getSubvoxel(
           (arr[0]/div)%2, 
           (arr[1]/div)%2, 
           (arr[2]/div)%2));
+    }
+    getElement(arr,lvl) = *ptr_sub_vxl;
   }
-  
-  return *ptr_sub_vxl;
+  return getElement(arr,lvl);
 }
 
 Voxel& Space::getVoxel(int x, int y, int z, int lvl){

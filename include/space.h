@@ -27,6 +27,10 @@ class Space{
     bool coordInBounds(const std::array<int,3>&, const unsigned); // not in use
     double getResolution() const; // misnamed
 
+    Voxel& getElement(const unsigned int, unsigned);
+    Voxel& getElement(const unsigned int, const unsigned int, const unsigned int, unsigned);
+    Voxel& getElement(const std::array<unsigned int,3>, unsigned);
+    Voxel& getElement(const std::array<int,3>, unsigned);
     Voxel& getElement(const unsigned int);
     Voxel& getElement(const unsigned int, const unsigned int, const unsigned int);
     Voxel& getElement(const std::array<unsigned int,3>);
