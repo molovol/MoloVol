@@ -2,9 +2,7 @@
 #include "model.h"
 #include "controller.h"
 #include "atom.h"
-#include "misc.h"
 #include "special_chars.h"
-#include <chrono>
 #include <array>
 #include <string>
 #include <vector>
@@ -41,11 +39,6 @@ bool Model::setProbeRadii(const double& r_1, const double& r_2, bool two_probe_m
 }
 
 void Model::setAtomListForCalculation(const std::vector<std::string>& included_elements, bool useUnitCell){
-  return setAtomListForCalculation(included_elements, useUnitCell? processed_atom_coordinates : raw_atom_coordinates);
-}
-
-void Model::setAtomListForCalculation(const std::vector<std::string>& included_elements,
-    std::vector<std::tuple<std::string,double,double,double>>& atom_coordinates){
   atoms.clear();
 
   for(int i = 0; i < atom_coordinates.size(); i++){
@@ -65,23 +58,14 @@ void Model::storeAtomsInTree(){
   atomtree = AtomTree(atoms);
 }
 
-void Model::linkToAdjacentAtoms(const double& r_probe, Atom& at){
-  if (at.adjacent_atoms.empty()){
-    at.adjacent_atoms = atomtree.findAdjacent(at, 2*r_probe);
-    for (Atom* adjacent_at : at.adjacent_atoms){
-      linkToAdjacentAtoms(r_probe, *adjacent_at);
-    }
-  }
+void Model::findCloseAtoms(const double& r_probe){
+  //TODO
+  return;
 }
 
-void Model::linkAtomsToAdjacentAtoms(const double& r_probe){
-  for (Atom& at : atoms){
-    linkToAdjacentAtoms(r_probe, at);
-  }
-}
-
-CalcResultBundle Model::calcVolume(){
-  CalcResultBundle data;
+void Model::calcVolume(){
+  cell.placeAtomsInGrid(atomtree);
+  double volume = cell.getVolume();
 
   auto start = std::chrono::steady_clock::now();
   _cell.placeAtomsInGrid(atomtree, _r_probe1); // assign each voxel in grid a type, defined by the atom positions
@@ -98,15 +82,10 @@ CalcResultBundle Model::calcVolume(){
   return data;
 }
 
-// generates a simple table to be displayed by the GUI. only uses standard library and base types in order to
-// avoid dependency issues
 std::vector<std::tuple<std::string, int, double>> Model::generateAtomList(){
   std::vector<std::tuple<std::string, int, double>> atoms_for_list;
-  // Element0: Elementy symbol
-  // Element1: Number of Atoms with that symbol
-  // Element2: Radius
   for(auto elem : atom_amounts){
-    atoms_for_list.push_back(std::make_tuple(elem.first, elem.second, radius_map[elem.first]));
+    atoms_for_list.emplace_back(elem.first, elem.second, raw_radius_map[elem.first]);
   }
   return atoms_for_list;
 }

@@ -2,12 +2,8 @@
 
 #define VOXEL_H
 
-#include "vector.h"
-#include "atomtree.h"
-#include "container3d.h"
 #include <vector>
 #include <array>
-#include <unordered_map>
 
 /*
 // DEPRECIATED
@@ -53,35 +49,40 @@ struct AtomNode;
 class Voxel{
   public:
     Voxel();
-    Voxel& getSubvoxel(const short& x, const short& y, const short& z);
-    Voxel& getSubvoxel(const short& i);
-    bool hasSubvoxel();
-    void setType(char);
+    Voxel& access(const short& x, const short& y, const short& z);
+    Voxel& access(const short& i);
     char getType();
 
-    static void prepareTypeAssignment(Space*, AtomTree, double, double, int);
-    static void computeIndices();
-    static void computeIndices(unsigned int);
-    char evalRelationToAtoms(Vector, const int);
-    void traverseTree(const AtomNode*, const double&, const Vector&, const double&, const double&, const int&, 
-        const char = 0b00000011, const char = 0); 
-    void splitVoxel(const Vector&, const double&); 
-    void splitVoxel(const std::array<unsigned int,3>&, const unsigned);
-        
-    char evalRelationToVoxels(const std::array<unsigned int,3>&, const unsigned, bool=false);
-    
-    static void listFromTree(
-        std::vector<int>&,
-        const AtomNode*,
-        const Vector&,
-        const double&,
-        const double&,
-        const double&,
-        const char=0);
-    
-    unsigned int tallyVoxelsOfType(const char volume_type, const int max_depth);
+   /* replaced by other determineType function
+    void determineType
+      (const std::vector<Atom>& atoms, 
+       std::array<double,3> pos,
+       const double& grid_size,
+       const double max_depth);
+    */
 
-    void fillTypeTensor(Container3D<char>&, const std::array<unsigned long int,3>, const int);
+    char determineType
+       (std::array<double,3> pos,
+       const double& grid_size,
+       const double max_depth,
+       const AtomTree& atomtree);
+    
+    void determineTypeSingleAtom
+      (const Atom& atom, 
+       std::array<double,3> pos, // voxel centre
+       const double& grid_size,
+       const double max_depth);
+   
+    void traverseTree
+      (const AtomNode* node, 
+       int dim, 
+       const double& at_rad, 
+       const double& vxl_rad, 
+       const std::array<double,3> vxl_pos,
+       const double& grid_size, 
+       const double& max_depth);
+    size_t tallyVoxelsOfType(const char volume_type, const int max_depth);
+
   private:
     static inline Space* s_cell;
     static inline AtomTree s_atomtree;
@@ -109,6 +110,10 @@ class Voxel{
 
     std::vector<Voxel> data; // empty or exactly 8 elements
     char type;
+    // types
+    // 'a' : inside of atom
+    // 'e' : empty
+    // 'm' : mixed
 };
 
 #endif

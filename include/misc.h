@@ -5,8 +5,6 @@
 #include <string>
 #include <array>
 #include <cmath>
-#include <bitset>
-#include <iostream>
 
 inline double distance(const std::array<double,3> &start, const std::array<double,3> &end){
   return std::pow( (pow(end[0]-start[0],2) + pow(end[1]-start[1],2) + pow(end[2]-start[2],2)) , 0.5);
