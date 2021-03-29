@@ -409,3 +409,4 @@ void Space::printGrid(){
     std::cin >> usr_inp;
   }
 }
+
