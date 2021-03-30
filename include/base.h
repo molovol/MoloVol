@@ -41,11 +41,15 @@ class MainFrame: public wxFrame
     std::string getRadiusFilepath();
     bool getIncludeHetatm();
     bool getAnalyzeUnitCell();
+    bool getCalcSurfaceAreas();
     bool getProbeMode();
     double getProbe1Radius();
     double getProbe2Radius();
     double getGridsize();
     int getDepth();
+    bool getMakeReport();
+    bool getMakeSurfaceMap();
+    bool getMakeCavityMaps();
     void enableGuiElements(bool inp); // method to turn on and off interactable gui elements
 
     void displayAtomList(std::vector<std::tuple<std::string, int, double>> symbol_number_radius);
@@ -74,6 +78,7 @@ class MainFrame: public wxFrame
     wxPanel* rightMainPanel;
       wxPanel* parameterPanel;
         wxCheckBox* unitCellCheckbox;
+        wxCheckBox* surfaceAreaCheckbox;
         wxCheckBox* twoProbesCheckbox;
         wxPanel* probe1Panel;
           wxStaticText* probe1Text;
@@ -93,6 +98,9 @@ class MainFrame: public wxFrame
         wxPanel* depthPanel;
           wxStaticText* depthText;
           wxSpinCtrl* depthInput;
+        wxCheckBox* reportCheckbox;
+        wxCheckBox* surfaceMapCheckbox;
+        wxCheckBox* cavityMapsCheckbox;
       wxPanel* sandrPanel;
         wxTextCtrl* outputText;
         wxButton* calcButton;
@@ -166,6 +174,7 @@ enum
   PANEL_RightMain,
     PANEL_Parameters,
       CHECKBOX_UnitCell,
+      CHECKBOX_SurfaceArea,
       CHECKBOX_TwoProbes,
       PANEL_Probe1,
         TEXT_Probe1,
@@ -185,9 +194,12 @@ enum
       PANEL_Depth,
         TEXT_Depth,
         SPIN_Depthinput,
+      CHECKBOX_Report,
+      CHECKBOX_SurfaceMap,
+      CHECKBOX_CavityMaps,
     PANEL_Sandr,
       TEXT_Output,
-      BUTTON_Calc,
+      BUTTON_Calc
 
 };
 
