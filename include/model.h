@@ -53,8 +53,6 @@ class Model{
     void setAtomListForCalculation(const std::vector<std::string>&, bool);
     void setAtomListForCalculation(const std::vector<std::string>&, std::vector<std::tuple<std::string, double, double, double>>&);
     void storeAtomsInTree();
-    void linkAtomsToAdjacentAtoms(const double&);
-    void linkToAdjacentAtoms(const double&, Atom&);
     CalcResultBundle calcVolume();
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void setRadiusMap(std::unordered_map<std::string, double> map);
