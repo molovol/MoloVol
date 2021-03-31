@@ -36,16 +36,12 @@ bool MainFrame::getIncludeHetatm(){
   return pdbHetatmCheckbox->GetValue();
 }
 
-double MainFrame::getGridsize(){
-  return std::stod(gridsizeInputText->GetValue().ToStdString());
-}
-
-int MainFrame::getDepth(){
-  return depthInput->GetValue();
-}
-
 bool MainFrame::getAnalyzeUnitCell(){
   return unitCellCheckbox->GetValue();
+}
+
+bool MainFrame::getCalcSurfaceAreas(){
+  return surfaceAreaCheckbox->GetValue();
 }
 
 bool MainFrame::getProbeMode(){
@@ -63,6 +59,26 @@ double MainFrame::getProbe2Radius(){
   else{ // when the probe mode is set to one probe, the second probe radius is considered null
     return 0;
   }
+}
+
+double MainFrame::getGridsize(){
+  return std::stod(gridsizeInputText->GetValue().ToStdString());
+}
+
+int MainFrame::getDepth(){
+  return depthInput->GetValue();
+}
+
+bool MainFrame::getMakeReport(){
+  return reportCheckbox->GetValue();
+}
+
+bool MainFrame::getMakeSurfaceMap(){
+  return surfaceMapCheckbox->GetValue();
+}
+
+bool MainFrame::getMakeCavityMaps(){
+  return cavityMapsCheckbox->GetValue();
 }
 
 void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>> symbol_number_radius){
@@ -104,7 +120,9 @@ std::string MainFrame::generateChemicalFormulaFromGrid(){
   for (int row = 0; row < atomListGrid->GetNumberRows(); row++){
     if (atomListGrid->GetCellValue(row,0) == "1"){ // if checkbox "include" is checked
       std::string symbol = atomListGrid->GetCellValue(row,1).ToStdString();
-      std::string subscript = Symbol::subscript(atomListGrid->GetCellValue(row,2).ToStdString());
+      // TODO fix symbol subscript in Windows or remove subscript
+      // std::string subscript = Symbol::subscript(atomListGrid->GetCellValue(row,2).ToStdString());
+      std::string subscript = atomListGrid->GetCellValue(row,2).ToStdString();
 
       // by convention: carbon comes first, then hydrogen, then in alphabetical order
       if (symbol == "C"){

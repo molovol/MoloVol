@@ -7,9 +7,9 @@
 
 bool Ctrl::unittestExcluded(){
   if(current_calculation == NULL){current_calculation = new Model();}
- 
+
   // parameters for unittest:
-  const std::string atom_filepaths[] = 
+  const std::string atom_filepaths[] =
   {"./inputfile/probetest_pair.xyz", "./inputfile/probetest_triplet.xyz", "./inputfile/probetest_quadruplet.xyz"};
   const std::string radius_filepath = "./inputfile/radii.txt";
   const double grid_step = 0.1;
@@ -20,7 +20,7 @@ bool Ctrl::unittestExcluded(){
   // preparation for calling runCalculation()
   std::unordered_map<std::string, double> rad_map = current_calculation->importRadiusMap(radius_filepath);
   current_calculation->setRadiusMap(rad_map);
-  
+
   double error[3];
   CalcResultBundle data[3];
   for (int i = 0; i < 3; i++){
@@ -46,7 +46,7 @@ bool Ctrl::unittestExcluded(){
 
 bool Ctrl::unittestProtein(){
   if(current_calculation == NULL){current_calculation = new Model();}
- 
+
   // parameters for unittest:
   const std::string atom_filepath = "./inputfile/6s8y.xyz";
   const std::string radius_filepath = "./inputfile/radii.txt";
@@ -55,9 +55,9 @@ bool Ctrl::unittestProtein(){
   const double rad_probe1 = 0.5;
   const double expected_vdwVolume = 14337.422000;
   const double expected_time = 155;
-  
+
   std::unordered_map<std::string, double> rad_map = current_calculation->importRadiusMap(radius_filepath);
-  
+
   double error_vdwVolume;
   double diff_time;
   CalcResultBundle data;
@@ -80,11 +80,11 @@ bool Ctrl::unittestProtein(){
 
 bool Ctrl::unittestRadius(){
   if(current_calculation == NULL){current_calculation = new Model();}
- 
+
   // parameters for unittest:
   const std::string atom_filepath = "./inputfile/probetest_pair.xyz";
   const std::string radius_filepath = "./inputfile/radii.txt";
-  
+
   std::unordered_map<std::string, double> rad_map = current_calculation->importRadiusMap(radius_filepath);
   {int max_depth = 0;
     //for (int max_depth = 4; max_depth < ; max_depth++){
@@ -92,13 +92,13 @@ bool Ctrl::unittestRadius(){
       //for (double grid_step = 1; grid_step>0.01; grid_step-=0.01){
       {double rad_probe1 = 1.2;
         //for (double rad_probe1 = 2; rad_probe1 < 2.01; rad_probe1 += 0.1){
-      
-    
+
+
         CalcResultBundle data;
         current_calculation->readAtomsFromFile(atom_filepath, false);
         std::vector<std::string> included_elements = current_calculation->listElementsInStructure();
         data = runCalculation(atom_filepath, grid_step, max_depth, rad_map, included_elements, rad_probe1);
-        
+
         if(data.success){
           printf("f: %40s, g: %4.2f, d: %4i, r: %4.1f\n", atom_filepath.c_str(), grid_step, max_depth, rad_probe1);
           printf("vdW: %20.10f, Excluded: %20.10f\n", data.volumes[0b00000011], data.volumes[0b00000101]);
@@ -115,17 +115,17 @@ bool Ctrl::unittestRadius(){
 
 bool Ctrl::unittestSurfaceMap(){
   if(current_calculation == NULL){current_calculation = new Model();}
- 
+
   // parameters for unittest:
   const std::string atom_filepath = "./inputfile/hydrogen.xyz";
   const std::string radius_filepath = "./inputfile/radii.txt";
   const double grid_step = 0.1;
   const int max_depth = 3;
-  
+
   double rad_probe1 = 0;
 
   std::unordered_map<std::string, double> rad_map = current_calculation->importRadiusMap(radius_filepath);
-  
+
   CalcResultBundle data;
   current_calculation->readAtomsFromFile(atom_filepath, false);
   std::vector<std::string> included_elements = current_calculation->listElementsInStructure();
@@ -136,7 +136,7 @@ bool Ctrl::unittestSurfaceMap(){
     printf("vdW: %20.10f, Excluded: %20.10f, Time: %10.5f s\n"
         , data.volumes[0b00000011], data.volumes[0b00000101], data.getTime());
 
-    current_calculation->writeSurfaceMap("output");
+    current_calculation->writeSurfaceMap();
   }
   else{
     std::cout << "Calculation failed" << std::endl;

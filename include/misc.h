@@ -19,6 +19,8 @@ inline double distance(const std::array<double,3> &start, const std::array<doubl
 
 std::string fileExtension(const std::string& path);
 
+std::string fileName(const std::string& path);
+
 template <typename T>
 void print(std::array<T,3> arr){
   for (T elem : arr){

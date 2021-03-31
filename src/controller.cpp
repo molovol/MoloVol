@@ -58,7 +58,7 @@ bool Ctrl::loadAtomFile(){
 
   bool successful_import;
   try{successful_import = current_calculation->readAtomsFromFile(gui->getAtomFilepath(), gui->getIncludeHetatm());}
-  
+
   catch (const ExceptIllegalFileExtension& e){
     notifyUser("Invalid structure file format!");
     successful_import = false;
@@ -69,7 +69,7 @@ bool Ctrl::loadAtomFile(){
   }
 
   gui->displayAtomList(current_calculation->generateAtomList()); // update gui
-  
+
   return successful_import;
 }
 
@@ -127,12 +127,6 @@ CalcResultBundle Ctrl::runCalculation(
 
   // store a map containing the radii of all atoms
   current_calculation->setRadiusMap(rad_map);
-  
-  /* no point in making folders for each calculation
-  if(!current_calculation->createOutputFolder()){
-    notifyUser("New output folder could not be created.\nThe output file(s) will be created in the program folder.");
-  }
-  */
 
   // process atom data for unit cell analysis if the option it ticked
   if(option_unit_cell){
@@ -148,7 +142,7 @@ CalcResultBundle Ctrl::runCalculation(
   current_calculation->storeAtomsInTree();
   // set size of the box containing all atoms
   current_calculation->defineCell(grid_step, max_depth);
-  
+
   // generate result report
   /*
   std::vector<std::string> parameters = getGuiParameters();
@@ -156,7 +150,7 @@ CalcResultBundle Ctrl::runCalculation(
   */
 
   // assign voxel types and store the volume(s)
-  return current_calculation->calcVolume(); 
+  return current_calculation->calcVolume();
 }
 
 // generate parameter list for report
@@ -164,7 +158,7 @@ std::vector<std::string> Ctrl::getGuiParameters(){
   std::vector<std::string> parameters;
   if(fileExtension(gui->getAtomFilepath()) == "pdb"){
 
-    parameters.push_back(std::string(((gui->getIncludeHetatm())? "Include" : "Exclude")) 
+    parameters.push_back(std::string(((gui->getIncludeHetatm())? "Include" : "Exclude"))
         + std::string(" HETATM from pdb file"));
 
     if(gui->getAnalyzeUnitCell()){
@@ -192,9 +186,20 @@ void Ctrl::notifyUser(std::string str, bool to_gui){
   }
   else {
     std::cout << str;
-  }    
+  }
 }
-  
-void Ctrl::exportSurfaceMap(std::string output_dir){
-  current_calculation->writeSurfaceMap(output_dir);
+
+void Ctrl::prepareOutput(std::string atomFilePath){
+  if(!current_calculation->createOutputFolder(fileName(atomFilePath))){
+      notifyUser("New output folder could not be created.\nThe output file(s) will be created in the program folder.");
+  }
+}
+
+void Ctrl::exportReport(){
+  // TODO revamp report
+  // current_calculation->createReport(gui->getAtomFilepath(), parameters, gui->getProbeMode());
+}
+
+void Ctrl::exportSurfaceMap(){
+  current_calculation->writeSurfaceMap();
 }

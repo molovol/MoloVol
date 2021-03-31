@@ -30,7 +30,9 @@ class Ctrl{
     static Ctrl* getInstance();
     std::vector<std::string> getGuiParameters(); // confusing name, this is not a getter function
     void notifyUser(std::string str, bool = true);
-    void exportSurfaceMap(std::string);
+    void prepareOutput(std::string);
+    void exportReport();
+    void exportSurfaceMap();
     // unit tests
     bool unittestExcluded();
     bool unittestProtein();
