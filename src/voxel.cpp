@@ -194,32 +194,40 @@ void Voxel::prepareTypeAssignment(Space* cell, AtomTree atomtree, double grid_si
 ///////////////////////////////
 // part of the type assigment routine. first evaluation is only concerned with the relation between
 // voxels and atoms
-char Voxel::evalRelationToAtoms(Vector pos_vxl, const int max_depth){
+char Voxel::evalRelationToAtoms(const std::array<unsigned,3>& index_vxl, Vector pos_vxl, const int max_depth){
   double rad_vxl = calcRadiusOfInfluence(max_depth); // calculated every time, since max_depth may change (not expensive)
 
   traverseTree(s_atomtree.getRoot(), s_atomtree.getMaxRad(), pos_vxl, rad_vxl, s_r_probe1, max_depth);
 
   if (type == 0){type = 0b00001001;}
-  if (readBit(type,7)){splitVoxel(pos_vxl, max_depth);} // split if type mixed
+  if (readBit(type,7)){splitVoxel(index_vxl, pos_vxl, max_depth);} // split if type mixed
 
   return type;
 }
 
 // adds an array of size 8 to the voxel that contains 8 subvoxels and evaluates each subvoxel's type
-void Voxel::splitVoxel(const Vector& vxl_pos, const double& max_depth){
+void Voxel::splitVoxel(const std::array<unsigned,3>& vxl_index, const Vector& vxl_pos, const double& max_depth){
   // split into 8 subvoxels
   Vector factors;
-  for(int i = 0; i < 8; i++){
-    data.push_back(Voxel());
-    // modify position
-    factors = {
-      (i%2) >= 1 ? 1 : -1,
-      (i%4) >= 2 ? 1 : -1,
-       i    >= 4 ? 1 : -1};
-
-    Vector new_pos = vxl_pos + factors * s_grid_size * std::pow(2,max_depth-2);
-
-    data[i].evalRelationToAtoms(new_pos, max_depth-1);
+  std::array<unsigned,3> sub_index;
+  for (char z = 0; z < 2; ++z){
+    sub_index[2] = vxl_index[2]*2 + z;
+    factors[2] = z ? 1 : -1;
+    for (char y = 0; y < 2; ++y){
+      sub_index[1] = vxl_index[1]*2 + y;
+      factors[1] = y==1 ? 1 : -1;
+      for (char x = 0; x < 2; ++x){
+        sub_index[0] = vxl_index[0]*2 + x;
+        factors[0] = x ? 1 : -1;
+        // modify position
+        Vector new_pos = vxl_pos + factors * s_grid_size * std::pow(2,max_depth-2);
+        
+        Voxel subvxl = Voxel();
+        subvxl.evalRelationToAtoms(sub_index, new_pos, max_depth-1);
+        
+        data.push_back(subvxl);
+      }
+    }
   }
   setType(mergeTypes(data));
 }

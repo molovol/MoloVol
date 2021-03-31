@@ -132,17 +132,18 @@ void Space::assignAtomVsCore(){
   // calculate side length of top level voxel
   const double vxl_dist = grid_size * pow(2,max_depth);
   std::array<double,3> vxl_pos;
-  for(unsigned int x = 0; x < n_gridsteps[0]; x++){
-    vxl_pos[0] = vxl_origin[0] + vxl_dist * (0.5 + x);
-    for(unsigned int y = 0; y < n_gridsteps[1]; y++){
-      vxl_pos[1] = vxl_origin[1] + vxl_dist * (0.5 + y);
-      for(unsigned int z = 0; z < n_gridsteps[2]; z++){
-        vxl_pos[2] = vxl_origin[2] + vxl_dist * (0.5 + z);
+  std::array<unsigned,3> top_lvl_index;
+  for(top_lvl_index[0] = 0; top_lvl_index[0] < n_gridsteps[0]; top_lvl_index[0]++){
+    vxl_pos[0] = vxl_origin[0] + vxl_dist * (0.5 + top_lvl_index[0]);
+    for(top_lvl_index[1] = 0; top_lvl_index[1] < n_gridsteps[1]; top_lvl_index[1]++){
+      vxl_pos[1] = vxl_origin[1] + vxl_dist * (0.5 + top_lvl_index[1]);
+      for(top_lvl_index[2] = 0; top_lvl_index[2] < n_gridsteps[2]; top_lvl_index[2]++){
+        vxl_pos[2] = vxl_origin[2] + vxl_dist * (0.5 + top_lvl_index[2]);
         // voxel position is deliberately not stored in voxel object to reduce memory cost
-        getTopVxl(x,y,z).evalRelationToAtoms(vxl_pos, max_depth);
+        getTopVxl(top_lvl_index).evalRelationToAtoms(top_lvl_index, vxl_pos, max_depth);
       }
     }
-    printf("%i%% done\n", int(100*(double(x)+1)/double(n_gridsteps[0])));
+    printf("%i%% done\n", int(100*(double(top_lvl_index[0])+1)/double(n_gridsteps[0])));
   }
 }
 

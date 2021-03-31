@@ -62,10 +62,10 @@ class Voxel{
     static void prepareTypeAssignment(Space*, AtomTree, double, double, int);
     static void computeIndices();
     static void computeIndices(unsigned int);
-    char evalRelationToAtoms(Vector, const int);
+    char evalRelationToAtoms(const std::array<unsigned,3>&, Vector, const int);
     void traverseTree(const AtomNode*, const double&, const Vector&, const double&, const double&, const int&, 
         const char = 0b00000011, const char = 0); 
-    void splitVoxel(const Vector&, const double&); 
+    void splitVoxel(const std::array<unsigned,3>&, const Vector&, const double&); 
     void splitVoxel(const std::array<unsigned int,3>&, const unsigned);
         
     char evalRelationToVoxels(const std::array<unsigned int,3>&, const unsigned, bool=false);
