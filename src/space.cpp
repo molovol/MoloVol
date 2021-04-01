@@ -237,6 +237,10 @@ std::array<double,3> Space::getSize(){
 double Space::getResolution() const {
   return grid_size;
 }
+    
+Container3D<Voxel> Space::getGrid(const unsigned lvl){
+  return _grid[lvl];
+}
 
 /////////////////
 // GET ELEMENT //

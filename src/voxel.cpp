@@ -215,7 +215,7 @@ void Voxel::splitVoxel(const std::array<unsigned,3>& vxl_index, const Vector& vx
     factors[2] = z ? 1 : -1;
     for (char y = 0; y < 2; ++y){
       sub_index[1] = vxl_index[1]*2 + y;
-      factors[1] = y==1 ? 1 : -1;
+      factors[1] = y ? 1 : -1;
       for (char x = 0; x < 2; ++x){
         sub_index[0] = vxl_index[0]*2 + x;
         factors[0] = x ? 1 : -1;
