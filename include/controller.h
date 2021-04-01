@@ -28,10 +28,10 @@ class Ctrl{
         std::string = "0");
     void registerView(MainFrame* inp_gui);
     static Ctrl* getInstance();
-    std::vector<std::string> getGuiParameters(); // confusing name, this is not a getter function
-    void notifyUser(std::string str, bool = true);
+    std::vector<std::string> generateGuiParameters();
+    void notifyUser(std::string str, bool = true); // TODO should the bool argument always be set to true ?!
     void prepareOutput(std::string);
-    void exportReport();
+    void exportReport(std::string, bool);
     void exportSurfaceMap();
     // unit tests
     bool unittestExcluded();

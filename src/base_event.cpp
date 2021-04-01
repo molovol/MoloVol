@@ -45,7 +45,7 @@ void MainFrame::OnCalc(wxCommandEvent& event){
 
   // stop calculation if probe 2 radius is too small in two probes mode
   if(getProbeMode() && getProbe1Radius() > getProbe2Radius()){
-    Ctrl::getInstance()->notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.");
+    Ctrl::getInstance()->notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.", true);
     return;
   }
 
@@ -58,7 +58,7 @@ void MainFrame::OnCalc(wxCommandEvent& event){
 
   // write report file if option is toggled
   if(getMakeReport()){
-    Ctrl::getInstance()->exportReport();
+    Ctrl::getInstance()->exportReport(getAtomFilepath(), getProbeMode());
   }
 
   // write total surface map file if option is toggled

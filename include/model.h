@@ -28,21 +28,24 @@ class Model{
     void readFilePDB(const std::string&, bool);
 
     // export
+    bool createOutputFolder(std::string);
+    void createReport(std::string, std::vector<std::string>, bool);
+    void writeXYZfile(std::vector<std::tuple<std::string, double, double, double>>&, std::string);
     void writeSurfaceMap();
 
     std::vector<std::string> listElementsInStructure();
 
+    // crystal unit cell related functions
     bool getSymmetryElements(std::string, std::vector<int>&, std::vector<double>&);
-    bool createOutputFolder(std::string);
-    void createReport(std::string, std::vector<std::string>);
-    void writeXYZfile(std::vector<std::tuple<std::string, double, double, double>>&, std::string);
     bool processUnitCell(double, double, double, double);
     void orthogonalizeUnitCell();
     bool symmetrizeUnitCell();
     void moveAtomsInsideCell();
     void removeDuplicateAtoms();
+    void countAtomsInUnitCell();
     void generateSupercell(double);
     void generateUsefulAtomMapFromSupercell(double);
+    std::string generateUnitCellChemicalFormula(std::vector<std::string>);
 
     inline double findRadiusOfAtom(const std::string&);
     inline double findRadiusOfAtom(const Atom&); //TODO has not been tested
@@ -63,6 +66,7 @@ class Model{
     void debug();
   private:
     std::string calc_time; // stores the time when the calculation was run for output folder and report
+    std::map<char,double> volumes_stored; // convenient access to calculated volumes for report
     std::string output_folder = "./"; // default folder is the program folder but it is changed with the output file routine
     std::vector<std::tuple<std::string, double, double, double>> raw_atom_coordinates;
     std::vector<std::tuple<std::string, double, double, double>> processed_atom_coordinates;
@@ -72,6 +76,7 @@ class Model{
     std::unordered_map<std::string, double> radius_map;
     std::unordered_map<std::string, int> elem_Z;
     std::map<std::string, int> atom_amounts;
+    std::map<std::string, int> unit_cell_atom_amounts; // stores atoms of unit cell to generate chemical formula
     std::vector<Atom> atoms;
     AtomTree atomtree;
     Space _cell;

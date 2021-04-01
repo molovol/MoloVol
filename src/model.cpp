@@ -30,7 +30,7 @@ bool Model::setProbeRadii(const double& r_1, const double& r_2, bool two_probe_m
   _r_probe1 = r_1;
   if (two_probe_mode){
     if (r_1 > r_2){
-    Ctrl::getInstance()->notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.");
+    Ctrl::getInstance()->notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.", true);
     return false;
     }
     else{
@@ -92,6 +92,7 @@ CalcResultBundle Model::calcVolume(){
 
   start = std::chrono::steady_clock::now();
   data.volumes = _cell.getVolume();
+  volumes_stored = data.volumes;
   end = std::chrono::steady_clock::now();
   data.volume_tally_elapsed_seconds = std::chrono::duration<double>(end-start).count();
 
@@ -151,12 +152,12 @@ bool Model::processUnitCell(double max_atom_rad, double probe1, double probe2, d
   */
   double radius_limit = 2*(max_atom_rad+probe1+probe2+gridstep);
   if(space_group == ""){
-    Ctrl::getInstance()->notifyUser("Space group not found!\nCheck the structure file\nor untick the unit cell analysis checkbox.");
+    Ctrl::getInstance()->notifyUser("Space group not found!\nCheck the structure file\nor untick the unit cell analysis checkbox.", true);
     return false;
   }
   for(int i = 0; i < 6; i++){
     if(cell_param[i] == 0){
-      Ctrl::getInstance()->notifyUser("Unit cell parameters invalid!\nCheck the structure file\nor untick the unit cell analysis checkbox.");
+      Ctrl::getInstance()->notifyUser("Unit cell parameters invalid!\nCheck the structure file\nor untick the unit cell analysis checkbox.", true);
       return false;
     }
   }
@@ -168,6 +169,7 @@ bool Model::processUnitCell(double max_atom_rad, double probe1, double probe2, d
   }
   moveAtomsInsideCell();
   removeDuplicateAtoms();
+  countAtomsInUnitCell(); // for report
   writeXYZfile(processed_atom_coordinates, "orthogonal_cell");
   generateSupercell(radius_limit);
   generateUsefulAtomMapFromSupercell(radius_limit);
@@ -233,7 +235,7 @@ bool Model::symmetrizeUnitCell(){
   std::vector<int> sym_matrix_XYZ;
   std::vector<double> sym_matrix_fraction;
   if(!getSymmetryElements(space_group, sym_matrix_XYZ, sym_matrix_fraction)){
-    Ctrl::getInstance()->notifyUser("Space group or symmetry not found!\nCheck the structure and space group files\nor untick the unit cell analysis checkbox.");
+    Ctrl::getInstance()->notifyUser("Space group or symmetry not found!\nCheck the structure and space group files\nor untick the unit cell analysis checkbox.", true);
     return false;
   }
   /* To convert cartesian coordinates x y z in unit cell coordinates a b c:
@@ -324,6 +326,15 @@ void Model::removeDuplicateAtoms(){
   }
 }
 
+// 4b) create chemical formula of a unit cell for report
+void Model::countAtomsInUnitCell(){
+  unit_cell_atom_amounts.clear();
+  for(size_t i = 0; i < processed_atom_coordinates.size(); i++){
+    std::string symbol = std::get<0>(processed_atom_coordinates[i]);
+    unit_cell_atom_amounts[symbol]++;
+  }
+}
+
 // 5) create supercell at least 3x3x3 but big enough to include a radius around central unit cell = 2*(max_atom_rad+probe1+probe2+gridstep)
 void Model::generateSupercell(double radius_limit){
   int initial_number_of_atoms = processed_atom_coordinates.size();
@@ -388,6 +399,31 @@ void Model::generateUsefulAtomMapFromSupercell(double radius_limit){
            i--;
     }
   }
+}
+
+// generate chemical formula of the unit cell for the report file
+std::string Model::generateUnitCellChemicalFormula(std::vector<std::string> included_elements){
+  std::string chemical_formula_suffix = "";
+  std::string chemical_formula_prefix = "";
+  for(std::map<std::string, int>::iterator it = unit_cell_atom_amounts.begin(); it != unit_cell_atom_amounts.end(); it++){
+    // if element is included by user in gui
+    if (std::find(included_elements.begin(), included_elements.end(), it->first) != included_elements.end()){
+      std::string symbol = it->first;
+      std::string subscript = std::to_string(it->second);
+      // by convention: carbon comes first, then hydrogen, then in alphabetical order
+      if (symbol == "C"){
+        chemical_formula_prefix = symbol + subscript + chemical_formula_prefix;
+      }
+      else if (symbol == "H"){
+        chemical_formula_prefix += symbol + subscript;
+      }
+
+      else {
+        chemical_formula_suffix += symbol + subscript;
+      }
+    }
+  }
+  return chemical_formula_prefix + chemical_formula_suffix;
 }
 
 ///////////////////

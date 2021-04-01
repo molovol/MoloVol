@@ -159,7 +159,7 @@ void Space::assignShellVsVoid(){
 }
 
 std::map<char,double> Space::getVolume(){
-  std::vector<char> types_to_tally{0b00000011,0b00000101};
+  std::vector<char> types_to_tally{0b00000011,0b00000101,0b00001001,0b00010001,0b00100001,0b01000001};
 
   std::vector<unsigned int> tally;
   for (size_t i = 0; i < types_to_tally.size(); i++){
@@ -179,7 +179,7 @@ std::map<char,double> Space::getVolume(){
   for (size_t i = 0; i < types_to_tally.size(); i++){
     volumes[types_to_tally[i]] = tally[i] * unit_volume;
   }
-/*
+/* TODO remove code if outdated
   std::cout << "Probe inaccessible volume: " << unit_volume*total_excluded << std::endl;
   return unit_volume * total;
   */
