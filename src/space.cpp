@@ -76,10 +76,11 @@ void Space::initGrid(){
                                         n_gridsteps[2]*pow(2,max_depth-lvl)));
   }
   // add pointers to every voxel in grid to point to children in grid
-  for (unsigned x = 0; x < n_gridsteps[0]; ++x){
-    for (unsigned y = 0; y < n_gridsteps[1]; ++y){
-      for (unsigned z = 0; z < n_gridsteps[2]; ++z){
-        getTopVxl(x,y,z).assignChildren(*this, {x, y, z}, max_depth);
+  std::array<unsigned,3> top_index;
+  for (top_index[0] = 0; top_index[0] < n_gridsteps[0]; ++top_index[0]){
+    for (top_index[1] = 0; top_index[1] < n_gridsteps[1]; ++top_index[1]){
+      for (top_index[2] = 0; top_index[2] < n_gridsteps[2]; ++top_index[2]){
+        getTopVxl(top_index).assignChildren(*this, top_index, max_depth);
       }
     }
   }
