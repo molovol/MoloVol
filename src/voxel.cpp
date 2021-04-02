@@ -154,7 +154,7 @@ void signCombinations(std::vector<std::array<int,3>>& list, std::array<unsigned 
 // CONSTRUCTOR //
 /////////////////
 
-Voxel::Voxel(){type = 0;}
+Voxel::Voxel(){_type = 0;}
 
 ////////////
 // ACCESS //
@@ -162,16 +162,16 @@ Voxel::Voxel(){type = 0;}
 
 // data
 Voxel& Voxel::getSubvoxel(const short& x, const short& y, const short& z){
-  return data[4 * z + 2 * y + x];
+  return _data[4 * z + 2 * y + x];
 }
 Voxel& Voxel::getSubvoxel(const short& i){
-  return data[i];
+  return _data[i];
 }
-bool Voxel::hasSubvoxel(){return readBit(type,7);}
+bool Voxel::hasSubvoxel(){return readBit(_type,7);}
 
 // type
-char Voxel::getType(){return type;}
-void Voxel::setType(char input){type = input;}
+char Voxel::getType(){return _type;}
+void Voxel::setType(char input){_type = input;}
 
 /////////////////////////////////
 // TYPE ASSIGNMENT PREPARATION //
@@ -184,9 +184,6 @@ void Voxel::prepareTypeAssignment(Space* cell, AtomTree atomtree, double grid_si
   s_grid_size = grid_size;
   s_r_probe1 = r_probe1;
   s_search_indices = SearchIndex(r_probe1, grid_size, cell->getMaxDepth());
-  //
-//  s_pair_data.clear();
-//  s_triplet_data.clear();
 }
 
 ///////////////////////////////
@@ -199,10 +196,10 @@ char Voxel::evalRelationToAtoms(const std::array<unsigned,3>& index_vxl, Vector 
 
   traverseTree(s_atomtree.getRoot(), s_atomtree.getMaxRad(), pos_vxl, rad_vxl, s_r_probe1, max_depth);
 
-  if (type == 0){type = 0b00001001;}
-  if (readBit(type,7)){splitVoxel(index_vxl, pos_vxl, max_depth);} // split if type mixed
+  if (_type == 0){_type = 0b00001001;}
+  if (readBit(_type,7)){splitVoxel(index_vxl, pos_vxl, max_depth);} // split if type mixed
 
-  return type;
+  return _type;
 }
 
 // adds an array of size 8 to the voxel that contains 8 subvoxels and evaluates each subvoxel's type
@@ -225,11 +222,11 @@ void Voxel::splitVoxel(const std::array<unsigned,3>& vxl_index, const Vector& vx
         Voxel subvxl = Voxel();
         subvxl.evalRelationToAtoms(sub_index, new_pos, max_depth-1);
         
-        data.push_back(subvxl);
+        _data.push_back(subvxl);
       }
     }
   }
-  setType(mergeTypes(data));
+  setType(mergeTypes(_data));
 }
 
 // goes through all close atoms to determine a voxel's type
@@ -243,7 +240,7 @@ void Voxel::traverseTree
    const char exit_type,
    const char dim){
 
-  if (node == NULL || readBit(type,0)){return;}
+  if (node == NULL || readBit(_type,0)){return;}
   const Atom& atom = node->getAtom();
 
   // distance between atom and voxel along one dimension
@@ -268,20 +265,20 @@ bool Voxel::isAtom(const Atom& atom, const Vector& pos_vxl, const double rad_vxl
   Vector dist = pos_vxl - atom.getPosVec();
 
   if((dist < atom.getRad() - rad_vxl) && (0 < atom.getRad() - rad_vxl)){
-    type = 0b00000011;
+    _type = 0b00000011;
     return true;
   }
   else if (dist < atom.getRad() + rad_vxl){
-    if (readBit(type,1)){return false;} // if inside atom
-    type = 0b10000010;
+    if (readBit(_type,1)){return false;} // if inside atom
+    _type = 0b10000010;
   }
   else if ((dist < atom.getRad() + rad_probe - rad_vxl) && (0 < atom.getRad() + rad_probe - rad_vxl)){
-    if (readBit(type,1)){return false;} // if mixed or inside atom
-    type = 0b00010000;
+    if (readBit(_type,1)){return false;} // if mixed or inside atom
+    _type = 0b00010000;
   }
   else if (dist < atom.getRad() + rad_probe + rad_vxl){
-    if (readBit(type,4) || readBit(type,1)){return false;} // if mixed, inside atom, or potential shell
-    type = 0b10010000;
+    if (readBit(_type,4) || readBit(_type,1)){return false;} // if mixed, inside atom, or potential shell
+    _type = 0b10010000;
   }
   return false;
 }
@@ -325,7 +322,7 @@ void Voxel::listFromTree(
 
 char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const unsigned lvl, bool split){
   // if voxel (including all subvoxels) have been assigned, then return immediately
-  if (readBit(type,0)){return type;}
+  if (readBit(_type,0)){return _type;}
   else if (!hasSubvoxel()){ // vxl has no children
     searchForCore(index, lvl, split);
   }
@@ -341,21 +338,21 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
         }
       }
     }
-    setType(mergeTypes(data));
+    setType(mergeTypes(_data));
   }
-  if (!readBit(type,0)){ // if voxel not assigned
+  if (!readBit(_type,0)){ // if voxel not assigned
     splitVoxel(index, lvl);
   }
-  return type;
+  return _type;
 }
 
 void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigned lvl, bool split){
-  type = 0b00000101; // type excluded
+  _type = 0b00000101; // type excluded
   for (unsigned int n = (split? Voxel::s_search_indices.getSafeLim(lvl+1)*4 : 1); n <= Voxel::s_search_indices.getUppLim(lvl); ++n){
     for (std::array<int,3> coord : Voxel::s_search_indices[n]){
       coord = add(coord, index);
       if (readBit((s_cell->getVxlFromGrid(coord,lvl)).getType(),3)){
-        type = (n <= Voxel::s_search_indices.getSafeLim(lvl))? 0b00010001 : 0b10000000;
+        _type = (n <= Voxel::s_search_indices.getSafeLim(lvl))? 0b00010001 : 0b10000000;
         return;
       }
     }
@@ -364,217 +361,11 @@ void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
 
 // adds an array of size 8 to the voxel that contains 8 subvoxels
 void Voxel::splitVoxel(const std::array<unsigned int,3>& vxl_ind, const unsigned lvl){
-  data = std::vector<Voxel>(8);
+  _data = std::vector<Voxel>(8);
   evalRelationToVoxels(vxl_ind, lvl, true);
-  setType(mergeTypes(data));
+  setType(mergeTypes(_data));
 }
 
-//////////////////////////////
-// GEOMETRY BASED ALGORITHM //
-//////////////////////////////
-// not currently used
-/*
-bool Voxel::isProbeExcluded(const Vector& vxl_pos, const double& r_probe, const double& radius_of_influence, const std::vector<int>& close_atom_ids){
-
-  if(type == 'm'){return false;} // type 'm' can never be changed by probe
-
-  for (int i = 0; i < close_atom_ids.size(); i++){
-    Atom atom1 = AtomNode::getAtom(close_atom_ids[i]);
-    // for simplicity all vectors are shifted by -vec_offset, so that atom1 is in the origin
-    Vector vec_offset = Vector(atom1.getPos());
-
-    std::array<double,4> atom_radii;
-    std::array<Vector,4> vectors;
-
-    atom_radii[0] = atom1.getRad();
-    Vector vec_vxl = vxl_pos - vec_offset;
-
-    for (int j = i+1; j < close_atom_ids.size(); j++){
-      Atom atom2 = AtomNode::getAtom(close_atom_ids[j]);
-      atom_radii[1] = atom2.getRad();
-      vectors[1] = Vector(atom2.getPos()) - vec_offset;
-
-      int pair_id = close_atom_ids[i] + AtomNode::getAtomList().size()*close_atom_ids[j];
-
-      if (!allAtomsClose(r_probe, atom_radii, vectors, 2)){continue;}
-      if (isExcludedByPair(vec_vxl, vectors[1], atom_radii[0], atom_radii[1], r_probe, radius_of_influence, pair_id)){return true;}
-
-      for (int k = j+1; k < close_atom_ids.size(); k++){
-        Atom atom3 = AtomNode::getAtom(close_atom_ids[k]);
-        atom_radii[2] = atom3.getRad();
-        vectors[2] = Vector(atom3.getPos()) - vec_offset;
-
-//        std::array<unsigned long long int, 4> triplet_ids;
-//        triplet_ids[0] = close_atom_ids[i] + AtomNode::getAtomList().size()*close_atom_ids[j] + pow(AtomNode::getAtomList().size(),2)*close_atom_ids[k];
-        unsigned long long int triplet_id = close_atom_ids[i] + AtomNode::getAtomList().size()*close_atom_ids[j] + pow(AtomNode::getAtomList().size(),2)*close_atom_ids[k];
-
-        if (!allAtomsClose(r_probe, atom_radii, vectors, 3)){continue;}
-        if (isExcludedByTriplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe, triplet_id)){return true;}
-
-        for (int l = k+1; l < close_atom_ids.size(); l++){
-
-
-          Atom atom4 = AtomNode::getAtom(close_atom_ids[l]);
-          atom_radii[3] = atom4.getRad();
-          vectors[3] = Vector(atom4.getPos()) - vec_offset;
-
-          if (!allAtomsClose(r_probe, atom_radii, vectors, 4)){continue;}
-          if (isExcludedByQuadruplet(vec_vxl, radius_of_influence, vectors, atom_radii, r_probe, close_atom_ids)){return true;}
-        }
-      }
-    }
-  }
-  return false;
-}
-
-bool Voxel::isExcludedByQuadruplet(
-    const Vector& vec_vxl,
-    const double& rad_vxl,
-    const std::array<Vector,4>& vec_atoms,
-    const std::array<double,4>& rad_atoms,
-    const double& rad_probe,
-    const std::vector<int>& close_atom_ids)
-{
-  bool sign;
-  if (!isInsideTetrahedron(vec_vxl, vec_atoms, sign)){return false;}
-  setType('x'); // all voxels inside tetrahedron are assumed inaccessible
-  // currently, access evaluation functions work with arrays of size four even when not strictly needed,
-  // in order to avoid the use of pointers
-  // this loop goes over all combinations of three atoms, i.e., all planes that make up the tetrahedron
-  std::array<Vector,4> vec_plane_vertices;
-  std::array<double,4> rad_plane_vertices;
-  for (char i = 0; i < 4; i++){
-    rad_plane_vertices[0] = rad_atoms[i];
-    for (char j = i+1; j < 4; j++){
-      vec_plane_vertices[1] = vec_atoms[j]-vec_atoms[i];
-      rad_plane_vertices[1] = rad_atoms[j];
-      for (char k = j+1; k < 4; k++){
-        vec_plane_vertices[2] = vec_atoms[k]-vec_atoms[i];
-        rad_plane_vertices[2] = rad_atoms[k];
-
-//        unsigned long long int triplet_id = close_atom_ids[i] + AtomNode::getAtomList().size()*close_atom_ids[j] + pow(AtomNode::getAtomList().size(),2)*close_atom_ids[k];
-
-        // introducing a dummy voxel as a hack, in order to independantly evaluate the voxel accessibilty
-        // for every plane
-        Voxel dummy = Voxel();
-        dummy.isExcludedByTriplet(vec_vxl-vec_atoms[i], rad_vxl, vec_plane_vertices, rad_plane_vertices, rad_probe, 0, true);
-        char type_from_plane = dummy.getType();
-
-        // if any voxel is found to be completely accessible, then set type and end
-        if (type_from_plane=='e'){
-          setType('e');
-          return false;
-        }
-        // if any voxel is found to be partially accessible, then set type and continue
-        else if (type_from_plane=='m'){
-          setType('m');
-        }
-      }
-    }
-  }
-  // if voxel has not been determined accessible, then it is inaccessible
-  return true;
-}
-
-bool Voxel::isExcludedByTriplet(
-  const Vector& vec_vxl,
-  const double& rad_vxl,
-  const std::array<Vector,4>& vec_atom,
-  const std::array<double,4>& rad_atom,
-  const double& rad_probe,
-  const unsigned long long int triplet_id,
-  const bool side_restr)
-{
-  // check if between atom1 and atom2 - done by isExcludedByPair
-
-  if (!isPointBetween(vec_vxl, vec_atom[2])){return false;} // filter voxels outside range
-
-  if (triplet_id == 0 || s_triplet_data.find(triplet_id) == s_triplet_data.end()){
-
-    Vector vec_probe_plane = calcProbeVectorInPlane(vec_atom, rad_atom, rad_probe);
-
-    Vector vec_probe_normal = calcProbeVectorNormal(vec_atom, rad_atom, rad_probe, vec_probe_plane);
-
-    s_triplet_data[triplet_id] = TripletBundle(vec_probe_plane, vec_probe_normal);
-  }
-
-  Vector vec_probe;
-
-  // side restricted mode: the probe always sits on the other side of the plane relative to
-  // the voxel. we do not check whether the voxel is inside the tetrahedron, because it never is
-  if (side_restr){
-    vec_probe = s_triplet_data[triplet_id].vec_probe_plane
-      + s_triplet_data[triplet_id].vec_probe_normal * ( std::signbit(s_triplet_data[triplet_id].vec_probe_normal*vec_vxl)? 1 : -1 );
-  }
-
-  // default mode: the probe always sits on the same side as the voxel
-  else {
-    vec_probe = s_triplet_data[triplet_id].vec_probe_plane
-      + s_triplet_data[triplet_id].vec_probe_normal * ( std::signbit(s_triplet_data[triplet_id].vec_probe_normal*vec_vxl)? -1 : 1 );
-
-    // check whether vxl is inside tetrahedron spanned by atoms1-3 and probe
-    std::array<Vector,4> vec_vertices; // vectors pointing to vertices of the tetrahedron
-    {
-      for (char i = 0; i<3; i++){
-        vec_vertices[i] = vec_atom[i];
-      }
-      vec_vertices[3] = vec_probe;
-    }
-    if (!isInsideTetrahedron(vec_vxl, vec_vertices)){return false;} // stop, if not inside tetrahedron
-  }
-
-  return isExcludedSetType(vec_vxl, rad_vxl, vec_probe, rad_probe);
-}
-
-bool Voxel::isExcludedByPair(
-    const Vector& vec_vxl,
-    const Vector& vec_atat,
-    const double& rad_atom1,
-    const double& rad_atom2,
-    const double& rad_probe,
-    const double& rad_vxl,
-    int pair_id)
-{
-
-  Vector unitvec_parallel = vec_atat.normalise();
-  double vxl_parallel = vec_vxl * unitvec_parallel;
-
-  if (s_pair_data.find(pair_id) == s_pair_data.end()){
-
-    // TODO: consider making a function that produces vec_probe and takes either PairBundle or values as args
-    double dist_atom1_probe = rad_atom1 + rad_probe;
-    double dist_atom2_probe = rad_atom2 + rad_probe;
-    double dist_atom1_atom2 = vec_atat.length();
-
-    double probe_parallel = ((pow(dist_atom1_probe,2) + pow(dist_atom1_atom2,2) - pow(dist_atom2_probe,2))/(2*dist_atom1_atom2));
-    double probe_orthogonal = pow(pow(dist_atom1_probe,2)-pow(probe_parallel,2),0.5);
-
-    s_pair_data[pair_id] = PairBundle(unitvec_parallel, probe_parallel, probe_orthogonal);
-  }
-  Vector unitvec_orthogonal = (vec_vxl-s_pair_data[pair_id].unitvec_parallel*vxl_parallel).normalise();
-
-  Vector vec_probe = s_pair_data[pair_id].probe_parallel * unitvec_parallel + s_pair_data[pair_id].probe_orthogonal * unitvec_orthogonal;
-
-  if (vec_vxl.isInsideTriangle({Vector(), vec_atat, vec_probe})){
-    return isExcludedSetType(vec_vxl, rad_vxl, vec_probe, rad_probe);
-  }
-  return false;
-}
-
-bool Voxel::isExcludedSetType(const Vector& vec_vxl, const double& rad_vxl, const Vector& vec_probe, const double& rad_probe){
-  if (vec_probe-vec_vxl > (rad_probe+rad_vxl)){ // then all subvoxels are inaccessible
-    setType('x');
-    return true;
-  }
-  else if (vec_probe-vec_vxl <= (rad_probe-rad_vxl)){ // then all subvoxels are accessible
-    return false;
-  }
-  else { // then each subvoxel has to be evaluated
-    setType('m');
-    return false;
-  }
-}
-*/
 ///////////
 // TALLY //
 ///////////
@@ -587,12 +378,12 @@ unsigned int Voxel::tallyVoxelsOfType(const char volume_type, const int max_dept
     // then total number of voxels is given by tallying all subvoxels
     unsigned int total = 0;
     for(int i = 0; i < 8; i++){
-      total += data[i].tallyVoxelsOfType(volume_type, max_depth-1);
+      total += _data[i].tallyVoxelsOfType(volume_type, max_depth-1);
     }
     return total;
   }
   // if voxel is of the type of interest, tally the voxel in units of bottom level voxels
-  else if(type == volume_type){
+  else if(_type == volume_type){
     return pow(pow(2,max_depth),3); // return number of bottom level voxels
   }
   // if neither empty nor of the type of interest, then the voxel doesn't count towards the total
@@ -740,13 +531,13 @@ void Voxel::fillTypeTensor(
     const std::array<unsigned long int,3> block_start,
     const int remaining_depth){
   if (remaining_depth == 0){
-    type_tensor.getElement(block_start) = type;
+    type_tensor.getElement(block_start) = _type;
   }
-  else if (data.empty()){
+  else if (_data.empty()){
     for (unsigned int i = block_start[0]; i < block_start[0]+pow(2,remaining_depth); i++){
       for (unsigned int j = block_start[1]; j < block_start[1]+pow(2,remaining_depth); j++){
         for (unsigned int k = block_start[2]; k < block_start[2]+pow(2,remaining_depth); k++){
-          type_tensor.getElement(i,j,k) = type;
+          type_tensor.getElement(i,j,k) = _type;
         }
       }
     }

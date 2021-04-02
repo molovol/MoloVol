@@ -107,8 +107,8 @@ class Voxel{
     // DEPRECIATED
     // */
 
-    std::vector<Voxel> data; // empty or exactly 8 elements
-    char type;
+    std::vector<Voxel> _data; // empty or exactly 8 elements
+    char _type;
 };
 
 #endif
