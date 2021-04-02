@@ -65,14 +65,23 @@ void Space::setBoundaries(const std::vector<Atom> &atoms, const double add_space
 // 3D grid (in form of a 1D vector) that contains all top level voxels.
 void Space::initGrid(){
   _grid.clear();
+  // determine how many top lvl voxels in each direction are needed
   for (int dim = 0; dim < 3; dim++){
     n_gridsteps[dim] = std::ceil (std::ceil( (getSize())[dim] / grid_size ) / std::pow(2,max_depth) );
   }
+  // initialise 3d tensors for each octree level
   for (int lvl = 0; lvl <= max_depth; ++lvl){
-    _grid.push_back(Container3D<Voxel>
-        (n_gridsteps[0]*pow(2,max_depth-lvl),
-         n_gridsteps[1]*pow(2,max_depth-lvl),
-         n_gridsteps[2]*pow(2,max_depth-lvl)));
+    _grid.push_back(Container3D<Voxel>( n_gridsteps[0]*pow(2,max_depth-lvl), 
+                                        n_gridsteps[1]*pow(2,max_depth-lvl), 
+                                        n_gridsteps[2]*pow(2,max_depth-lvl)));
+  }
+  // add pointers to every voxel in grid to point to children in grid
+  for (unsigned x = 0; x < n_gridsteps[0]; ++x){
+    for (unsigned y = 0; y < n_gridsteps[1]; ++y){
+      for (unsigned z = 0; z < n_gridsteps[2]; ++z){
+        getTopVxl(x,y,z).assignChildren(*this, {x, y, z}, max_depth);
+      }
+    }
   }
   return;
 }
@@ -88,42 +97,7 @@ void Space::placeAtomsInGrid(const AtomTree& atomtree, const double& r_probe){
 
   assignAtomVsCore();
 
-  updateGrid();
-
   assignShellVsVoid();
-}
-
-// all voxels are contained in the top level voxels and their children stored in the space object. the space object
-// also contains a grid for every level that is used to accelerate access during neighbour search. this function
-// updates the grids
-// using pointers in the grid could make this step avoidable
-void Space::updateGrid(){
-  for (unsigned int x = 0; x < n_gridsteps[0]; ++x){
-    for (unsigned int y = 0; y < n_gridsteps[1]; ++y){
-      for (unsigned int z = 0; z < n_gridsteps[2]; ++z){
-        Voxel top_lvl_vxl = getTopVxl(x,y,z);
-        fillGrid(top_lvl_vxl, x, y, z, max_depth);
-      }
-    }
-  }
-}
-
-void Space::fillGrid(Voxel& vxl, int x, int y, int z, unsigned lvl){
-  getVxlFromGrid(x,y,z, lvl) = vxl;
-  if (lvl != 0) {
-    for (char i = 0; i<2; ++i){
-      for (char j = 0; j<2; ++j){
-        for (char k = 0; k<2; ++k){
-          if (!vxl.hasSubvoxel()){
-            fillGrid(vxl, x*2+i, y*2+j, z*2+k , lvl-1);
-          }
-          else {
-            fillGrid(vxl.getSubvoxel(i,j,k), x*2+i, y*2+j, z*2+k , lvl-1);
-          }
-        }
-      }
-    }
-  }
 }
 
 void Space::assignAtomVsCore(){
@@ -185,29 +159,6 @@ std::map<char,double> Space::getVolume(){
   return unit_volume * total;
   */
   return volumes;
-}
-
-////////////
-// OUTPUT //
-////////////
-
-Container3D<char> Space::generateTypeTensor(){
-  // reserve memory
-  Container3D<char> type_tensor = Container3D<char>(gridstepsOnLvl(0));
-
-  std::array<unsigned long int,3> block_start = {0,0,0};
-  int n_bot_lvl_vxl = pow(2,max_depth);
-  for (unsigned int i = 0; i < n_gridsteps[0]; i++){
-    block_start[0] = i*n_bot_lvl_vxl;
-    for (unsigned int j = 0; j < n_gridsteps[1]; j++){
-      block_start[1] = j*n_bot_lvl_vxl;
-      for (unsigned int k = 0; k < n_gridsteps[2]; k++){
-        block_start[2] = k*n_bot_lvl_vxl;
-        getTopVxl(i,j,k).fillTypeTensor(type_tensor, block_start, max_depth);
-      }
-    }
-  }
-  return type_tensor;
 }
 
 //////////////////////

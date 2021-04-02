@@ -30,6 +30,8 @@ struct AtomNode;
 class Voxel{
   public:
     Voxel();
+    void assignChildren(Space&, const std::array<unsigned,3>&, int);
+
     Voxel& getSubvoxel(const short& x, const short& y, const short& z);
     Voxel& getSubvoxel(const short& i);
     bool hasSubvoxel();
@@ -39,12 +41,14 @@ class Voxel{
     static void prepareTypeAssignment(Space*, AtomTree, double, double, int);
     static void computeIndices();
     static void computeIndices(unsigned int);
+
     char evalRelationToAtoms(const std::array<unsigned,3>&, Vector, const int);
     void traverseTree(const AtomNode*, const double&, const Vector&, const double&, const double&, const int&, 
         const char = 0b00000011, const char = 0); 
+    void passTypeToChildren(const int);
     void splitVoxel(const std::array<unsigned,3>&, const Vector&, const double&); 
     void splitVoxel(const std::array<unsigned int,3>&, const unsigned);
-        
+
     char evalRelationToVoxels(const std::array<unsigned int,3>&, const unsigned, bool=false);
     
     static void listFromTree(
@@ -71,7 +75,7 @@ class Voxel{
     bool isAtom(const Atom&, const Vector&, const double, const double);
     void searchForCore(const std::array<unsigned int,3>&, const unsigned, bool=false);
 
-    std::vector<Voxel> _data; // empty or exactly 8 elements
+    std::vector<Voxel*> _data; // empty or exactly 8 elements
     char _type;
 };
 

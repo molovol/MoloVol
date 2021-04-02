@@ -14,7 +14,7 @@
 inline double Voxel::calcRadiusOfInfluence(const double& max_depth){
   return max_depth != 0 ? 0.86602540378 * s_grid_size * (pow(2,max_depth) - 1) : 0;
 }
-char mergeTypes(std::vector<Voxel>&);
+char mergeTypes(std::vector<Voxel*>&);
 
 /////////////////////////
 // SEARCH INDEX STRUCT //
@@ -140,16 +140,34 @@ void signCombinations(std::vector<std::array<int,3>>& list, std::array<unsigned 
 
 Voxel::Voxel(){_type = 0;}
 
+void Voxel::assignChildren(Space& cell, const std::array<unsigned,3>& index, int lvl){
+  if (lvl!=0){
+    _data = std::vector<Voxel*>(8);
+    std::array<unsigned,3> sub_index;
+    for (char x = 0; x < 2; ++x){
+      sub_index[0] = index[0]*2 + x;
+      for (char y = 0; y < 2; ++y){
+        sub_index[1] = index[1]*2 + y;
+        for (char z = 0; z < 2; ++z){
+          sub_index[2] = index[2]*2 + z;
+          _data[4 * z + 2 * y + x] = &cell.getVxlFromGrid(sub_index,lvl-1);
+          getSubvoxel(x,y,z).assignChildren(cell, sub_index, lvl-1);
+        }
+      }
+    }
+  } 
+}
+
 ////////////
 // ACCESS //
 ////////////
 
 // data
 Voxel& Voxel::getSubvoxel(const short& x, const short& y, const short& z){
-  return _data[4 * z + 2 * y + x];
+  return *_data[4 * z + 2 * y + x];
 }
 Voxel& Voxel::getSubvoxel(const short& i){
-  return _data[i];
+  return *_data[i];
 }
 bool Voxel::hasSubvoxel(){return readBit(_type,7);}
 
@@ -175,15 +193,25 @@ void Voxel::prepareTypeAssignment(Space* cell, AtomTree atomtree, double grid_si
 ///////////////////////////////
 // part of the type assigment routine. first evaluation is only concerned with the relation between
 // voxels and atoms
-char Voxel::evalRelationToAtoms(const std::array<unsigned,3>& index_vxl, Vector pos_vxl, const int max_depth){
-  double rad_vxl = calcRadiusOfInfluence(max_depth); // calculated every time, since max_depth may change (not expensive)
+char Voxel::evalRelationToAtoms(const std::array<unsigned,3>& index_vxl, Vector pos_vxl, const int lvl){
+  double rad_vxl = calcRadiusOfInfluence(lvl); // calculated every time, since max_depth may change (not expensive)
 
-  traverseTree(s_atomtree.getRoot(), s_atomtree.getMaxRad(), pos_vxl, rad_vxl, s_r_probe1, max_depth);
+  traverseTree(s_atomtree.getRoot(), s_atomtree.getMaxRad(), pos_vxl, rad_vxl, s_r_probe1, lvl);
 
   if (_type == 0){_type = 0b00001001;}
-  if (readBit(_type,7)){splitVoxel(index_vxl, pos_vxl, max_depth);} // split if type mixed
+  if (readBit(_type,7)){splitVoxel(index_vxl, pos_vxl, lvl);} // split if type mixed
+  else {passTypeToChildren(lvl);}
 
   return _type;
+}
+
+// passes parent type to all children
+void Voxel::passTypeToChildren(const int lvl){
+  if (lvl == 0){return;}
+  for (char i = 0; i < 8; ++i){
+    getSubvoxel(i).setType(_type);
+    getSubvoxel(i).passTypeToChildren(lvl-1);
+  }
 }
 
 // adds an array of size 8 to the voxel that contains 8 subvoxels and evaluates each subvoxel's type
@@ -203,10 +231,9 @@ void Voxel::splitVoxel(const std::array<unsigned,3>& vxl_index, const Vector& vx
         // modify position
         Vector new_pos = vxl_pos + factors * s_grid_size * std::pow(2,max_depth-2);
         
-        Voxel subvxl = Voxel();
-        subvxl.evalRelationToAtoms(sub_index, new_pos, max_depth-1);
+        getSubvoxel(x,y,z).evalRelationToAtoms(sub_index, new_pos, max_depth-1);
         
-        _data.push_back(subvxl);
+        //_data.push_back(subvxl);
       }
     }
   }
@@ -324,9 +351,8 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
     }
     setType(mergeTypes(_data));
   }
-  if (!readBit(_type,0)){ // if voxel not assigned
-    splitVoxel(index, lvl);
-  }
+  if (!readBit(_type,0)){ splitVoxel(index, lvl);} // if voxel unassigned
+  if (!readBit(_type,7)){passTypeToChildren(lvl);}
   return _type;
 }
 
@@ -345,7 +371,7 @@ void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
 
 // adds an array of size 8 to the voxel that contains 8 subvoxels
 void Voxel::splitVoxel(const std::array<unsigned int,3>& vxl_ind, const unsigned lvl){
-  _data = std::vector<Voxel>(8);
+  //_data = std::vector<Voxel*>(8);
   evalRelationToVoxels(vxl_ind, lvl, true);
   setType(mergeTypes(_data));
 }
@@ -362,7 +388,7 @@ unsigned int Voxel::tallyVoxelsOfType(const char volume_type, const int max_dept
     // then total number of voxels is given by tallying all subvoxels
     unsigned int total = 0;
     for(int i = 0; i < 8; i++){
-      total += _data[i].tallyVoxelsOfType(volume_type, max_depth-1);
+      total += _data[i]->tallyVoxelsOfType(volume_type, max_depth-1);
     }
     return total;
   }
@@ -380,12 +406,12 @@ unsigned int Voxel::tallyVoxelsOfType(const char volume_type, const int max_dept
 
 // combines the types of subvoxels into a new type for the parent. performs bitwise OR for bits 1-6
 // and a bitwise AND for bit 0. sets bit 7 to true
-char mergeTypes(std::vector<Voxel>& sub_vxls){
+char mergeTypes(std::vector<Voxel*>& sub_vxls){
   char parent_type = 0;
   bool confirmed = true;
-  for (Voxel sub_vxl : sub_vxls){
-    parent_type = parent_type | sub_vxl.getType();
-    confirmed &= readBit(sub_vxl.getType(),0);
+  for (Voxel* sub_vxl : sub_vxls){
+    parent_type = parent_type | sub_vxl->getType();
+    confirmed &= readBit(sub_vxl->getType(),0);
   }
   setBit(parent_type,0,confirmed);
   setBitOn(parent_type,7);
@@ -404,7 +430,7 @@ void Voxel::fillTypeTensor(
   if (remaining_depth == 0){
     type_tensor.getElement(block_start) = _type;
   }
-  else if (_data.empty()){
+  else if (!hasSubvoxel()){
     for (unsigned int i = block_start[0]; i < block_start[0]+pow(2,remaining_depth); i++){
       for (unsigned int j = block_start[1]; j < block_start[1]+pow(2,remaining_depth); j++){
         for (unsigned int k = block_start[2]; k < block_start[2]+pow(2,remaining_depth); k++){

@@ -42,7 +42,6 @@ class Space{
 
     int getMaxDepth(){return max_depth;}
     // output
-    Container3D<char> generateTypeTensor(); 
     void printGrid();
 
     // type evaluation
@@ -60,8 +59,6 @@ class Space{
     void setBoundaries(const std::vector<Atom>&, const double);
 
     void initGrid();
-    void updateGrid();
-    void fillGrid(Voxel& vxl, int x, int y, int z, unsigned lvl);
 
     const std::array<unsigned long int,3> gridstepsOnLvl(const int) const;
     void assignAtomVsCore();
