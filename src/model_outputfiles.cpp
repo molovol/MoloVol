@@ -65,9 +65,9 @@ void Model::writeXYZfile(std::vector<std::tuple<std::string, double, double, dou
 void Model::writeSurfaceMap(std::string output_dir){
 
   // assemble data
-  Container3D<Voxel> surface_map = _cell.getGrid(0);
+  Container3D<Voxel>* surface_map = &_cell.getGrid(0);
   // save commonly used variable
-  std::array<unsigned long int,3> n_elements = surface_map.getNumElements();
+  std::array<unsigned long int,3> n_elements = surface_map->getNumElements();
   double vxl_length = _cell.getResolution();
   // create map for assigning numbers to types
   std::map<char,int> typeToNum =
@@ -121,8 +121,8 @@ void Model::writeSurfaceMap(std::string output_dir){
   for(size_t x = 0; x < n_elements[0]; x++){
     for(size_t y = 0; y < n_elements[1]; y++){
       for(size_t z = 0; z < n_elements[2]; z++){
-        if (typeToNum.count(surface_map.getElement(x,y,z).getType()) != 0){
-          output_file << typeToNum[surface_map.getElement(x,y,z).getType()];
+        if (typeToNum.count(surface_map->getElement(x,y,z).getType()) != 0){
+          output_file << typeToNum[surface_map->getElement(x,y,z).getType()];
         }
         else {
           output_file << -2;

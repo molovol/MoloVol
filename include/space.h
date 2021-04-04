@@ -24,7 +24,7 @@ class Space{
     std::array <double,3> getSize();
     bool coordInBounds(const std::array<int,3>&, const unsigned); // not in use
     double getResolution() const; // misnamed
-    Container3D<Voxel> getGrid(const unsigned);
+    Container3D<Voxel>& getGrid(const unsigned);
 
     // get voxel
     Voxel& getVxl(int, int, int, int);
