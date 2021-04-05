@@ -11,3 +11,7 @@ std::string fileExtension(const std::string& path){
     return "invalid";
   }
 }
+
+int pow2(int exp){
+  return (1 << exp);
+}

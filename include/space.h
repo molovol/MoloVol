@@ -27,8 +27,6 @@ class Space{
     Container3D<Voxel>& getGrid(const unsigned);
 
     // get voxel
-    Voxel& getVxl(int, int, int, int);
-    Voxel& getVxl(const std::array<int,3>&, int);
     Voxel& getVxlFromGrid(const unsigned int, unsigned);
     Voxel& getVxlFromGrid(const unsigned int, const unsigned int, const unsigned int, unsigned);
     Voxel& getVxlFromGrid(const std::array<unsigned int,3>, unsigned);

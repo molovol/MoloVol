@@ -141,28 +141,11 @@ void signCombinations(std::vector<std::array<int,3>>& list, std::array<unsigned 
 
 Voxel::Voxel(){_type = 0;}
 
-void Voxel::assignChildren(Space& cell, const std::array<unsigned,3>& index, int lvl){
-  if (lvl!=0){
-    _data = std::vector<Voxel*>(8);
-    std::array<unsigned,3> sub_index;
-    for (char x = 0; x < 2; ++x){
-      sub_index[0] = index[0]*2 + x;
-      for (char y = 0; y < 2; ++y){
-        sub_index[1] = index[1]*2 + y;
-        for (char z = 0; z < 2; ++z){
-          sub_index[2] = index[2]*2 + z;
-          _data[4 * z + 2 * y + x] = &cell.getVxlFromGrid(sub_index,lvl-1);
-          getSubvoxel(x,y,z).assignChildren(cell, sub_index, lvl-1);
-        }
-      }
-    }
-  } 
-}
-
 ////////////
 // ACCESS //
 ////////////
 
+// subvoxels (through s_cell)
 Voxel& Voxel::getSubvoxel(std::array<unsigned,3> p_index, const unsigned p_lvl, const std::array<char,3>& sub_index){
   for (char i = 0; i < 3; ++i){
     p_index[i] *= 2;
@@ -182,13 +165,7 @@ Voxel& Voxel::getSubvoxel(std::array<unsigned,3> p_index, const unsigned p_lvl, 
 Voxel& Voxel::getSubvoxel(std::array<unsigned,3> sub_index, const unsigned p_lvl){
   return s_cell->getVxlFromGrid(sub_index,p_lvl-1);
 }
-// data
-Voxel& Voxel::getSubvoxel(const short& x, const short& y, const short& z){
-  return *_data[4 * z + 2 * y + x];
-}
-Voxel& Voxel::getSubvoxel(const short& i){
-  return *_data[i];
-}
+
 bool Voxel::hasSubvoxel(){return readBit(_type,7);}
 
 // type
@@ -405,9 +382,7 @@ void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
 
 // adds an array of size 8 to the voxel that contains 8 subvoxels
 void Voxel::splitVoxel(const std::array<unsigned int,3>& vxl_ind, const unsigned lvl){
-  //_data = std::vector<Voxel*>(8);
   evalRelationToVoxels(vxl_ind, lvl, true);
-  setType(mergeTypes(_data));
 }
 
 ///////////
@@ -415,20 +390,28 @@ void Voxel::splitVoxel(const std::array<unsigned int,3>& vxl_ind, const unsigned
 ///////////
 
 // TODO: Optimise. Allow for tallying multiples types at once
-unsigned int Voxel::tallyVoxelsOfType(const char volume_type, const int max_depth)
+unsigned int Voxel::tallyVoxelsOfType(const std::array<unsigned,3>& index, const char volume_type, const int lvl)
 {
   // if voxel is of type "mixed" (i.e. data vector is not empty)
   if(hasSubvoxel()){
     // then total number of voxels is given by tallying all subvoxels
     unsigned int total = 0;
-    for(int i = 0; i < 8; i++){
-      total += getSubvoxel(i).tallyVoxelsOfType(volume_type, max_depth-1);
+    std::array<unsigned,3> sub_index;
+    for(char x = 0; x < 2; ++x){
+      sub_index[0] = index[0]*2 + x;
+      for(char y = 0; y < 2; ++y){
+        sub_index[1] = index[1]*2 + y;
+        for(char z = 0; z < 2; ++z){
+          sub_index[2] = index[2]*2 + z;
+          total += getSubvoxel(sub_index, lvl).tallyVoxelsOfType(sub_index, volume_type, lvl-1);
+        }
+      }
     }
     return total;
   }
   // if voxel is of the type of interest, tally the voxel in units of bottom level voxels
   else if(_type == volume_type){
-    return pow(pow(2,max_depth),3); // return number of bottom level voxels
+    return pow(pow(2,lvl),3); // return number of bottom level voxels
   }
   // if neither empty nor of the type of interest, then the voxel doesn't count towards the total
   return 0;

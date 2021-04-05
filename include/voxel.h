@@ -30,13 +30,10 @@ struct AtomNode;
 class Voxel{
   public:
     Voxel();
-    void assignChildren(Space&, const std::array<unsigned,3>&, int);
 
     Voxel& getSubvoxel(std::array<unsigned,3>, const unsigned, const std::array<char,3>&);
     Voxel& getSubvoxel(std::array<unsigned,3>, const unsigned, const char);
     Voxel& getSubvoxel(std::array<unsigned,3>, const unsigned);
-    Voxel& getSubvoxel(const short& x, const short& y, const short& z);
-    Voxel& getSubvoxel(const short& i);
     bool hasSubvoxel();
     void setType(char);
     char getType();
@@ -63,7 +60,7 @@ class Voxel{
         const double&,
         const char=0);
     
-    unsigned int tallyVoxelsOfType(const char volume_type, const int max_depth);
+    unsigned int tallyVoxelsOfType(const std::array<unsigned,3>&, const char volume_type, const int max_depth);
 
   private:
     static inline Space* s_cell;
@@ -77,7 +74,6 @@ class Voxel{
     bool isAtom(const Atom&, const Vector&, const double, const double);
     void searchForCore(const std::array<unsigned int,3>&, const unsigned, bool=false);
 
-    std::vector<Voxel*> _data; // empty or exactly 8 elements
     char _type;
 };
 
