@@ -67,13 +67,13 @@ void Space::initGrid(){
   _grid.clear();
   // determine how many top lvl voxels in each direction are needed
   for (int dim = 0; dim < 3; dim++){
-    n_gridsteps[dim] = std::ceil (std::ceil( (getSize())[dim] / grid_size ) / pow2(max_depth) );
+    n_gridsteps[dim] = std::ceil (std::ceil( (getSize())[dim] / grid_size ) / std::pow(2,max_depth) );
   }
   // initialise 3d tensors for each octree level
   for (int lvl = 0; lvl <= max_depth; ++lvl){
-    _grid.push_back(Container3D<Voxel>( n_gridsteps[0]*pow2(max_depth-lvl), 
-                                        n_gridsteps[1]*pow2(max_depth-lvl), 
-                                        n_gridsteps[2]*pow2(max_depth-lvl)));
+    _grid.push_back(Container3D<Voxel>( n_gridsteps[0]*pow(2,max_depth-lvl), 
+                                        n_gridsteps[1]*pow(2,max_depth-lvl), 
+                                        n_gridsteps[2]*pow(2,max_depth-lvl)));
   }
 }
 
@@ -95,7 +95,7 @@ void Space::assignAtomVsCore(){
   // calculate position of first voxel
   const std::array<double,3> vxl_origin = getOrigin();
   // calculate side length of top level voxel
-  const double vxl_dist = grid_size * pow2(max_depth);
+  const double vxl_dist = grid_size * pow(2,max_depth);
   std::array<double,3> vxl_pos;
   std::array<unsigned,3> top_lvl_index;
   for(top_lvl_index[0] = 0; top_lvl_index[0] < n_gridsteps[0]; top_lvl_index[0]++){
@@ -225,7 +225,7 @@ Voxel& Space::getTopVxl(const std::array<int,3> arr){
 // check whether coord is inside grid bounds
 bool Space::coordInBounds(const std::array<int,3>& coord, const unsigned lvl){
   for (char i = 0; i < 3; i++){
-    if(coord[i] < 0 || coord[i] >= n_gridsteps[i] * pow2(max_depth-lvl)){return false;}
+    if(coord[i] < 0 || coord[i] >= n_gridsteps[i] * std::pow(2,max_depth-lvl)){return false;}
   }
   return true;
 }
@@ -247,7 +247,7 @@ const std::array<unsigned long int,3> Space::gridstepsOnLvl(const int level) con
   if (level > max_depth){throw ExceptIllegalFunctionCall();}
   std::array<unsigned long int,3> n_voxels;
   for (char i = 0; i < 3; i++){
-    n_voxels[i] = n_gridsteps[i] * pow2(max_depth-level);
+    n_voxels[i] = n_gridsteps[i] * pow(2,max_depth-level);
   }
   return n_voxels;
 }
@@ -258,7 +258,7 @@ const std::array<unsigned long int,3> Space::gridstepsOnLvl(const int level) con
 
 std::array<unsigned int,3> makeIndices(std::array<unsigned int,3> indices, int depth){
   for (char i = 0; i < 3; i++){
-    indices[i] *= pow2(depth);
+    indices[i] *= pow(2,depth);
   }
   return indices;
 }

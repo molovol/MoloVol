@@ -12,6 +12,6 @@ std::string fileExtension(const std::string& path){
   }
 }
 
-unsigned pow2(unsigned exp){
+int pow2(int exp){
   return (1 << exp);
 }
