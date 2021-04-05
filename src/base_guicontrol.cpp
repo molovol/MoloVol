@@ -81,6 +81,10 @@ bool MainFrame::getMakeCavityMaps(){
   return cavityMapsCheckbox->GetValue();
 }
 
+std::string MainFrame::getOutputDir(){
+  return outputdirPicker->GetPath().ToStdString();
+}
+
 void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>> symbol_number_radius){
   // delete all rows
   // DeleteRows causes an error if there are no rows

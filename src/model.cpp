@@ -15,6 +15,7 @@
 ////////////////////////////////////
 
 bool Model::setParameters(std::string file_path,
+            std::string output_dir,
             bool inc_hetatm,
             bool analyze_unit_cell,
             bool probe_mode,
@@ -33,6 +34,7 @@ bool Model::setParameters(std::string file_path,
     return false;
   }
   _data.atom_file_path = file_path;
+  output_folder = output_dir;
   _data.inc_hetatm = inc_hetatm;
   _data.analyze_unit_cell = analyze_unit_cell;
   _data.probe_mode = probe_mode;
@@ -135,6 +137,7 @@ CalcReportBundle Model::getBundle(){
 CalcReportBundle Model::runUnittest(std::string atom_filepath, double grid_step, int max_depth, std::unordered_map<std::string, double> rad_map, std::vector<std::string> included_elements, double rad_probe1){
   setParameters(
         atom_filepath,
+        ".",
         false,
         false,
         false,
@@ -192,6 +195,8 @@ void Model::linkAtomsToAdjacentAtoms(const double& r_probe){
 }
 
 CalcReportBundle Model::calcVolume(){
+  // save the date and time of calculation for output files
+  calc_time = timeNow();
 
   auto start = std::chrono::steady_clock::now();
   _cell.placeAtomsInGrid(atomtree, _r_probe1); // assign each voxel in grid a type, defined by the atom positions

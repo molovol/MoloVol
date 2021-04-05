@@ -85,7 +85,7 @@ class Model{
     void linkAtomsToAdjacentAtoms(const double&);
     void linkToAdjacentAtoms(const double&, Atom&);
     CalcReportBundle calcVolume();
-    bool setParameters(std::string, bool, bool, bool, double, double, double, int, bool, bool, bool, std::unordered_map<std::string, double>, std::vector<std::string>, double);
+    bool setParameters(std::string, std::string, bool, bool, bool, double, double, double, int, bool, bool, bool, std::unordered_map<std::string, double>, std::vector<std::string>, double);
     void setTotalCalcTime(double);
     CalcReportBundle getBundle(); // TODO remove is unused
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
@@ -98,7 +98,7 @@ class Model{
   private:
     CalcReportBundle _data;
     std::string calc_time; // stores the time when the calculation was run for output folder and report
-    std::string output_folder = "./"; // default folder is the program folder but it is changed with the output file routine
+    std::string output_folder = "."; // default folder is the program folder but it is changed with the output file routine
     std::vector<std::tuple<std::string, double, double, double>> raw_atom_coordinates;
     std::vector<std::tuple<std::string, double, double, double>> processed_atom_coordinates;
     double cell_param[6]; // unit cell parameters in order: A, B, C, alpha, beta, gamma

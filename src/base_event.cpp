@@ -49,10 +49,13 @@ void MainFrame::OnCalc(wxCommandEvent& event){
     return;
   }
 
+  /* TODO remove if obselete
   // create output folder if any output file option is toggled
   if(getMakeReport() || getMakeSurfaceMap() || getMakeCavityMaps() || getAnalyzeUnitCell()){
     Ctrl::getInstance()->prepareOutput(getAtomFilepath());
   }
+  */
+
   Ctrl::getInstance()->runCalculation();
   // write report file if option is toggled
   if(getMakeReport()){

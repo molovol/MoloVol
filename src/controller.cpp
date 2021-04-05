@@ -90,6 +90,7 @@ bool Ctrl::runCalculation(){
   // save parameters in model
   if(!current_calculation->setParameters(
       gui->getAtomFilepath(),
+      gui->getOutputDir(),
       gui->getIncludeHetatm(),
       gui->getAnalyzeUnitCell(),
       gui->getProbeMode(),
@@ -97,7 +98,6 @@ bool Ctrl::runCalculation(){
       gui->getProbe2Radius(),
       gui->getGridsize(),
       gui->getDepth(),
-      //TODO add get output folder
       gui->getMakeReport(),
       gui->getMakeSurfaceMap(),
       gui->getMakeCavityMaps(),
@@ -159,6 +159,7 @@ void Ctrl::notifyUser(std::string str, bool to_gui){
   }
 }
 
+// TODO remove is obselete
 void Ctrl::prepareOutput(std::string atomFilePath){
   if(!current_calculation->createOutputFolder(fileName(atomFilePath))){
       notifyUser("New output folder could not be created.\nThe output file(s) will be created in the program folder.");

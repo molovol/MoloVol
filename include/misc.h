@@ -9,6 +9,7 @@
 #include <cmath>
 #include <climits>
 #include <bitset>
+#include <ctime>
 #include <iostream>
 
 inline bool isIncluded(const std::string& element_symbol, const std::vector<std::string>& included_elements) {
@@ -26,6 +27,8 @@ inline double distance(const std::array<double,3> &start, const std::array<doubl
 std::string fileExtension(const std::string& path);
 
 std::string fileName(const std::string& path);
+
+std::string timeNow();
 
 template <typename T>
 void print(std::array<T,3> arr){

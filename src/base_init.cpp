@@ -267,38 +267,37 @@ void MainFrame::InitSandr(){
 ////////////////////
 
 // function used in InitAtomfilePanel and InitRadiusfilePanel to create and set the sizer
-void MainFrame::SetSizerFilePanel(wxPanel* panel, wxButton* button, wxTextCtrl* text){
+void MainFrame::SetSizerFilePanel(wxPanel* panel, wxStaticText* text, wxButton* button, wxTextCtrl* path){
 
   wxBoxSizer *fileSizer = new wxBoxSizer(wxHORIZONTAL);
-  fileSizer->Add(button,1,wxALIGN_LEFT | wxALIGN_CENTRE_VERTICAL | wxALL,10);
-  fileSizer->Add(text,5,wxALL,10);
+  fileSizer->Add(text, 0, wxALIGN_CENTRE_VERTICAL | wxALL, 10);
+  fileSizer->Add(path, 5, wxALL, 10);
+  fileSizer->Add(button, 0, wxALL, 10);
   panel->SetSizerAndFit(fileSizer);
 }
 
 void MainFrame::InitAtomfilePanel(){
+  atomText = new wxStaticText(atomfilePanel, TEXT_Atom, "Structure file:");
   browseButton = new wxButton
     (atomfilePanel, BUTTON_Browse, "Browse", wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator);
 
   filepathText = new wxTextCtrl(atomfilePanel,
 								TEXT_Filename,
-								wxEmptyString,
-								wxDefaultPosition,
-								wxDefaultSize,
-								0,
-								wxDefaultValidator);
+								wxEmptyString);
 
-  SetSizerFilePanel(atomfilePanel, browseButton, filepathText);
+  SetSizerFilePanel(atomfilePanel, atomText, browseButton, filepathText);
 }
 
 void MainFrame::InitRadiusfilePanel(){
+  radiusText = new wxStaticText(radiusfilePanel, TEXT_Radius, "Elements radii:");
   radiusButton = new wxButton
     (radiusfilePanel, BUTTON_Radius, "Browse");
 
   radiuspathText = new wxTextCtrl(radiusfilePanel,
-								  TEXT_Radius,
+								  TEXT_Radiuspath,
 								  "./inputfile/radii.txt");
 
-  SetSizerFilePanel(radiusfilePanel, radiusButton, radiuspathText);
+  SetSizerFilePanel(radiusfilePanel, radiusText, radiusButton, radiuspathText);
 }
 
 /////////////////////////////////////
@@ -438,10 +437,13 @@ void MainFrame::InitParametersPanel(){
   cavityMapsCheckbox->Enable(true);
   cavityMapsCheckbox->SetValue(false);
 
+  outputpathPanel = new wxPanel(parameterPanel, PANEL_Outputpath, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+
   InitProbe1Panel();
   InitProbe2Panel();
   InitGridPanel();
   InitDepthPanel();
+  InitOutputpathPanel();
 
   wxStaticBoxSizer *parameterSizer = new wxStaticBoxSizer(wxVERTICAL,parameterPanel);
   parameterSizer->Add(unitCellCheckbox,1,wxALIGN_LEFT | wxALL,10);
@@ -454,6 +456,7 @@ void MainFrame::InitParametersPanel(){
   parameterSizer->Add(reportCheckbox,1,wxALIGN_LEFT | wxALL,10);
   parameterSizer->Add(surfaceMapCheckbox,1,wxALIGN_LEFT | wxALL,10);
   parameterSizer->Add(cavityMapsCheckbox,1,wxALIGN_LEFT | wxALL,10);
+  parameterSizer->Add(outputpathPanel,0,wxEXPAND,20);
   parameterPanel->SetSizerAndFit(parameterSizer);
 
   return;
@@ -569,6 +572,16 @@ void MainFrame::InitDepthPanel(){
   depthSizer->Add(depthInput,0,wxALIGN_CENTRE_VERTICAL | wxALL,10);
   depthPanel->SetSizerAndFit(depthSizer);
   return;
+}
+
+void MainFrame::InitOutputpathPanel(){
+  outputdirText = new wxStaticText(outputpathPanel, TEXT_Outputdir, "Output directory:");
+  outputdirPicker = new wxDirPickerCtrl(outputpathPanel, BUTTON_Output, ".");
+
+  wxBoxSizer *outputSizer = new wxBoxSizer(wxHORIZONTAL);
+  outputSizer->Add(outputdirText,0, wxALIGN_CENTRE_VERTICAL | wxALL,10);
+  outputSizer->Add(outputdirPicker,5, wxALL,10);
+  outputpathPanel->SetSizerAndFit(outputSizer);
 }
 
 /////////////////////

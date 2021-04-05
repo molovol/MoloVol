@@ -3,6 +3,7 @@
 #define BASE_H
 
 #include <wx/filectrl.h>
+#include <wx/filepicker.h>
 #include <wx/wfstream.h>
 #include <wx/spinctrl.h>
 #include <wx/grid.h>
@@ -50,6 +51,7 @@ class MainFrame: public wxFrame
     bool getMakeReport();
     bool getMakeSurfaceMap();
     bool getMakeCavityMaps();
+    std::string getOutputDir();
     void enableGuiElements(bool inp); // method to turn on and off interactable gui elements
 
     void displayAtomList(std::vector<std::tuple<std::string, int, double>> symbol_number_radius);
@@ -63,9 +65,11 @@ class MainFrame: public wxFrame
     wxPanel* leftMainPanel;
       wxPanel* browsePanel;
         wxPanel* atomfilePanel;
+          wxStaticText* atomText;
           wxButton* browseButton;
           wxTextCtrl* filepathText;
         wxPanel* radiusfilePanel;
+          wxStaticText* radiusText;
           wxButton* radiusButton;
           wxTextCtrl* radiuspathText;
         wxPanel* fileOptionsPanel;
@@ -100,6 +104,9 @@ class MainFrame: public wxFrame
         wxCheckBox* reportCheckbox;
         wxCheckBox* surfaceMapCheckbox;
         wxCheckBox* cavityMapsCheckbox;
+        wxPanel* outputpathPanel;
+          wxStaticText* outputdirText;
+          wxDirPickerCtrl* outputdirPicker;
       wxPanel* sandrPanel;
         wxTextCtrl* outputText;
         wxButton* calcButton;
@@ -117,7 +124,7 @@ class MainFrame: public wxFrame
     void InitBrowsePanel();
     void InitAtomfilePanel();
     void InitRadiusfilePanel();
-    void SetSizerFilePanel(wxPanel* panel, wxButton* button, wxTextCtrl* text);
+    void SetSizerFilePanel(wxPanel* panel, wxStaticText* text, wxButton* button, wxTextCtrl* path);
     void InitFileOptionsPanel();
     void InitAtomListPanel();
     void InitRightMainPanel();
@@ -129,6 +136,7 @@ class MainFrame: public wxFrame
     void InitGridPanel();
     void InitGridinputPanel();
     void InitDepthPanel();
+    void InitOutputpathPanel();
     void InitSandr();
 
     // methods to handle events
@@ -159,11 +167,13 @@ enum
   PANEL_LeftMain = wxID_HIGHEST + 1,
     PANEL_Browse,
       PANEL_Atomfile,
+        TEXT_Atom,
         BUTTON_Browse,
         TEXT_Filename,
       PANEL_Radiusfile,
-        BUTTON_Radius,
         TEXT_Radius,
+        BUTTON_Radius,
+        TEXT_Radiuspath,
       PANEL_FileOptions,
         CHECKBOX_Hetatm,
         BUTTON_LoadFiles,
@@ -196,6 +206,9 @@ enum
       CHECKBOX_Report,
       CHECKBOX_SurfaceMap,
       CHECKBOX_CavityMaps,
+      PANEL_Outputpath,
+        TEXT_Outputdir,
+        BUTTON_Output,
     PANEL_Sandr,
       TEXT_Output,
       BUTTON_Calc
