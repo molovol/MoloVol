@@ -16,7 +16,7 @@ IMPLEMENT_APP(MainApp)
 /////////////////////////////
 
 // contains all command line options
-static const wxCmdLineEntryDesc gCmdLineDesc[] = 
+static const wxCmdLineEntryDesc gCmdLineDesc[] =
 {
   { wxCMD_LINE_SWITCH, "s", "silent", "Silence GUI", wxCMD_LINE_VAL_NONE, 0},
   { wxCMD_LINE_OPTION, "u", "unittest", "Run a unittest", wxCMD_LINE_VAL_STRING},
@@ -410,7 +410,7 @@ void MainFrame::InitParametersPanel(){
      "Report file"
     );
   twoProbesCheckbox->Enable(true);
-  reportCheckbox->SetValue(true);
+  reportCheckbox->SetValue(false);
 
   surfaceMapCheckbox = new wxCheckBox
     (parameterPanel,

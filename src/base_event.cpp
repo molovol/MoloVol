@@ -45,7 +45,7 @@ void MainFrame::OnCalc(wxCommandEvent& event){
 
   // stop calculation if probe 2 radius is too small in two probes mode
   if(getProbeMode() && getProbe1Radius() > getProbe2Radius()){
-    Ctrl::getInstance()->notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.", true);
+    Ctrl::getInstance()->notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.");
     return;
   }
 
@@ -53,19 +53,16 @@ void MainFrame::OnCalc(wxCommandEvent& event){
   if(getMakeReport() || getMakeSurfaceMap() || getMakeCavityMaps() || getAnalyzeUnitCell()){
     Ctrl::getInstance()->prepareOutput(getAtomFilepath());
   }
-
   Ctrl::getInstance()->runCalculation();
-
   // write report file if option is toggled
   if(getMakeReport()){
-    Ctrl::getInstance()->exportReport(getAtomFilepath(), getProbeMode());
+    Ctrl::getInstance()->exportReport();
   }
 
   // write total surface map file if option is toggled
   if(getMakeSurfaceMap()){
     Ctrl::getInstance()->exportSurfaceMap();
   }
-
   /* TODO make function to generate cavity maps
   if(getMakeCavityMaps()){
 

@@ -53,7 +53,6 @@ class MainFrame: public wxFrame
     void enableGuiElements(bool inp); // method to turn on and off interactable gui elements
 
     void displayAtomList(std::vector<std::tuple<std::string, int, double>> symbol_number_radius);
-    std::string generateChemicalFormulaFromGrid();
     std::unordered_map<std::string, double> generateRadiusMap();
     double getMaxRad();
     std::vector<std::string> getIncludedElements();

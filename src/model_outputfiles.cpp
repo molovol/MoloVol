@@ -23,6 +23,7 @@ bool Model::createOutputFolder(std::string file_name){
   // folder name based on current time to avoid overwriting output files with successive calculations
   calc_time = timeNow();
   output_folder = "./output/" + file_name + " MoloVol/" + calc_time + "/";
+  // TODO create directories didn't seem to work on MacOS, need to fix this issue later
   if(std::filesystem::create_directories(output_folder)){
     return true;
   }
@@ -30,9 +31,10 @@ bool Model::createOutputFolder(std::string file_name){
     output_folder = "./";
     return false;
   }
+  return true;
 }
 
-void Model::createReport(std::string input_filepath, std::vector<std::string> parameters, bool probe_mode){
+void Model::createReport(){
   std::ofstream output_report(output_folder+"MoloVol result report.txt");
   output_report << "\n";
   output_report << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n";
@@ -46,52 +48,81 @@ void Model::createReport(std::string input_filepath, std::vector<std::string> pa
   output_report << "   MM     M     MM    OOOO    LL    OOOO          V          OOOO    LL   \n\n";
   output_report << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n";
   output_report << "Source code available at https://github.com/jmaglic/MoloVol under the MIT licence\n";
-  output_report << "Copyright Â© 2020-2021 Jasmin B. Maglic, Roy Lavendomme\n\n";
+  output_report << "Copyright © 2020-2021 Jasmin B. Maglic, Roy Lavendomme\n\n";
   output_report << "MoloVol program: calculation results report\n";
   output_report << "version: alpha\n\n"; // TODO make a variable for the version to simplify updates
   output_report << "Time of the calculation: " << calc_time << "\n";
-  output_report << "Structure file analyzed: " << input_filepath << "\n";
-  for(size_t i = 0; i < parameters.size(); i++){
-    output_report << parameters[i] << "\n";
+  output_report << "Structure file analyzed: " << _data.atom_file_path << "\n";
+  output_report << "Chemical formula: " + _data.chemical_formula << "\n";
+  output_report << "Duration of the calculation: " << _data.total_elapsed_seconds << " s\n";
+
+  output_report << "\n////////////////////////////\n";
+  output_report << "// Calculation parameters //\n";
+  output_report << "////////////////////////////\n\n";
+  if(fileExtension(_data.atom_file_path) == "pdb"){
+    if(_data.analyze_unit_cell){
+      output_report << "Analyze crystal structure unit cell\n";
+    }
+    output_report << std::string((_data.inc_hetatm)? "Include" : "Exclude") + " HETATM from pdb file\n";
   }
-  // TODO add atomic radii used and corresponding command in PyMol
+  if(_data.probe_mode){
+    output_report << "Probe mode: two probes\n";
+    output_report << "Probe 1 radius: " + std::to_string(_r_probe1) + " A\n";
+    output_report << "Probe 2 radius: " + std::to_string(_r_probe2) + " A\n";
+  }
+  else{
+    output_report << "Probe mode: one probe\n";
+    output_report << "Probe radius: " + std::to_string(_r_probe1) + " A\n";
+  }
+  output_report << "Grid step size (resolution): " + std::to_string(_data.grid_step) + " A\n";
+  output_report << "Maximum tree depth (algorithm acceleration): " + std::to_string(_data.max_depth) << "\n";
+  output_report << "Elements radii:\n";
+  for(std::unordered_map<std::string, double>::iterator it = radius_map.begin(); it != radius_map.end(); it++){
+    if(isIncluded(it->first, _data.included_elements)){
+      output_report << it->first + " : " + std::to_string(it->second) + " A\n";
+    }
+  }
+
   // TODO consider crystal unit cell report with density, volumes per gram and volume ratio
 
   output_report << "\n////////////////////////\n";
   output_report << "// Volumes calculated //\n";
   output_report << "////////////////////////\n\n";
-  output_report << "Van der Waals volume: " << std::to_string(volumes_stored[0b00000011]) << " A^3\n";
-  output_report << "Excluded void volume: " << std::to_string(volumes_stored[0b00000101]) << " A^3\n";
-  output_report << "Molecular volume (vdw + excluded void): " << std::to_string(volumes_stored[0b00000011] + volumes_stored[0b00000101]) << " A^3\n";
-  output_report << "Probe 1 core volume: " << std::to_string(volumes_stored[0b00001001]) << " A^3\n";
-  output_report << "Probe 1 shell volume: " << std::to_string(volumes_stored[0b00010001]) << " A^3\n";
-  if(probe_mode){
-    output_report << "Internal cavities and pockets volume (probe 1 core + shell): " << std::to_string(volumes_stored[0b00001001] + volumes_stored[0b00010001]) << " A^3\n";
-    output_report << "Probe 2 core volume: " << std::to_string(volumes_stored[0b00100001]) << " A^3\n";
-    output_report << "Probe 2 shell volume: " << std::to_string(volumes_stored[0b01000001]) << " A^3\n";
+  output_report << "Van der Waals volume: " << std::to_string(_data.volumes[0b00000011]) << " A^3\n";
+  output_report << "Excluded void volume: " << std::to_string(_data.volumes[0b00000101]) << " A^3\n";
+  output_report << "Molecular volume (vdw + excluded void): " << std::to_string(_data.volumes[0b00000011] + _data.volumes[0b00000101]) << " A^3\n";
+  output_report << "Probe 1 core volume: " << std::to_string(_data.volumes[0b00001001]) << " A^3\n";
+  output_report << "Probe 1 shell volume: " << std::to_string(_data.volumes[0b00010001]) << " A^3\n";
+  if(_data.probe_mode){
+    output_report << "Internal cavities and pockets volume (probe 1 core + shell): " << std::to_string(_data.volumes[0b00001001] + _data.volumes[0b00010001]) << " A^3\n";
+    output_report << "Probe 2 core volume: " << std::to_string(_data.volumes[0b00100001]) << " A^3\n";
+    output_report << "Probe 2 shell volume: " << std::to_string(_data.volumes[0b01000001]) << " A^3\n";
   }
-  output_report << "\n\n";
-  output_report << "If you ticked the option to generate a surface map file,\n";
-  output_report << "you can open the surface_map.dx file in PyMol, USCF Chimera or USCF ChimeraX.\n";
-  output_report << "Use the following isosurface levels to visualize the desired surface:\n";
-  output_report << "Level 0.5 : Van der Waals surface\n";
-  if(probe_mode){
-    output_report << "Level 1.5 : Molecular surface (probes 1 and 2 excluded, similar to the Connolly surface)\n";
-    output_report << "Level 3 : Internal cavities and pockets (probe 1 excluded, similar to the Connolly surface but only 'inside')\n";
-    output_report << "Level 5 : Probe 1 accessible surface (similar to Lee-Richards molecular surface but only 'inside')\n";
-  }
-  else{
-    output_report << "Level 2 : Molecular surface (probe 1 excluded, similar to the Connolly surface)\n";
-    output_report << "Level 5 : Probe 1 accessible surface (similar to Lee-Richards molecular surface)\n";
-  }
-  output_report << "For help on how to vizualize maps:\n";
-  output_report << " - in Pymol, simply open the map file then click 'A' in the right panel, choose mesh or surface and select the level.\n";
-  output_report << "   For more information, check https://pymolwiki.org/index.php/Isomesh and https://pymolwiki.org/index.php/Isosurface \n";
-  output_report << " - in USCF Chimera, check https://www.cgl.ucsf.edu/chimera/docs/ContributedSoftware/volumeviewer/volumeviewer.html \n";
-  output_report << " - in USCF ChimeraX, check https://www.cgl.ucsf.edu/chimerax/docs/user/tools/volumeviewer.html \n";
 
-  output_report << "\n\n";
-
+  if(_data.make_full_map || _data.make_cav_maps){
+    // TODO add commands to change atomic radii in PyMol
+    output_report << "\n/////////////////////////////\n";
+    output_report << "// Surface map information //\n";
+    output_report << "/////////////////////////////\n\n";
+    output_report << "The surface map files generated (.dx, OpenDX format) can be opened with\n";
+    output_report << "PyMol, USCF Chimera or USCF ChimeraX.\n\n";
+    output_report << "Use the following isosurface levels to visualize the desired surface:\n";
+    output_report << "Level 0.5 : Van der Waals surface\n";
+    if(_data.probe_mode){
+      output_report << "Level 1.5 : Molecular surface (probes 1 and 2 excluded, similar to the Connolly surface)\n";
+      output_report << "Level 3 : Internal cavities and pockets (probe 1 excluded, similar to the Connolly surface but only 'inside')\n";
+      output_report << "Level 5 : Probe 1 accessible surface (similar to Lee-Richards molecular surface but only 'inside')\n";
+    }
+    else{
+      output_report << "Level 2 : Molecular surface (probe 1 excluded, similar to the Connolly surface)\n";
+      output_report << "Level 5 : Probe 1 accessible surface (similar to Lee-Richards molecular surface)\n";
+    }
+    output_report << "\nFor help on how to vizualize maps:\n";
+    output_report << " - in Pymol, simply open the map file then click 'A' in the right panel, choose mesh or surface and select the level.\n";
+    output_report << "   For more information, check https://pymolwiki.org/index.php/Isomesh and https://pymolwiki.org/index.php/Isosurface \n";
+    output_report << " - in USCF Chimera, check https://www.cgl.ucsf.edu/chimera/docs/ContributedSoftware/volumeviewer/volumeviewer.html \n";
+    output_report << " - in USCF ChimeraX, check https://www.cgl.ucsf.edu/chimerax/docs/user/tools/volumeviewer.html \n";
+  }
   output_report.close();
 }
 

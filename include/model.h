@@ -9,8 +9,36 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include <math.h>
 
-struct CalcResultBundle;
+struct CalcReportBundle{
+  bool success = true;
+  // structure and calculation parameters
+  std::string atom_file_path;
+  bool inc_hetatm;
+  bool analyze_unit_cell;
+  bool probe_mode;
+  double grid_step;
+  int max_depth;
+  std::vector<std::string> included_elements;
+  std::string chemical_formula;
+  // output options
+  bool make_report;
+  bool make_full_map;
+  bool make_cav_maps;
+  // calculation results
+  std::map<char,double> volumes;
+  std::map<char,double> surfaces;
+
+  double total_elapsed_seconds;
+  double type_assignment_elapsed_seconds;
+  double volume_tally_elapsed_seconds;
+
+  double getTime(){
+    return type_assignment_elapsed_seconds+volume_tally_elapsed_seconds;
+  }
+};
+
 class AtomTree;
 struct Atom;
 class Space;
@@ -29,7 +57,7 @@ class Model{
 
     // export
     bool createOutputFolder(std::string);
-    void createReport(std::string, std::vector<std::string>, bool);
+    void createReport();
     void writeXYZfile(std::vector<std::tuple<std::string, double, double, double>>&, std::string);
     void writeSurfaceMap();
 
@@ -37,7 +65,7 @@ class Model{
 
     // crystal unit cell related functions
     bool getSymmetryElements(std::string, std::vector<int>&, std::vector<double>&);
-    bool processUnitCell(double, double, double, double);
+    bool processUnitCell();
     void orthogonalizeUnitCell();
     bool symmetrizeUnitCell();
     void moveAtomsInsideCell();
@@ -45,28 +73,31 @@ class Model{
     void countAtomsInUnitCell();
     void generateSupercell(double);
     void generateUsefulAtomMapFromSupercell(double);
-    std::string generateUnitCellChemicalFormula(std::vector<std::string>);
 
     inline double findRadiusOfAtom(const std::string&);
     inline double findRadiusOfAtom(const Atom&); //TODO has not been tested
 
     // controller-model communication
     // calls the Space constructor and creates a cell containing all atoms. Cell size is defined by atom positions
-    void defineCell(const double, const int);
-    void setAtomListForCalculation(const std::vector<std::string>&, bool);
-    void setAtomListForCalculation(const std::vector<std::string>&, std::vector<std::tuple<std::string, double, double, double>>&);
+    void defineCell();
+    void setAtomListForCalculation();
     void storeAtomsInTree();
     void linkAtomsToAdjacentAtoms(const double&);
     void linkToAdjacentAtoms(const double&, Atom&);
-    CalcResultBundle calcVolume();
+    CalcReportBundle calcVolume();
+    bool setParameters(std::string, bool, bool, bool, double, double, double, int, bool, bool, bool, std::unordered_map<std::string, double>, std::vector<std::string>, double);
+    void setTotalCalcTime(double);
+    CalcReportBundle getBundle(); // TODO remove is unused
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void setRadiusMap(std::unordered_map<std::string, double> map);
     bool setProbeRadii(const double&, const double&, bool);
+    void generateChemicalFormula();
 
-    void debug();
+    CalcReportBundle runUnittest(std::string, double, int, std::unordered_map<std::string, double>, std::vector<std::string>, double);
+    void debug(); // TODO remove is unused
   private:
+    CalcReportBundle _data;
     std::string calc_time; // stores the time when the calculation was run for output folder and report
-    std::map<char,double> volumes_stored; // convenient access to calculated volumes for report
     std::string output_folder = "./"; // default folder is the program folder but it is changed with the output file routine
     std::vector<std::tuple<std::string, double, double, double>> raw_atom_coordinates;
     std::vector<std::tuple<std::string, double, double, double>> processed_atom_coordinates;
@@ -82,17 +113,9 @@ class Model{
     Space _cell;
     double _r_probe1 = 0;
     double _r_probe2 = 0;
+    double _max_atom_radius = 0;
 };
 
-struct CalcResultBundle{
-  bool success = true;
-  std::map<char,double> volumes;
-  double type_assignment_elapsed_seconds;
-  double volume_tally_elapsed_seconds;
 
-  double getTime(){
-    return type_assignment_elapsed_seconds+volume_tally_elapsed_seconds;
-  }
-};
 
 #endif

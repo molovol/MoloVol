@@ -8,29 +8,54 @@
 #include <array>
 #include <string>
 #include <vector>
-#include <algorithm>
 
-///////////////////////////////
-// AUX FUNCTION DECLARATIONS //
-///////////////////////////////
 
-inline bool isIncluded(const std::string&, const std::vector<std::string>&);
+////////////////////////////////////
+// CONTROLLER-MODEL COMMUNICATION //
+////////////////////////////////////
 
-void Model::defineCell(const double grid_step, const int max_depth){
-  _cell = Space(atoms, grid_step, max_depth, _r_probe1);
-  return;
+bool Model::setParameters(std::string file_path,
+            bool inc_hetatm,
+            bool analyze_unit_cell,
+            bool probe_mode,
+            double r_probe1,
+            double r_probe2,
+            double grid_step,
+            int max_depth,
+            bool make_report,
+            bool make_full_map,
+            bool make_cav_maps,
+            std::unordered_map<std::string, double> rad_map,
+            std::vector<std::string> included_elem,
+            double max_radius){
+  if(!setProbeRadii(r_probe1, r_probe2, probe_mode)){
+    _data.success = false;
+    return false;
+  }
+  _data.atom_file_path = file_path;
+  _data.inc_hetatm = inc_hetatm;
+  _data.analyze_unit_cell = analyze_unit_cell;
+  _data.probe_mode = probe_mode;
+  _data.grid_step = grid_step;
+  _data.max_depth = max_depth;
+  _data.make_report = make_report;
+  _data.make_full_map = make_full_map;
+  _data.make_cav_maps = make_cav_maps;
+  radius_map = rad_map;
+  _data.included_elements = included_elem;
+  _max_atom_radius = max_radius;
+  return true;
 }
 
-///////////////////////////
-// CALCULATION FUNCTIONS //
-///////////////////////////
-// Not sure about the name of the section
+void Model::setTotalCalcTime(double calc_time){
+  _data.total_elapsed_seconds = calc_time;
+}
 
 bool Model::setProbeRadii(const double& r_1, const double& r_2, bool two_probe_mode){
   _r_probe1 = r_1;
   if (two_probe_mode){
     if (r_1 > r_2){
-    Ctrl::getInstance()->notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.", true);
+    Ctrl::getInstance()->notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.");
     return false;
     }
     else{
@@ -40,16 +65,12 @@ bool Model::setProbeRadii(const double& r_1, const double& r_2, bool two_probe_m
   return true;
 }
 
-void Model::setAtomListForCalculation(const std::vector<std::string>& included_elements, bool useUnitCell){
-  return setAtomListForCalculation(included_elements, useUnitCell? processed_atom_coordinates : raw_atom_coordinates);
-}
-
-void Model::setAtomListForCalculation(const std::vector<std::string>& included_elements,
-    std::vector<std::tuple<std::string,double,double,double>>& atom_coordinates){
+void Model::setAtomListForCalculation(){
+  std::vector<std::tuple<std::string,double,double,double>>& atom_coordinates = (_data.analyze_unit_cell) ? processed_atom_coordinates : raw_atom_coordinates;
   atoms.clear();
 
   for(size_t i = 0; i < atom_coordinates.size(); i++){
-    if(isIncluded(std::get<0>(atom_coordinates[i]), included_elements)){
+    if(isIncluded(std::get<0>(atom_coordinates[i]), _data.included_elements)){
       Atom at = Atom(std::get<1>(atom_coordinates[i]),
                      std::get<2>(atom_coordinates[i]),
                      std::get<3>(atom_coordinates[i]),
@@ -59,6 +80,96 @@ void Model::setAtomListForCalculation(const std::vector<std::string>& included_e
       atoms.push_back(at);
     }
   }
+}
+
+// generates a simple table to be displayed by the GUI. only uses standard library and base types in order to
+// avoid dependency issues
+std::vector<std::tuple<std::string, int, double>> Model::generateAtomList(){
+  std::vector<std::tuple<std::string, int, double>> atoms_for_list;
+  // Element0: Element symbol
+  // Element1: Number of Atoms with that symbol
+  // Element2: Radius
+  for(auto elem : atom_amounts){
+    atoms_for_list.push_back(std::make_tuple(elem.first, elem.second, radius_map[elem.first]));
+  }
+  return atoms_for_list;
+}
+
+// TODO should be obselete because radius_map is set by setParameters
+// but it is still used in Model::readRadiusFileSetMaps and Ctrl::unittestExcluded()
+void Model::setRadiusMap(std::unordered_map<std::string, double> map){
+  radius_map = map;
+  return;
+}
+
+void Model::generateChemicalFormula(){
+  std::string chemical_formula_suffix = "";
+  std::string chemical_formula_prefix = "";
+  std::map<std::string, int> atom_list = (_data.analyze_unit_cell) ? unit_cell_atom_amounts : atom_amounts;
+  for(auto elem : atom_list){
+    std::string symbol = elem.first;
+    // if element is included by user in gui
+    if (isIncluded(symbol, _data.included_elements)){
+      std::string subscript = std::to_string(elem.second);
+      // by convention: carbon comes first, then hydrogen, then in alphabetical order
+      if (symbol == "C"){
+        chemical_formula_prefix = symbol + subscript + chemical_formula_prefix;
+      }
+      else if (symbol == "H"){
+        chemical_formula_prefix += symbol + subscript;
+      }
+
+      else {
+        chemical_formula_suffix += symbol + subscript;
+      }
+    }
+  }
+  _data.chemical_formula = chemical_formula_prefix + chemical_formula_suffix;
+}
+
+// TODO remove is unused
+CalcReportBundle Model::getBundle(){
+  return _data;
+}
+
+CalcReportBundle Model::runUnittest(std::string atom_filepath, double grid_step, int max_depth, std::unordered_map<std::string, double> rad_map, std::vector<std::string> included_elements, double rad_probe1){
+  setParameters(
+        atom_filepath,
+        false,
+        false,
+        false,
+        rad_probe1,
+        5,
+        grid_step,
+        max_depth,
+        //TODO add get output folder
+        false,
+        false,
+        false,
+        rad_map,
+        included_elements,
+        3);
+
+  // determine which atoms will be taken into account
+  setAtomListForCalculation();
+  // place atoms in a binary tree for faster access
+  storeAtomsInTree();
+  // set size of the box containing all atoms
+  defineCell();
+
+  generateChemicalFormula();
+
+  // assign voxel types and store the volume(s)
+  return calcVolume();
+}
+
+///////////////////////////
+// CALCULATION FUNCTIONS //
+///////////////////////////
+
+void Model::defineCell(){
+  _cell = Space(atoms, _data.grid_step, _data.max_depth, _r_probe1);
+  return;
 }
 
 void Model::storeAtomsInTree(){
@@ -80,43 +191,25 @@ void Model::linkAtomsToAdjacentAtoms(const double& r_probe){
   }
 }
 
-CalcResultBundle Model::calcVolume(){
-  CalcResultBundle data;
+CalcReportBundle Model::calcVolume(){
 
   auto start = std::chrono::steady_clock::now();
   _cell.placeAtomsInGrid(atomtree, _r_probe1); // assign each voxel in grid a type, defined by the atom positions
   auto end = std::chrono::steady_clock::now();
-  data.type_assignment_elapsed_seconds = std::chrono::duration<double>(end-start).count();
+  _data.type_assignment_elapsed_seconds = std::chrono::duration<double>(end-start).count();
 
+  // TODO remove when unnecessary
   //_cell.printGrid(); // for testing
 
   start = std::chrono::steady_clock::now();
-  data.volumes = _cell.getVolume();
-  volumes_stored = data.volumes;
+  _data.volumes = _cell.getVolume();
   end = std::chrono::steady_clock::now();
-  data.volume_tally_elapsed_seconds = std::chrono::duration<double>(end-start).count();
+  _data.volume_tally_elapsed_seconds = std::chrono::duration<double>(end-start).count();
 
-  return data;
+  return _data;
 }
 
-// generates a simple table to be displayed by the GUI. only uses standard library and base types in order to
-// avoid dependency issues
-std::vector<std::tuple<std::string, int, double>> Model::generateAtomList(){
-  std::vector<std::tuple<std::string, int, double>> atoms_for_list;
-  // Element0: Elementy symbol
-  // Element1: Number of Atoms with that symbol
-  // Element2: Radius
-  for(auto elem : atom_amounts){
-    atoms_for_list.push_back(std::make_tuple(elem.first, elem.second, radius_map[elem.first]));
-  }
-  return atoms_for_list;
-}
-
-void Model::setRadiusMap(std::unordered_map<std::string, double> map){
-  radius_map = map;
-  return;
-}
-
+// TODO remove when unnecessary
 void Model::debug(){
   std::array<double,3> cell_min = _cell.getMin();
   std::array<double,3> cell_max = _cell.getMax();
@@ -140,7 +233,7 @@ To obtain data usable by the software from a unit cell, we need
 5) to remove atoms at the limits of the supercell that are useless for the calculation (to increase the efficiency)
 */
 
-bool Model::processUnitCell(double max_atom_rad, double probe1, double probe2, double gridstep){
+bool Model::processUnitCell(){
   /* This data processing is performed by the functions below:
   1) find orthogonal unit cell matrix
   2) create symmetry elements from base structure
@@ -150,14 +243,14 @@ bool Model::processUnitCell(double max_atom_rad, double probe1, double probe2, d
   6) create atom map based on unit cell limits + radius= 2*(max_atom_rad+probe1+probe2+gridstep)
   7) write structure file with processed atom list
   */
-  double radius_limit = 2*(max_atom_rad+probe1+probe2+gridstep);
+  double radius_limit = 2*(_max_atom_radius+_r_probe1+_r_probe2+_data.grid_step);
   if(space_group == ""){
-    Ctrl::getInstance()->notifyUser("Space group not found!\nCheck the structure file\nor untick the unit cell analysis checkbox.", true);
+    Ctrl::getInstance()->notifyUser("Space group not found!\nCheck the structure file\nor untick the unit cell analysis checkbox.");
     return false;
   }
   for(int i = 0; i < 6; i++){
     if(cell_param[i] == 0){
-      Ctrl::getInstance()->notifyUser("Unit cell parameters invalid!\nCheck the structure file\nor untick the unit cell analysis checkbox.", true);
+      Ctrl::getInstance()->notifyUser("Unit cell parameters invalid!\nCheck the structure file\nor untick the unit cell analysis checkbox.");
       return false;
     }
   }
@@ -235,7 +328,7 @@ bool Model::symmetrizeUnitCell(){
   std::vector<int> sym_matrix_XYZ;
   std::vector<double> sym_matrix_fraction;
   if(!getSymmetryElements(space_group, sym_matrix_XYZ, sym_matrix_fraction)){
-    Ctrl::getInstance()->notifyUser("Space group or symmetry not found!\nCheck the structure and space group files\nor untick the unit cell analysis checkbox.", true);
+    Ctrl::getInstance()->notifyUser("Space group or symmetry not found!\nCheck the structure and space group files\nor untick the unit cell analysis checkbox.");
     return false;
   }
   /* To convert cartesian coordinates x y z in unit cell coordinates a b c:
@@ -399,37 +492,4 @@ void Model::generateUsefulAtomMapFromSupercell(double radius_limit){
            i--;
     }
   }
-}
-
-// generate chemical formula of the unit cell for the report file
-std::string Model::generateUnitCellChemicalFormula(std::vector<std::string> included_elements){
-  std::string chemical_formula_suffix = "";
-  std::string chemical_formula_prefix = "";
-  for(std::map<std::string, int>::iterator it = unit_cell_atom_amounts.begin(); it != unit_cell_atom_amounts.end(); it++){
-    // if element is included by user in gui
-    if (std::find(included_elements.begin(), included_elements.end(), it->first) != included_elements.end()){
-      std::string symbol = it->first;
-      std::string subscript = std::to_string(it->second);
-      // by convention: carbon comes first, then hydrogen, then in alphabetical order
-      if (symbol == "C"){
-        chemical_formula_prefix = symbol + subscript + chemical_formula_prefix;
-      }
-      else if (symbol == "H"){
-        chemical_formula_prefix += symbol + subscript;
-      }
-
-      else {
-        chemical_formula_suffix += symbol + subscript;
-      }
-    }
-  }
-  return chemical_formula_prefix + chemical_formula_suffix;
-}
-
-///////////////////
-// AUX FUNCTIONS //
-///////////////////
-
-inline bool isIncluded(const std::string& element_symbol, const std::vector<std::string>& included_elements) {
-  return (std::find(included_elements.begin(), included_elements.end(), element_symbol) != included_elements.end());
 }
