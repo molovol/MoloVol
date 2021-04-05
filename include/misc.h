@@ -44,6 +44,8 @@ std::array<T1,3> add(std::array<T1,3> arr1, const std::array<T2,3>& arr2){
   return arr1;
 }
 
+int pow2(int);
+
 ////////////////////
 // BIT OPERATIONS //
 ////////////////////

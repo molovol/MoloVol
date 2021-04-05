@@ -21,3 +21,6 @@ std::string fileName(const std::string& path){
   }
 }
 
+int pow2(int exp){
+  return (1 << exp);
+}
