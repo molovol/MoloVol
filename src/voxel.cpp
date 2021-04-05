@@ -12,7 +12,7 @@
 ///////////////////
 
 inline double Voxel::calcRadiusOfInfluence(const double& max_depth){
-  return max_depth != 0 ? 0.86602540378 * s_grid_size * (pow(2,max_depth) - 1) : 0;
+  return max_depth != 0 ? 0.86602540378 * s_grid_size * (pow2(max_depth) - 1) : 0;
 }
 char mergeTypes(std::vector<Voxel*>&);
 char mergeTypes(const std::array<char,8>&);
@@ -38,9 +38,9 @@ SearchIndex::SearchIndex(const double r_probe, const double grid_size, const uns
   _upp_lim = std::vector<unsigned int>(max_depth+1);
   for (unsigned int lvl = 0; lvl <= max_depth; ++lvl){
     // maximum distance between neighbour voxels that need to be assessed (in units of voxel side length at lvl)
-    double max_dist = r_probe/(grid_size*std::pow(2,lvl)) + std::sqrt(2)/4;
+    double max_dist = r_probe/(grid_size*pow2(lvl)) + std::sqrt(2)/4;
     // voxel radius in units of voxel side length at current lvl
-    double vxl_radius = std::sqrt(3) * (1-1/std::pow(2,lvl));
+    double vxl_radius = std::sqrt(3) * (1-1/pow2(lvl));
     // squared max distance between neighbours, where voxels do not have to be split
     _safe_lim[lvl] = (0 > max_dist - 2*vxl_radius)? 0 : std::pow( max_dist - (2*vxl_radius) , 2);
     // squared max distance between neighbours, that need to be assessed
@@ -237,7 +237,7 @@ void Voxel::splitVoxel(const std::array<unsigned,3>& vxl_index, const Vector& vx
         sub_index[0] = vxl_index[0]*2 + x;
         factors[0] = x ? 1 : -1;
         // modify position
-        Vector new_pos = vxl_pos + factors * s_grid_size * std::pow(2,lvl-2);
+        Vector new_pos = vxl_pos + factors * s_grid_size * pow(2,lvl-2);
         
         subtypes[i] = getSubvoxel(sub_index, lvl).evalRelationToAtoms(sub_index, new_pos, lvl-1);
         ++i;
@@ -411,7 +411,7 @@ unsigned int Voxel::tallyVoxelsOfType(const std::array<unsigned,3>& index, const
   }
   // if voxel is of the type of interest, tally the voxel in units of bottom level voxels
   else if(_type == volume_type){
-    return pow(pow(2,lvl),3); // return number of bottom level voxels
+    return pow(pow2(lvl),3); // return number of bottom level voxels
   }
   // if neither empty nor of the type of interest, then the voxel doesn't count towards the total
   return 0;
