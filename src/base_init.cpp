@@ -73,10 +73,14 @@ void MainFrame::InitDefaultStates(){
     filepathText,
     radiuspathText,
     atomListGrid,
+    surfaceAreaCheckbox,
     twoProbesCheckbox,
     probe1InputText,
     gridsizeInputText,
-    depthInput};
+    depthInput,
+    reportCheckbox,
+    surfaceMapCheckbox,
+    cavityMapsCheckbox};
   wxWindow* widgets_disabled[] = {
     pdbHetatmCheckbox,
     loadFilesButton,
@@ -353,6 +357,19 @@ void MainFrame::InitParametersPanel(){
   unitCellCheckbox->Enable(false);
   unitCellCheckbox->SetValue(false);
 
+  surfaceAreaCheckbox = new wxCheckBox
+    (parameterPanel,
+     CHECKBOX_SurfaceArea,
+     "Calculate surface areas (NOT AVAILABLE YET !)",
+     wxDefaultPosition,
+     wxDefaultSize,
+     0,
+     wxDefaultValidator,
+     "Surface Area"
+    );
+  surfaceAreaCheckbox->Enable(true);
+  surfaceAreaCheckbox->SetValue(false);
+
   twoProbesCheckbox = new wxCheckBox
     (parameterPanel,
      CHECKBOX_TwoProbes,
@@ -382,6 +399,45 @@ void MainFrame::InitParametersPanel(){
   depthPanel = new wxPanel(parameterPanel, PANEL_Depth, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
   depthPanel->SetBackgroundColour(col_panel);
 
+  reportCheckbox = new wxCheckBox
+    (parameterPanel,
+     CHECKBOX_Report,
+     "Generate report file",
+     wxDefaultPosition,
+     wxDefaultSize,
+     0,
+     wxDefaultValidator,
+     "Report file"
+    );
+  twoProbesCheckbox->Enable(true);
+  reportCheckbox->SetValue(true);
+
+  surfaceMapCheckbox = new wxCheckBox
+    (parameterPanel,
+     CHECKBOX_SurfaceMap,
+     "Generate a total surface map file (to visualize in PyMol and Chimera)",
+     wxDefaultPosition,
+     wxDefaultSize,
+     0,
+     wxDefaultValidator,
+     "Surface Map"
+    );
+  surfaceMapCheckbox->Enable(true);
+  surfaceMapCheckbox->SetValue(false);
+
+  cavityMapsCheckbox = new wxCheckBox
+    (parameterPanel,
+     CHECKBOX_CavityMaps,
+     "Generate a surface map file for each cavity/pocket (to visualize in PyMol and Chimera) (NOT AVAILABLE YET !)",
+     wxDefaultPosition,
+     wxDefaultSize,
+     0,
+     wxDefaultValidator,
+     "Cavity Maps"
+    );
+  cavityMapsCheckbox->Enable(true);
+  cavityMapsCheckbox->SetValue(false);
+
   InitProbe1Panel();
   InitProbe2Panel();
   InitGridPanel();
@@ -389,11 +445,15 @@ void MainFrame::InitParametersPanel(){
 
   wxStaticBoxSizer *parameterSizer = new wxStaticBoxSizer(wxVERTICAL,parameterPanel);
   parameterSizer->Add(unitCellCheckbox,1,wxALIGN_LEFT | wxALL,10);
+  parameterSizer->Add(surfaceAreaCheckbox,1,wxALIGN_LEFT | wxALL,10);
   parameterSizer->Add(twoProbesCheckbox,1,wxALIGN_LEFT | wxALL,10);
   parameterSizer->Add(probe1Panel,0,wxEXPAND,20);
   parameterSizer->Add(probe2Panel,0,wxEXPAND,20);
   parameterSizer->Add(gridsizePanel,0,wxEXPAND,20);
   parameterSizer->Add(depthPanel,0,wxEXPAND,20);
+  parameterSizer->Add(reportCheckbox,1,wxALIGN_LEFT | wxALL,10);
+  parameterSizer->Add(surfaceMapCheckbox,1,wxALIGN_LEFT | wxALL,10);
+  parameterSizer->Add(cavityMapsCheckbox,1,wxALIGN_LEFT | wxALL,10);
   parameterPanel->SetSizerAndFit(parameterSizer);
 
   return;

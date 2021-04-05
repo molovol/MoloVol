@@ -31,6 +31,7 @@ void MainFrame::OnExit(wxCommandEvent& event){
   this->Close(TRUE);
 }
 
+// TODO remove obsolete debugging functions
 // display text in output, used for debugging
 void MainFrame::OnPrint(wxCommandEvent& event){
   std::string text = "treat yourself well";
@@ -41,11 +42,35 @@ void MainFrame::OnPrint(wxCommandEvent& event){
 void MainFrame::OnCalc(wxCommandEvent& event){
   enableGuiElements(false);
 
+
+  // stop calculation if probe 2 radius is too small in two probes mode
+  if(getProbeMode() && getProbe1Radius() > getProbe2Radius()){
+    Ctrl::getInstance()->notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.");
+    return;
+  }
+
+  // create output folder if any output file option is toggled
+  if(getMakeReport() || getMakeSurfaceMap() || getMakeCavityMaps() || getAnalyzeUnitCell()){
+    Ctrl::getInstance()->prepareOutput(getAtomFilepath());
+  }
+
   Ctrl::getInstance()->runCalculation();
 
-  // TODO: Make button to call the following
-  // "OnExport(output_dir)"
-  Ctrl::getInstance()->exportSurfaceMap("output");
+  // write report file if option is toggled
+  if(getMakeReport()){
+    Ctrl::getInstance()->exportReport();
+  }
+
+  // write total surface map file if option is toggled
+  if(getMakeSurfaceMap()){
+    Ctrl::getInstance()->exportSurfaceMap();
+  }
+
+  /* TODO make function to generate cavity maps
+  if(getMakeCavityMaps()){
+
+  }
+  */
 
   wxYield(); // is this necessary?
   // without wxYield, the clicks on disabled buttons are queued

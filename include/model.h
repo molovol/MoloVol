@@ -28,12 +28,12 @@ class Model{
     void readFilePDB(const std::string&, bool);
 
     // export
-    void writeSurfaceMap(std::string);
+    void writeSurfaceMap();
 
     std::vector<std::string> listElementsInStructure();
 
     bool getSymmetryElements(std::string, std::vector<int>&, std::vector<double>&);
-    bool createOutputFolder();
+    bool createOutputFolder(std::string);
     void createReport(std::string, std::vector<std::string>);
     void writeXYZfile(std::vector<std::tuple<std::string, double, double, double>>&, std::string);
     bool processUnitCell(double, double, double, double);
@@ -60,6 +60,7 @@ class Model{
 
     void debug();
   private:
+    std::string calc_time; // stores the time when the calculation was run for output folder and report
     std::string output_folder = "./"; // default folder is the program folder but it is changed with the output file routine
     std::vector<std::tuple<std::string, double, double, double>> raw_atom_coordinates;
     std::vector<std::tuple<std::string, double, double, double>> processed_atom_coordinates;
