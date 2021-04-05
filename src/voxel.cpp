@@ -15,6 +15,7 @@ inline double Voxel::calcRadiusOfInfluence(const double& max_depth){
   return max_depth != 0 ? 0.86602540378 * s_grid_size * (pow(2,max_depth) - 1) : 0;
 }
 char mergeTypes(std::vector<Voxel*>&);
+char mergeTypes(const std::array<char,8>&);
 
 /////////////////////////
 // SEARCH INDEX STRUCT //
@@ -162,6 +163,25 @@ void Voxel::assignChildren(Space& cell, const std::array<unsigned,3>& index, int
 // ACCESS //
 ////////////
 
+Voxel& Voxel::getSubvoxel(std::array<unsigned,3> p_index, const unsigned p_lvl, const std::array<char,3>& sub_index){
+  for (char i = 0; i < 3; ++i){
+    p_index[i] *= 2;
+    p_index[i] += sub_index[i];
+  }
+  return s_cell->getVxlFromGrid(p_index,p_lvl-1);
+}
+
+Voxel& Voxel::getSubvoxel(std::array<unsigned,3> p_index, const unsigned p_lvl, const char j){
+  for (char i = 0; i < 3; ++i){
+    p_index[i] *= 2;
+    p_index[i] += (j/pow2(i))%2;
+  }
+  return s_cell->getVxlFromGrid(p_index,p_lvl-1);
+}
+
+Voxel& Voxel::getSubvoxel(std::array<unsigned,3> sub_index, const unsigned p_lvl){
+  return s_cell->getVxlFromGrid(sub_index,p_lvl-1);
+}
 // data
 Voxel& Voxel::getSubvoxel(const short& x, const short& y, const short& z){
   return *_data[4 * z + 2 * y + x];
@@ -200,25 +220,36 @@ char Voxel::evalRelationToAtoms(const std::array<unsigned,3>& index_vxl, Vector 
 
   if (_type == 0){_type = 0b00001001;}
   if (readBit(_type,7)){splitVoxel(index_vxl, pos_vxl, lvl);} // split if type mixed
-  else {passTypeToChildren(lvl);}
+  else {passTypeToChildren(index_vxl, lvl);}
 
   return _type;
 }
 
 // passes parent type to all children
-void Voxel::passTypeToChildren(const int lvl){
+void Voxel::passTypeToChildren(const std::array<unsigned,3>& index, const int lvl){
   if (lvl == 0){return;}
-  for (char i = 0; i < 8; ++i){
-    getSubvoxel(i).setType(_type);
-    getSubvoxel(i).passTypeToChildren(lvl-1);
+  std::array<unsigned,3> sub_index;
+  for (char x = 0; x < 2; ++x){
+    sub_index[0] = index[0]*2 + x;
+    for (char y = 0; y < 2; ++y){
+      sub_index[1] = index[1]*2 + y;
+      for (char z = 0; z < 2; ++z){
+        sub_index[2] = index[2]*2 + z;
+
+        getSubvoxel(sub_index, lvl).setType(_type);
+        getSubvoxel(sub_index, lvl).passTypeToChildren(sub_index, lvl-1);
+      }
+    }
   }
 }
 
 // adds an array of size 8 to the voxel that contains 8 subvoxels and evaluates each subvoxel's type
-void Voxel::splitVoxel(const std::array<unsigned,3>& vxl_index, const Vector& vxl_pos, const double& max_depth){
+void Voxel::splitVoxel(const std::array<unsigned,3>& vxl_index, const Vector& vxl_pos, const double lvl){
   // split into 8 subvoxels
-  Vector factors;
+  std::array<char,8> subtypes;
   std::array<unsigned,3> sub_index;
+  Vector factors;
+  char i = 0;
   for (char z = 0; z < 2; ++z){
     sub_index[2] = vxl_index[2]*2 + z;
     factors[2] = z ? 1 : -1;
@@ -229,15 +260,15 @@ void Voxel::splitVoxel(const std::array<unsigned,3>& vxl_index, const Vector& vx
         sub_index[0] = vxl_index[0]*2 + x;
         factors[0] = x ? 1 : -1;
         // modify position
-        Vector new_pos = vxl_pos + factors * s_grid_size * std::pow(2,max_depth-2);
+        Vector new_pos = vxl_pos + factors * s_grid_size * std::pow(2,lvl-2);
         
-        getSubvoxel(x,y,z).evalRelationToAtoms(sub_index, new_pos, max_depth-1);
+        subtypes[i] = getSubvoxel(sub_index, lvl).evalRelationToAtoms(sub_index, new_pos, lvl-1);
+        ++i;
         
-        //_data.push_back(subvxl);
       }
     }
   }
-  setType(mergeTypes(_data));
+  setType(mergeTypes(subtypes));
 }
 
 // goes through all close atoms to determine a voxel's type
@@ -339,20 +370,23 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
   }
   else { // vxl has children
     std::array<unsigned int,3> index_subvxl;
+    std::array<char,8> subtypes;
+    char i = 0;
     for (char x = 0; x < 2; x++){
       index_subvxl[0] = index[0]*2 + x;
       for (char y = 0; y < 2; y++){
         index_subvxl[1] = index[1]*2 + y;
         for (char z = 0; z < 2; z++){
           index_subvxl[2] = index[2]*2 + z;
-          getSubvoxel(x,y,z).evalRelationToVoxels(index_subvxl, lvl-1, split);
+          subtypes[i] = getSubvoxel(index_subvxl, lvl).evalRelationToVoxels(index_subvxl, lvl-1, split);
+          ++i;
         }
       }
     }
-    setType(mergeTypes(_data));
+    setType(mergeTypes(subtypes));
   }
   if (!readBit(_type,0)){ splitVoxel(index, lvl);} // if voxel unassigned
-  if (!readBit(_type,7)){passTypeToChildren(lvl);}
+  if (!readBit(_type,7)){passTypeToChildren(index, lvl);}
   return _type;
 }
 
@@ -388,7 +422,7 @@ unsigned int Voxel::tallyVoxelsOfType(const char volume_type, const int max_dept
     // then total number of voxels is given by tallying all subvoxels
     unsigned int total = 0;
     for(int i = 0; i < 8; i++){
-      total += _data[i]->tallyVoxelsOfType(volume_type, max_depth-1);
+      total += getSubvoxel(i).tallyVoxelsOfType(volume_type, max_depth-1);
     }
     return total;
   }
@@ -406,6 +440,18 @@ unsigned int Voxel::tallyVoxelsOfType(const char volume_type, const int max_dept
 
 // combines the types of subvoxels into a new type for the parent. performs bitwise OR for bits 1-6
 // and a bitwise AND for bit 0. sets bit 7 to true
+char mergeTypes(const std::array<char,8>& subtypes){
+  char parent_type = 0;
+  bool confirmed = true;
+  for (char sub_type : subtypes){
+    parent_type = parent_type | sub_type;
+    confirmed &= readBit(sub_type,0);
+  }
+  setBit(parent_type,0,confirmed);
+  setBitOn(parent_type,7);
+  return parent_type;
+}
+
 char mergeTypes(std::vector<Voxel*>& sub_vxls){
   char parent_type = 0;
   bool confirmed = true;
@@ -418,39 +464,3 @@ char mergeTypes(std::vector<Voxel*>& sub_vxls){
   return parent_type;
 }
 
-/////////////////
-// OUTPUT TYPE //
-/////////////////
-
-// function for generating a 3D tensor filled with the types of the voxel
-void Voxel::fillTypeTensor(
-    Container3D<char>& type_tensor,
-    const std::array<unsigned long int,3> block_start,
-    const int remaining_depth){
-  if (remaining_depth == 0){
-    type_tensor.getElement(block_start) = _type;
-  }
-  else if (!hasSubvoxel()){
-    for (unsigned int i = block_start[0]; i < block_start[0]+pow(2,remaining_depth); i++){
-      for (unsigned int j = block_start[1]; j < block_start[1]+pow(2,remaining_depth); j++){
-        for (unsigned int k = block_start[2]; k < block_start[2]+pow(2,remaining_depth); k++){
-          type_tensor.getElement(i,j,k) = _type;
-        }
-      }
-    }
-  }
-  else {
-    std::array<unsigned long int,3> new_start;
-    for (char i = 0; i < 2; i++){
-      new_start[0] = block_start[0] + i*pow(2,remaining_depth-1);
-      for (char j = 0; j < 2; j++){
-        new_start[1] = block_start[1] + j*pow(2,remaining_depth-1);
-        for (char k = 0; k < 2; k++){
-          new_start[2] = block_start[2] + k*pow(2,remaining_depth-1);
-
-          getSubvoxel(i,j,k).fillTypeTensor(type_tensor, new_start, remaining_depth-1);
-        }
-      }
-    }
-  }
-}
