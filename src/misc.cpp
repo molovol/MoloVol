@@ -34,3 +34,7 @@ std::string timeNow(){
 
     return buffer;
 }
+
+int pow2(int exp){
+  return (1 << exp);
+}

@@ -24,10 +24,9 @@ class Space{
     std::array <double,3> getSize();
     bool coordInBounds(const std::array<int,3>&, const unsigned); // not in use
     double getResolution() const; // misnamed
+    Container3D<Voxel>& getGrid(const unsigned);
 
     // get voxel
-    Voxel& getVxl(int, int, int, int);
-    Voxel& getVxl(const std::array<int,3>&, int);
     Voxel& getVxlFromGrid(const unsigned int, unsigned);
     Voxel& getVxlFromGrid(const unsigned int, const unsigned int, const unsigned int, unsigned);
     Voxel& getVxlFromGrid(const std::array<unsigned int,3>, unsigned);
@@ -41,7 +40,6 @@ class Space{
 
     int getMaxDepth(){return max_depth;}
     // output
-    Container3D<char> generateTypeTensor(); 
     void printGrid();
 
     // type evaluation
@@ -59,8 +57,6 @@ class Space{
     void setBoundaries(const std::vector<Atom>&, const double);
 
     void initGrid();
-    void updateGrid();
-    void fillGrid(Voxel& vxl, int x, int y, int z, unsigned lvl);
 
     const std::array<unsigned long int,3> gridstepsOnLvl(const int) const;
     void assignAtomVsCore();
