@@ -125,7 +125,7 @@ void Space::assignShellVsVoid(){
 }
 
 std::map<char,double> Space::getVolume(){
-  std::vector<char> types_to_tally{0b00000011,0b00000101};
+  std::vector<char> types_to_tally{0b00000011,0b00000101,0b00001001,0b00010001,0b00100001,0b01000001};
 
   std::vector<unsigned int> tally;
   for (size_t i = 0; i < types_to_tally.size(); i++){

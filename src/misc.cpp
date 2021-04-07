@@ -21,6 +21,20 @@ std::string fileName(const std::string& path){
   }
 }
 
+// find the current time and convert to a string in format year-month-day_hour-min-sec
+std::string timeNow(){
+    time_t rawtime;
+    struct tm * timeinfo;
+    char buffer[80];
+
+    time (&rawtime);
+    timeinfo = localtime (&rawtime);
+
+    strftime (buffer,80,"%Y-%m-%d_%Hh%Mm%Ss",timeinfo);
+
+    return buffer;
+}
+
 int pow2(int exp){
   return (1 << exp);
 }

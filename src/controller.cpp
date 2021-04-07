@@ -75,108 +75,78 @@ bool Ctrl::loadAtomFile(){
 
 // called by user through GUI, where the data isn't needed afterwards
 bool Ctrl::runCalculation(){
-  CalcResultBundle data = runCalculation(
-      gui->getAtomFilepath(),
-      gui->getGridsize(),
-      gui->getDepth(),
-      gui->generateRadiusMap(),
-      gui->getIncludedElements(),
-      gui->getProbe1Radius(),
-      gui->getProbe2Radius(),
-      gui->getProbeMode(),
-      gui->getAnalyzeUnitCell(),
-      gui->getMaxRad(),
-      gui->generateChemicalFormulaFromGrid());
+  // start the timer for the total calculation time
+  auto start = std::chrono::steady_clock::now();
 
-  if (data.success){
-    notifyUser("Result for " + gui->generateChemicalFormulaFromGrid(), to_gui);
-    notifyUser("Elapsed time: " + std::to_string(data.getTime()) + " s", to_gui);
-    notifyUser("VdW Volume: " + std::to_string(data.volumes[0b00000011]) + " " + Symbol::angstrom() + Symbol::cubed(), to_gui);
-    notifyUser("Excluded Volume: " + std::to_string(data.volumes[0b00000101]) + " " + Symbol::angstrom() + Symbol::cubed(), to_gui);
-    return true;
-  }
-  return false;
-}
-
-// general function that returns all data from the calculation
-CalcResultBundle Ctrl::runCalculation(
-    std::string atom_filepath,
-    double grid_step,
-    int max_depth,
-    std::unordered_map<std::string, double> rad_map,
-    std::vector<std::string> included_elements,
-    double rad_probe1,
-    double rad_probe2,
-    bool option_probe_mode,
-    bool option_unit_cell,
-    double max_rad,
-    std::string chemical_formula){
-  // create output bundle
-  CalcResultBundle data;
   // create an instance of the model class
   // ensures, that there is only ever one instance of the model class
   if(current_calculation == NULL){
     current_calculation = new Model();
   }
 
-  // save probe radii inside model
-  if(!current_calculation->setProbeRadii(rad_probe1, rad_probe2, option_probe_mode)){
+  // create a report bundle
+  CalcReportBundle data;
+
+  // save parameters in model
+  if(!current_calculation->setParameters(
+      gui->getAtomFilepath(),
+      gui->getOutputDir(),
+      gui->getIncludeHetatm(),
+      gui->getAnalyzeUnitCell(),
+      gui->getProbeMode(),
+      gui->getProbe1Radius(),
+      gui->getProbe2Radius(),
+      gui->getGridsize(),
+      gui->getDepth(),
+      gui->getMakeReport(),
+      gui->getMakeSurfaceMap(),
+      gui->getMakeCavityMaps(),
+      gui->generateRadiusMap(),
+      gui->getIncludedElements(),
+      gui->getMaxRad())){
     data.success = false;
-    return data;
+    return data.success;
   }
 
-  // store a map containing the radii of all atoms
-  current_calculation->setRadiusMap(rad_map);
-
   // process atom data for unit cell analysis if the option it ticked
-  if(option_unit_cell){
-    if(!current_calculation->processUnitCell(max_rad, rad_probe1, rad_probe2, grid_step)){
+  if(gui->getAnalyzeUnitCell()){
+    if(!current_calculation->processUnitCell()){
       data.success = false;
-      return data;
+      return data.success;
     }
   }
 
   // determine which atoms will be taken into account
-  current_calculation->setAtomListForCalculation(included_elements, option_unit_cell);
+  current_calculation->setAtomListForCalculation();
   // place atoms in a binary tree for faster access
   current_calculation->storeAtomsInTree();
   // set size of the box containing all atoms
-  current_calculation->defineCell(grid_step, max_depth);
+  current_calculation->defineCell();
 
-  // generate result report
-  /*
-  std::vector<std::string> parameters = getGuiParameters();
-  current_calculation->createReport(atom_filepath, parameters);
-  */
+  current_calculation->generateChemicalFormula();
 
   // assign voxel types and store the volume(s)
-  return current_calculation->calcVolume();
-}
+  data = current_calculation->calcVolume();
 
-// generate parameter list for report
-std::vector<std::string> Ctrl::getGuiParameters(){
-  std::vector<std::string> parameters;
-  if(fileExtension(gui->getAtomFilepath()) == "pdb"){
+  // start the timer and save the total calculation time
+  auto end = std::chrono::steady_clock::now();
+  double calc_time = std::chrono::duration<double>(end-start).count();
+  current_calculation->setTotalCalcTime(calc_time);
 
-    parameters.push_back(std::string(((gui->getIncludeHetatm())? "Include" : "Exclude"))
-        + std::string(" HETATM from pdb file"));
-
-    if(gui->getAnalyzeUnitCell()){
-      parameters.push_back("Analyze crystal structure unit cell");
+  if (data.success){
+    notifyUser("Result for " + data.chemical_formula);
+    notifyUser("Elapsed time: " + std::to_string(calc_time) + " s");
+    notifyUser("Van der Waals volume: " + std::to_string(data.volumes[0b00000011]) + " A^3");
+    notifyUser("Excluded void volume: " + std::to_string(data.volumes[0b00000101]) + " A^3");
+    notifyUser("Probe 1 core volume: " + std::to_string(data.volumes[0b00001001]) + " A^3");
+    notifyUser("Probe 1 shell volume: " + std::to_string(data.volumes[0b00010001]) + " A^3");
+    if(data.probe_mode){
+      notifyUser("Probe 2 core volume: " + std::to_string(data.volumes[0b00100001]) + " A^3");
+      notifyUser("Probe 2 shell volume: " + std::to_string(data.volumes[0b01000001]) + " A^3");
     }
+    return true;
   }
-  if(gui->getProbeMode()){
-    parameters.push_back("Probe mode: two probes");
-    parameters.push_back("Probe 1 radius: " + std::to_string(gui->getProbe1Radius()) + " A");
-    parameters.push_back("Probe 2 radius: " + std::to_string(gui->getProbe2Radius()) + " A");
-  }
-  else{
-    parameters.push_back("Probe mode: one probe");
-    parameters.push_back("Probe radius: " + std::to_string(gui->getProbe1Radius()) + " A");
-  }
-  parameters.push_back("Grid step size (resolution): " + std::to_string(gui->getGridsize()) + " A");
-  parameters.push_back("Maximum tree depth (algorithm acceleration): " + std::to_string(gui->getDepth()));
-  return parameters;
+  return false;
 }
 
 void Ctrl::notifyUser(std::string str, bool to_gui){
@@ -189,6 +159,7 @@ void Ctrl::notifyUser(std::string str, bool to_gui){
   }
 }
 
+// TODO remove is obselete
 void Ctrl::prepareOutput(std::string atomFilePath){
   if(!current_calculation->createOutputFolder(fileName(atomFilePath))){
       notifyUser("New output folder could not be created.\nThe output file(s) will be created in the program folder.");
@@ -196,8 +167,7 @@ void Ctrl::prepareOutput(std::string atomFilePath){
 }
 
 void Ctrl::exportReport(){
-  // TODO revamp report
-  // current_calculation->createReport(gui->getAtomFilepath(), parameters, gui->getProbeMode());
+  current_calculation->createReport();
 }
 
 void Ctrl::exportSurfaceMap(){

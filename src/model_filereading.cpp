@@ -168,6 +168,8 @@ void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
   inp_file.close();
 }
 
+
+// TODO only used in unittest, could be removed after deleting unittest
 std::vector<std::string> Model::listElementsInStructure(){
   std::vector<std::string> list;
   for (auto elem : atom_amounts){

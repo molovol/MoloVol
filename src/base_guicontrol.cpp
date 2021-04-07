@@ -81,6 +81,10 @@ bool MainFrame::getMakeCavityMaps(){
   return cavityMapsCheckbox->GetValue();
 }
 
+std::string MainFrame::getOutputDir(){
+  return outputdirPicker->GetPath().ToStdString();
+}
+
 void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>> symbol_number_radius){
   // delete all rows
   // DeleteRows causes an error if there are no rows
@@ -112,33 +116,6 @@ void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>
     // without this, it was sometimes observed that the last cell was not updated properly
     atomListGrid->ForceRefresh();
   }
-}
-
-std::string MainFrame::generateChemicalFormulaFromGrid(){
-  std::string chemical_formula_suffix = "";
-  std::string chemical_formula_prefix = "";
-  for (int row = 0; row < atomListGrid->GetNumberRows(); row++){
-    if (atomListGrid->GetCellValue(row,0) == "1"){ // if checkbox "include" is checked
-      std::string symbol = atomListGrid->GetCellValue(row,1).ToStdString();
-      // TODO fix symbol subscript in Windows or remove subscript
-      // std::string subscript = Symbol::subscript(atomListGrid->GetCellValue(row,2).ToStdString());
-      std::string subscript = atomListGrid->GetCellValue(row,2).ToStdString();
-
-      // by convention: carbon comes first, then hydrogen, then in alphabetical order
-      if (symbol == "C"){
-        chemical_formula_prefix = symbol + subscript + chemical_formula_prefix;
-      }
-      else if (symbol == "H"){
-        chemical_formula_prefix += symbol + subscript;
-      }
-
-      else {
-        chemical_formula_suffix += symbol + subscript;
-      }
-
-    }
-  }
-  return chemical_formula_prefix + chemical_formula_suffix;
 }
 
 std::unordered_map<std::string, double> MainFrame::generateRadiusMap(){

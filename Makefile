@@ -16,7 +16,7 @@ TESTSOURCES := $(shell find $(TESTDIR) -type f -name *.$(SRCEXT))
 TESTOBJECTS := $(patsubst $(TESTDIR)/%,$(TESTBUILDDIR)/%,$(TESTSOURCES:.$(SRCEXT)=.o))
 
 CXXFLAGS := -O3 -g -std=c++17 -Wall -Werror 
-CFLAGS := -O3 -g -std=c++17 -Wno-unused-command-line-argument
+CFLAGS := -O3 -g -std=c++17 -Wno-unused-command-line-argument -Wno-invalid-source-encoding
 INC := -I include
 
 $(TARGET): $(OBJECTS)

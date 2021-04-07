@@ -9,8 +9,36 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include <math.h>
 
-struct CalcResultBundle;
+struct CalcReportBundle{
+  bool success = true;
+  // structure and calculation parameters
+  std::string atom_file_path;
+  bool inc_hetatm;
+  bool analyze_unit_cell;
+  bool probe_mode;
+  double grid_step;
+  int max_depth;
+  std::vector<std::string> included_elements;
+  std::string chemical_formula;
+  // output options
+  bool make_report;
+  bool make_full_map;
+  bool make_cav_maps;
+  // calculation results
+  std::map<char,double> volumes;
+  std::map<char,double> surfaces;
+
+  double total_elapsed_seconds;
+  double type_assignment_elapsed_seconds;
+  double volume_tally_elapsed_seconds;
+
+  double getTime(){
+    return type_assignment_elapsed_seconds+volume_tally_elapsed_seconds;
+  }
+};
+
 class AtomTree;
 struct Atom;
 class Space;
@@ -28,19 +56,21 @@ class Model{
     void readFilePDB(const std::string&, bool);
 
     // export
+    bool createOutputFolder(std::string);
+    void createReport();
+    void writeXYZfile(std::vector<std::tuple<std::string, double, double, double>>&, std::string);
     void writeSurfaceMap();
 
     std::vector<std::string> listElementsInStructure();
 
+    // crystal unit cell related functions
     bool getSymmetryElements(std::string, std::vector<int>&, std::vector<double>&);
-    bool createOutputFolder(std::string);
-    void createReport(std::string, std::vector<std::string>);
-    void writeXYZfile(std::vector<std::tuple<std::string, double, double, double>>&, std::string);
-    bool processUnitCell(double, double, double, double);
+    bool processUnitCell();
     void orthogonalizeUnitCell();
     bool symmetrizeUnitCell();
     void moveAtomsInsideCell();
     void removeDuplicateAtoms();
+    void countAtomsInUnitCell();
     void generateSupercell(double);
     void generateUsefulAtomMapFromSupercell(double);
 
@@ -49,19 +79,26 @@ class Model{
 
     // controller-model communication
     // calls the Space constructor and creates a cell containing all atoms. Cell size is defined by atom positions
-    void defineCell(const double, const int);
-    void setAtomListForCalculation(const std::vector<std::string>&, bool);
-    void setAtomListForCalculation(const std::vector<std::string>&, std::vector<std::tuple<std::string, double, double, double>>&);
+    void defineCell();
+    void setAtomListForCalculation();
     void storeAtomsInTree();
-    CalcResultBundle calcVolume();
+    void linkAtomsToAdjacentAtoms(const double&);
+    void linkToAdjacentAtoms(const double&, Atom&);
+    CalcReportBundle calcVolume();
+    bool setParameters(std::string, std::string, bool, bool, bool, double, double, double, int, bool, bool, bool, std::unordered_map<std::string, double>, std::vector<std::string>, double);
+    void setTotalCalcTime(double);
+    CalcReportBundle getBundle(); // TODO remove is unused
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void setRadiusMap(std::unordered_map<std::string, double> map);
     bool setProbeRadii(const double&, const double&, bool);
+    void generateChemicalFormula();
 
-    void debug();
+    CalcReportBundle runUnittest(std::string, double, int, std::unordered_map<std::string, double>, std::vector<std::string>, double);
+    void debug(); // TODO remove is unused
   private:
+    CalcReportBundle _data;
     std::string calc_time; // stores the time when the calculation was run for output folder and report
-    std::string output_folder = "./"; // default folder is the program folder but it is changed with the output file routine
+    std::string output_folder = "."; // default folder is the program folder but it is changed with the output file routine
     std::vector<std::tuple<std::string, double, double, double>> raw_atom_coordinates;
     std::vector<std::tuple<std::string, double, double, double>> processed_atom_coordinates;
     double cell_param[6]; // unit cell parameters in order: A, B, C, alpha, beta, gamma
@@ -70,22 +107,15 @@ class Model{
     std::unordered_map<std::string, double> radius_map;
     std::unordered_map<std::string, int> elem_Z;
     std::map<std::string, int> atom_amounts;
+    std::map<std::string, int> unit_cell_atom_amounts; // stores atoms of unit cell to generate chemical formula
     std::vector<Atom> atoms;
     AtomTree atomtree;
     Space _cell;
     double _r_probe1 = 0;
     double _r_probe2 = 0;
+    double _max_atom_radius = 0;
 };
 
-struct CalcResultBundle{
-  bool success = true;
-  std::map<char,double> volumes;
-  double type_assignment_elapsed_seconds;
-  double volume_tally_elapsed_seconds;
 
-  double getTime(){
-    return type_assignment_elapsed_seconds+volume_tally_elapsed_seconds;
-  }
-};
 
 #endif

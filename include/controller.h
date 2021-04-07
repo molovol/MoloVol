@@ -6,7 +6,6 @@
 #include <unordered_map>
 #include <wx/wx.h>
 
-struct CalcResultBundle;
 class Model;
 class MainFrame;
 class Ctrl{
@@ -14,22 +13,9 @@ class Ctrl{
     bool loadRadiusFile();
     bool loadAtomFile();
     bool runCalculation();
-    CalcResultBundle runCalculation(
-        std::string,
-        double,
-        int,
-        std::unordered_map<std::string, double>,
-        std::vector<std::string>,
-        double = 0,
-        double = 0,
-        bool = false,
-        bool = false,
-        double = 0,
-        std::string = "0");
     void registerView(MainFrame* inp_gui);
     static Ctrl* getInstance();
-    std::vector<std::string> getGuiParameters(); // confusing name, this is not a getter function
-    void notifyUser(std::string str, bool = true);
+    void notifyUser(std::string str, bool = true); // TODO should the bool argument always be set to true ?!
     void prepareOutput(std::string);
     void exportReport();
     void exportSurfaceMap();
