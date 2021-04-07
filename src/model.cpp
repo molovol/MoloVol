@@ -179,21 +179,6 @@ void Model::storeAtomsInTree(){
   atomtree = AtomTree(atoms);
 }
 
-void Model::linkToAdjacentAtoms(const double& r_probe, Atom& at){
-  if (at.adjacent_atoms.empty()){
-    at.adjacent_atoms = atomtree.findAdjacent(at, 2*r_probe);
-    for (Atom* adjacent_at : at.adjacent_atoms){
-      linkToAdjacentAtoms(r_probe, *adjacent_at);
-    }
-  }
-}
-
-void Model::linkAtomsToAdjacentAtoms(const double& r_probe){
-  for (Atom& at : atoms){
-    linkToAdjacentAtoms(r_probe, at);
-  }
-}
-
 CalcReportBundle Model::calcVolume(){
   // save the date and time of calculation for output files
   calc_time = timeNow();
