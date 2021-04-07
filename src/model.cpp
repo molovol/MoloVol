@@ -57,8 +57,8 @@ bool Model::setProbeRadii(const double& r_1, const double& r_2, bool two_probe_m
   _r_probe1 = r_1;
   if (two_probe_mode){
     if (r_1 > r_2){
-    Ctrl::getInstance()->notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.");
-    return false;
+      Ctrl::getInstance()->notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.");
+      return false;
     }
     else{
       _r_probe2 = r_2;

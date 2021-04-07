@@ -370,6 +370,7 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
 void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigned lvl, bool split){
   _type = 0b00000101; // type excluded
   for (unsigned int n = (split? Voxel::s_search_indices.getSafeLim(lvl+1)*4 : 1); n <= Voxel::s_search_indices.getUppLim(lvl); ++n){
+    // called very often; keep section inexpensive
     for (std::array<int,3> coord : Voxel::s_search_indices[n]){
       coord = add(coord, index);
       if (readBit((s_cell->getVxlFromGrid(coord,lvl)).getType(),3)){
