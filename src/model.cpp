@@ -29,7 +29,7 @@ bool Model::setParameters(std::string file_path,
             std::unordered_map<std::string, double> rad_map,
             std::vector<std::string> included_elem,
             double max_radius){
-  if(!setProbeRadii(r_probe1, r_probe2, probe_mode)){
+  if(!setProbeRadii(r_probe1, r_probe2)){
     _data.success = false;
     return false;
   }
@@ -49,19 +49,19 @@ bool Model::setParameters(std::string file_path,
   return true;
 }
 
-void Model::setTotalCalcTime(double calc_time){
-  _data.total_elapsed_seconds = calc_time;
+void Model::setTotalCalcTime(double elapsed_time){
+  _data.total_elapsed_seconds = elapsed_time;
 }
 
-bool Model::setProbeRadii(const double& r_1, const double& r_2, bool two_probe_mode){
-  _data.setProbeRad1(r_1);
-  if (two_probe_mode){
+bool Model::setProbeRadii(const double& r_1, const double& r_2){
+  setProbeRad1(r_1);
+  if (optionProbeMode()){
     if (r_1 > r_2){
       Ctrl::getInstance()->notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.");
       return false;
     }
     else{
-      _data.setProbeRad2(r_2);
+      setProbeRad2(r_2);
     }
   }
   return true;
@@ -171,7 +171,7 @@ CalcReportBundle Model::runUnittest(std::string atom_filepath, double grid_step,
 ///////////////////////////
 
 void Model::defineCell(){
-  _cell = Space(atoms, _data.grid_step, _data.max_depth, _data.getProbeRad1());
+  _cell = Space(atoms, _data.grid_step, _data.max_depth, getProbeRad1());
   return;
 }
 
@@ -184,7 +184,7 @@ CalcReportBundle Model::calcVolume(){
   calc_time = timeNow();
 
   auto start = std::chrono::steady_clock::now();
-  _cell.assignTypeInGrid(atomtree, _data.getProbeRad1()); // assign each voxel in grid a type, defined by the atom positions
+  _cell.assignTypeInGrid(atomtree, getProbeRad1()); // assign each voxel in grid a type, defined by the atom positions
   auto end = std::chrono::steady_clock::now();
   _data.type_assignment_elapsed_seconds = std::chrono::duration<double>(end-start).count();
 
@@ -233,7 +233,7 @@ bool Model::processUnitCell(){
   6) create atom map based on unit cell limits + radius= 2*(max_atom_rad+probe1+probe2+gridstep)
   7) write structure file with processed atom list
   */
-  double radius_limit = 2*(_max_atom_radius+_data.getProbeRad1()+_data.getProbeRad2()+_data.grid_step);
+  double radius_limit = 2*(_max_atom_radius+getProbeRad1()+getProbeRad2()+_data.grid_step);
   if(space_group == ""){
     Ctrl::getInstance()->notifyUser("Space group not found!\nCheck the structure file\nor untick the unit cell analysis checkbox.");
     return false;

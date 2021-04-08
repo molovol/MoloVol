@@ -38,14 +38,7 @@ struct CalcReportBundle{
   double total_elapsed_seconds;
   double type_assignment_elapsed_seconds;
   double volume_tally_elapsed_seconds;
-  
-  // functions
   double getTime(){return type_assignment_elapsed_seconds+volume_tally_elapsed_seconds;}
-  bool optionProbeMode(){return probe_mode;}
-  double getProbeRad1(){return r_probe1;}
-  void setProbeRad1(double r){r_probe1 = r;}
-  double getProbeRad2(){return r_probe2;}
-  void setProbeRad2(double r){r_probe2 = r;}
 };
 
 class AtomTree;
@@ -99,7 +92,7 @@ class Model{
     CalcReportBundle getBundle(); // TODO remove is unused
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void setRadiusMap(std::unordered_map<std::string, double> map);
-    bool setProbeRadii(const double&, const double&, bool);
+    bool setProbeRadii(const double&, const double&);
     void generateChemicalFormula();
 
     CalcReportBundle runUnittest(std::string, double, int, std::unordered_map<std::string, double>, std::vector<std::string>, double);
@@ -121,6 +114,12 @@ class Model{
     AtomTree atomtree;
     Space _cell;
     double _max_atom_radius = 0;
+  
+    double getProbeRad1(){return _data.r_probe1;}
+    void setProbeRad1(double r){_data.r_probe1 = r;}
+    double getProbeRad2(){return _data.r_probe2;}
+    void setProbeRad2(double r){_data.r_probe2 = r;}
+    bool optionProbeMode(){return _data.probe_mode;}
 };
 
 
