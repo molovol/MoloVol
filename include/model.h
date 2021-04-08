@@ -12,14 +12,19 @@
 #include <math.h>
 
 struct CalcReportBundle{
+  // calculation returned without error
   bool success = true;
-  // structure and calculation parameters
+  // file paths
   std::string atom_file_path;
+  // switches
   bool inc_hetatm;
   bool analyze_unit_cell;
   bool probe_mode;
+  // parameters for calculation
   double grid_step;
   int max_depth;
+  double r_probe1 = 0;
+  double r_probe2 = 0;
   std::vector<std::string> included_elements;
   std::string chemical_formula;
   // output options
@@ -29,14 +34,18 @@ struct CalcReportBundle{
   // calculation results
   std::map<char,double> volumes;
   std::map<char,double> surfaces;
-
+  // time
   double total_elapsed_seconds;
   double type_assignment_elapsed_seconds;
   double volume_tally_elapsed_seconds;
-
-  double getTime(){
-    return type_assignment_elapsed_seconds+volume_tally_elapsed_seconds;
-  }
+  
+  // functions
+  double getTime(){return type_assignment_elapsed_seconds+volume_tally_elapsed_seconds;}
+  bool optionProbeMode(){return probe_mode;}
+  double getProbeRad1(){return r_probe1;}
+  void setProbeRad1(double r){r_probe1 = r;}
+  double getProbeRad2(){return r_probe2;}
+  void setProbeRad2(double r){r_probe2 = r;}
 };
 
 class AtomTree;
@@ -111,8 +120,6 @@ class Model{
     std::vector<Atom> atoms;
     AtomTree atomtree;
     Space _cell;
-    double _r_probe1 = 0;
-    double _r_probe2 = 0;
     double _max_atom_radius = 0;
 };
 

@@ -43,7 +43,7 @@ class Space{
     void printGrid();
 
     // type evaluation
-    void placeAtomsInGrid(const AtomTree&, const double&);
+    void assignTypeInGrid(const AtomTree&, const double&);
     std::map<char,double> getVolume();
 
   private:

@@ -54,14 +54,14 @@ void Model::setTotalCalcTime(double calc_time){
 }
 
 bool Model::setProbeRadii(const double& r_1, const double& r_2, bool two_probe_mode){
-  _r_probe1 = r_1;
+  _data.setProbeRad1(r_1);
   if (two_probe_mode){
     if (r_1 > r_2){
       Ctrl::getInstance()->notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.");
       return false;
     }
     else{
-      _r_probe2 = r_2;
+      _data.setProbeRad2(r_2);
     }
   }
   return true;
@@ -171,7 +171,7 @@ CalcReportBundle Model::runUnittest(std::string atom_filepath, double grid_step,
 ///////////////////////////
 
 void Model::defineCell(){
-  _cell = Space(atoms, _data.grid_step, _data.max_depth, _r_probe1);
+  _cell = Space(atoms, _data.grid_step, _data.max_depth, _data.getProbeRad1());
   return;
 }
 
@@ -184,7 +184,7 @@ CalcReportBundle Model::calcVolume(){
   calc_time = timeNow();
 
   auto start = std::chrono::steady_clock::now();
-  _cell.placeAtomsInGrid(atomtree, _r_probe1); // assign each voxel in grid a type, defined by the atom positions
+  _cell.assignTypeInGrid(atomtree, _data.getProbeRad1()); // assign each voxel in grid a type, defined by the atom positions
   auto end = std::chrono::steady_clock::now();
   _data.type_assignment_elapsed_seconds = std::chrono::duration<double>(end-start).count();
 
@@ -233,7 +233,7 @@ bool Model::processUnitCell(){
   6) create atom map based on unit cell limits + radius= 2*(max_atom_rad+probe1+probe2+gridstep)
   7) write structure file with processed atom list
   */
-  double radius_limit = 2*(_max_atom_radius+_r_probe1+_r_probe2+_data.grid_step);
+  double radius_limit = 2*(_max_atom_radius+_data.getProbeRad1()+_data.getProbeRad2()+_data.grid_step);
   if(space_group == ""){
     Ctrl::getInstance()->notifyUser("Space group not found!\nCheck the structure file\nor untick the unit cell analysis checkbox.");
     return false;

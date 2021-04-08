@@ -82,7 +82,7 @@ void Space::initGrid(){
 /////////////////////
 
 // sets all voxel's types, determined by the input atoms
-void Space::placeAtomsInGrid(const AtomTree& atomtree, const double& r_probe){
+void Space::assignTypeInGrid(const AtomTree& atomtree, const double& r_probe){
   // save variable that all voxels need access to for their type determination as static members of Voxel class
   Voxel::prepareTypeAssignment(this, atomtree, grid_size, r_probe, max_depth);
 

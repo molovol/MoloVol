@@ -67,6 +67,7 @@ class Voxel{
     static inline AtomTree s_atomtree;
     static inline double s_grid_size;
     static inline double s_r_probe1;
+    static inline double s_r_probe2;
     static inline SearchIndex s_search_indices;
 
     static inline double calcRadiusOfInfluence(const double& max_depth);
