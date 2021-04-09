@@ -67,6 +67,28 @@ bool Model::setProbeRadii(const double& r_1, const double& r_2){
   return true;
 }
 
+CalcReportBundle Model::generateVolumeData(){
+  // process atom data for unit cell analysis if the option it ticked
+  if(optionAnalyzeUnitCell()){
+    if(!processUnitCell()){
+      _data.success = false;
+      return _data;
+    }
+  }
+
+  // determine which atoms will be taken into account
+  setAtomListForCalculation();
+  // place atoms in a binary tree for faster access
+  storeAtomsInTree();
+  // set size of the box containing all atoms
+  defineCell();
+
+  generateChemicalFormula();
+
+  // create a report bundle
+  return calcVolume();
+}
+
 void Model::setAtomListForCalculation(){
   std::vector<std::tuple<std::string,double,double,double>>& atom_coordinates = (_data.analyze_unit_cell) ? processed_atom_coordinates : raw_atom_coordinates;
   atoms.clear();
@@ -132,38 +154,6 @@ void Model::generateChemicalFormula(){
 // TODO remove is unused
 CalcReportBundle Model::getBundle(){
   return _data;
-}
-
-CalcReportBundle Model::runUnittest(std::string atom_filepath, double grid_step, int max_depth, std::unordered_map<std::string, double> rad_map, std::vector<std::string> included_elements, double rad_probe1){
-  setParameters(
-        atom_filepath,
-        ".",
-        false,
-        false,
-        false,
-        rad_probe1,
-        5,
-        grid_step,
-        max_depth,
-        //TODO add get output folder
-        false,
-        false,
-        false,
-        rad_map,
-        included_elements,
-        3);
-
-  // determine which atoms will be taken into account
-  setAtomListForCalculation();
-  // place atoms in a binary tree for faster access
-  storeAtomsInTree();
-  // set size of the box containing all atoms
-  defineCell();
-
-  generateChemicalFormula();
-
-  // assign voxel types and store the volume(s)
-  return calcVolume();
 }
 
 ///////////////////////////

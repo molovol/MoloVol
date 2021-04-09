@@ -80,6 +80,7 @@ class Model{
     inline double findRadiusOfAtom(const Atom&); //TODO has not been tested
 
     // controller-model communication
+    CalcReportBundle generateVolumeData();
     // calls the Space constructor and creates a cell containing all atoms. Cell size is defined by atom positions
     void defineCell();
     void setAtomListForCalculation();
@@ -95,7 +96,6 @@ class Model{
     bool setProbeRadii(const double&, const double&);
     void generateChemicalFormula();
 
-    CalcReportBundle runUnittest(std::string, double, int, std::unordered_map<std::string, double>, std::vector<std::string>, double);
     void debug(); // TODO remove is unused
   private:
     CalcReportBundle _data;
@@ -114,12 +114,16 @@ class Model{
     AtomTree atomtree;
     Space _cell;
     double _max_atom_radius = 0;
-  
+ 
+    // access functions for information stored in data
     double getProbeRad1(){return _data.r_probe1;}
     void setProbeRad1(double r){_data.r_probe1 = r;}
     double getProbeRad2(){return _data.r_probe2;}
     void setProbeRad2(double r){_data.r_probe2 = r;}
     bool optionProbeMode(){return _data.probe_mode;}
+    bool optionIncludeHetatm(){return _data.inc_hetatm;}
+    bool optionAnalyzeUnitCell(){return _data.analyze_unit_cell;}
+    bool optionAnalyseUnitCell(){return _data.analyze_unit_cell;}
 };
 
 

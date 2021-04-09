@@ -73,19 +73,15 @@ bool Ctrl::loadAtomFile(){
   return successful_import;
 }
 
-// called by user through GUI, where the data isn't needed afterwards
+// default function call: transfer data from GUI to Model
 bool Ctrl::runCalculation(){
-  // start the timer for the total calculation time
-  auto start = std::chrono::steady_clock::now();
-
   // create an instance of the model class
   // ensures, that there is only ever one instance of the model class
   if(current_calculation == NULL){
     current_calculation = new Model();
   }
 
-  // create a report bundle
-  CalcReportBundle data;
+  // TODO: Place the following code into a wrapper function
 
   // save parameters in model
   if(!current_calculation->setParameters(
@@ -104,38 +100,16 @@ bool Ctrl::runCalculation(){
       gui->generateRadiusMap(),
       gui->getIncludedElements(),
       gui->getMaxRad())){
-    data.success = false;
-    return data.success;
+    return false;
   }
-
-  // process atom data for unit cell analysis if the option it ticked
-  if(gui->getAnalyzeUnitCell()){
-    if(!current_calculation->processUnitCell()){
-      data.success = false;
-      return data.success;
-    }
-  }
-
-  // determine which atoms will be taken into account
-  current_calculation->setAtomListForCalculation();
-  // place atoms in a binary tree for faster access
-  current_calculation->storeAtomsInTree();
-  // set size of the box containing all atoms
-  current_calculation->defineCell();
-
-  current_calculation->generateChemicalFormula();
-
-  // assign voxel types and store the volume(s)
-  data = current_calculation->calcVolume();
-
-  // start the timer and save the total calculation time
+  auto start = std::chrono::steady_clock::now();
+  CalcReportBundle data = current_calculation->generateVolumeData();
   auto end = std::chrono::steady_clock::now();
-  double calc_time = std::chrono::duration<double>(end-start).count();
-  current_calculation->setTotalCalcTime(calc_time);
-
+  double total_time = std::chrono::duration<double>(end-start).count();
+  
   if (data.success){
     notifyUser("Result for " + data.chemical_formula);
-    notifyUser("Elapsed time: " + std::to_string(calc_time) + " s");
+    notifyUser("Elapsed time: " + std::to_string(total_time) + " s");
     notifyUser("Van der Waals volume: " + std::to_string(data.volumes[0b00000011]) + " A^3");
     notifyUser("Excluded void volume: " + std::to_string(data.volumes[0b00000101]) + " A^3");
     notifyUser("Probe 1 core volume: " + std::to_string(data.volumes[0b00001001]) + " A^3");
@@ -144,9 +118,11 @@ bool Ctrl::runCalculation(){
       notifyUser("Probe 2 core volume: " + std::to_string(data.volumes[0b00100001]) + " A^3");
       notifyUser("Probe 2 shell volume: " + std::to_string(data.volumes[0b01000001]) + " A^3");
     }
-    return true;
   }
-  return false;
+  else{
+    notifyUser("Calculation failed!");
+  }
+  return data.success;
 }
 
 void Ctrl::notifyUser(std::string str, bool to_gui){

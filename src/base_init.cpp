@@ -42,9 +42,6 @@ bool MainApp::OnInit()
     else if (unittest_id=="radius"){
       Ctrl::getInstance()->unittestRadius();
     }
-    else if (unittest_id=="surface"){
-      Ctrl::getInstance()->unittestSurfaceMap();
-    }
     else {
       std::cout << "Invalid selection" << std::endl;}
     return true;

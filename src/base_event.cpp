@@ -72,8 +72,7 @@ void MainFrame::OnCalc(wxCommandEvent& event){
   }
   */
 
-  wxYield(); // is this necessary?
-  // without wxYield, the clicks on disabled buttons are queued
+  wxYield(); // without wxYield, the clicks on disabled buttons are queued
   enableGuiElements(true);
 }
 

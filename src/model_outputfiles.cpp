@@ -62,12 +62,12 @@ void Model::createReport(){
   }
   if(_data.probe_mode){
     output_report << "Probe mode: two probes\n";
-    output_report << "Probe 1 radius: " + std::to_string(_data.getProbeRad1()) + " A\n";
-    output_report << "Probe 2 radius: " + std::to_string(_data.getProbeRad2()) + " A\n";
+    output_report << "Probe 1 radius: " + std::to_string(getProbeRad1()) + " A\n";
+    output_report << "Probe 2 radius: " + std::to_string(getProbeRad2()) + " A\n";
   }
   else{
     output_report << "Probe mode: one probe\n";
-    output_report << "Probe radius: " + std::to_string(_data.getProbeRad1()) + " A\n";
+    output_report << "Probe radius: " + std::to_string(getProbeRad1()) + " A\n";
   }
   output_report << "Grid step size (resolution): " + std::to_string(_data.grid_step) + " A\n";
   output_report << "Maximum tree depth (algorithm acceleration): " + std::to_string(_data.max_depth) << "\n";
