@@ -87,16 +87,16 @@ void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, co
 
   Voxel::prepareTypeAssignment(this, atomtree); 
   if (probe_mode){
-    Voxel::storeProbe(r_probe2);
-    assignAtomVsCore(true);
-    assignShellVsVoid(true);
+    Voxel::storeProbe(r_probe2, true);
+    assignAtomVsCore();
+    assignShellVsVoid();
   }
-  Voxel::storeProbe(r_probe1);
-  assignAtomVsCore(false);
-  assignShellVsVoid(false);
+  Voxel::storeProbe(r_probe1, false);
+  assignAtomVsCore();
+  assignShellVsVoid();
 }
 
-void Space::assignAtomVsCore(bool masking_probe){
+void Space::assignAtomVsCore(){
   // calculate position of first voxel
   const std::array<double,3> vxl_origin = getOrigin();
   // calculate side length of top level voxel
@@ -117,7 +117,7 @@ void Space::assignAtomVsCore(bool masking_probe){
   }
 }
 
-void Space::assignShellVsVoid(bool masking_probe){
+void Space::assignShellVsVoid(){
   std::array<unsigned int,3> vxl_index;
   for(vxl_index[0] = 0; vxl_index[0] < n_gridsteps[0]; vxl_index[0]++){
     for(vxl_index[1] = 0; vxl_index[1] < n_gridsteps[1]; vxl_index[1]++){
@@ -180,8 +180,8 @@ std::array<double,3> Space::getSize(){
   }
   return size;
 }
-
-double Space::getResolution() const {
+  
+double Space::getVxlSize() const {
   return grid_size;
 }
     

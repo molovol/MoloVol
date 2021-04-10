@@ -151,7 +151,7 @@ void Model::writeSurfaceMap(){
   Container3D<Voxel>* surface_map = &_cell.getGrid(0);
   // save commonly used variable
   std::array<unsigned long int,3> n_elements = surface_map->getNumElements();
-  double vxl_length = _cell.getResolution();
+  double vxl_length = _cell.getVxlSize();
   // create map for assigning numbers to types
   std::map<char,int> typeToNum =
     {{0b00000011, 0},

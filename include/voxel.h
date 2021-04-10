@@ -40,7 +40,7 @@ class Voxel{
     char getType();
 
     static void prepareTypeAssignment(Space*, AtomTree);
-    static void storeProbe(const double);
+    static void storeProbe(const double, const bool);
     static void computeIndices();
     static void computeIndices(unsigned int);
 
@@ -67,8 +67,8 @@ class Voxel{
   private:
     static inline Space* s_cell;
     static inline AtomTree s_atomtree;
-    static inline double s_grid_size;
     static inline double s_r_probe;
+    static inline bool s_masking_mode;
     static inline SearchIndex s_search_indices;
 
     static inline double calcRadiusOfInfluence(const double& max_depth);

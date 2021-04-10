@@ -23,7 +23,7 @@ class Space{
     std::array <double,3> getMax();
     std::array <double,3> getSize();
     bool coordInBounds(const std::array<int,3>&, const unsigned); // not in use
-    double getResolution() const; // misnamed
+    double getVxlSize() const;
     Container3D<Voxel>& getGrid(const unsigned);
 
     // get voxel
@@ -59,8 +59,8 @@ class Space{
     void initGrid();
 
     const std::array<unsigned long int,3> gridstepsOnLvl(const int) const;
-    void assignAtomVsCore(bool=false);
-    void assignShellVsVoid(bool=false);
+    void assignAtomVsCore();
+    void assignShellVsVoid();
     
 };
 

@@ -12,7 +12,7 @@
 ///////////////////
 
 inline double Voxel::calcRadiusOfInfluence(const double& max_depth){
-  return max_depth != 0 ? 0.86602540378 * s_grid_size * (pow(2,max_depth) - 1) : 0;
+  return max_depth != 0 ? 0.86602540378 * s_cell->getVxlSize() * (pow(2,max_depth) - 1) : 0;
 }
 char mergeTypes(std::vector<Voxel*>&);
 char mergeTypes(const std::array<char,8>&);
@@ -181,12 +181,12 @@ void Voxel::setType(char input){_type = input;}
 void Voxel::prepareTypeAssignment(Space* cell, AtomTree atomtree){
   s_cell = cell;
   s_atomtree = atomtree;
-  s_grid_size = s_cell->getResolution();
 }
 
-void Voxel::storeProbe(const double r_probe){
+void Voxel::storeProbe(const double r_probe, const bool masking_mode){
   s_r_probe = r_probe;
-  s_search_indices = SearchIndex(r_probe, s_cell->getResolution(), s_cell->getMaxDepth());
+  s_masking_mode = masking_mode;
+  s_search_indices = SearchIndex(r_probe, s_cell->getVxlSize(), s_cell->getMaxDepth());
 }
 ///////////////////////////////
 // TYPE ASSIGNMENT 1ST ROUND //
@@ -241,7 +241,7 @@ void Voxel::splitVoxel(const std::array<unsigned,3>& vxl_index, const Vector& vx
         sub_index[0] = vxl_index[0]*2 + x;
         factors[0] = x ? 1 : -1;
         // modify position
-        Vector new_pos = vxl_pos + factors * s_grid_size * std::pow(2,lvl-2);
+        Vector new_pos = vxl_pos + factors * s_cell->getVxlSize() * std::pow(2,lvl-2);
         
         subtypes[i] = getSubvoxel(sub_index, lvl).evalRelationToAtoms(sub_index, new_pos, lvl-1);
         ++i;
