@@ -43,7 +43,7 @@ class Space{
     void printGrid();
 
     // type evaluation
-    void assignTypeInGrid(const AtomTree&, const double&);
+    void assignTypeInGrid(const AtomTree&, const double, const double, bool);
     std::map<char,double> getVolume();
 
   private:
@@ -59,8 +59,8 @@ class Space{
     void initGrid();
 
     const std::array<unsigned long int,3> gridstepsOnLvl(const int) const;
-    void assignAtomVsCore();
-    void assignShellVsVoid();
+    void assignAtomVsCore(bool=false);
+    void assignShellVsVoid(bool=false);
     
 };
 

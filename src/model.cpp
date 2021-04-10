@@ -161,7 +161,7 @@ CalcReportBundle Model::getBundle(){
 ///////////////////////////
 
 void Model::defineCell(){
-  _cell = Space(atoms, _data.grid_step, _data.max_depth, getProbeRad1());
+  _cell = Space(atoms, _data.grid_step, _data.max_depth, optionProbeMode()? getProbeRad2() : getProbeRad1());
   return;
 }
 
@@ -174,12 +174,12 @@ CalcReportBundle Model::calcVolume(){
   calc_time = timeNow();
 
   auto start = std::chrono::steady_clock::now();
-  _cell.assignTypeInGrid(atomtree, getProbeRad1()); // assign each voxel in grid a type, defined by the atom positions
+  _cell.assignTypeInGrid(atomtree, getProbeRad1(), getProbeRad2(), optionProbeMode()); // assign each voxel in grid a type
   auto end = std::chrono::steady_clock::now();
   _data.type_assignment_elapsed_seconds = std::chrono::duration<double>(end-start).count();
 
   // TODO remove when unnecessary
-  //_cell.printGrid(); // for testing
+  _cell.printGrid(); // for testing
 
   start = std::chrono::steady_clock::now();
   _data.volumes = _cell.getVolume();

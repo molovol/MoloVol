@@ -11,9 +11,9 @@
 // CONSTRUCTOR //
 /////////////////
 
-Space::Space(std::vector<Atom> &atoms, const double bot_lvl_vxl_dist, const int depth, const double r_probe1)
+Space::Space(std::vector<Atom> &atoms, const double bot_lvl_vxl_dist, const int depth, const double r_probe)
   :grid_size(bot_lvl_vxl_dist), max_depth(depth){
-  setBoundaries(atoms,r_probe1+2*bot_lvl_vxl_dist);
+  setBoundaries(atoms,r_probe+2*bot_lvl_vxl_dist);
   initGrid();
 }
 
@@ -82,16 +82,19 @@ void Space::initGrid(){
 /////////////////////
 
 // sets all voxel's types, determined by the input atoms
-void Space::assignTypeInGrid(const AtomTree& atomtree, const double& r_probe){
+void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, const double r_probe2, bool probe_mode){
   // save variable that all voxels need access to for their type determination as static members of Voxel class
-  Voxel::prepareTypeAssignment(this, atomtree, grid_size, r_probe, max_depth);
+  Voxel::prepareTypeAssignment(this, atomtree, grid_size, r_probe1, max_depth);
 
-  assignAtomVsCore();
-
-  assignShellVsVoid();
+  if (probe_mode){
+    assignAtomVsCore(true);
+    assignShellVsVoid(true);
+  }
+  assignAtomVsCore(false);
+  assignShellVsVoid(false);
 }
 
-void Space::assignAtomVsCore(){
+void Space::assignAtomVsCore(bool masking_probe){
   // calculate position of first voxel
   const std::array<double,3> vxl_origin = getOrigin();
   // calculate side length of top level voxel
@@ -112,7 +115,7 @@ void Space::assignAtomVsCore(){
   }
 }
 
-void Space::assignShellVsVoid(){
+void Space::assignShellVsVoid(bool masking_probe){
   std::array<unsigned int,3> vxl_index;
   for(vxl_index[0] = 0; vxl_index[0] < n_gridsteps[0]; vxl_index[0]++){
     for(vxl_index[1] = 0; vxl_index[1] < n_gridsteps[1]; vxl_index[1]++){

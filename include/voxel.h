@@ -35,6 +35,7 @@ class Voxel{
     Voxel& getSubvoxel(std::array<unsigned,3>, const unsigned, const char);
     Voxel& getSubvoxel(std::array<unsigned,3>, const unsigned);
     bool hasSubvoxel();
+    bool isAssigned();
     void setType(char);
     char getType();
 
