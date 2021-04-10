@@ -179,7 +179,7 @@ CalcReportBundle Model::calcVolume(){
   _data.type_assignment_elapsed_seconds = std::chrono::duration<double>(end-start).count();
 
   // TODO remove when unnecessary
-  _cell.printGrid(); // for testing
+  //_cell.printGrid(); // for testing
 
   start = std::chrono::steady_clock::now();
   _data.volumes = _cell.getVolume();

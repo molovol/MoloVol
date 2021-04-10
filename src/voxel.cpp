@@ -178,14 +178,16 @@ void Voxel::setType(char input){_type = input;}
 /////////////////////////////////
 
 // function to call before beginning the type assignment routine in order to prepare static variables
-void Voxel::prepareTypeAssignment(Space* cell, AtomTree atomtree, double grid_size, double r_probe1, int max_depth){
+void Voxel::prepareTypeAssignment(Space* cell, AtomTree atomtree){
   s_cell = cell;
   s_atomtree = atomtree;
-  s_grid_size = grid_size;
-  s_r_probe1 = r_probe1;
-  s_search_indices = SearchIndex(r_probe1, grid_size, cell->getMaxDepth());
+  s_grid_size = s_cell->getResolution();
 }
 
+void Voxel::storeProbe(const double r_probe){
+  s_r_probe = r_probe;
+  s_search_indices = SearchIndex(r_probe, s_cell->getResolution(), s_cell->getMaxDepth());
+}
 ///////////////////////////////
 // TYPE ASSIGNMENT 1ST ROUND //
 ///////////////////////////////
@@ -195,7 +197,7 @@ char Voxel::evalRelationToAtoms(const std::array<unsigned,3>& index_vxl, Vector 
   if (isAssigned()) {return _type;}
   double rad_vxl = calcRadiusOfInfluence(lvl); // calculated every time, since max_depth may change (not expensive)
 
-  traverseTree(s_atomtree.getRoot(), s_atomtree.getMaxRad(), pos_vxl, rad_vxl, s_r_probe1, lvl);
+  traverseTree(s_atomtree.getRoot(), s_atomtree.getMaxRad(), pos_vxl, rad_vxl, s_r_probe, lvl);
 
   if (_type == 0){_type = 0b00001001;} // 0b00100001
   if (readBit(_type,7)){splitVoxel(index_vxl, pos_vxl, lvl);} // split if type mixed
