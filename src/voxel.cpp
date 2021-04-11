@@ -349,7 +349,7 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
   else if (!hasSubvoxel()){ // vxl has no children
     searchForCore(index, lvl, split);
   }
-  else { // vxl has children
+  if (hasSubvoxel()) { // vxl has children
     std::array<unsigned int,3> index_subvxl;
     std::array<char,8> subtypes;
     char i = 0;
@@ -366,10 +366,7 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
     }
     setType(mergeTypes(subtypes));
   }
-  
-  if (hasSubvoxel()){ splitVoxel(index, lvl);} // if voxel has been marked to be split
   else {passTypeToChildren(index, lvl);}
-  assert(_type != 0b00000100);
   return _type;
 }
 
@@ -393,6 +390,7 @@ void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
   }
 }
 
+// CURRENTLY NOT IN USE
 // adds an array of size 8 to the voxel that contains 8 subvoxels
 void Voxel::splitVoxel(const std::array<unsigned int,3>& vxl_ind, const unsigned lvl){
   evalRelationToVoxels(vxl_ind, lvl, true);
