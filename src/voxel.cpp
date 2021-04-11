@@ -195,14 +195,15 @@ void Voxel::storeProbe(const double r_probe, const bool masking_mode){
 // voxels and atoms
 char Voxel::evalRelationToAtoms(const std::array<unsigned,3>& index_vxl, Vector pos_vxl, const int lvl){
   if (isAssigned()) {return _type;}
-  double rad_vxl = calcRadiusOfInfluence(lvl); // calculated every time, since max_depth may change (not expensive)
-
-  traverseTree(s_atomtree.getRoot(), s_atomtree.getMaxRad(), pos_vxl, rad_vxl, s_r_probe, lvl);
-
-  if (_type == 0){_type = s_masking_mode? 0b00100001 : 0b00001001;}
-  if (readBit(_type,7)){splitVoxel(index_vxl, pos_vxl, lvl);} // split if type mixed
+  if (!hasSubvoxel()) {
+    double rad_vxl = calcRadiusOfInfluence(lvl); // calculated every time, since max_depth may change (not expensive)
+    traverseTree(s_atomtree.getRoot(), s_atomtree.getMaxRad(), pos_vxl, rad_vxl, s_r_probe, lvl);
+    if (_type == 0){_type = s_masking_mode? 0b00100001 : 0b00001001;}
+  }
+  if (hasSubvoxel()) {
+    splitVoxel(index_vxl, pos_vxl, lvl);
+  }
   else {passTypeToChildren(index_vxl, lvl);}
-
   return _type;
 }
 
@@ -255,15 +256,15 @@ void Voxel::splitVoxel(const std::array<unsigned,3>& vxl_index, const Vector& vx
 // goes through all close atoms to determine a voxel's type
 void Voxel::traverseTree
   (const AtomNode* node,
-   const double& rad_max,
+   const double rad_max,
    const Vector& pos_vxl,
-   const double& rad_vxl,
-   const double& rad_probe,
-   const int& max_depth,
+   const double rad_vxl,
+   const double rad_probe,
+   const int max_depth,
    const char exit_type,
    const char dim){
 
-  if (node == NULL || isAssigned()){return;}
+  if (node == NULL){return;}
   const Atom& atom = node->getAtom();
 
   // distance between atom and voxel along one dimension
@@ -348,6 +349,7 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
   if (isAssigned()){return _type;}
   else if (!hasSubvoxel()){ // vxl has no children
     searchForCore(index, lvl, split);
+    split = true;
   }
   if (hasSubvoxel()) { // vxl has children
     std::array<unsigned int,3> index_subvxl;
@@ -371,9 +373,7 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
 }
 
 void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigned lvl, bool split){
-  _type = s_masking_mode? 0b00000100 : 0b00000101; // type excluded
-  //_type = 0b00000101; // type excluded
-  // TODO: make it so that after masking mode, type is unassigned
+  _type = s_masking_mode? 0 : 0b00000101; // type excluded
 
   const char shell = s_masking_mode? 0b01000001 : 0b00010001;
   const char bit_pos_core = s_masking_mode? 5 : 3;

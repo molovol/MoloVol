@@ -45,7 +45,7 @@ class Voxel{
     static void computeIndices(unsigned int);
 
     char evalRelationToAtoms(const std::array<unsigned,3>&, Vector, const int);
-    void traverseTree(const AtomNode*, const double&, const Vector&, const double&, const double&, const int&, 
+    void traverseTree(const AtomNode*, const double, const Vector&, const double, const double, const int, 
         const char = 0b00000011, const char = 0); 
     void passTypeToChildren(const std::array<unsigned,3>&, const int);
     void splitVoxel(const std::array<unsigned,3>&, const Vector&, const double); 

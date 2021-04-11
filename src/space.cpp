@@ -96,7 +96,6 @@ void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, co
   Voxel::storeProbe(r_probe1, false);
   assignAtomVsCore();
   assignShellVsVoid();
-  //printGrid();
 }
 
 void Space::assignAtomVsCore(){
