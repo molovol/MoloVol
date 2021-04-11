@@ -53,12 +53,7 @@ double MainFrame::getProbe1Radius(){
 }
 
 double MainFrame::getProbe2Radius(){
-  if(getProbeMode()){
-    return std::stod(probe2InputText->GetValue().ToStdString());
-  }
-  else{ // when the probe mode is set to one probe, the second probe radius is considered null
-    return 0;
-  }
+  return getProbeMode()? std::stod(probe2InputText->GetValue().ToStdString()) : 0;
 }
 
 double MainFrame::getGridsize(){

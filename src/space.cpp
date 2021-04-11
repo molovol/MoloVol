@@ -85,6 +85,8 @@ void Space::initGrid(){
 void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, const double r_probe2, bool probe_mode){
   // save variable that all voxels need access to for their type determination as static members of Voxel class
 
+  // TODO: find out why algo has become much slower than before
+
   Voxel::prepareTypeAssignment(this, atomtree); 
   if (probe_mode){
     Voxel::storeProbe(r_probe2, true);
@@ -94,6 +96,7 @@ void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, co
   Voxel::storeProbe(r_probe1, false);
   assignAtomVsCore();
   assignShellVsVoid();
+  //  printGrid();
 }
 
 void Space::assignAtomVsCore(){
@@ -328,8 +331,12 @@ void Space::printGrid(){
       for(unsigned int x = x_min; x < x_max; x++){
         char to_print = (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00000011)? 'A' : 'O';
         if (!readBit(getVxlFromGrid(x,y,z,max_depth-depth).getType(),0)){to_print = '?';}
-        if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00010001){to_print = 'S';}
+        if (readBit(getVxlFromGrid(x,y,z,max_depth-depth).getType(),7)){to_print = 'M';}
         if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00000101){to_print = 'X';}
+        if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00001001){to_print = 'P';}
+        if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00010001){to_print = 'S';}
+        if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00100001){to_print = 'p';}
+        if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b01000001){to_print = 's';}
 
         std::cout << to_print << " ";
       }

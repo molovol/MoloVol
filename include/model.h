@@ -93,7 +93,7 @@ class Model{
     CalcReportBundle getBundle(); // TODO remove is unused
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void setRadiusMap(std::unordered_map<std::string, double> map);
-    bool setProbeRadii(const double&, const double&);
+    bool setProbeRadii(const double, const double, const bool);
     void generateChemicalFormula();
 
     void debug(); // TODO remove is unused
@@ -121,6 +121,7 @@ class Model{
     double getProbeRad2(){return _data.r_probe2;}
     void setProbeRad2(double r){_data.r_probe2 = r;}
     bool optionProbeMode(){return _data.probe_mode;}
+    void toggleProbeMode(bool state){_data.probe_mode = state;}
     bool optionIncludeHetatm(){return _data.inc_hetatm;}
     bool optionAnalyzeUnitCell(){return _data.analyze_unit_cell;}
     bool optionAnalyseUnitCell(){return _data.analyze_unit_cell;}

@@ -199,7 +199,7 @@ char Voxel::evalRelationToAtoms(const std::array<unsigned,3>& index_vxl, Vector 
 
   traverseTree(s_atomtree.getRoot(), s_atomtree.getMaxRad(), pos_vxl, rad_vxl, s_r_probe, lvl);
 
-  if (_type == 0){_type = 0b00001001;} // 0b00100001
+  if (_type == 0){_type = s_masking_mode? 0b00100001 : 0b00001001;}
   if (readBit(_type,7)){splitVoxel(index_vxl, pos_vxl, lvl);} // split if type mixed
   else {passTypeToChildren(index_vxl, lvl);}
 
@@ -297,11 +297,11 @@ bool Voxel::isAtom(const Atom& atom, const Vector& pos_vxl, const double rad_vxl
   }
   else if ((dist < atom.getRad() + rad_probe - rad_vxl) && (0 < atom.getRad() + rad_probe - rad_vxl)){
     if (readBit(_type,1)){return false;} // if mixed or inside atom
-    _type = 0b00010000; // 0b01000000
+    _type = s_masking_mode? 0b01000000 : 0b00010000;
   }
   else if (dist < atom.getRad() + rad_probe + rad_vxl){
     if (readBit(_type,4) || readBit(_type,1)){return false;} // if mixed, inside atom, or potential shell
-    _type = 0b10010000; // 0b11000000
+    _type = s_masking_mode? 0b11000000 : 0b10010000;
   }
   return false;
 }
@@ -366,19 +366,27 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
     }
     setType(mergeTypes(subtypes));
   }
-  if (!isAssigned()){ splitVoxel(index, lvl);} // if voxel unassigned
-  if (!readBit(_type,7)){passTypeToChildren(index, lvl);}
+  
+  if (hasSubvoxel()){ splitVoxel(index, lvl);} // if voxel has been marked to be split
+  else {passTypeToChildren(index, lvl);}
+  assert(_type != 0b00000100);
   return _type;
 }
 
 void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigned lvl, bool split){
-  _type = 0b00000101; // 0 // type excluded
+  _type = s_masking_mode? 0b00000100 : 0b00000101; // type excluded
+  //_type = 0b00000101; // type excluded
+  // TODO: make it so that after masking mode, type is unassigned
+
+  const char shell = s_masking_mode? 0b01000001 : 0b00010001;
+  const char bit_pos_core = s_masking_mode? 5 : 3;
+
   for (unsigned int n = (split? Voxel::s_search_indices.getSafeLim(lvl+1)*4 : 1); n <= Voxel::s_search_indices.getUppLim(lvl); ++n){
     // called very often; keep section inexpensive
     for (std::array<int,3> coord : Voxel::s_search_indices[n]){
       coord = add(coord, index);
-      if (readBit((s_cell->getVxlFromGrid(coord,lvl)).getType(),3)){
-        _type = (n <= Voxel::s_search_indices.getSafeLim(lvl))? 0b00010001 : 0b10000000; // 0b01000001 : 0b10000000
+      if (readBit((s_cell->getVxlFromGrid(coord,lvl)).getType(),bit_pos_core)){
+        _type = (n <= Voxel::s_search_indices.getSafeLim(lvl))? shell : 0b10000000; // mark to split
         return;
       }
     }

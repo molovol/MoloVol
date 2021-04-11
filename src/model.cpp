@@ -29,7 +29,7 @@ bool Model::setParameters(std::string file_path,
             std::unordered_map<std::string, double> rad_map,
             std::vector<std::string> included_elem,
             double max_radius){
-  if(!setProbeRadii(r_probe1, r_probe2)){
+  if(!setProbeRadii(r_probe1, r_probe2, probe_mode)){
     _data.success = false;
     return false;
   }
@@ -37,7 +37,6 @@ bool Model::setParameters(std::string file_path,
   output_folder = output_dir;
   _data.inc_hetatm = inc_hetatm;
   _data.analyze_unit_cell = analyze_unit_cell;
-  _data.probe_mode = probe_mode;
   _data.grid_step = grid_step;
   _data.max_depth = max_depth;
   _data.make_report = make_report;
@@ -53,7 +52,8 @@ void Model::setTotalCalcTime(double elapsed_time){
   _data.total_elapsed_seconds = elapsed_time;
 }
 
-bool Model::setProbeRadii(const double& r_1, const double& r_2){
+bool Model::setProbeRadii(const double r_1, const double r_2, const bool probe_mode){
+  toggleProbeMode(probe_mode);
   setProbeRad1(r_1);
   if (optionProbeMode()){
     if (r_1 > r_2){
