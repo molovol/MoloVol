@@ -243,10 +243,10 @@ void Voxel::splitVoxel(const std::array<unsigned,3>& vxl_index, const Vector& vx
         factors[0] = x ? 1 : -1;
         // modify position
         Vector new_pos = vxl_pos + factors * s_cell->getVxlSize() * std::pow(2,lvl-2);
-        
+
         subtypes[i] = getSubvoxel(sub_index, lvl).evalRelationToAtoms(sub_index, new_pos, lvl-1);
         ++i;
-        
+
       }
     }
   }
@@ -288,19 +288,23 @@ void Voxel::traverseTree
 bool Voxel::isAtom(const Atom& atom, const Vector& pos_vxl, const double rad_vxl, const double rad_probe){
   Vector dist = pos_vxl - atom.getPosVec();
 
-  if((dist < atom.getRad() - rad_vxl) && (0 < atom.getRad() - rad_vxl)){
+  // TODO the second condition would not be necessary if dist was a double type
+  // if(dist + rad_vxl < atom.getRad()){
+  if((dist < atom.getRad() - rad_vxl) && (0 < atom.getRad() - rad_vxl)){ // if completely inside atom
     _type = 0b00000011;
     return true;
   }
-  else if (dist < atom.getRad() + rad_vxl){
+  else if (dist < atom.getRad() + rad_vxl){ // if partially inside atom
     if (readBit(_type,1)){return false;} // if inside atom
     _type = 0b10000010;
   }
-  else if ((dist < atom.getRad() + rad_probe - rad_vxl) && (0 < atom.getRad() + rad_probe - rad_vxl)){
+  // TODO the second condition would not be necessary if dist was a double type
+  // else if (dist + rad_vxl < atom.getRad() + rad_probe){
+  else if ((dist < atom.getRad() + rad_probe - rad_vxl) && (0 < atom.getRad() + rad_probe - rad_vxl)){ // if outside atom but not touching potential probe core
     if (readBit(_type,1)){return false;} // if mixed or inside atom
     _type = s_masking_mode? 0b01000000 : 0b00010000;
   }
-  else if (dist < atom.getRad() + rad_probe + rad_vxl){
+  else if (dist < atom.getRad() + rad_probe + rad_vxl){ // if outside atom but touching potential probe core
     if (readBit(_type,4) || readBit(_type,1)){return false;} // if mixed, inside atom, or potential shell
     _type = s_masking_mode? 0b11000000 : 0b10010000;
   }

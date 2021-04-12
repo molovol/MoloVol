@@ -71,8 +71,8 @@ void Space::initGrid(){
   }
   // initialise 3d tensors for each octree level
   for (int lvl = 0; lvl <= max_depth; ++lvl){
-    _grid.push_back(Container3D<Voxel>( n_gridsteps[0]*pow(2,max_depth-lvl), 
-                                        n_gridsteps[1]*pow(2,max_depth-lvl), 
+    _grid.push_back(Container3D<Voxel>( n_gridsteps[0]*pow(2,max_depth-lvl),
+                                        n_gridsteps[1]*pow(2,max_depth-lvl),
                                         n_gridsteps[2]*pow(2,max_depth-lvl)));
   }
 }
@@ -84,15 +84,23 @@ void Space::initGrid(){
 // sets all voxel's types, determined by the input atoms
 void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, const double r_probe2, bool probe_mode){
   // save variable that all voxels need access to for their type determination as static members of Voxel class
-  Voxel::prepareTypeAssignment(this, atomtree); 
+  Voxel::prepareTypeAssignment(this, atomtree);
+  printf("\nVoxels assignment progress:\n");
   if (probe_mode){
     // first run algorithm with the larger probe to exclude most voxels - "masking mode"
     Voxel::storeProbe(r_probe2, true);
+    printf("\nAssigning probe 2 core and atoms:\n");
     assignAtomVsCore();
+    printf("\nAssigning probe 2 shell:\n");
     assignShellVsVoid();
+    printf("\nAssigning probe 1 core:\n");
+  }
+  else{
+    printf("\nAssigning probe 1 core and atoms:\n");
   }
   Voxel::storeProbe(r_probe1, false);
   assignAtomVsCore();
+  printf("\nAssigning probe 1 shell and excluded void:\n");
   assignShellVsVoid();
 }
 
@@ -180,11 +188,11 @@ std::array<double,3> Space::getSize(){
   }
   return size;
 }
-  
+
 double Space::getVxlSize() const {
   return grid_size;
 }
-    
+
 Container3D<Voxel>& Space::getGrid(const unsigned lvl){
   return _grid[lvl];
 }
