@@ -31,7 +31,7 @@ bool MainApp::OnInit()
   assert(parser.Parse()==0);
   wxString unittest_id;
   if (parser.Found("u",&unittest_id)){
-    silenceGUI(true); // not really needed
+    silenceGUI(true); // not really needed but doesn't hurt
     std::cout << "Selected unit test: " << unittest_id << std::endl;
     if (unittest_id=="excluded"){
       Ctrl::getInstance()->unittestExcluded();
@@ -41,6 +41,9 @@ bool MainApp::OnInit()
     }
     else if (unittest_id=="radius"){
       Ctrl::getInstance()->unittestRadius();
+    }
+    else if (unittest_id=="2probe"){
+      Ctrl::getInstance()->unittest2Probe();
     }
     else {
       std::cout << "Invalid selection" << std::endl;}
