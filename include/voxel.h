@@ -49,7 +49,6 @@ class Voxel{
         const char = 0b00000011, const char = 0); 
     void passTypeToChildren(const std::array<unsigned,3>&, const int);
     void splitVoxel(const std::array<unsigned,3>&, const Vector&, const double); 
-    void splitVoxel(const std::array<unsigned int,3>&, const unsigned);
 
     char evalRelationToVoxels(const std::array<unsigned int,3>&, const unsigned, bool=false);
     

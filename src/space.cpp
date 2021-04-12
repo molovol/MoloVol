@@ -86,6 +86,7 @@ void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, co
   // save variable that all voxels need access to for their type determination as static members of Voxel class
   Voxel::prepareTypeAssignment(this, atomtree); 
   if (probe_mode){
+    // first run algorithm with the larger probe to exclude most voxels - "masking mode"
     Voxel::storeProbe(r_probe2, true);
     assignAtomVsCore();
     assignShellVsVoid();

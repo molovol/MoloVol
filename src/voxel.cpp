@@ -390,12 +390,6 @@ void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
   }
 }
 
-// CURRENTLY NOT IN USE
-// adds an array of size 8 to the voxel that contains 8 subvoxels
-void Voxel::splitVoxel(const std::array<unsigned int,3>& vxl_ind, const unsigned lvl){
-  evalRelationToVoxels(vxl_ind, lvl, true);
-}
-
 ///////////
 // TALLY //
 ///////////
