@@ -99,7 +99,7 @@ class Model{
     void debug(); // TODO remove is unused
   private:
     CalcReportBundle _data;
-    std::string calc_time; // stores the time when the calculation was run for output folder and report
+    std::string _time_stamp; // stores the time when the calculation was run for output folder and report
     std::string output_folder = "."; // default folder is the program folder but it is changed with the output file routine
     std::vector<std::tuple<std::string, double, double, double>> raw_atom_coordinates;
     std::vector<std::tuple<std::string, double, double, double>> processed_atom_coordinates;

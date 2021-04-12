@@ -171,7 +171,7 @@ void Model::storeAtomsInTree(){
 
 CalcReportBundle Model::calcVolume(){
   // save the date and time of calculation for output files
-  calc_time = timeNow(); // TODO: rename "_time_stamp"
+  _time_stamp = timeNow();
 
   auto start = std::chrono::steady_clock::now();
   _cell.assignTypeInGrid(atomtree, getProbeRad1(), getProbeRad2(), optionProbeMode()); // assign each voxel in grid a type
