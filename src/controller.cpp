@@ -106,7 +106,7 @@ bool Ctrl::runCalculation(){
   CalcReportBundle data = current_calculation->generateVolumeData();
   auto end = std::chrono::steady_clock::now();
   double total_time = std::chrono::duration<double>(end-start).count();
-  
+
   if (data.success){
     notifyUser("Result for " + data.chemical_formula);
     notifyUser("Elapsed time: " + std::to_string(total_time) + " s");
@@ -135,7 +135,7 @@ void Ctrl::notifyUser(std::string str, bool to_gui){
   }
 }
 
-// TODO remove is obselete
+// TODO remove if obselete
 void Ctrl::prepareOutput(std::string atomFilePath){
   if(!current_calculation->createOutputFolder(fileName(atomFilePath))){
       notifyUser("New output folder could not be created.\nThe output file(s) will be created in the program folder.");

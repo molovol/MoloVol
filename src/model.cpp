@@ -56,6 +56,9 @@ bool Model::setProbeRadii(const double r_1, const double r_2, const bool probe_m
   toggleProbeMode(probe_mode);
   setProbeRad1(r_1);
   if (optionProbeMode()){
+    // The following conditions is checked twice: after pressing calc button in MainFrame::OnCalc and here
+    // This second check would be unnecessary when using the GUI but
+    // adding it here makes the back engine Model error-proof independently from the GUI
     if (r_1 > r_2){
       Ctrl::getInstance()->notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.");
       return false;
