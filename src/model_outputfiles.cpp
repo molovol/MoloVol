@@ -49,7 +49,7 @@ void Model::createReport(){
   output_report << "Time of the calculation: " << _time_stamp << "\n";
   output_report << "Structure file analyzed: " << _data.atom_file_path << "\n";
   output_report << "Chemical formula: " + _data.chemical_formula << "\n";
-  output_report << "Duration of the calculation: " << _data.total_elapsed_seconds << " s\n";
+  output_report << "Duration of the calculation: " << getCalcTime() << " s\n";
 
   output_report << "\n////////////////////////////\n";
   output_report << "// Calculation parameters //\n";

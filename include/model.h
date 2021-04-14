@@ -116,6 +116,7 @@ class Model{
     double _max_atom_radius = 0;
  
     // access functions for information stored in data
+    double getCalcTime(){return _data.getTime();}
     double getProbeRad1(){return _data.r_probe1;}
     void setProbeRad1(double r){_data.r_probe1 = r;}
     double getProbeRad2(){return _data.r_probe2;}
