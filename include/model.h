@@ -35,10 +35,16 @@ struct CalcReportBundle{
   std::map<char,double> volumes;
   std::map<char,double> surfaces;
   // time
-  double total_elapsed_seconds;
-  double type_assignment_elapsed_seconds;
-  double volume_tally_elapsed_seconds;
-  double getTime(){return type_assignment_elapsed_seconds+volume_tally_elapsed_seconds;}
+  std::vector<double> elapsed_seconds;
+  void addTime(const double t){elapsed_seconds.push_back(t);}
+  double getTime(const unsigned i){return elapsed_seconds[i];}
+  double getTime(){
+    double total_seconds = 0;
+    for (const double time : elapsed_seconds){
+      total_seconds += time;
+    }
+    return total_seconds;
+  }
 };
 
 class AtomTree;
@@ -89,7 +95,6 @@ class Model{
     void linkToAdjacentAtoms(const double&, Atom&);
     CalcReportBundle calcVolume();
     bool setParameters(std::string, std::string, bool, bool, bool, double, double, double, int, bool, bool, bool, std::unordered_map<std::string, double>, std::vector<std::string>, double);
-    void setTotalCalcTime(double);
     CalcReportBundle getBundle(); // TODO remove is unused
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void setRadiusMap(std::unordered_map<std::string, double> map);

@@ -48,10 +48,6 @@ bool Model::setParameters(std::string file_path,
   return true;
 }
 
-void Model::setTotalCalcTime(double elapsed_time){
-  _data.total_elapsed_seconds = elapsed_time;
-}
-
 bool Model::setProbeRadii(const double r_1, const double r_2, const bool probe_mode){
   toggleProbeMode(probe_mode);
   setProbeRad1(r_1);
@@ -71,6 +67,7 @@ bool Model::setProbeRadii(const double r_1, const double r_2, const bool probe_m
 }
 
 CalcReportBundle Model::generateVolumeData(){
+  auto start = std::chrono::steady_clock::now();
   // process atom data for unit cell analysis if the option it ticked
   if(optionAnalyzeUnitCell()){
     if(!processUnitCell()){
@@ -87,6 +84,8 @@ CalcReportBundle Model::generateVolumeData(){
   defineCell();
 
   generateChemicalFormula();
+  auto end = std::chrono::steady_clock::now();
+  _data.addTime(std::chrono::duration<double>(end-start).count());
 
   // create a report bundle
   return calcVolume();
@@ -179,7 +178,7 @@ CalcReportBundle Model::calcVolume(){
   auto start = std::chrono::steady_clock::now();
   _cell.assignTypeInGrid(atomtree, getProbeRad1(), getProbeRad2(), optionProbeMode()); // assign each voxel in grid a type
   auto end = std::chrono::steady_clock::now();
-  _data.type_assignment_elapsed_seconds = std::chrono::duration<double>(end-start).count();
+  _data.addTime(std::chrono::duration<double>(end-start).count());
 
   // TODO remove when unnecessary
   //_cell.printGrid(); // for testing
@@ -187,7 +186,7 @@ CalcReportBundle Model::calcVolume(){
   start = std::chrono::steady_clock::now();
   _data.volumes = _cell.getVolume();
   end = std::chrono::steady_clock::now();
-  _data.volume_tally_elapsed_seconds = std::chrono::duration<double>(end-start).count();
+  _data.addTime(std::chrono::duration<double>(end-start).count());
 
   return _data;
 }

@@ -100,14 +100,11 @@ bool Ctrl::runCalculation(){
       gui->getMaxRad())){
     return false;
   }
-  auto start = std::chrono::steady_clock::now();
   CalcReportBundle data = current_calculation->generateVolumeData();
-  auto end = std::chrono::steady_clock::now();
-  double total_time = std::chrono::duration<double>(end-start).count();
 
   if (data.success){
     notifyUser("Result for " + data.chemical_formula);
-    notifyUser("Elapsed time: " + std::to_string(total_time) + " s");
+    notifyUser("Elapsed time: " + std::to_string(data.getTime()) + " s");
     notifyUser("Van der Waals volume: " + std::to_string(data.volumes[0b00000011]) + " A^3");
     notifyUser("Excluded void volume: " + std::to_string(data.volumes[0b00000101]) + " A^3");
     notifyUser("Probe 1 core volume: " + std::to_string(data.volumes[0b00001001]) + " A^3");

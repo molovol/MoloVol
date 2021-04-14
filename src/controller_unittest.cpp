@@ -106,7 +106,7 @@ bool Ctrl::unittestProtein(){
 
     printf("f: %40s, g: %4.1f, d: %4i, r: %4.1f\n", atom_filepath.c_str(), grid_step, max_depth, rad_probe1);
     printf("Error vdW: %20.10f, Excluded: %20.10f, Time: %10.5f s\n", error_vdwVolume, data.volumes[0b00000101], diff_time);
-    printf("Type Assignment: %10.5f s, Volume Tally: %10.5f s\n", data.type_assignment_elapsed_seconds, data.volume_tally_elapsed_seconds);
+    printf("Type Assignment: %10.5f s, Volume Tally: %10.5f s\n", data.getTime(1), data.getTime(2));
   }
   else{
     std::cout << "Calculation failed" << std::endl;
