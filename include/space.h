@@ -23,7 +23,7 @@ class Space{
     std::array <double,3> getMax();
     std::array <double,3> getSize();
     bool coordInBounds(const std::array<int,3>&, const unsigned); // not in use
-    double getResolution() const; // misnamed
+    double getVxlSize() const;
     Container3D<Voxel>& getGrid(const unsigned);
 
     // get voxel
@@ -43,7 +43,7 @@ class Space{
     void printGrid();
 
     // type evaluation
-    void placeAtomsInGrid(const AtomTree&, const double&);
+    void assignTypeInGrid(const AtomTree&, const double, const double, bool);
     std::map<char,double> getVolume();
 
   private:

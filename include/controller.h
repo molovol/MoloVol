@@ -23,7 +23,7 @@ class Ctrl{
     bool unittestExcluded();
     bool unittestProtein();
     bool unittestRadius();
-    bool unittestSurfaceMap();
+    bool unittest2Probe();
 
   private:
     // consider making static pointer for model
@@ -32,7 +32,7 @@ class Ctrl{
     static Ctrl* instance;
     static MainFrame* gui;
 
-    bool to_gui = true; // determines whether to print to console or to GUI
+    bool _to_gui = true; // determines whether to print to console or to GUI
 };
 
 

@@ -26,7 +26,25 @@ bool Ctrl::unittestExcluded(){
   for (int i = 0; i < 3; i++){
     current_calculation->readAtomsFromFile(atom_filepaths[i], false);
     std::vector<std::string> included_elements = current_calculation->listElementsInStructure();
-    data[i] = current_calculation->runUnittest(atom_filepaths[i], grid_step, max_depth, rad_map, included_elements, rad_probe1);
+    
+    current_calculation->setParameters(
+        atom_filepaths[i],
+        "./output",
+        false,
+        false,
+        false,
+        rad_probe1,
+        0,
+        grid_step,
+        max_depth,
+        false,
+        false,
+        false,
+        rad_map,
+        included_elements,
+        3);
+
+    data[i] = current_calculation->generateVolumeData();
     if(data[i].success){
       error[i] = abs(data[i].volumes[0b00000101]-expected_volumes[i])/data[i].volumes[0b00000101];
     }
@@ -63,14 +81,32 @@ bool Ctrl::unittestProtein(){
   CalcReportBundle data;
   current_calculation->readAtomsFromFile(atom_filepath, false);
   std::vector<std::string> included_elements = current_calculation->listElementsInStructure();
-  data = current_calculation->runUnittest(atom_filepath, grid_step, max_depth, rad_map, included_elements, rad_probe1);
+
+  current_calculation->setParameters(
+      atom_filepath,
+      "./output",
+      false,
+      false,
+      false,
+      rad_probe1,
+      0,
+      grid_step,
+      max_depth,
+      false,
+      false,
+      false,
+      rad_map,
+      included_elements,
+      3);
+
+  data = current_calculation->generateVolumeData();
   if(data.success){
     error_vdwVolume = abs(data.volumes[0b00000011]-expected_vdwVolume)/data.volumes[0b00000011];
     diff_time = data.getTime() - expected_time;
 
     printf("f: %40s, g: %4.1f, d: %4i, r: %4.1f\n", atom_filepath.c_str(), grid_step, max_depth, rad_probe1);
     printf("Error vdW: %20.10f, Excluded: %20.10f, Time: %10.5f s\n", error_vdwVolume, data.volumes[0b00000101], diff_time);
-    printf("Type Assignment: %10.5f s, Volume Tally: %10.5f s\n", data.type_assignment_elapsed_seconds, data.volume_tally_elapsed_seconds);
+    printf("Type Assignment: %10.5f s, Volume Tally: %10.5f s\n", data.getTime(1), data.getTime(2));
   }
   else{
     std::cout << "Calculation failed" << std::endl;
@@ -84,20 +120,40 @@ bool Ctrl::unittestRadius(){
   // parameters for unittest:
   const std::string atom_filepath = "./inputfile/probetest_pair.xyz";
   const std::string radius_filepath = "./inputfile/radii.txt";
+  double rad_probe2 = 1.2;
+  bool two_probe = true;
 
   std::unordered_map<std::string, double> rad_map = current_calculation->importRadiusMap(radius_filepath);
-  {int max_depth = 0;
+  {int max_depth = 4;
     //for (int max_depth = 4; max_depth < ; max_depth++){
     {double grid_step = 0.1;
       //for (double grid_step = 1; grid_step>0.01; grid_step-=0.01){
-      {double rad_probe1 = 1.2;
+      {double rad_probe1 = 0;
         //for (double rad_probe1 = 2; rad_probe1 < 2.01; rad_probe1 += 0.1){
 
 
         CalcReportBundle data;
         current_calculation->readAtomsFromFile(atom_filepath, false);
         std::vector<std::string> included_elements = current_calculation->listElementsInStructure();
-        data = current_calculation->runUnittest(atom_filepath, grid_step, max_depth, rad_map, included_elements, rad_probe1);
+
+        current_calculation->setParameters(
+            atom_filepath,
+            "./output",
+            false,
+            false,
+            two_probe,
+            rad_probe1,
+            rad_probe2,
+            grid_step,
+            max_depth,
+            false,
+            false,
+            false,
+            rad_map,
+            included_elements,
+            3);
+
+        data = current_calculation->generateVolumeData();
 
         if(data.success){
           printf("f: %40s, g: %4.2f, d: %4i, r: %4.1f\n", atom_filepath.c_str(), grid_step, max_depth, rad_probe1);
@@ -113,35 +169,54 @@ bool Ctrl::unittestRadius(){
   return true;
 }
 
-bool Ctrl::unittestSurfaceMap(){
+bool Ctrl::unittest2Probe(){
   if(current_calculation == NULL){current_calculation = new Model();}
 
   // parameters for unittest:
-  const std::string atom_filepath = "./inputfile/hydrogen.xyz";
+  const std::string atom_filepath = "./inputfile/probetest_quadruplet.xyz";
   const std::string radius_filepath = "./inputfile/radii.txt";
-  const double grid_step = 0.1;
-  const int max_depth = 3;
-
-  double rad_probe1 = 0;
+  double rad_probe2 = 2;
+  double rad_probe1 = 0.5;
+  bool two_probe = true;
+  int max_depth = 4;
+  double grid_step = 0.1;
 
   std::unordered_map<std::string, double> rad_map = current_calculation->importRadiusMap(radius_filepath);
 
   CalcReportBundle data;
   current_calculation->readAtomsFromFile(atom_filepath, false);
   std::vector<std::string> included_elements = current_calculation->listElementsInStructure();
-  data = current_calculation->runUnittest(atom_filepath, grid_step, max_depth, rad_map, included_elements, rad_probe1);
+
+  current_calculation->setParameters(
+      atom_filepath,
+      "./output",
+      false,
+      false,
+      two_probe,
+      rad_probe1,
+      rad_probe2,
+      grid_step,
+      max_depth,
+      false,
+      false,
+      false,
+      rad_map,
+      included_elements,
+      3);
+
+  data = current_calculation->generateVolumeData();
+
   if(data.success){
-
-    printf("f: %40s, g: %4.1f, d: %4i, r: %4.1f\n", atom_filepath.c_str(), grid_step, max_depth, rad_probe1);
-    printf("vdW: %20.10f, Excluded: %20.10f, Time: %10.5f s\n"
-        , data.volumes[0b00000011], data.volumes[0b00000101], data.getTime());
-
-    current_calculation->writeSurfaceMap();
+    printf("f: %40s, g: %4.2f, d: %4i, r1: %4.1f, r2: %4.1f\n", 
+        atom_filepath.c_str(), grid_step, max_depth, rad_probe1, rad_probe2);
+    printf("vdW: %20.10f, Excluded: %20.10f\n", data.volumes[0b00000011]-28.866, data.volumes[0b00000101]-6.224);
+    printf("P1 Core: %20.10f, P1 Shell: %20.10f\n", data.volumes[0b00001001]-0.202, data.volumes[0b00010001]-5.702);
+    printf("P2 Core: %20.10f, P1 Shell: %20.10f\n", data.volumes[0b00100001]-681.534, data.volumes[0b01000001]-309.664);
+    printf("Time elapsed: %10.5f s\n", data.getTime()-2.12);
   }
   else{
     std::cout << "Calculation failed" << std::endl;
   }
   return true;
 }
-
 

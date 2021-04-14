@@ -12,14 +12,19 @@
 #include <math.h>
 
 struct CalcReportBundle{
+  // calculation returned without error
   bool success = true;
-  // structure and calculation parameters
+  // file paths
   std::string atom_file_path;
+  // switches
   bool inc_hetatm;
   bool analyze_unit_cell;
   bool probe_mode;
+  // parameters for calculation
   double grid_step;
   int max_depth;
+  double r_probe1 = 0;
+  double r_probe2 = 0;
   std::vector<std::string> included_elements;
   std::string chemical_formula;
   // output options
@@ -29,13 +34,16 @@ struct CalcReportBundle{
   // calculation results
   std::map<char,double> volumes;
   std::map<char,double> surfaces;
-
-  double total_elapsed_seconds;
-  double type_assignment_elapsed_seconds;
-  double volume_tally_elapsed_seconds;
-
+  // time
+  std::vector<double> elapsed_seconds;
+  void addTime(const double t){elapsed_seconds.push_back(t);}
+  double getTime(const unsigned i){return elapsed_seconds[i];}
   double getTime(){
-    return type_assignment_elapsed_seconds+volume_tally_elapsed_seconds;
+    double total_seconds = 0;
+    for (const double time : elapsed_seconds){
+      total_seconds += time;
+    }
+    return total_seconds;
   }
 };
 
@@ -78,6 +86,7 @@ class Model{
     inline double findRadiusOfAtom(const Atom&); //TODO has not been tested
 
     // controller-model communication
+    CalcReportBundle generateVolumeData();
     // calls the Space constructor and creates a cell containing all atoms. Cell size is defined by atom positions
     void defineCell();
     void setAtomListForCalculation();
@@ -86,18 +95,16 @@ class Model{
     void linkToAdjacentAtoms(const double&, Atom&);
     CalcReportBundle calcVolume();
     bool setParameters(std::string, std::string, bool, bool, bool, double, double, double, int, bool, bool, bool, std::unordered_map<std::string, double>, std::vector<std::string>, double);
-    void setTotalCalcTime(double);
     CalcReportBundle getBundle(); // TODO remove is unused
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void setRadiusMap(std::unordered_map<std::string, double> map);
-    bool setProbeRadii(const double&, const double&, bool);
+    bool setProbeRadii(const double, const double, const bool);
     void generateChemicalFormula();
 
-    CalcReportBundle runUnittest(std::string, double, int, std::unordered_map<std::string, double>, std::vector<std::string>, double);
     void debug(); // TODO remove is unused
   private:
     CalcReportBundle _data;
-    std::string calc_time; // stores the time when the calculation was run for output folder and report
+    std::string _time_stamp; // stores the time when the calculation was run for output folder and report
     std::string output_folder = "."; // default folder is the program folder but it is changed with the output file routine
     std::vector<std::tuple<std::string, double, double, double>> raw_atom_coordinates;
     std::vector<std::tuple<std::string, double, double, double>> processed_atom_coordinates;
@@ -111,9 +118,19 @@ class Model{
     std::vector<Atom> atoms;
     AtomTree atomtree;
     Space _cell;
-    double _r_probe1 = 0;
-    double _r_probe2 = 0;
     double _max_atom_radius = 0;
+ 
+    // access functions for information stored in data
+    double getCalcTime(){return _data.getTime();}
+    double getProbeRad1(){return _data.r_probe1;}
+    void setProbeRad1(double r){_data.r_probe1 = r;}
+    double getProbeRad2(){return _data.r_probe2;}
+    void setProbeRad2(double r){_data.r_probe2 = r;}
+    bool optionProbeMode(){return _data.probe_mode;}
+    void toggleProbeMode(bool state){_data.probe_mode = state;}
+    bool optionIncludeHetatm(){return _data.inc_hetatm;}
+    bool optionAnalyzeUnitCell(){return _data.analyze_unit_cell;}
+    bool optionAnalyseUnitCell(){return _data.analyze_unit_cell;}
 };
 
 

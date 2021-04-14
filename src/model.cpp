@@ -37,7 +37,6 @@ bool Model::setParameters(std::string file_path,
   output_folder = output_dir;
   _data.inc_hetatm = inc_hetatm;
   _data.analyze_unit_cell = analyze_unit_cell;
-  _data.probe_mode = probe_mode;
   _data.grid_step = grid_step;
   _data.max_depth = max_depth;
   _data.make_report = make_report;
@@ -49,22 +48,47 @@ bool Model::setParameters(std::string file_path,
   return true;
 }
 
-void Model::setTotalCalcTime(double calc_time){
-  _data.total_elapsed_seconds = calc_time;
-}
-
-bool Model::setProbeRadii(const double& r_1, const double& r_2, bool two_probe_mode){
-  _r_probe1 = r_1;
-  if (two_probe_mode){
+bool Model::setProbeRadii(const double r_1, const double r_2, const bool probe_mode){
+  toggleProbeMode(probe_mode);
+  setProbeRad1(r_1);
+  if (optionProbeMode()){
+    // The following conditions is checked twice: after pressing calc button in MainFrame::OnCalc and here
+    // This second check would be unnecessary when using the GUI but
+    // adding it here makes the back engine Model error-proof independently from the GUI
     if (r_1 > r_2){
-    Ctrl::getInstance()->notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.");
-    return false;
+      Ctrl::getInstance()->notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.");
+      return false;
     }
     else{
-      _r_probe2 = r_2;
+      setProbeRad2(r_2);
     }
   }
   return true;
+}
+
+CalcReportBundle Model::generateVolumeData(){
+  auto start = std::chrono::steady_clock::now();
+  // process atom data for unit cell analysis if the option it ticked
+  if(optionAnalyzeUnitCell()){
+    if(!processUnitCell()){
+      _data.success = false;
+      return _data;
+    }
+  }
+
+  // determine which atoms will be taken into account
+  setAtomListForCalculation();
+  // place atoms in a binary tree for faster access
+  storeAtomsInTree();
+  // set size of the box containing all atoms
+  defineCell();
+
+  generateChemicalFormula();
+  auto end = std::chrono::steady_clock::now();
+  _data.addTime(std::chrono::duration<double>(end-start).count());
+
+  // create a report bundle
+  return calcVolume();
 }
 
 void Model::setAtomListForCalculation(){
@@ -134,44 +158,12 @@ CalcReportBundle Model::getBundle(){
   return _data;
 }
 
-CalcReportBundle Model::runUnittest(std::string atom_filepath, double grid_step, int max_depth, std::unordered_map<std::string, double> rad_map, std::vector<std::string> included_elements, double rad_probe1){
-  setParameters(
-        atom_filepath,
-        ".",
-        false,
-        false,
-        false,
-        rad_probe1,
-        5,
-        grid_step,
-        max_depth,
-        //TODO add get output folder
-        false,
-        false,
-        false,
-        rad_map,
-        included_elements,
-        3);
-
-  // determine which atoms will be taken into account
-  setAtomListForCalculation();
-  // place atoms in a binary tree for faster access
-  storeAtomsInTree();
-  // set size of the box containing all atoms
-  defineCell();
-
-  generateChemicalFormula();
-
-  // assign voxel types and store the volume(s)
-  return calcVolume();
-}
-
 ///////////////////////////
 // CALCULATION FUNCTIONS //
 ///////////////////////////
 
 void Model::defineCell(){
-  _cell = Space(atoms, _data.grid_step, _data.max_depth, _r_probe1);
+  _cell = Space(atoms, _data.grid_step, _data.max_depth, optionProbeMode()? getProbeRad2() : getProbeRad1());
   return;
 }
 
@@ -181,12 +173,12 @@ void Model::storeAtomsInTree(){
 
 CalcReportBundle Model::calcVolume(){
   // save the date and time of calculation for output files
-  calc_time = timeNow();
+  _time_stamp = timeNow();
 
   auto start = std::chrono::steady_clock::now();
-  _cell.placeAtomsInGrid(atomtree, _r_probe1); // assign each voxel in grid a type, defined by the atom positions
+  _cell.assignTypeInGrid(atomtree, getProbeRad1(), getProbeRad2(), optionProbeMode()); // assign each voxel in grid a type
   auto end = std::chrono::steady_clock::now();
-  _data.type_assignment_elapsed_seconds = std::chrono::duration<double>(end-start).count();
+  _data.addTime(std::chrono::duration<double>(end-start).count());
 
   // TODO remove when unnecessary
   //_cell.printGrid(); // for testing
@@ -194,7 +186,7 @@ CalcReportBundle Model::calcVolume(){
   start = std::chrono::steady_clock::now();
   _data.volumes = _cell.getVolume();
   end = std::chrono::steady_clock::now();
-  _data.volume_tally_elapsed_seconds = std::chrono::duration<double>(end-start).count();
+  _data.addTime(std::chrono::duration<double>(end-start).count());
 
   return _data;
 }
@@ -233,7 +225,7 @@ bool Model::processUnitCell(){
   6) create atom map based on unit cell limits + radius= 2*(max_atom_rad+probe1+probe2+gridstep)
   7) write structure file with processed atom list
   */
-  double radius_limit = 2*(_max_atom_radius+_r_probe1+_r_probe2+_data.grid_step);
+  double radius_limit = 2*(_max_atom_radius+getProbeRad1()+getProbeRad2()+_data.grid_step);
   if(space_group == ""){
     Ctrl::getInstance()->notifyUser("Space group not found!\nCheck the structure file\nor untick the unit cell analysis checkbox.");
     return false;

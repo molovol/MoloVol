@@ -12,7 +12,7 @@
 ///////////////////
 
 inline double Voxel::calcRadiusOfInfluence(const double& max_depth){
-  return max_depth != 0 ? 0.86602540378 * s_grid_size * (pow(2,max_depth) - 1) : 0;
+  return max_depth != 0 ? 0.86602540378 * s_cell->getVxlSize() * (pow(2,max_depth) - 1) : 0;
 }
 char mergeTypes(std::vector<Voxel*>&);
 char mergeTypes(const std::array<char,8>&);
@@ -167,6 +167,7 @@ Voxel& Voxel::getSubvoxel(std::array<unsigned,3> sub_index, const unsigned p_lvl
 }
 
 bool Voxel::hasSubvoxel(){return readBit(_type,7);}
+bool Voxel::isAssigned(){return readBit(_type,0);}
 
 // type
 char Voxel::getType(){return _type;}
@@ -177,28 +178,32 @@ void Voxel::setType(char input){_type = input;}
 /////////////////////////////////
 
 // function to call before beginning the type assignment routine in order to prepare static variables
-void Voxel::prepareTypeAssignment(Space* cell, AtomTree atomtree, double grid_size, double r_probe1, int max_depth){
+void Voxel::prepareTypeAssignment(Space* cell, AtomTree atomtree){
   s_cell = cell;
   s_atomtree = atomtree;
-  s_grid_size = grid_size;
-  s_r_probe1 = r_probe1;
-  s_search_indices = SearchIndex(r_probe1, grid_size, cell->getMaxDepth());
 }
 
+void Voxel::storeProbe(const double r_probe, const bool masking_mode){
+  s_r_probe = r_probe;
+  s_masking_mode = masking_mode;
+  s_search_indices = SearchIndex(r_probe, s_cell->getVxlSize(), s_cell->getMaxDepth());
+}
 ///////////////////////////////
 // TYPE ASSIGNMENT 1ST ROUND //
 ///////////////////////////////
 // part of the type assigment routine. first evaluation is only concerned with the relation between
 // voxels and atoms
 char Voxel::evalRelationToAtoms(const std::array<unsigned,3>& index_vxl, Vector pos_vxl, const int lvl){
-  double rad_vxl = calcRadiusOfInfluence(lvl); // calculated every time, since max_depth may change (not expensive)
-
-  traverseTree(s_atomtree.getRoot(), s_atomtree.getMaxRad(), pos_vxl, rad_vxl, s_r_probe1, lvl);
-
-  if (_type == 0){_type = 0b00001001;}
-  if (readBit(_type,7)){splitVoxel(index_vxl, pos_vxl, lvl);} // split if type mixed
+  if (isAssigned()) {return _type;}
+  if (!hasSubvoxel()) {
+    double rad_vxl = calcRadiusOfInfluence(lvl); // calculated every time, since max_depth may change (not expensive)
+    traverseTree(s_atomtree.getRoot(), s_atomtree.getMaxRad(), pos_vxl, rad_vxl, s_r_probe, lvl);
+    if (_type == 0){_type = s_masking_mode? 0b00100001 : 0b00001001;}
+  }
+  if (hasSubvoxel()) {
+    splitVoxel(index_vxl, pos_vxl, lvl);
+  }
   else {passTypeToChildren(index_vxl, lvl);}
-
   return _type;
 }
 
@@ -237,11 +242,11 @@ void Voxel::splitVoxel(const std::array<unsigned,3>& vxl_index, const Vector& vx
         sub_index[0] = vxl_index[0]*2 + x;
         factors[0] = x ? 1 : -1;
         // modify position
-        Vector new_pos = vxl_pos + factors * s_grid_size * std::pow(2,lvl-2);
-        
+        Vector new_pos = vxl_pos + factors * s_cell->getVxlSize() * std::pow(2,lvl-2);
+
         subtypes[i] = getSubvoxel(sub_index, lvl).evalRelationToAtoms(sub_index, new_pos, lvl-1);
         ++i;
-        
+
       }
     }
   }
@@ -251,15 +256,15 @@ void Voxel::splitVoxel(const std::array<unsigned,3>& vxl_index, const Vector& vx
 // goes through all close atoms to determine a voxel's type
 void Voxel::traverseTree
   (const AtomNode* node,
-   const double& rad_max,
+   const double rad_max,
    const Vector& pos_vxl,
-   const double& rad_vxl,
-   const double& rad_probe,
-   const int& max_depth,
+   const double rad_vxl,
+   const double rad_probe,
+   const int max_depth,
    const char exit_type,
    const char dim){
 
-  if (node == NULL || readBit(_type,0)){return;}
+  if (node == NULL){return;}
   const Atom& atom = node->getAtom();
 
   // distance between atom and voxel along one dimension
@@ -283,21 +288,21 @@ void Voxel::traverseTree
 bool Voxel::isAtom(const Atom& atom, const Vector& pos_vxl, const double rad_vxl, const double rad_probe){
   Vector dist = pos_vxl - atom.getPosVec();
 
-  if((dist < atom.getRad() - rad_vxl) && (0 < atom.getRad() - rad_vxl)){
+  if((dist < atom.getRad() - rad_vxl) && (0 < atom.getRad() - rad_vxl)){ // if completely inside atom
     _type = 0b00000011;
     return true;
   }
-  else if (dist < atom.getRad() + rad_vxl){
+  else if (dist < atom.getRad() + rad_vxl){ // if partially inside atom
     if (readBit(_type,1)){return false;} // if inside atom
     _type = 0b10000010;
   }
-  else if ((dist < atom.getRad() + rad_probe - rad_vxl) && (0 < atom.getRad() + rad_probe - rad_vxl)){
+  else if ((dist < atom.getRad() + rad_probe - rad_vxl) && (0 < atom.getRad() + rad_probe - rad_vxl)){ // if outside atom but not touching potential probe core
     if (readBit(_type,1)){return false;} // if mixed or inside atom
-    _type = 0b00010000;
+    _type = s_masking_mode? 0b01000000 : 0b00010000;
   }
-  else if (dist < atom.getRad() + rad_probe + rad_vxl){
+  else if (dist < atom.getRad() + rad_probe + rad_vxl){ // if outside atom but touching potential probe core
     if (readBit(_type,4) || readBit(_type,1)){return false;} // if mixed, inside atom, or potential shell
-    _type = 0b10010000;
+    _type = s_masking_mode? 0b11000000 : 0b10010000;
   }
   return false;
 }
@@ -341,11 +346,12 @@ void Voxel::listFromTree(
 
 char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const unsigned lvl, bool split){
   // if voxel (including all subvoxels) have been assigned, then return immediately
-  if (readBit(_type,0)){return _type;}
+  if (isAssigned()){return _type;}
   else if (!hasSubvoxel()){ // vxl has no children
     searchForCore(index, lvl, split);
+    split = true;
   }
-  else { // vxl has children
+  if (hasSubvoxel()) { // vxl has children
     std::array<unsigned int,3> index_subvxl;
     std::array<char,8> subtypes;
     char i = 0;
@@ -362,27 +368,26 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
     }
     setType(mergeTypes(subtypes));
   }
-  if (!readBit(_type,0)){ splitVoxel(index, lvl);} // if voxel unassigned
-  if (!readBit(_type,7)){passTypeToChildren(index, lvl);}
+  else {passTypeToChildren(index, lvl);}
   return _type;
 }
 
 void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigned lvl, bool split){
-  _type = 0b00000101; // type excluded
+  _type = s_masking_mode? 0 : 0b00000101; // type excluded
+
+  const char shell_type = s_masking_mode? 0b01000001 : 0b00010001;
+  const char bit_pos_core = s_masking_mode? 5 : 3;
+
   for (unsigned int n = (split? Voxel::s_search_indices.getSafeLim(lvl+1)*4 : 1); n <= Voxel::s_search_indices.getUppLim(lvl); ++n){
+    // called very often; keep section inexpensive
     for (std::array<int,3> coord : Voxel::s_search_indices[n]){
       coord = add(coord, index);
-      if (readBit((s_cell->getVxlFromGrid(coord,lvl)).getType(),3)){
-        _type = (n <= Voxel::s_search_indices.getSafeLim(lvl))? 0b00010001 : 0b10000000;
+      if (readBit((s_cell->getVxlFromGrid(coord,lvl)).getType(),bit_pos_core)){
+        _type = (n <= Voxel::s_search_indices.getSafeLim(lvl))? shell_type : 0b10000000; // mark to split
         return;
       }
     }
   }
-}
-
-// adds an array of size 8 to the voxel that contains 8 subvoxels
-void Voxel::splitVoxel(const std::array<unsigned int,3>& vxl_ind, const unsigned lvl){
-  evalRelationToVoxels(vxl_ind, lvl, true);
 }
 
 ///////////
