@@ -81,8 +81,6 @@ bool Ctrl::runCalculation(){
     current_calculation = new Model();
   }
 
-  // TODO: Place the following code into a wrapper function
-
   // save parameters in model
   if(!current_calculation->setParameters(
       gui->getAtomFilepath(),
