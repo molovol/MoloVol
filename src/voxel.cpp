@@ -288,8 +288,6 @@ void Voxel::traverseTree
 bool Voxel::isAtom(const Atom& atom, const Vector& pos_vxl, const double rad_vxl, const double rad_probe){
   Vector dist = pos_vxl - atom.getPosVec();
 
-  // TODO the second condition would not be necessary if dist was a double type
-  // if(dist + rad_vxl < atom.getRad()){
   if((dist < atom.getRad() - rad_vxl) && (0 < atom.getRad() - rad_vxl)){ // if completely inside atom
     _type = 0b00000011;
     return true;
@@ -298,8 +296,6 @@ bool Voxel::isAtom(const Atom& atom, const Vector& pos_vxl, const double rad_vxl
     if (readBit(_type,1)){return false;} // if inside atom
     _type = 0b10000010;
   }
-  // TODO the second condition would not be necessary if dist was a double type
-  // else if (dist + rad_vxl < atom.getRad() + rad_probe){
   else if ((dist < atom.getRad() + rad_probe - rad_vxl) && (0 < atom.getRad() + rad_probe - rad_vxl)){ // if outside atom but not touching potential probe core
     if (readBit(_type,1)){return false;} // if mixed or inside atom
     _type = s_masking_mode? 0b01000000 : 0b00010000;
