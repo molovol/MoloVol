@@ -81,7 +81,7 @@ void Model::clearAtomData(){
   raw_atom_coordinates.clear();
   space_group = "";
   for(int i = 0; i < 6; i++){
-    cell_param[i] = 0;
+    _cell_param[i] = 0;
   }
 }
 
@@ -154,12 +154,12 @@ void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
                                         std::stod(line.substr(46,8)));
     }
     else if (line.substr(0,6) == "CRYST1"){
-      cell_param[0] = std::stod(line.substr(6,9));
-      cell_param[1] = std::stod(line.substr(15,9));
-      cell_param[2] = std::stod(line.substr(24,9));
-      cell_param[3] = std::stod(line.substr(33,7));
-      cell_param[4] = std::stod(line.substr(40,7));
-      cell_param[5] = std::stod(line.substr(47,7));
+      _cell_param[0] = std::stod(line.substr(6,9));
+      _cell_param[1] = std::stod(line.substr(15,9));
+      _cell_param[2] = std::stod(line.substr(24,9));
+      _cell_param[3] = std::stod(line.substr(33,7));
+      _cell_param[4] = std::stod(line.substr(40,7));
+      _cell_param[5] = std::stod(line.substr(47,7));
       space_group = line.substr(55,11); // note: mercury recognizes only 10 chars but official PDB format is 11 chars
       space_group.erase(std::remove(space_group.begin(), space_group.end(), ' '), space_group.end()); // remove white spaces
     }
