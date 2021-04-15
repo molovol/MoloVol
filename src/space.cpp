@@ -58,6 +58,12 @@ void Space::setBoundaries(const std::vector<Atom> &atoms, const double add_space
     cart_min[dim] -= (add_space + max_radius);
     cart_max[dim] += (add_space + max_radius);
   }
+  // align the grid with origin (0,0,0) of atomic Cartesian coordinates, useful for unit cell analysis
+  for(int dim = 0; dim < 3; dim++){
+    if(std::fmod(cart_min[dim],grid_size) != 0){
+      cart_min[dim] -= std::fmod(cart_min[dim],grid_size);
+    }
+  }
   return;
 }
 
