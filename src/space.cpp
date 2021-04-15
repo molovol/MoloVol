@@ -193,27 +193,29 @@ std::map<char,double> Space::getUnitCellVolumes(std::array<double,3> unit_cell_l
     }
   }
   // for unit cells that are not proportional to grid_size, it is necessary to only consider a partial voxel volume for the voxels partially overlapping with the unit cell
-  int count1 = 0;
-  int count2 = 0;
   for(int n = 0; n < 3; n++){
     int i = n;
     int j = (n+1)%3;
     int k = (n+2)%3;
-    bot_lvl_index[i] = unit_cell_end_index[i]+1;
+
+    // count voxels in the three end faces of the unit cell
+    bot_lvl_index[i] = unit_cell_end_index[i];
     for (bot_lvl_index[j] = unit_cell_start_index[j]; bot_lvl_index[j] < unit_cell_end_index[j]; bot_lvl_index[j]++){
       for (bot_lvl_index[k] = unit_cell_start_index[k]; bot_lvl_index[k] < unit_cell_end_index[k]; bot_lvl_index[k]++){
         tally[getVxlFromGrid(bot_lvl_index, 0).getType()] += unit_cell_mod_index[i]/grid_size;
-        count1++;
       }
     }
-    bot_lvl_index[j] = unit_cell_end_index[j]+1;
-    for (bot_lvl_index[k] = unit_cell_start_index[k]; bot_lvl_index[k] <= unit_cell_end_index[k]; bot_lvl_index[k]++){
+
+    // count voxels in the three edges connecting end faces of the unit cell
+    bot_lvl_index[j] = unit_cell_end_index[j];
+    for (bot_lvl_index[k] = unit_cell_start_index[k]; bot_lvl_index[k] < unit_cell_end_index[k]; bot_lvl_index[k]++){
       tally[getVxlFromGrid(bot_lvl_index, 0).getType()] += unit_cell_mod_index[i]*unit_cell_mod_index[j]/(grid_size*grid_size);
-      count2++;
     }
   }
+
+  // add last end corner voxel
   for(int i = 0; i < 3; i++){
-    bot_lvl_index[i] = unit_cell_end_index[i]+1;
+    bot_lvl_index[i] = unit_cell_end_index[i];
   }
   tally[getVxlFromGrid(bot_lvl_index, 0).getType()] += unit_cell_mod_index[0]*unit_cell_mod_index[1]*unit_cell_mod_index[2]/(grid_size*grid_size*grid_size);
 
