@@ -221,11 +221,11 @@ bool Model::processUnitCell(){
   2) create symmetry elements from base structure
   3) if atoms outside the orthogonal cell, move them inside
   4) remove duplicate atoms (allow 0.01-0.05 A error)
-  5) create supercell at least 3x3x3 but big enough to include a radius around central unit cell = 2*(largestAtom+probe1+probe2+gridstep)
-  6) create atom map based on unit cell limits + radius= 2*(max_atom_rad+probe1+probe2+gridstep)
+  5) create supercell at least 3x3x3 but big enough to include a radius around central unit cell = gridstep + largest_atom radius + 2*largest probe radius
+  6) create atom map based on unit cell limits + radius= gridstep + largest_atom radius + 2*largest probe radius
   7) write structure file with processed atom list
   */
-  double radius_limit = 2*(_max_atom_radius+getProbeRad1()+getProbeRad2()+_data.grid_step);
+  double radius_limit = _data.grid_step + _max_atom_radius + 2*( (_data.probe_mode) ? getProbeRad2() : getProbeRad1() );
   if(space_group == ""){
     Ctrl::getInstance()->notifyUser("Space group not found!\nCheck the structure file\nor untick the unit cell analysis checkbox.");
     return false;
