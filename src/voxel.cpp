@@ -173,6 +173,10 @@ bool Voxel::isAssigned(){return readBit(_type,0);}
 char Voxel::getType(){return _type;}
 void Voxel::setType(char input){_type = input;}
 
+// ID
+void Voxel::setID(unsigned char id){_identity = id;}
+unsigned char Voxel::getID(){return _identity;}
+
 /////////////////////////////////
 // TYPE ASSIGNMENT PREPARATION //
 /////////////////////////////////

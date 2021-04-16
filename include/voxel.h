@@ -38,6 +38,8 @@ class Voxel{
     bool isAssigned();
     void setType(char);
     char getType();
+    void setID(unsigned char);
+    unsigned char getID();
 
     static void prepareTypeAssignment(Space*, AtomTree);
     static void storeProbe(const double, const bool);
@@ -76,6 +78,7 @@ class Voxel{
     void searchForCore(const std::array<unsigned int,3>&, const unsigned, bool=false);
 
     char _type;
+    unsigned char _identity;
 };
 
 #endif
