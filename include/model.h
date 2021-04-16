@@ -13,7 +13,7 @@
 
 struct CalcReportBundle{
   // calculation returned without error
-  bool success = true;
+  bool success;
   // file paths
   std::string atom_file_path;
   // switches

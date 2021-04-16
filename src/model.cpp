@@ -176,6 +176,9 @@ void Model::storeAtomsInTree(){
 
 CalcReportBundle Model::calcVolume(){
 
+  // set back the default value of success to true to avoid lingering errors from previous failed calculations
+  _data.success = true;
+
   auto start = std::chrono::steady_clock::now();
   _cell.assignTypeInGrid(atomtree, getProbeRad1(), getProbeRad2(), optionProbeMode()); // assign each voxel in grid a type
   auto end = std::chrono::steady_clock::now();
