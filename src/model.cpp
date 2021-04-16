@@ -67,6 +67,9 @@ bool Model::setProbeRadii(const double r_1, const double r_2, const bool probe_m
 }
 
 CalcReportBundle Model::generateVolumeData(){
+  // save the date and time of calculation for output files
+  _time_stamp = timeNow();
+
   auto start = std::chrono::steady_clock::now();
   // process atom data for unit cell analysis if the option it ticked
   if(optionAnalyzeUnitCell()){
@@ -172,8 +175,9 @@ void Model::storeAtomsInTree(){
 }
 
 CalcReportBundle Model::calcVolume(){
-  // save the date and time of calculation for output files
-  _time_stamp = timeNow();
+
+  // set back the default value of success to true to avoid lingering errors from previous failed calculations
+  _data.success = true;
 
   auto start = std::chrono::steady_clock::now();
   _cell.assignTypeInGrid(atomtree, getProbeRad1(), getProbeRad2(), optionProbeMode()); // assign each voxel in grid a type
@@ -184,7 +188,13 @@ CalcReportBundle Model::calcVolume(){
   //_cell.printGrid(); // for testing
 
   start = std::chrono::steady_clock::now();
-  _data.volumes = _cell.getVolume();
+  if(_data.analyze_unit_cell){
+    std::array<double,3> unit_cell_limits = {_cart_matrix[0][0],_cart_matrix[1][1],_cart_matrix[2][2]};
+    _data.volumes = _cell.getUnitCellVolumes(unit_cell_limits);
+  }
+  else{
+    _data.volumes = _cell.getVolumes();
+  }
   end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
 
@@ -221,17 +231,17 @@ bool Model::processUnitCell(){
   2) create symmetry elements from base structure
   3) if atoms outside the orthogonal cell, move them inside
   4) remove duplicate atoms (allow 0.01-0.05 A error)
-  5) create supercell at least 3x3x3 but big enough to include a radius around central unit cell = 2*(largestAtom+probe1+probe2+gridstep)
-  6) create atom map based on unit cell limits + radius= 2*(max_atom_rad+probe1+probe2+gridstep)
+  5) create supercell at least 3x3x3 but big enough to include a radius around central unit cell = gridstep + largest_atom radius + 2*largest probe radius
+  6) create atom map based on unit cell limits + radius= gridstep + largest_atom radius + 2*largest probe radius
   7) write structure file with processed atom list
   */
-  double radius_limit = 2*(_max_atom_radius+getProbeRad1()+getProbeRad2()+_data.grid_step);
+  double radius_limit = _data.grid_step + _max_atom_radius + 2*( (_data.probe_mode) ? getProbeRad2() : getProbeRad1() );
   if(space_group == ""){
     Ctrl::getInstance()->notifyUser("Space group not found!\nCheck the structure file\nor untick the unit cell analysis checkbox.");
     return false;
   }
   for(int i = 0; i < 6; i++){
-    if(cell_param[i] == 0){
+    if(_cell_param[i] == 0){
       Ctrl::getInstance()->notifyUser("Unit cell parameters invalid!\nCheck the structure file\nor untick the unit cell analysis checkbox.");
       return false;
     }
@@ -245,10 +255,14 @@ bool Model::processUnitCell(){
   moveAtomsInsideCell();
   removeDuplicateAtoms();
   countAtomsInUnitCell(); // for report
-  writeXYZfile(processed_atom_coordinates, "orthogonal_cell");
+  if(_data.make_report){
+    writeXYZfile(processed_atom_coordinates, "orthogonal_cell");
+  }
   generateSupercell(radius_limit);
   generateUsefulAtomMapFromSupercell(radius_limit);
-  writeXYZfile(processed_atom_coordinates, "orthogonal_cell_with_neighboring_atoms");
+  if(_data.make_report){
+    writeXYZfile(processed_atom_coordinates, "orthogonal_cell_with_neighboring_atoms");
+  }
   return true;
 }
 
@@ -276,31 +290,31 @@ void Model::orthogonalizeUnitCell(){
   */
   const double pi = 3.14159265358979323846;
   // convert unit cell angles from degree to radian
-  double alpha = cell_param[3]*pi/180;
-  double beta = cell_param[4]*pi/180;
-  double gamma = cell_param[5]*pi/180;
-  cart_matrix[0][0] = cell_param[0]; // A is always along x axis => Ax = X
-  cart_matrix[0][1] = 0; // A is always along x axis => Ay = 0
-  cart_matrix[0][2] = 0; // A is always along x axis => Az = 0
-  cart_matrix[1][2] = 0; // B is always on xy plane => Bz = 0
-  if(cell_param[5] == 90){ // if B is along y axis, no need to do calculations that could result in approximations
-    cart_matrix[1][0] = 0;
-    cart_matrix[1][1] = cell_param[1];
+  double alpha = _cell_param[3]*pi/180;
+  double beta = _cell_param[4]*pi/180;
+  double gamma = _cell_param[5]*pi/180;
+  _cart_matrix[0][0] = _cell_param[0]; // A is always along x axis => Ax = X
+  _cart_matrix[0][1] = 0; // A is always along x axis => Ay = 0
+  _cart_matrix[0][2] = 0; // A is always along x axis => Az = 0
+  _cart_matrix[1][2] = 0; // B is always on xy plane => Bz = 0
+  if(_cell_param[5] == 90){ // if B is along y axis, no need to do calculations that could result in approximations
+    _cart_matrix[1][0] = 0;
+    _cart_matrix[1][1] = _cell_param[1];
   }
   else{
-    cart_matrix[1][0] = cell_param[1]*std::cos(gamma);
-    cart_matrix[1][1] = cell_param[1]*std::sin(gamma);
+    _cart_matrix[1][0] = _cell_param[1]*std::cos(gamma);
+    _cart_matrix[1][1] = _cell_param[1]*std::sin(gamma);
 
   }
-  if(cell_param[3] == 90 && cell_param[4] == 90 ){ // if C is along z axis, no need to do calculations that could result in approximations
-    cart_matrix[2][0] = 0;
-    cart_matrix[2][1] = 0;
-    cart_matrix[2][2] = cell_param[2];
+  if(_cell_param[3] == 90 && _cell_param[4] == 90 ){ // if C is along z axis, no need to do calculations that could result in approximations
+    _cart_matrix[2][0] = 0;
+    _cart_matrix[2][1] = 0;
+    _cart_matrix[2][2] = _cell_param[2];
   }
   else{
-    cart_matrix[2][0] = cell_param[2]*std::cos(beta);
-    cart_matrix[2][1] = cell_param[2]*((std::cos(alpha)*std::sin(gamma))+((std::cos(beta)-(std::cos(alpha)*std::cos(gamma)))*std::sin(gamma-(pi/2))/std::cos(gamma-(pi/2))));
-    cart_matrix[2][2] = std::sqrt(pow(cell_param[2],2)-pow(cart_matrix[2][0],2)-pow(cart_matrix[2][1],2));
+    _cart_matrix[2][0] = _cell_param[2]*std::cos(beta);
+    _cart_matrix[2][1] = _cell_param[2]*((std::cos(alpha)*std::sin(gamma))+((std::cos(beta)-(std::cos(alpha)*std::cos(gamma)))*std::sin(gamma-(pi/2))/std::cos(gamma-(pi/2))));
+    _cart_matrix[2][2] = std::sqrt(pow(_cell_param[2],2)-pow(_cart_matrix[2][0],2)-pow(_cart_matrix[2][1],2));
   }
   return;
 }
@@ -328,9 +342,9 @@ bool Model::symmetrizeUnitCell(){
     double atom_y = std::get<2>(processed_atom_coordinates[i]);
     double atom_z = std::get<3>(processed_atom_coordinates[i]);
     double atom_abc[3];
-    atom_abc[2] = atom_z/cart_matrix[2][2];
-    atom_abc[1] = (atom_y-(cart_matrix[2][1]*atom_abc[2]))/cart_matrix[1][1];
-    atom_abc[0] = (atom_x-(cart_matrix[2][0]*atom_abc[2])-(cart_matrix[1][0]*atom_abc[1]))/cart_matrix[0][0];
+    atom_abc[2] = atom_z/_cart_matrix[2][2];
+    atom_abc[1] = (atom_y-(_cart_matrix[2][1]*atom_abc[2]))/_cart_matrix[1][1];
+    atom_abc[0] = (atom_x-(_cart_matrix[2][0]*atom_abc[2])-(_cart_matrix[1][0]*atom_abc[1]))/_cart_matrix[0][0];
     for (int j = 0; j < sym_number; j++){
       double sym_abc[3];
       for (int k = 0; k < 3; k++){
@@ -347,7 +361,7 @@ bool Model::symmetrizeUnitCell(){
     double atom_abc[3] = {std::get<1>(ABC_coord[i]), std::get<2>(ABC_coord[i]), std::get<3>(ABC_coord[i])};
     for (int j = 0; j < 3; j++){
       for (int k = 0; k < 3; k++){
-        atom_xyz[j] += atom_abc[k]*cart_matrix[k][j];
+        atom_xyz[j] += atom_abc[k]*_cart_matrix[k][j];
       }
     }
     processed_atom_coordinates.emplace_back(std::get<0>(ABC_coord[i]), atom_xyz[0], atom_xyz[1], atom_xyz[2]);
@@ -359,28 +373,28 @@ bool Model::symmetrizeUnitCell(){
 void Model::moveAtomsInsideCell(){
   for(size_t n = 0; n < processed_atom_coordinates.size(); n ++){
     while(std::get<3>(processed_atom_coordinates[n]) < 0){ // need to start with Z axis because the unit cell C axis can have X and Y components
-      std::get<3>(processed_atom_coordinates[n]) += cart_matrix[2][2];
-      std::get<2>(processed_atom_coordinates[n]) += cart_matrix[2][1];
-      std::get<1>(processed_atom_coordinates[n]) += cart_matrix[2][0];
+      std::get<3>(processed_atom_coordinates[n]) += _cart_matrix[2][2];
+      std::get<2>(processed_atom_coordinates[n]) += _cart_matrix[2][1];
+      std::get<1>(processed_atom_coordinates[n]) += _cart_matrix[2][0];
     }
-    while(std::get<3>(processed_atom_coordinates[n]) > cart_matrix[2][2]){
-      std::get<3>(processed_atom_coordinates[n]) -= cart_matrix[2][2];
-      std::get<2>(processed_atom_coordinates[n]) -= cart_matrix[2][1];
-      std::get<1>(processed_atom_coordinates[n]) -= cart_matrix[2][0];
+    while(std::get<3>(processed_atom_coordinates[n]) > _cart_matrix[2][2]){
+      std::get<3>(processed_atom_coordinates[n]) -= _cart_matrix[2][2];
+      std::get<2>(processed_atom_coordinates[n]) -= _cart_matrix[2][1];
+      std::get<1>(processed_atom_coordinates[n]) -= _cart_matrix[2][0];
     }
     while(std::get<2>(processed_atom_coordinates[n]) < 0){ // then check Y axis because the unit cell B axis can have a X component
-      std::get<2>(processed_atom_coordinates[n]) += cart_matrix[1][1];
-      std::get<1>(processed_atom_coordinates[n]) += cart_matrix[1][0];
+      std::get<2>(processed_atom_coordinates[n]) += _cart_matrix[1][1];
+      std::get<1>(processed_atom_coordinates[n]) += _cart_matrix[1][0];
     }
-    while(std::get<2>(processed_atom_coordinates[n]) > cart_matrix[1][1]){
-      std::get<2>(processed_atom_coordinates[n]) -= cart_matrix[1][1];
-      std::get<1>(processed_atom_coordinates[n]) -= cart_matrix[1][0];
+    while(std::get<2>(processed_atom_coordinates[n]) > _cart_matrix[1][1]){
+      std::get<2>(processed_atom_coordinates[n]) -= _cart_matrix[1][1];
+      std::get<1>(processed_atom_coordinates[n]) -= _cart_matrix[1][0];
     }
     while(std::get<1>(processed_atom_coordinates[n]) < 0){
-      std::get<1>(processed_atom_coordinates[n]) += cart_matrix[0][0];
+      std::get<1>(processed_atom_coordinates[n]) += _cart_matrix[0][0];
     }
-    while(std::get<1>(processed_atom_coordinates[n]) > cart_matrix[0][0]){
-      std::get<1>(processed_atom_coordinates[n]) -= cart_matrix[0][0];
+    while(std::get<1>(processed_atom_coordinates[n]) > _cart_matrix[0][0]){
+      std::get<1>(processed_atom_coordinates[n]) -= _cart_matrix[0][0];
     }
   }
 }
@@ -413,11 +427,11 @@ void Model::countAtomsInUnitCell(){
 // 5) create supercell at least 3x3x3 but big enough to include a radius around central unit cell = 2*(max_atom_rad+probe1+probe2+gridstep)
 void Model::generateSupercell(double radius_limit){
   int initial_number_of_atoms = processed_atom_coordinates.size();
-  if(cell_param[3] == 90 && cell_param[4] == 90 && cell_param[5] == 90){ // for orthogonal space groups, the algorithm is considerably simpler than for other space groups
+  if(_cell_param[3] == 90 && _cell_param[4] == 90 && _cell_param[5] == 90){ // for orthogonal space groups, the algorithm is considerably simpler than for other space groups
     // determine how many cells will be needed in each dimension for the supercell
     int surrounding_cells[3];
     for(int i = 0; i < 3; i++){
-      surrounding_cells[i] = 1 + (int)(radius_limit/cart_matrix[i][i]);
+      surrounding_cells[i] = 1 + (int)(radius_limit/_cart_matrix[i][i]);
     }
     for(int i = -surrounding_cells[0]; i <= surrounding_cells[0]; i++){
       for(int j = -surrounding_cells[1]; j <= surrounding_cells[1]; j++){
@@ -426,9 +440,9 @@ void Model::generateSupercell(double radius_limit){
             // duplicate atoms in each cell of supercell beside the original central cell
             if(i != 0 || j != 0 || k != 0){
               processed_atom_coordinates.emplace_back(std::get<0>(processed_atom_coordinates[n]),
-                                            std::get<1>(processed_atom_coordinates[n])+(i*cart_matrix[0][0]),
-                                            std::get<2>(processed_atom_coordinates[n])+(j*cart_matrix[1][1]),
-                                            std::get<3>(processed_atom_coordinates[n])+(k*cart_matrix[2][2]));
+                                            std::get<1>(processed_atom_coordinates[n])+(i*_cart_matrix[0][0]),
+                                            std::get<2>(processed_atom_coordinates[n])+(j*_cart_matrix[1][1]),
+                                            std::get<3>(processed_atom_coordinates[n])+(k*_cart_matrix[2][2]));
             }
           }
         }
@@ -437,21 +451,21 @@ void Model::generateSupercell(double radius_limit){
   }
   else { // for non orthogonal space groups, we need to extend the supercell in a specific order because B and C axes can have components in X and/or Y
     // determine how many cells will be needed in each dimension for the supercell
-    int C_number = 1 + (int)(radius_limit/cart_matrix[2][2]);
+    int C_number = 1 + (int)(radius_limit/_cart_matrix[2][2]);
     for(int i = -C_number; i <= C_number; i++){
-      int B_number_neg = -1 + (int)((-radius_limit-(i*cart_matrix[2][1]))/cart_matrix[1][1]);
-      int B_number_pos = 1 + (int)((radius_limit-(i*cart_matrix[2][1]))/cart_matrix[1][1]);
+      int B_number_neg = -1 + (int)((-radius_limit-(i*_cart_matrix[2][1]))/_cart_matrix[1][1]);
+      int B_number_pos = 1 + (int)((radius_limit-(i*_cart_matrix[2][1]))/_cart_matrix[1][1]);
       for(int j = B_number_neg; j <= B_number_pos; j++){
-        int A_number_neg = -1 + (int)((-radius_limit-(i*cart_matrix[2][0])-(j*cart_matrix[1][0]))/cart_matrix[0][0]);
-        int A_number_pos = 1+ (int)((radius_limit-(i*cart_matrix[2][0])-(j*cart_matrix[1][0]))/cart_matrix[0][0]);
+        int A_number_neg = -1 + (int)((-radius_limit-(i*_cart_matrix[2][0])-(j*_cart_matrix[1][0]))/_cart_matrix[0][0]);
+        int A_number_pos = 1+ (int)((radius_limit-(i*_cart_matrix[2][0])-(j*_cart_matrix[1][0]))/_cart_matrix[0][0]);
         for(int k = A_number_neg; k <= A_number_pos; k++){
           for(int n = 0; n < initial_number_of_atoms; n++){
             // duplicate atoms in each cell of supercell beside the original central cell
             if(i != 0 || j != 0 || k != 0){
                 processed_atom_coordinates.emplace_back(std::get<0>(processed_atom_coordinates[n]),
-                                              std::get<1>(processed_atom_coordinates[n])+(k*cart_matrix[0][0])+(j*cart_matrix[1][0])+(i*cart_matrix[2][0]),
-                                              std::get<2>(processed_atom_coordinates[n])+(j*cart_matrix[1][1])+(i*cart_matrix[2][1]),
-                                              std::get<3>(processed_atom_coordinates[n])+(i*cart_matrix[2][2]));
+                                              std::get<1>(processed_atom_coordinates[n])+(k*_cart_matrix[0][0])+(j*_cart_matrix[1][0])+(i*_cart_matrix[2][0]),
+                                              std::get<2>(processed_atom_coordinates[n])+(j*_cart_matrix[1][1])+(i*_cart_matrix[2][1]),
+                                              std::get<3>(processed_atom_coordinates[n])+(i*_cart_matrix[2][2]));
             }
           }
         }
@@ -466,9 +480,9 @@ void Model::generateUsefulAtomMapFromSupercell(double radius_limit){
     if(std::get<1>(processed_atom_coordinates[i]) < -radius_limit ||
        std::get<2>(processed_atom_coordinates[i]) < -radius_limit ||
        std::get<3>(processed_atom_coordinates[i]) < -radius_limit ||
-       std::get<1>(processed_atom_coordinates[i]) > cart_matrix[0][0]+radius_limit ||
-       std::get<2>(processed_atom_coordinates[i]) > cart_matrix[1][1]+radius_limit ||
-       std::get<3>(processed_atom_coordinates[i]) > cart_matrix[2][2]+radius_limit
+       std::get<1>(processed_atom_coordinates[i]) > _cart_matrix[0][0]+radius_limit ||
+       std::get<2>(processed_atom_coordinates[i]) > _cart_matrix[1][1]+radius_limit ||
+       std::get<3>(processed_atom_coordinates[i]) > _cart_matrix[2][2]+radius_limit
     ){
       processed_atom_coordinates.erase(processed_atom_coordinates.begin() + i);
            i--;

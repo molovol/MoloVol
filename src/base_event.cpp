@@ -58,7 +58,11 @@ void MainFrame::OnCalc(wxCommandEvent& event){
   }
   */
 
-  Ctrl::getInstance()->runCalculation();
+  if(!Ctrl::getInstance()->runCalculation()){
+    wxYield(); // without wxYield, the clicks on disabled buttons are queued
+    enableGuiElements(true);
+    return;
+  }
 
   // write report file if option is toggled
   if(getMakeReport()){
