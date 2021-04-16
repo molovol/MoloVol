@@ -139,7 +139,10 @@ void signCombinations(std::vector<std::array<int,3>>& list, std::array<unsigned 
 // CONSTRUCTOR //
 /////////////////
 
-Voxel::Voxel(){_type = 0;}
+Voxel::Voxel(){
+  _type = 0;
+  _identity = 0;
+}
 
 ////////////
 // ACCESS //
