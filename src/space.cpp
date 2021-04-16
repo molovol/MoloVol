@@ -180,7 +180,9 @@ std::map<char,double> Space::getUnitCellVolumes(std::array<double,3> unit_cell_l
   std::array<unsigned int,3> unit_cell_end_index;
   std::array<double,3> unit_cell_mod_index;
   for(int i = 0; i < 3; i++){
-    unit_cell_start_index[i] = -cart_min[i]/grid_size;
+    // +0.5 to avoid rounding errors
+    unit_cell_start_index[i] = int(0.5 - cart_min[i]/grid_size);
+    // no rounding because fmod() in unit_cell_mod_index will correct any rounding error in unit_cell_end_index
     unit_cell_end_index[i] = unit_cell_start_index[i] + unit_cell_limits[i]/grid_size;
     unit_cell_mod_index[i] = std::fmod(unit_cell_limits[i],grid_size);
   }

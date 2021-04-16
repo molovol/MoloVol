@@ -105,13 +105,13 @@ bool Ctrl::runCalculation(){
   if (data.success){
     notifyUser("Result for " + data.chemical_formula);
     notifyUser("Elapsed time: " + std::to_string(data.getTime()) + " s");
-    notifyUser("Van der Waals volume: " + std::to_string(data.volumes[0b00000011]) + " A^3");
-    notifyUser("Excluded void volume: " + std::to_string(data.volumes[0b00000101]) + " A^3");
-    notifyUser("Probe 1 core volume: " + std::to_string(data.volumes[0b00001001]) + " A^3");
-    notifyUser("Probe 1 shell volume: " + std::to_string(data.volumes[0b00010001]) + " A^3");
+    notifyUser("Van der Waals volume: " + std::to_string(data.volumes[0b00000011]) + " Å^3");
+    notifyUser("Excluded void volume: " + std::to_string(data.volumes[0b00000101]) + " Å^3");
+    notifyUser("Probe 1 core volume: " + std::to_string(data.volumes[0b00001001]) + " Å^3");
+    notifyUser("Probe 1 shell volume: " + std::to_string(data.volumes[0b00010001]) + " Å^3");
     if(data.probe_mode){
-      notifyUser("Probe 2 core volume: " + std::to_string(data.volumes[0b00100001]) + " A^3");
-      notifyUser("Probe 2 shell volume: " + std::to_string(data.volumes[0b01000001]) + " A^3");
+      notifyUser("Probe 2 core volume: " + std::to_string(data.volumes[0b00100001]) + " Å^3");
+      notifyUser("Probe 2 shell volume: " + std::to_string(data.volumes[0b01000001]) + " Å^3");
     }
   }
   else{
