@@ -66,6 +66,7 @@ bool Model::setProbeRadii(const double r_1, const double r_2, const bool probe_m
   return true;
 }
 
+// TODO: consider making return value const, in order to prevent controller from messing with this
 CalcReportBundle Model::generateVolumeData(){
   // save the date and time of calculation for output files
   _time_stamp = timeNow();
