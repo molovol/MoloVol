@@ -162,6 +162,7 @@ void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
       _cell_param[5] = std::stod(line.substr(47,7));
       space_group = line.substr(55,11); // note: mercury recognizes only 10 chars but official PDB format is 11 chars
       space_group.erase(std::remove(space_group.begin(), space_group.end(), ' '), space_group.end()); // remove white spaces
+      removeEOL(space_group);
     }
   }
   // file has been read

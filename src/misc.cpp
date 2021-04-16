@@ -38,3 +38,8 @@ std::string timeNow(){
 int pow2(int exp){
   return (1 << exp);
 }
+
+void removeEOL(std::string& str){
+  str.erase(std::remove(str.begin(), str.end(), '\r'), str.end());
+  str.erase(std::remove(str.begin(), str.end(), '\n'), str.end());
+}
