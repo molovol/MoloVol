@@ -170,6 +170,7 @@ Voxel& Voxel::getSubvoxel(std::array<unsigned,3> sub_index, const unsigned p_lvl
 }
 
 bool Voxel::hasSubvoxel(){return readBit(_type,7);}
+bool Voxel::isCore(){return readBit(_type,3);}
 bool Voxel::isAssigned(){return readBit(_type,0);}
 
 // type
@@ -351,8 +352,8 @@ void Voxel::listFromTree(
 // CAVITY ID //
 ///////////////
 
-void Voxel::floodFill(){
-
+bool Voxel::floodFill(){
+  return false;
 }
 
 ///////////////////////////////

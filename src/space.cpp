@@ -135,10 +135,31 @@ void Space::identifyCavities(){
   for(vxl_index[0] = 0; vxl_index[0] < n_gridsteps[0]; vxl_index[0]++){
     for(vxl_index[1] = 0; vxl_index[1] < n_gridsteps[1]; vxl_index[1]++){
       for(vxl_index[2] = 0; vxl_index[2] < n_gridsteps[2]; vxl_index[2]++){
-        getTopVxl(vxl_index).floodFill();
+        descendToCore(id,vxl_index,getMaxDepth());
       }
     }
     printf("%i%% done\n", int(100*(double(vxl_index[0])+1)/double(n_gridsteps[0])));
+  }
+}
+
+void Space::descendToCore(unsigned char& id, const std::array<unsigned,3> index, unsigned lvl){
+  Voxel& vxl = getVxlFromGrid(index,lvl);
+  if (!vxl.isCore()){return;}
+  if (!vxl.hasSubvoxel()){
+    if(vxl.floodFill()){id++;}
+  }
+  else {
+    std::array<unsigned,3> subindex;
+    for (char i = 0; i < 2; ++i){
+      subindex[0] = index[0]*2 + i;
+      for (char j = 0; j < 2; ++j){
+        subindex[1] = index[1]*2 + j;
+        for (char k = 0; k < 2; ++k){
+          subindex[2] = index[2]*2 + k;
+          descendToCore(id, subindex, lvl-1);
+        }
+      }
+    }
   }
 }
 

@@ -61,6 +61,7 @@ class Space{
     const std::array<unsigned long int,3> gridstepsOnLvl(const int) const;
     void assignAtomVsCore();
     void identifyCavities();
+    void descendToCore(unsigned char&, const std::array<unsigned,3>, unsigned);
     void assignShellVsVoid();
     
 };

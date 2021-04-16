@@ -34,12 +34,15 @@ class Voxel{
     Voxel& getSubvoxel(std::array<unsigned,3>, const unsigned, const std::array<char,3>&);
     Voxel& getSubvoxel(std::array<unsigned,3>, const unsigned, const char);
     Voxel& getSubvoxel(std::array<unsigned,3>, const unsigned);
-    bool hasSubvoxel();
-    bool isAssigned();
     void setType(char);
     char getType();
     void setID(unsigned char);
     unsigned char getID();
+    
+    // bitwise operations on _type
+    bool hasSubvoxel(); // state of bit 7
+    bool isCore(); // state of bit 3
+    bool isAssigned(); // state of bit 0
 
     // calc preparation
     static void prepareTypeAssignment(Space*, AtomTree);
@@ -55,7 +58,7 @@ class Voxel{
     void splitVoxel(const std::array<unsigned,3>&, const Vector&, const double); 
 
     // cavity id
-    void floodFill();
+    bool floodFill();
 
     // shell vs void
     char evalRelationToVoxels(const std::array<unsigned int,3>&, const unsigned, bool=false);
