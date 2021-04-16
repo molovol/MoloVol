@@ -101,7 +101,6 @@ class Model{
     bool setProbeRadii(const double, const double, const bool);
     void generateChemicalFormula();
 
-    void debug(); // TODO remove is unused
   private:
     CalcReportBundle _data;
     std::string _time_stamp; // stores the time when the calculation was run for output folder and report

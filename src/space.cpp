@@ -91,6 +91,7 @@ void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, co
     Voxel::storeProbe(r_probe2, true);
     printf("\nAssigning probe 2 core and atoms:\n");
     assignAtomVsCore();
+
     printf("\nAssigning probe 2 shell:\n");
     assignShellVsVoid();
     printf("\nAssigning probe 1 core:\n");
@@ -100,6 +101,9 @@ void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, co
   }
   Voxel::storeProbe(r_probe1, false);
   assignAtomVsCore();
+    
+  identifyCavities();
+
   printf("\nAssigning probe 1 shell and excluded void:\n");
   assignShellVsVoid();
 }
@@ -122,6 +126,19 @@ void Space::assignAtomVsCore(){
       }
     }
     printf("%i%% done\n", int(100*(double(top_lvl_index[0])+1)/double(n_gridsteps[0])));
+  }
+}
+
+void Space::identifyCavities(){
+  std::array<unsigned int,3> vxl_index;
+  unsigned char id = 1;
+  for(vxl_index[0] = 0; vxl_index[0] < n_gridsteps[0]; vxl_index[0]++){
+    for(vxl_index[1] = 0; vxl_index[1] < n_gridsteps[1]; vxl_index[1]++){
+      for(vxl_index[2] = 0; vxl_index[2] < n_gridsteps[2]; vxl_index[2]++){
+        getTopVxl(vxl_index).floodFill();
+      }
+    }
+    printf("%i%% done\n", int(100*(double(vxl_index[0])+1)/double(n_gridsteps[0])));
   }
 }
 

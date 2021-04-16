@@ -41,19 +41,26 @@ class Voxel{
     void setID(unsigned char);
     unsigned char getID();
 
+    // calc preparation
     static void prepareTypeAssignment(Space*, AtomTree);
     static void storeProbe(const double, const bool);
     static void computeIndices();
     static void computeIndices(unsigned int);
 
+    // atom vs probe core
     char evalRelationToAtoms(const std::array<unsigned,3>&, Vector, const int);
     void traverseTree(const AtomNode*, const double, const Vector&, const double, const double, const int, 
         const char = 0b00000011, const char = 0); 
     void passTypeToChildren(const std::array<unsigned,3>&, const int);
     void splitVoxel(const std::array<unsigned,3>&, const Vector&, const double); 
 
+    // cavity id
+    void floodFill();
+
+    // shell vs void
     char evalRelationToVoxels(const std::array<unsigned int,3>&, const unsigned, bool=false);
     
+    // unused
     static void listFromTree(
         std::vector<int>&,
         const AtomNode*,
@@ -63,6 +70,7 @@ class Voxel{
         const double&,
         const char=0);
     
+    // volume
     unsigned int tallyVoxelsOfType(const std::array<unsigned,3>&, const char volume_type, const int max_depth);
 
   private:

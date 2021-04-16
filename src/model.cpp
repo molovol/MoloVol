@@ -67,6 +67,9 @@ bool Model::setProbeRadii(const double r_1, const double r_2, const bool probe_m
 }
 
 CalcReportBundle Model::generateVolumeData(){
+  // save the date and time of calculation for output files
+  _time_stamp = timeNow();
+
   auto start = std::chrono::steady_clock::now();
   // process atom data for unit cell analysis if the option it ticked
   if(optionAnalyzeUnitCell()){
@@ -172,9 +175,6 @@ void Model::storeAtomsInTree(){
 }
 
 CalcReportBundle Model::calcVolume(){
-  // save the date and time of calculation for output files
-  _time_stamp = timeNow();
-
   auto start = std::chrono::steady_clock::now();
   _cell.assignTypeInGrid(atomtree, getProbeRad1(), getProbeRad2(), optionProbeMode()); // assign each voxel in grid a type
   auto end = std::chrono::steady_clock::now();
@@ -189,17 +189,6 @@ CalcReportBundle Model::calcVolume(){
   _data.addTime(std::chrono::duration<double>(end-start).count());
 
   return _data;
-}
-
-// TODO remove when unnecessary
-void Model::debug(){
-  std::array<double,3> cell_min = _cell.getMin();
-  std::array<double,3> cell_max = _cell.getMax();
-
-  for(int dim = 0; dim < 3; dim++){
-    std::cout << "Cell Limit in Dim " << dim << ":" << cell_min[dim] << " and " << cell_max[dim] << std::endl;
-  }
-  return;
 }
 
 ////////////////////////////////////////////
