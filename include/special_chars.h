@@ -3,13 +3,16 @@
 #define SPECIAL_CHARS_H
 
 #include <string>
+#include <wx/wx.h>
 
 class Symbol{
   public:
-    static std::string angstrom();
-    static std::string cubed();
-    static std::string subscript(int num);
-    static std::string subscript(std::string num);
+    static std::wstring angstrom();
+    static std::wstring cubed();
+    static std::wstring numSubscript(int num);
+    static std::wstring numSubscript(std::string num);
+    static wchar_t digitSubscript(char digit);
+    static std::wstring generateChemicalFormulaUnicode(std::string);
 
 };
 

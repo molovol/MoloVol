@@ -103,15 +103,22 @@ bool Ctrl::runCalculation(){
   CalcReportBundle data = current_calculation->generateVolumeData();
 
   if (data.success){
-    notifyUser("Result for " + data.chemical_formula);
+    notifyUser("Result for ");
+    notifyUser(Symbol::generateChemicalFormulaUnicode(data.chemical_formula));
     notifyUser("Elapsed time: " + std::to_string(data.getTime()) + " s");
-    notifyUser("Van der Waals volume: " + std::to_string(data.volumes[0b00000011]) + " A^3");
-    notifyUser("Excluded void volume: " + std::to_string(data.volumes[0b00000101]) + " A^3");
-    notifyUser("Probe 1 core volume: " + std::to_string(data.volumes[0b00001001]) + " A^3");
-    notifyUser("Probe 1 shell volume: " + std::to_string(data.volumes[0b00010001]) + " A^3");
+    notifyUser("Van der Waals volume: " + std::to_string(data.volumes[0b00000011]) + " ");
+    notifyUser(Symbol::angstrom() + Symbol::cubed());
+    notifyUser("Excluded void volume: " + std::to_string(data.volumes[0b00000101]) + " ");
+    notifyUser(Symbol::angstrom() + Symbol::cubed());
+    notifyUser("Probe 1 core volume: " + std::to_string(data.volumes[0b00001001]) + " ");
+    notifyUser(Symbol::angstrom() + Symbol::cubed());
+    notifyUser("Probe 1 shell volume: " + std::to_string(data.volumes[0b00010001]) + " ");
+    notifyUser(Symbol::angstrom() + Symbol::cubed());
     if(data.probe_mode){
-      notifyUser("Probe 2 core volume: " + std::to_string(data.volumes[0b00100001]) + " A^3");
-      notifyUser("Probe 2 shell volume: " + std::to_string(data.volumes[0b01000001]) + " A^3");
+      notifyUser("Probe 2 core volume: " + std::to_string(data.volumes[0b00100001]) + " ");
+      notifyUser(Symbol::angstrom() + Symbol::cubed());
+      notifyUser("Probe 2 shell volume: " + std::to_string(data.volumes[0b01000001]) + " ");
+      notifyUser(Symbol::angstrom() + Symbol::cubed());
     }
   }
   else{
@@ -128,6 +135,10 @@ void Ctrl::notifyUser(std::string str, bool to_gui){
   else {
     std::cout << str;
   }
+}
+
+void Ctrl::notifyUser(std::wstring wstr){
+  gui->appendOutput(wstr);
 }
 
 // TODO remove if obselete
