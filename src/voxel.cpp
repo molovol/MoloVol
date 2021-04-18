@@ -233,6 +233,23 @@ void Voxel::passTypeToChildren(const std::array<unsigned,3>& index, const int lv
   }
 }
 
+void Voxel::passIDtoChildren(const std::array<unsigned,3>& index, const int lvl){
+  if (lvl == 0){return;}
+  std::array<unsigned,3> sub_index;
+  for (char x = 0; x < 2; ++x){
+    sub_index[0] = index[0]*2 + x;
+    for (char y = 0; y < 2; ++y){
+      sub_index[1] = index[1]*2 + y;
+      for (char z = 0; z < 2; ++z){
+        sub_index[2] = index[2]*2 + z;
+
+        getSubvoxel(sub_index, lvl).setID(_identity);
+        getSubvoxel(sub_index, lvl).passIDtoChildren(sub_index, lvl-1);
+      }
+    }
+  }
+}
+
 // adds an array of size 8 to the voxel that contains 8 subvoxels and evaluates each subvoxel's type
 void Voxel::splitVoxel(const std::array<unsigned,3>& vxl_index, const Vector& vxl_pos, const double lvl){
   // split into 8 subvoxels
@@ -352,8 +369,87 @@ void Voxel::listFromTree(
 // CAVITY ID //
 ///////////////
 
-bool Voxel::floodFill(){
-  return false;
+bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& index, const unsigned lvl){
+  // if voxel has ID then ignore
+  if (getID() != 0){return false;}
+  // else set ID according to argument
+  setID(id);
+  passIDtoChildren(index, lvl);
+  // find neighbours on the same level
+  std::array<unsigned,3> nb_index;
+  for (char dim = 0; dim < 3; dim++){
+    for (bool sign : {false, true}){ // true: negative, false: positive
+      nb_index = index;
+      nb_index[dim] += sign? -1 : 1;
+      if (!s_cell->isInBounds(nb_index,lvl)){continue;} // skip if voxel out of bounds
+        
+      Voxel& nb_vxl = s_cell->getVxlFromGrid(nb_index,lvl);
+//      if (!nb_vxl.isCore()){continue;} // only check neighbours that are or contain probe core
+      // descend to all subvoxels that border this voxel and perform flood fill
+      if(!nb_vxl.descend(id, nb_index, lvl, dim, sign)){
+        // ascend to highest parent of pure type and perform flood fill
+        nb_vxl.ascend(id, nb_index, lvl, index, dim);
+      }
+    }
+  }
+  return true;
+}
+
+bool Voxel::descend(const unsigned char id, const std::array<unsigned,3>& index, const unsigned lvl, const signed char dim, const bool sign){
+  if (!isCore()){return true;} // return immediatly if voxel isn't and doesn't contain core voxel
+  if (!hasSubvoxel()){
+    floodFill(id, index, lvl);
+    return false;
+  }
+  else {
+    // only loop over those voxels bordering the previous voxel
+    std::array<unsigned,3> sub_index;
+    std::array<signed char,3> i;
+    i[dim] = sign? 1 : 0; 
+    for (i[(dim+1)%3] = 0; i[(dim+1)%3] < 2; ++i[(dim+1)%3]){
+      for (i[(dim+2)%3] = 0; i[(dim+2)%3] < 2; ++i[(dim+2)%3]){
+        for (char j = 0; j < 3; ++j){
+          sub_index[j] = index[j] * 2 + i[j];
+        }
+        s_cell->getVxlFromGrid(sub_index, lvl-1).descend(id, sub_index, lvl-1, dim, sign);
+      }
+    }
+    return true;
+  }
+}
+
+void Voxel::ascend(const unsigned char id, std::array<unsigned,3> index, const unsigned lvl, std::array<unsigned,3> prev_index, const signed char dim){
+  // compare index with index of previous voxel
+  /*
+  Voxel* vxl = this;
+  while (index[dim/2] == prev_index[dim]){
+    for (char i = 0; i < 3; ++i){
+      index[i] = index[i]/2;
+      prev_index[i] = prev_index[i]/2;
+    }
+    if (getVxlFromGrid())
+
+
+  }
+  */
+  assert(_type ==0b00001001);
+  
+  // if previous voxel and this voxel belong to same parent
+  // or if at top lvl
+  if (index[dim]/2 == prev_index[dim]/2 || lvl == s_cell->getMaxDepth()){ 
+    floodFill(id, index, lvl);
+  }
+  else {
+    for (char i = 0; i < 3; ++i){
+      index[i] = index[i]/2;
+      prev_index[i] = prev_index[i]/2;
+    }
+
+    Voxel& parent = s_cell->getVxlFromGrid(index, lvl+1);
+    if (parent.getType() == getType()){
+      ascend(id, index, lvl+1, prev_index, dim);
+    }
+  }
 }
 
 ///////////////////////////////

@@ -22,7 +22,8 @@ class Space{
     std::array <double,3> getOrigin(); // same as getMin();
     std::array <double,3> getMax();
     std::array <double,3> getSize();
-    bool coordInBounds(const std::array<int,3>&, const unsigned); // not in use
+    bool isInBounds(const std::array<int,3>&, const unsigned);
+    bool isInBounds(const std::array<unsigned,3>&, const unsigned);
     double getVxlSize() const;
     Container3D<Voxel>& getGrid(const unsigned);
 

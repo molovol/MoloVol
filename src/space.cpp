@@ -146,7 +146,7 @@ void Space::descendToCore(unsigned char& id, const std::array<unsigned,3> index,
   Voxel& vxl = getVxlFromGrid(index,lvl);
   if (!vxl.isCore()){return;}
   if (!vxl.hasSubvoxel()){
-    if(vxl.floodFill()){id++;}
+    if(vxl.floodFill(id, index, lvl)){id++;}
   }
   else {
     std::array<unsigned,3> subindex;
@@ -274,12 +274,19 @@ Voxel& Space::getTopVxl(const std::array<int,3> arr){
 /////////////////
 
 // check whether coord is inside grid bounds
-bool Space::coordInBounds(const std::array<int,3>& coord, const unsigned lvl){
+bool Space::isInBounds(const std::array<int,3>& coord, const unsigned lvl){
   for (char i = 0; i < 3; i++){
     if(coord[i] < 0 || coord[i] >= n_gridsteps[i] * std::pow(2,max_depth-lvl)){return false;}
   }
   return true;
 }
+bool Space::isInBounds(const std::array<unsigned,3>& coord, const unsigned lvl){
+  for (char i = 0; i < 3; i++){
+    if(coord[i] < 0 || coord[i] >= n_gridsteps[i] * std::pow(2,max_depth-lvl)){return false;}
+  }
+  return true;
+}
+
 
 std::array<unsigned int,3> Space::getGridsteps(){
   return n_gridsteps;
