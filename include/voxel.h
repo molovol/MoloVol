@@ -27,6 +27,7 @@ class Space;
 class AtomTree;
 struct Atom;
 struct AtomNode;
+struct VoxelBundle;
 class Voxel{
   public:
     Voxel();
@@ -58,9 +59,9 @@ class Voxel{
     void splitVoxel(const std::array<unsigned,3>&, const Vector&, const double); 
 
     // cavity id
-    bool floodFill(const unsigned char, const std::array<unsigned,3>&, const unsigned);
-    bool descend(const unsigned char id, const std::array<unsigned,3>& index, const unsigned lvl, const signed char dim, const bool sign);
-    void ascend(const unsigned char id, std::array<unsigned,3> index, const unsigned lvl, std::array<unsigned,3> prev_index, const signed char dim);
+    bool floodFill(const unsigned char, const std::array<unsigned,3>&, const int);
+    void descend(std::vector<VoxelBundle>&, const unsigned char id, const std::array<unsigned,3>& index, const int lvl, const signed char dim, const bool sign);
+    void ascend(std::vector<VoxelBundle>&, const unsigned char id, const std::array<unsigned,3> index, const int lvl, std::array<unsigned,3> prev_index, const signed char dim);
     void passIDtoChildren(const std::array<unsigned,3>&, const int);
 
     // shell vs void

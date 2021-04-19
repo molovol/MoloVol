@@ -368,38 +368,60 @@ void Voxel::listFromTree(
 ///////////////
 // CAVITY ID //
 ///////////////
+  
+struct VoxelBundle{
+  VoxelBundle(Voxel* vxl, const std::array<unsigned,3>& index, const int lvl) : vxl(vxl), index(index), lvl(lvl) {}
+  Voxel* vxl;
+  std::array<unsigned,3> index;
+  int lvl;
+};
 
-bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& index, const unsigned lvl){
-  // if voxel has ID then ignore
-  if (getID() != 0){return false;}
-  // else set ID according to argument
+bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& start_index, const int start_lvl){
+  assert(_type == 0b00001001);
+  if(getID() != 0){return false;}
   setID(id);
-  passIDtoChildren(index, lvl);
-  // find neighbours on the same level
-  std::array<unsigned,3> nb_index;
-  for (char dim = 0; dim < 3; dim++){
-    for (bool sign : {false, true}){ // true: negative, false: positive
-      nb_index = index;
-      nb_index[dim] += sign? -1 : 1;
-      if (!s_cell->isInBounds(nb_index,lvl)){continue;} // skip if voxel out of bounds
-        
-      Voxel& nb_vxl = s_cell->getVxlFromGrid(nb_index,lvl);
-//      if (!nb_vxl.isCore()){continue;} // only check neighbours that are or contain probe core
-      // descend to all subvoxels that border this voxel and perform flood fill
-      if(!nb_vxl.descend(id, nb_index, lvl, dim, sign)){
-        // ascend to highest parent of pure type and perform flood fill
-        nb_vxl.ascend(id, nb_index, lvl, index, dim);
+  passIDtoChildren(start_index, start_lvl);
+
+  std::vector<VoxelBundle> flood_stack;
+  flood_stack.push_back(VoxelBundle(this, start_index, start_lvl));
+  
+  // adds neighbours to the stack, IDs are assigned before adding to the stack
+  while (flood_stack.size() > 0){
+    VoxelBundle vxl = flood_stack.back();
+    flood_stack.pop_back();
+    
+    std::array<unsigned,3> nb_index;
+    for (char dim = 0; dim < 3; dim++){
+      for (bool sign : {false, true}){ // true: negative, false: positive
+        nb_index = vxl.index;
+        nb_index[dim] += sign? -1 : 1;
+        if (!s_cell->isInBounds(nb_index,vxl.lvl)){continue;} // skip if index is invalid
+        Voxel& nb_vxl = s_cell->getVxlFromGrid(nb_index,vxl.lvl);
+        if (!nb_vxl.isCore()) {continue;} // skip if neighbour is not core
+
+        if (nb_vxl.hasSubvoxel()){
+          // descend to all subvoxels that border this voxel and add to stack
+          nb_vxl.descend(flood_stack, id, nb_index, vxl.lvl, dim, sign);
+        }
+        else {
+          // ascend to highest parent of pure type and add to stack
+          nb_vxl.ascend(flood_stack, id, nb_index, vxl.lvl, vxl.index, dim);
+        }
       }
     }
   }
   return true;
 }
 
-bool Voxel::descend(const unsigned char id, const std::array<unsigned,3>& index, const unsigned lvl, const signed char dim, const bool sign){
-  if (!isCore()){return true;} // return immediatly if voxel isn't and doesn't contain core voxel
+void Voxel::descend(std::vector<VoxelBundle>& stack, const unsigned char id, const std::array<unsigned,3>& index, const int lvl, const signed char dim, const bool sign){
+  if (!isCore()){return;} // return immediatly if voxel isn't and doesn't contain core voxel
   if (!hasSubvoxel()){
-    floodFill(id, index, lvl);
-    return false;
+    if (getID() == 0){
+      // when reaching a voxel that has no children and is core, set ID and add voxel to stack
+      setID(id);
+      passIDtoChildren(index, lvl);
+      stack.push_back(VoxelBundle(this, index, lvl));
+    }
   }
   else {
     // only loop over those voxels bordering the previous voxel
@@ -411,43 +433,42 @@ bool Voxel::descend(const unsigned char id, const std::array<unsigned,3>& index,
         for (char j = 0; j < 3; ++j){
           sub_index[j] = index[j] * 2 + i[j];
         }
-        s_cell->getVxlFromGrid(sub_index, lvl-1).descend(id, sub_index, lvl-1, dim, sign);
+        s_cell->getVxlFromGrid(sub_index, lvl-1).descend(stack, id, sub_index, lvl-1, dim, sign);
       }
     }
-    return true;
   }
 }
 
-void Voxel::ascend(const unsigned char id, std::array<unsigned,3> index, const unsigned lvl, std::array<unsigned,3> prev_index, const signed char dim){
+// TODO: restructure this section, so that the voxel is only added to the stack once in the code
+void Voxel::ascend(std::vector<VoxelBundle>& stack, const unsigned char id, const std::array<unsigned,3> index, const int lvl, std::array<unsigned,3> prev_index, const signed char dim){
   // compare index with index of previous voxel
-  /*
-  Voxel* vxl = this;
-  while (index[dim/2] == prev_index[dim]){
-    for (char i = 0; i < 3; ++i){
-      index[i] = index[i]/2;
-      prev_index[i] = prev_index[i]/2;
+  // if voxel and previous voxel belong to the same parent or this is top lvl vxl
+  if (index[dim]/2 == prev_index[dim]/2 || lvl == s_cell->getMaxDepth()){
+    if (getID() == 0){
+      setID(id);
+      passIDtoChildren(index, lvl);
+      stack.push_back(VoxelBundle(this, index, lvl));
     }
-    if (getVxlFromGrid())
-
-
   }
-  */
-  assert(_type ==0b00001001);
-  
-  // if previous voxel and this voxel belong to same parent
-  // or if at top lvl
-  if (index[dim]/2 == prev_index[dim]/2 || lvl == s_cell->getMaxDepth()){ 
-    floodFill(id, index, lvl);
-  }
+  // if voxel and previous voxel don't belong to same parent, compare parent type to voxel type
   else {
+    // calculate parent indices
+    std::array<unsigned,3> parent_index;
     for (char i = 0; i < 3; ++i){
-      index[i] = index[i]/2;
+      parent_index[i] = index[i]/2;
       prev_index[i] = prev_index[i]/2;
     }
-
-    Voxel& parent = s_cell->getVxlFromGrid(index, lvl+1);
+    // access parent
+    Voxel& parent = s_cell->getVxlFromGrid(parent_index, lvl+1);
     if (parent.getType() == getType()){
-      ascend(id, index, lvl+1, prev_index, dim);
+      ascend(stack, id, parent_index, lvl+1, prev_index, dim);
+    }
+    else {
+      if (getID() == 0){
+        setID(id);
+        passIDtoChildren(index, lvl);
+        stack.push_back(VoxelBundle(this, index, lvl));
+      }
     }
   }
 }

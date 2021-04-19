@@ -142,7 +142,7 @@ void Space::identifyCavities(){
   }
 }
 
-void Space::descendToCore(unsigned char& id, const std::array<unsigned,3> index, unsigned lvl){
+void Space::descendToCore(unsigned char& id, const std::array<unsigned,3> index, int lvl){
   Voxel& vxl = getVxlFromGrid(index,lvl);
   if (!vxl.isCore()){return;}
   if (!vxl.hasSubvoxel()){
