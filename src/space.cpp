@@ -6,6 +6,7 @@
 #include "exception.h"
 #include <cmath>
 #include <cassert>
+#include <stdexcept>
 
 /////////////////
 // CONSTRUCTOR //
@@ -101,8 +102,10 @@ void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, co
   }
   Voxel::storeProbe(r_probe1, false);
   assignAtomVsCore();
-    
-  identifyCavities();
+
+  try{identifyCavities();}
+  catch (std::overflow_error e){// TODO: relay exception to controller and inform user
+  }
 
   printf("\nAssigning probe 1 shell and excluded void:\n");
   assignShellVsVoid();
@@ -135,7 +138,12 @@ void Space::identifyCavities(){
   for(vxl_index[0] = 0; vxl_index[0] < n_gridsteps[0]; vxl_index[0]++){
     for(vxl_index[1] = 0; vxl_index[1] < n_gridsteps[1]; vxl_index[1]++){
       for(vxl_index[2] = 0; vxl_index[2] < n_gridsteps[2]; vxl_index[2]++){
-        descendToCore(id,vxl_index,getMaxDepth());
+        try{
+          descendToCore(id,vxl_index,getMaxDepth());
+        }
+        catch (std::overflow_error e){
+          throw;
+        }
       }
     }
     printf("%i%% done\n", int(100*(double(vxl_index[0])+1)/double(n_gridsteps[0])));
@@ -146,7 +154,12 @@ void Space::descendToCore(unsigned char& id, const std::array<unsigned,3> index,
   Voxel& vxl = getVxlFromGrid(index,lvl);
   if (!vxl.isCore()){return;}
   if (!vxl.hasSubvoxel()){
-    if(vxl.floodFill(id, index, lvl)){id++;}
+    if(vxl.floodFill(id, index, lvl)){
+      if (id == 0b11111111){
+        throw std::overflow_error("Too many isolated cavities detected!");
+      }
+      id++;
+    }
   }
   else {
     std::array<unsigned,3> subindex;
@@ -156,7 +169,8 @@ void Space::descendToCore(unsigned char& id, const std::array<unsigned,3> index,
         subindex[1] = index[1]*2 + j;
         for (char k = 0; k < 2; ++k){
           subindex[2] = index[2]*2 + k;
-          descendToCore(id, subindex, lvl-1);
+          try {descendToCore(id, subindex, lvl-1);}
+          catch (std::overflow_error e){throw;}
         }
       }
     }
