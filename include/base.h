@@ -38,6 +38,7 @@ class MainFrame: public wxFrame
     void clearOutput();
     void printToOutput(std::string& text);
     void appendOutput(std::string& text);
+    void appendOutput(std::wstring& text);
     std::string getAtomFilepath();
     std::string getRadiusFilepath();
     bool getIncludeHetatm();

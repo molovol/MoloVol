@@ -15,7 +15,8 @@ class Ctrl{
     bool runCalculation();
     void registerView(MainFrame* inp_gui);
     static Ctrl* getInstance();
-    void notifyUser(std::string str, bool = true); // TODO should the bool argument always be set to true ?!
+    void notifyUser(std::string str, bool = true);
+    void notifyUser(std::wstring wstr);
     void prepareOutput(std::string);
     void exportReport();
     void exportSurfaceMap();
