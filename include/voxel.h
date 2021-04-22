@@ -60,9 +60,6 @@ class Voxel{
 
     // cavity id
     bool floodFill(const unsigned char, const std::array<unsigned,3>&, const int);
-    void descend(std::vector<VoxelBundle>&, const unsigned char id, const std::array<unsigned,3>& index, const int lvl, const signed char dim, const bool sign);
-    void ascend(std::vector<VoxelBundle>&, const unsigned char id, const std::array<unsigned,3> index, const int lvl, std::array<unsigned,3> prev_index, const signed char dim);
-    void passIDtoChildren(const std::array<unsigned,3>&, const int);
 
     // shell vs void
     char evalRelationToVoxels(const std::array<unsigned int,3>&, const unsigned, bool=false);
@@ -81,19 +78,27 @@ class Voxel{
     unsigned int tallyVoxelsOfType(const std::array<unsigned,3>&, const char volume_type, const int max_depth);
 
   private:
+    char _type;
+    unsigned char _identity;
+
     static inline Space* s_cell;
+    // atom vs core
     static inline AtomTree s_atomtree;
+    // shell vs void
     static inline double s_r_probe;
     static inline bool s_masking_mode;
     static inline SearchIndex s_search_indices;
 
     static inline double calcRadiusOfInfluence(const double& max_depth);
 
+    // atom vs core
     bool isAtom(const Atom&, const Vector&, const double, const double);
+    // cavity id
+    void descend(std::vector<VoxelBundle>&, const unsigned char, const std::array<unsigned,3>&, const int, const signed char, const bool);
+    void ascend(std::vector<VoxelBundle>&, const unsigned char, const std::array<unsigned,3>, const int, std::array<unsigned,3>, const signed char);
+    void passIDtoChildren(const std::array<unsigned,3>&, const int);
+    // shell vs void
     void searchForCore(const std::array<unsigned int,3>&, const unsigned, bool=false);
-
-    char _type;
-    unsigned char _identity;
 };
 
 #endif
