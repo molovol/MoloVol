@@ -440,19 +440,10 @@ void Voxel::descend(std::vector<VoxelBundle>& stack, const unsigned char id, con
 }
 
 void Voxel::ascend(std::vector<VoxelBundle>& stack, const unsigned char id, const std::array<unsigned,3> index, const int lvl, std::array<unsigned,3> prev_index, const signed char dim){
-    
   // compare index with index of previous voxel
-  // if voxel and previous voxel belong to the same parent or this is top lvl vxl
-  if (index[dim]/2 == prev_index[dim]/2 || lvl == s_cell->getMaxDepth()){
-    if (getID() == 0){
-      setID(id);
-      passIDtoChildren(index, lvl);
-      stack.push_back(VoxelBundle(this, index, lvl));
-    }
-  }
-  // if voxel and previous voxel don't belong to same parent, compare parent type to voxel type
-  else {
-    // calculate parent indices
+  // if voxel and previous voxel dont't belong to the same parent and this is not top lvl vxl
+  // then compare types of this voxel and parent voxel
+  if (index[dim]/2 != prev_index[dim]/2 && lvl != s_cell->getMaxDepth()){
     std::array<unsigned,3> parent_index;
     for (char i = 0; i < 3; ++i){
       parent_index[i] = index[i]/2;
@@ -460,16 +451,15 @@ void Voxel::ascend(std::vector<VoxelBundle>& stack, const unsigned char id, cons
     }
     // access parent
     Voxel& parent = s_cell->getVxlFromGrid(parent_index, lvl+1);
+    // if types are the same, then move to parent voxel
     if (parent.getType() == getType()){
       parent.ascend(stack, id, parent_index, lvl+1, prev_index, dim);
     }
-    else {
-      if (getID() == 0){
-        setID(id);
-        passIDtoChildren(index, lvl);
-        stack.push_back(VoxelBundle(this, index, lvl));
-      }
-    }
+  }
+  if (getID() == 0){
+    setID(id);
+    passIDtoChildren(index, lvl);
+    stack.push_back(VoxelBundle(this, index, lvl));
   }
 }
 
