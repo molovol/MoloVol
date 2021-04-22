@@ -369,9 +369,8 @@ void Voxel::listFromTree(
 // CAVITY ID //
 ///////////////
   
-struct VoxelBundle{
-  VoxelBundle(Voxel* vxl, const std::array<unsigned,3>& index, const int lvl) : vxl(vxl), index(index), lvl(lvl) {}
-  Voxel* vxl; // not even needed
+struct VoxelLoc{
+  VoxelLoc(const std::array<unsigned,3>& index, const int lvl) : index(index), lvl(lvl) {}
   std::array<unsigned,3> index;
   int lvl;
 };
@@ -382,12 +381,12 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
   setID(id);
   passIDtoChildren(start_index, start_lvl);
 
-  std::vector<VoxelBundle> flood_stack;
-  flood_stack.push_back(VoxelBundle(this, start_index, start_lvl));
+  std::vector<VoxelLoc> flood_stack;
+  flood_stack.push_back(VoxelLoc(start_index, start_lvl));
   
   // adds neighbours to the stack, IDs are assigned before adding to the stack
   while (flood_stack.size() > 0){
-    VoxelBundle vxl = flood_stack.back();
+    VoxelLoc vxl = flood_stack.back();
     flood_stack.pop_back();
     
     std::array<unsigned,3> nb_index;
@@ -413,14 +412,14 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
   return true;
 }
 
-void Voxel::descend(std::vector<VoxelBundle>& stack, const unsigned char id, const std::array<unsigned,3>& index, const int lvl, const signed char dim, const bool sign){
+void Voxel::descend(std::vector<VoxelLoc>& stack, const unsigned char id, const std::array<unsigned,3>& index, const int lvl, const signed char dim, const bool sign){
   if (!isCore()){return;} // return immediatly if voxel isn't and doesn't contain core voxel
   if (!hasSubvoxel()){
     if (getID() == 0){
       // when reaching a voxel that has no children and is core, set ID and add voxel to stack
       setID(id);
       passIDtoChildren(index, lvl);
-      stack.push_back(VoxelBundle(this, index, lvl));
+      stack.push_back(VoxelLoc(index, lvl));
     }
   }
   else {
@@ -439,7 +438,7 @@ void Voxel::descend(std::vector<VoxelBundle>& stack, const unsigned char id, con
   }
 }
 
-void Voxel::ascend(std::vector<VoxelBundle>& stack, const unsigned char id, const std::array<unsigned,3> index, const int lvl, std::array<unsigned,3> prev_index, const signed char dim){
+void Voxel::ascend(std::vector<VoxelLoc>& stack, const unsigned char id, const std::array<unsigned,3> index, const int lvl, std::array<unsigned,3> prev_index, const signed char dim){
   // compare index with index of previous voxel
   // if voxel and previous voxel dont't belong to the same parent and this is not top lvl vxl
   // then compare types of this voxel and parent voxel
@@ -459,7 +458,7 @@ void Voxel::ascend(std::vector<VoxelBundle>& stack, const unsigned char id, cons
   if (getID() == 0){
     setID(id);
     passIDtoChildren(index, lvl);
-    stack.push_back(VoxelBundle(this, index, lvl));
+    stack.push_back(VoxelLoc(index, lvl));
   }
 }
 
