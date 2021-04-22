@@ -338,6 +338,7 @@ std::array<unsigned int,3> makeIndices(std::array<unsigned int,3> indices, int d
 // displays voxel grid types as matrix in the terminal. useful for debugging
 void Space::printGrid(){
 
+  bool disp_id = false;
   int depth = 0;
   std::array<unsigned int,3> indices = makeIndices(n_gridsteps, depth);
 
@@ -351,6 +352,10 @@ void Space::printGrid(){
   std::cout << "Enter 'q' to quit; 'w', 'a', 's', 'd' for directional input; 'c' to continue in z direction; 'r' to go back in z direction. Enter '+' or '-' to change the octree depth." << std::endl;
   char usr_inp = '\0';
   while (usr_inp != 'q'){
+
+    if (usr_inp == '#'){
+      disp_id = !disp_id;
+    }
 
     // if depth is changed, reset view
     if (usr_inp == '+' || usr_inp == '-'){
@@ -393,14 +398,20 @@ void Space::printGrid(){
     // print matrix
     for(unsigned int y = y_min; y < y_max; y++){
       for(unsigned int x = x_min; x < x_max; x++){
-        char to_print = (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00000011)? 'A' : 'O';
-        if (!readBit(getVxlFromGrid(x,y,z,max_depth-depth).getType(),0)){to_print = '?';}
-        if (readBit(getVxlFromGrid(x,y,z,max_depth-depth).getType(),7)){to_print = 'M';}
-        if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00000101){to_print = 'X';}
-        if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00001001){to_print = 'P';}
-        if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00010001){to_print = 'S';}
-        if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00100001){to_print = 'p';}
-        if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b01000001){to_print = 's';}
+        char to_print;
+        if (disp_id){
+          to_print = ('0' + getVxlFromGrid(x,y,z, max_depth-depth).getID());
+        }
+        else{
+          to_print = (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00000011)? 'A' : 'O';
+          if (!readBit(getVxlFromGrid(x,y,z,max_depth-depth).getType(),0)){to_print = '?';}
+          if (readBit(getVxlFromGrid(x,y,z,max_depth-depth).getType(),7)){to_print = 'M';}
+          if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00000101){to_print = 'X';}
+          if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00001001){to_print = 'P';}
+          if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00010001){to_print = 'S';}
+          if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00100001){to_print = 'p';}
+          if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b01000001){to_print = 's';}
+        }
 
         std::cout << to_print << " ";
       }

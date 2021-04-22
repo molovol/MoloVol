@@ -371,7 +371,7 @@ void Voxel::listFromTree(
   
 struct VoxelBundle{
   VoxelBundle(Voxel* vxl, const std::array<unsigned,3>& index, const int lvl) : vxl(vxl), index(index), lvl(lvl) {}
-  Voxel* vxl;
+  Voxel* vxl; // not even needed
   std::array<unsigned,3> index;
   int lvl;
 };
@@ -439,8 +439,8 @@ void Voxel::descend(std::vector<VoxelBundle>& stack, const unsigned char id, con
   }
 }
 
-// TODO: restructure this section, so that the voxel is only added to the stack once in the code
 void Voxel::ascend(std::vector<VoxelBundle>& stack, const unsigned char id, const std::array<unsigned,3> index, const int lvl, std::array<unsigned,3> prev_index, const signed char dim){
+    
   // compare index with index of previous voxel
   // if voxel and previous voxel belong to the same parent or this is top lvl vxl
   if (index[dim]/2 == prev_index[dim]/2 || lvl == s_cell->getMaxDepth()){
@@ -461,7 +461,7 @@ void Voxel::ascend(std::vector<VoxelBundle>& stack, const unsigned char id, cons
     // access parent
     Voxel& parent = s_cell->getVxlFromGrid(parent_index, lvl+1);
     if (parent.getType() == getType()){
-      ascend(stack, id, parent_index, lvl+1, prev_index, dim);
+      parent.ascend(stack, id, parent_index, lvl+1, prev_index, dim);
     }
     else {
       if (getID() == 0){
