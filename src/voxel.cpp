@@ -453,6 +453,7 @@ void Voxel::ascend(std::vector<VoxelLoc>& stack, const unsigned char id, const s
     // if types are the same, then move to parent voxel
     if (parent.getType() == getType()){
       parent.ascend(stack, id, parent_index, lvl+1, prev_index, dim);
+      return;
     }
   }
   if (getID() == 0){
@@ -506,6 +507,11 @@ void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
       coord = add(coord, index);
       if (readBit((s_cell->getVxlFromGrid(coord,lvl)).getType(),bit_pos_core)){
         _type = (n <= Voxel::s_search_indices.getSafeLim(lvl))? shell_type : 0b10000000; // mark to split
+        /*
+        if (_type == shell_type) {
+          setID(s_cell->getVxlFromGrid(coord,lvl).getID());
+          passIDtoChildren(index, lvl);
+        }*/
         return;
       }
     }
