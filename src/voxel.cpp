@@ -474,7 +474,7 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
     searchForCore(index, lvl, split);
     split = true;
   }
-  if (hasSubvoxel()) { // vxl has children
+  if (hasSubvoxel()) { // vxl has children/ has been marked to split
     std::array<unsigned int,3> index_subvxl;
     std::array<char,8> subtypes;
     char i = 0;
@@ -499,19 +499,19 @@ void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
   _type = s_masking_mode? 0 : 0b00000101; // type excluded
 
   const char shell_type = s_masking_mode? 0b01000001 : 0b00010001;
-  const char bit_pos_core = s_masking_mode? 5 : 3;
+  const char core_type = s_masking_mode? 0b00100001 : 0b00001001;
 
   for (unsigned int n = (split? Voxel::s_search_indices.getSafeLim(lvl+1)*4 : 1); n <= Voxel::s_search_indices.getUppLim(lvl); ++n){
     // called very often; keep section inexpensive
     for (std::array<int,3> coord : Voxel::s_search_indices[n]){
       coord = add(coord, index);
-      if (readBit((s_cell->getVxlFromGrid(coord,lvl)).getType(),bit_pos_core)){
+      if (s_cell->getVxlFromGrid(coord,lvl).getType() == core_type){
         _type = (n <= Voxel::s_search_indices.getSafeLim(lvl))? shell_type : 0b10000000; // mark to split
-        /*
-        if (_type == shell_type) {
+        
+        if (!s_masking_mode) {
           setID(s_cell->getVxlFromGrid(coord,lvl).getID());
           passIDtoChildren(index, lvl);
-        }*/
+        }
         return;
       }
     }

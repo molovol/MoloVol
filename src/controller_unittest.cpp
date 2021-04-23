@@ -70,9 +70,9 @@ bool Ctrl::unittestProtein(){
   const std::string radius_filepath = "./inputfile/radii.txt";
   const double grid_step = 0.1;
   const int max_depth = 4;
-  const double rad_probe1 = 0.5;
+  const double rad_probe1 = 1.2;
   const double expected_vdwVolume = 14337.422000;
-  const double expected_time = 155;
+  const double expected_time = 67;
 
   std::unordered_map<std::string, double> rad_map = current_calculation->importRadiusMap(radius_filepath);
 

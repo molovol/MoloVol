@@ -103,6 +103,7 @@ void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, co
   Voxel::storeProbe(r_probe1, false);
   assignAtomVsCore();
 
+  printf("\nColour all cavities\n");
   try{identifyCavities();}
   catch (std::overflow_error e){// TODO: relay exception to controller and inform user
   }
