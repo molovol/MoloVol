@@ -499,7 +499,6 @@ bool Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
   // the subsequent neighbour search should start from 0 or from the safe limit. The use of this
   // return value allows avoiding calling a function to validate voxel coordinates (Space::isInBounds)
   // which, due to the number of times the function would have to be called, saves a lot of computations
-  bool next_search_from_0 = false;
   _type = s_masking_mode? 0 : 0b00000101; // type excluded
 
   const char shell_type = s_masking_mode? 0b01000001 : 0b00010001;
@@ -511,35 +510,30 @@ bool Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
       coord = add(coord,index);
       // if a neighbour voxel containing a probe core is found
       if (readBit((s_cell->getVxlFromGrid(coord,lvl)).getType(),bit_pos_core)){
-        Voxel& nb_vxl = s_cell->getVxlFromGrid(coord,lvl);
-        // if the neighbour is within a safe distance
-        if (n <= Voxel::s_search_indices.getSafeLim(lvl)){
-          next_search_from_0 = true;
-          setType(shell_type);
-          if (!s_masking_mode && nb_vxl.getType() != 0b00001001){
-            setType(0b10000000);
-          }
-          else {
-            setID(nb_vxl.getID());
+        bool inside_safe_lim = n <= Voxel::s_search_indices.getSafeLim(lvl);
+        // if large probe
+        if (!s_masking_mode){
+          setType(inside_safe_lim? shell_type : 0b10000000);
+          //return true; // return true is fine here, because if shell type then no more search will be done
+        }
+        // if small probe
+        else {
+          bool found_pure_type = s_cell->getVxlFromGrid(coord,lvl).getType() == 0b00001001;
+          // assign shell type only when inside safe limit and a pure type has been found
+          if (inside_safe_lim && found_pure_type) {
+            setType(shell_type);
+            setID(s_cell->getVxlFromGrid(index,lvl).getID());
             passIDtoChildren(index, lvl);
           }
+          else {
+            setType(0b10000000);
+          }
         }
-        // if the neighbour is within a questionable distance
-        else {
-          next_search_from_0 = false;
-          setType(0b10000000);
-        }
-//        _type = (n <= Voxel::s_search_indices.getSafeLim(lvl))? shell_type : 0b10000000; // mark to split
-        /*
-        if (_type == shell_type) {
-          setID(s_cell->getVxlFromGrid(coord,lvl).getID());
-          passIDtoChildren(index, lvl);
-        }*/
-        return next_search_from_0;
+        return !inside_safe_lim;
       }
     }
   }
-  return next_search_from_0;
+  return false;
 }
 
 ///////////
