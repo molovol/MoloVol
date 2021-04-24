@@ -529,12 +529,6 @@ bool Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
           next_search_from_0 = false;
           setType(0b10000000);
         }
-//        _type = (n <= Voxel::s_search_indices.getSafeLim(lvl))? shell_type : 0b10000000; // mark to split
-        /*
-        if (_type == shell_type) {
-          setID(s_cell->getVxlFromGrid(coord,lvl).getID());
-          passIDtoChildren(index, lvl);
-        }*/
         return next_search_from_0;
       }
     }
