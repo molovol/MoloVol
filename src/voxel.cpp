@@ -471,8 +471,7 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
   // if voxel (including all subvoxels) have been assigned, then return immediately
   if (isAssigned()){return _type;}
   else if (!hasSubvoxel()){ // vxl has no children
-    searchForCore(index, lvl, split);
-    split = true;
+    split = !searchForCore(index, lvl, split);
   }
   if (hasSubvoxel()) { // vxl has children
     std::array<unsigned int,3> index_subvxl;
@@ -495,7 +494,12 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
   return _type;
 }
 
-void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigned lvl, bool split){
+bool Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigned lvl, bool split){
+  // the return value of this function is used to determine, whether after splitting this voxel,
+  // the subsequent neighbour search should start from 0 or from the safe limit. The use of this
+  // return value allows avoiding calling a function to validate voxel coordinates (Space::isInBounds)
+  // which, due to the number of times the function would have to be called, saves a lot of computations
+  bool next_search_from_0 = false;
   _type = s_masking_mode? 0 : 0b00000101; // type excluded
 
   const char shell_type = s_masking_mode? 0b01000001 : 0b00010001;
@@ -504,18 +508,38 @@ void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
   for (unsigned int n = (split? Voxel::s_search_indices.getSafeLim(lvl+1)*4 : 1); n <= Voxel::s_search_indices.getUppLim(lvl); ++n){
     // called very often; keep section inexpensive
     for (std::array<int,3> coord : Voxel::s_search_indices[n]){
-      coord = add(coord, index);
+      coord = add(coord,index);
+      // if a neighbour voxel containing a probe core is found
       if (readBit((s_cell->getVxlFromGrid(coord,lvl)).getType(),bit_pos_core)){
-        _type = (n <= Voxel::s_search_indices.getSafeLim(lvl))? shell_type : 0b10000000; // mark to split
+        Voxel& nb_vxl = s_cell->getVxlFromGrid(coord,lvl);
+        // if the neighbour is within a safe distance
+        if (n <= Voxel::s_search_indices.getSafeLim(lvl)){
+          next_search_from_0 = true;
+          setType(shell_type);
+          if (!s_masking_mode && nb_vxl.getType() != 0b00001001){
+            setType(0b10000000);
+          }
+          else {
+            setID(nb_vxl.getID());
+            passIDtoChildren(index, lvl);
+          }
+        }
+        // if the neighbour is within a questionable distance
+        else {
+          next_search_from_0 = false;
+          setType(0b10000000);
+        }
+//        _type = (n <= Voxel::s_search_indices.getSafeLim(lvl))? shell_type : 0b10000000; // mark to split
         /*
         if (_type == shell_type) {
           setID(s_cell->getVxlFromGrid(coord,lvl).getID());
           passIDtoChildren(index, lvl);
         }*/
-        return;
+        return next_search_from_0;
       }
     }
   }
+  return next_search_from_0;
 }
 
 ///////////

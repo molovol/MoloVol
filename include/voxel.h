@@ -98,7 +98,7 @@ class Voxel{
     void ascend(std::vector<VoxelLoc>&, const unsigned char, const std::array<unsigned,3>, const int, std::array<unsigned,3>, const signed char);
     void passIDtoChildren(const std::array<unsigned,3>&, const int);
     // shell vs void
-    void searchForCore(const std::array<unsigned int,3>&, const unsigned, bool=false);
+    bool searchForCore(const std::array<unsigned int,3>&, const unsigned, bool=false);
 };
 
 #endif
