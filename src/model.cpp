@@ -185,7 +185,8 @@ CalcReportBundle Model::calcVolume(){
   //_cell.printGrid(); // for testing
 
   start = std::chrono::steady_clock::now();
-  _cell.getVolume(_data.volumes);
+  _cell.getVolume(_data.volumes, _data.cavities);
+
   end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
 

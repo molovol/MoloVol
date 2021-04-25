@@ -143,7 +143,7 @@ void Space::identifyCavities(){
           descendToCore(id,vxl_index,getMaxDepth()); // id gets iterated inside this function
         }
         catch (std::overflow_error e){
-          _n_cavities = 0;
+          _n_cavities = id;
           throw;
         }
       }
@@ -192,14 +192,15 @@ void Space::assignShellVsVoid(){
   }
 }
 
-void Space::getVolume(std::map<char,double>& volumes){
+void Space::getVolume(std::map<char,double>& volumes, std::vector<double>& cavities){
   std::map<char, unsigned> type_tally;
+  std::map<char, unsigned> id_tally;
 
   std::array<unsigned,3> top_lvl_index;
   for (top_lvl_index[0] = 0; top_lvl_index[0] < n_gridsteps[0]; top_lvl_index[0]++){
     for (top_lvl_index[1] = 0; top_lvl_index[1] < n_gridsteps[1]; top_lvl_index[1]++){
       for (top_lvl_index[2] = 0; top_lvl_index[2] < n_gridsteps[2]; top_lvl_index[2]++){
-        getTopVxl(top_lvl_index).tallyVoxelsOfType(type_tally, top_lvl_index, max_depth);
+        getTopVxl(top_lvl_index).tallyVoxelsOfType(type_tally, id_tally, top_lvl_index, max_depth);
       }
     }
   }
@@ -207,6 +208,10 @@ void Space::getVolume(std::map<char,double>& volumes){
   double unit_volume = pow(getVxlSize(),3);
   for (auto& [type,tally] : type_tally) {
     volumes[type] = tally * unit_volume;
+  }
+  cavities = std::vector<double> (id_tally.size());
+  for (auto& [id,tally] : id_tally) {
+    cavities[id] = tally * unit_volume;
   }
 }
 
