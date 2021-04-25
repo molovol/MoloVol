@@ -103,6 +103,7 @@ void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, co
   Voxel::storeProbe(r_probe1, false);
   assignAtomVsCore();
 
+  printf("\nIdentifying cavities:\n");
   try{identifyCavities();}
   catch (std::overflow_error e){// TODO: relay exception to controller and inform user
   }
@@ -139,15 +140,17 @@ void Space::identifyCavities(){
     for(vxl_index[1] = 0; vxl_index[1] < n_gridsteps[1]; vxl_index[1]++){
       for(vxl_index[2] = 0; vxl_index[2] < n_gridsteps[2]; vxl_index[2]++){
         try{
-          descendToCore(id,vxl_index,getMaxDepth());
+          descendToCore(id,vxl_index,getMaxDepth()); // id gets iterated inside this function
         }
         catch (std::overflow_error e){
+          _n_cavities = 0;
           throw;
         }
       }
     }
     printf("%i%% done\n", int(100*(double(vxl_index[0])+1)/double(n_gridsteps[0])));
   }
+  _n_cavities = id+1;
 }
 
 void Space::descendToCore(unsigned char& id, const std::array<unsigned,3> index, int lvl){
@@ -192,18 +195,17 @@ void Space::assignShellVsVoid(){
 std::map<char,double> Space::getVolume(){
   std::vector<char> types_to_tally{0b00000011,0b00000101,0b00001001,0b00010001,0b00100001,0b01000001};
 
-  std::vector<unsigned int> tally;
+  std::vector<unsigned int> type_tally;
   for (size_t i = 0; i < types_to_tally.size(); i++){
-    tally.push_back(0);
+    type_tally.push_back(0);
   }
 
-//  for(unsigned int i = 0; i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]; i++){ // loop through all top level voxels
   std::array<unsigned,3> top_lvl_index;
   for (top_lvl_index[0] = 0; top_lvl_index[0] < n_gridsteps[0]; top_lvl_index[0]++){
     for (top_lvl_index[1] = 0; top_lvl_index[1] < n_gridsteps[1]; top_lvl_index[1]++){
       for (top_lvl_index[2] = 0; top_lvl_index[2] < n_gridsteps[2]; top_lvl_index[2]++){
         for (size_t j = 0; j < types_to_tally.size(); j++){
-          tally[j] += getTopVxl(top_lvl_index).tallyVoxelsOfType(top_lvl_index, types_to_tally[j], max_depth);
+          type_tally[j] += getTopVxl(top_lvl_index).tallyVoxelsOfType(top_lvl_index, types_to_tally[j], max_depth);
         }
       }
     }
@@ -212,7 +214,7 @@ std::map<char,double> Space::getVolume(){
 
   std::map<char,double> volumes;
   for (size_t i = 0; i < types_to_tally.size(); i++){
-    volumes[types_to_tally[i]] = tally[i] * unit_volume;
+    volumes[types_to_tally[i]] = type_tally[i] * unit_volume;
   }
   return volumes;
 }

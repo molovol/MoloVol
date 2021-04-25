@@ -33,6 +33,7 @@ struct CalcReportBundle{
   bool make_cav_maps;
   // calculation results
   std::map<char,double> volumes;
+  std::vector<double> cavities;
   std::map<char,double> surfaces;
   // time
   std::vector<double> elapsed_seconds;

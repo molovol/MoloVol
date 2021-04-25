@@ -54,6 +54,7 @@ class Space{
     std::array<unsigned int,3> n_gridsteps; // number of top level voxels in x,y,z direction 
     double grid_size;
     int max_depth; // for voxels
+    unsigned char _n_cavities;
     
     void setBoundaries(const std::vector<Atom>&, const double);
 
