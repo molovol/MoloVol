@@ -45,7 +45,7 @@ class Space{
 
     // type evaluation
     void assignTypeInGrid(const AtomTree&, const double, const double, bool);
-    std::map<char,double> getVolume();
+    void getVolume(std::map<char,double>&);
 
   private:
     std::array <double,3> cart_min; // this is also the "origin" of the space

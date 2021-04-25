@@ -192,7 +192,7 @@ void Space::assignShellVsVoid(){
   }
 }
 
-std::map<char,double> Space::getVolume(){
+void Space::getVolume(std::map<char,double>& volumes){
   std::map<char, unsigned> type_tally;
 
   std::array<unsigned,3> top_lvl_index;
@@ -205,11 +205,9 @@ std::map<char,double> Space::getVolume(){
   }
 
   double unit_volume = pow(getVxlSize(),3);
-  std::map<char,double> volumes;
   for (auto& [type,tally] : type_tally) {
     volumes[type] = tally * unit_volume;
   }
-  return volumes;
 }
 
 //////////////////////
