@@ -193,6 +193,8 @@ void Space::assignShellVsVoid(){
 }
 
 void Space::getVolume(std::map<char,double>& volumes, std::vector<double>& cavities){
+  volumes.clear();
+  cavities.clear();
   std::map<char, unsigned> type_tally;
   std::map<char, unsigned> id_tally;
 
