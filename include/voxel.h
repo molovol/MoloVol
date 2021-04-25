@@ -8,6 +8,7 @@
 #include <vector>
 #include <array>
 #include <unordered_map>
+#include <map>
 
 struct SearchIndex{
   public:
@@ -75,7 +76,7 @@ class Voxel{
         const char=0);
     
     // volume
-    unsigned int tallyVoxelsOfType(const std::array<unsigned,3>&, const char volume_type, const int max_depth);
+    void tallyVoxelsOfType(std::map<char,unsigned>&, const std::array<unsigned,3>&, const int);
 
   private:
     char _type;
