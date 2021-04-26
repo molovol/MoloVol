@@ -109,6 +109,12 @@ bool Ctrl::runCalculation(){
     notifyUser("Excluded void volume: " + std::to_string(data.volumes[0b00000101]) + " A^3");
     notifyUser("Probe 1 core volume: " + std::to_string(data.volumes[0b00001001]) + " A^3");
     notifyUser("Probe 1 shell volume: " + std::to_string(data.volumes[0b00010001]) + " A^3");
+    for (size_t i = 1; i < data.cavities.size(); ++i){
+      notifyUser("Cav " + std::to_string(i) + ": " + std::to_string(data.cavities[i]) + " A^3 Pos: "
+        + "(" + std::to_string(data.getCavCentre(i)[0]) + ", "
+        + std::to_string(data.getCavCentre(i)[1]) + ", "
+        + std::to_string(data.getCavCentre(i)[2]) + ")");
+    }
     if(data.probe_mode){
       notifyUser("Probe 2 core volume: " + std::to_string(data.volumes[0b00100001]) + " A^3");
       notifyUser("Probe 2 shell volume: " + std::to_string(data.volumes[0b01000001]) + " A^3");

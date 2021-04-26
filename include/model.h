@@ -36,6 +36,14 @@ struct CalcReportBundle{
   std::vector<double> cavities;
   std::vector<std::array<double,3>> cav_min;
   std::vector<std::array<double,3>> cav_max;
+  std::array<double,3> getCavCentre(const unsigned char i){
+    std::array<double,3> cav_ctr;
+    for (char j = 0; j < 3; ++j){
+      cav_ctr[j] = (cav_min[i][j] + cav_max[i][j])/2;
+    }
+    return cav_ctr;
+  }
+  std::array<double,3> getCavCenter(const unsigned char i){return getCavCentre(i);}
   std::map<char,double> surfaces;
   // time
   std::vector<double> elapsed_seconds;
