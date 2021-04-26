@@ -34,6 +34,8 @@ struct CalcReportBundle{
   // calculation results
   std::map<char,double> volumes;
   std::vector<double> cavities;
+  std::vector<std::array<double,3>> cav_min;
+  std::vector<std::array<double,3>> cav_max;
   std::map<char,double> surfaces;
   // time
   std::vector<double> elapsed_seconds;

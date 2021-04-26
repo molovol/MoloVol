@@ -143,14 +143,12 @@ void Space::identifyCavities(){
           descendToCore(id,vxl_index,getMaxDepth()); // id gets iterated inside this function
         }
         catch (std::overflow_error e){
-          _n_cavities = id;
           throw;
         }
       }
     }
     printf("%i%% done\n", int(100*(double(vxl_index[0])+1)/double(n_gridsteps[0])));
   }
-  _n_cavities = id+1;
 }
 
 void Space::descendToCore(unsigned char& id, const std::array<unsigned,3> index, int lvl){
@@ -192,17 +190,22 @@ void Space::assignShellVsVoid(){
   }
 }
 
-void Space::getVolume(std::map<char,double>& volumes, std::vector<double>& cavities){
+void Space::getVolume(std::map<char,double>& volumes, std::vector<double>& cavities, std::vector<std::array<double,3>>& cav_min, std::vector<std::array<double,3>>& cav_max){
   volumes.clear();
   cavities.clear();
+  cav_min.clear();
+  cav_max.clear();
   std::map<char, unsigned> type_tally;
-  std::map<char, unsigned> id_tally;
+  std::map<unsigned char, unsigned> id_tally;
+  // contains the boundaries in which all voxels of a given ID are contained
+  std::map<unsigned char, std::array<unsigned,3>> id_min;
+  std::map<unsigned char, std::array<unsigned,3>> id_max;
 
   std::array<unsigned,3> top_lvl_index;
   for (top_lvl_index[0] = 0; top_lvl_index[0] < n_gridsteps[0]; top_lvl_index[0]++){
     for (top_lvl_index[1] = 0; top_lvl_index[1] < n_gridsteps[1]; top_lvl_index[1]++){
       for (top_lvl_index[2] = 0; top_lvl_index[2] < n_gridsteps[2]; top_lvl_index[2]++){
-        getTopVxl(top_lvl_index).tallyVoxelsOfType(type_tally, id_tally, top_lvl_index, max_depth);
+        getTopVxl(top_lvl_index).tallyVoxelsOfType(type_tally, id_tally, id_min, id_max, top_lvl_index, max_depth);
       }
     }
   }

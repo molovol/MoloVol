@@ -76,7 +76,12 @@ class Voxel{
         const char=0);
     
     // volume
-    void tallyVoxelsOfType(std::map<char,unsigned>&, std::map<char,unsigned>&, const std::array<unsigned,3>&, const int);
+    void tallyVoxelsOfType(std::map<char,unsigned>&, 
+        std::map<unsigned char,unsigned>&, 
+        std::map<unsigned char,std::array<unsigned,3>>&, 
+        std::map<unsigned char,std::array<unsigned,3>>&, 
+        const std::array<unsigned,3>&, 
+        const int);
 
   private:
     char _type;

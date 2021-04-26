@@ -541,7 +541,12 @@ bool Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
 ///////////
 
 // TODO: Optimise. Allow for tallying multiples types at once
-void Voxel::tallyVoxelsOfType(std::map<char,unsigned>& type_tally, std::map<char,unsigned>& id_tally, const std::array<unsigned,3>& index, const int lvl)
+void Voxel::tallyVoxelsOfType(std::map<char,unsigned>& type_tally, 
+    std::map<unsigned char,unsigned>& id_tally, 
+    std::map<unsigned char,std::array<unsigned,3>>& id_min,
+    std::map<unsigned char,std::array<unsigned,3>>& id_max,
+    const std::array<unsigned,3>& index, 
+    const int lvl)
 {
   // if voxel is of type "mixed" (i.e. data vector is not empty)
   if(hasSubvoxel()){
@@ -554,7 +559,7 @@ void Voxel::tallyVoxelsOfType(std::map<char,unsigned>& type_tally, std::map<char
         sub_index[1] = index[1]*2 + y;
         for(char z = 0; z < 2; ++z){
           sub_index[2] = index[2]*2 + z;
-          getSubvoxel(sub_index, lvl).tallyVoxelsOfType(type_tally, id_tally, sub_index, lvl-1);
+          getSubvoxel(sub_index, lvl).tallyVoxelsOfType(type_tally, id_tally, id_min, id_max, sub_index, lvl-1);
         }
       }
     }
@@ -563,6 +568,19 @@ void Voxel::tallyVoxelsOfType(std::map<char,unsigned>& type_tally, std::map<char
     // tally number of bottom level voxels
     type_tally[getType()] += pow(pow2(lvl),3);
     id_tally[getID()] += pow(pow2(lvl),3);
+    // localise cavities
+    std::array<unsigned,3> min;
+    std::array<unsigned,3> max;
+    for (char i = 0; i < 3; i++){
+      min[i] = index[i]*pow2(lvl);
+      max[i] = ((index[i]+1)*pow2(lvl))-1;
+    }
+    if (id_min.count(getID()) == 0) {id_min[getID()] = min;}
+    if (id_max.count(getID()) == 0) {id_max[getID()] = max;}
+    for (char i = 0; i < 3; i++){
+      if (id_min[getID()][i] > min[i]) {id_min[getID()][i] = min[i];}
+      if (id_max[getID()][i] < max[i]) {id_max[getID()][i] = max[i];}
+    }
   }
 }
 

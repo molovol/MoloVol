@@ -45,7 +45,7 @@ class Space{
 
     // type evaluation
     void assignTypeInGrid(const AtomTree&, const double, const double, bool);
-    void getVolume(std::map<char,double>&, std::vector<double>&);
+    void getVolume(std::map<char,double>&, std::vector<double>&, std::vector<std::array<double,3>>&, std::vector<std::array<double,3>>&);
 
   private:
     std::array <double,3> cart_min; // this is also the "origin" of the space
@@ -54,7 +54,6 @@ class Space{
     std::array<unsigned int,3> n_gridsteps; // number of top level voxels in x,y,z direction 
     double grid_size;
     int max_depth; // for voxels
-    unsigned char _n_cavities;
     
     void setBoundaries(const std::vector<Atom>&, const double);
 
