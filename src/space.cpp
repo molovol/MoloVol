@@ -6,6 +6,7 @@
 #include "exception.h"
 #include <cmath>
 #include <cassert>
+#include <stdexcept>
 
 /////////////////
 // CONSTRUCTOR //
@@ -97,6 +98,7 @@ void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, co
     Voxel::storeProbe(r_probe2, true);
     printf("\nAssigning probe 2 core and atoms:\n");
     assignAtomVsCore();
+
     printf("\nAssigning probe 2 shell:\n");
     assignShellVsVoid();
     printf("\nAssigning probe 1 core:\n");
@@ -106,6 +108,12 @@ void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, co
   }
   Voxel::storeProbe(r_probe1, false);
   assignAtomVsCore();
+
+  printf("\nIdentifying cavities:\n");
+  try{identifyCavities();}
+  catch (std::overflow_error e){// TODO: relay exception to controller and inform user
+  }
+
   printf("\nAssigning probe 1 shell and excluded void:\n");
   assignShellVsVoid();
 }
@@ -131,6 +139,51 @@ void Space::assignAtomVsCore(){
   }
 }
 
+void Space::identifyCavities(){
+  std::array<unsigned int,3> vxl_index;
+  unsigned char id = 1;
+  for(vxl_index[0] = 0; vxl_index[0] < n_gridsteps[0]; vxl_index[0]++){
+    for(vxl_index[1] = 0; vxl_index[1] < n_gridsteps[1]; vxl_index[1]++){
+      for(vxl_index[2] = 0; vxl_index[2] < n_gridsteps[2]; vxl_index[2]++){
+        try{
+          descendToCore(id,vxl_index,getMaxDepth()); // id gets iterated inside this function
+        }
+        catch (std::overflow_error e){
+          throw;
+        }
+      }
+    }
+    printf("%i%% done\n", int(100*(double(vxl_index[0])+1)/double(n_gridsteps[0])));
+  }
+}
+
+void Space::descendToCore(unsigned char& id, const std::array<unsigned,3> index, int lvl){
+  Voxel& vxl = getVxlFromGrid(index,lvl);
+  if (!vxl.isCore()){return;}
+  if (!vxl.hasSubvoxel()){
+    if(vxl.floodFill(id, index, lvl)){
+      if (id == 0b11111111){
+        throw std::overflow_error("Too many isolated cavities detected!");
+      }
+      id++;
+    }
+  }
+  else {
+    std::array<unsigned,3> subindex;
+    for (char i = 0; i < 2; ++i){
+      subindex[0] = index[0]*2 + i;
+      for (char j = 0; j < 2; ++j){
+        subindex[1] = index[1]*2 + j;
+        for (char k = 0; k < 2; ++k){
+          subindex[2] = index[2]*2 + k;
+          try {descendToCore(id, subindex, lvl-1);}
+          catch (std::overflow_error e){throw;}
+        }
+      }
+    }
+  }
+}
+
 void Space::assignShellVsVoid(){
   std::array<unsigned int,3> vxl_index;
   for(vxl_index[0] = 0; vxl_index[0] < n_gridsteps[0]; vxl_index[0]++){
@@ -143,31 +196,50 @@ void Space::assignShellVsVoid(){
   }
 }
 
-std::map<char,double> Space::getVolumes(){
-  std::vector<char> types_to_tally{0b00000011,0b00000101,0b00001001,0b00010001,0b00100001,0b01000001};
-  std::vector<unsigned int> tally;
-  for (size_t i = 0; i < types_to_tally.size(); i++){
-    tally.push_back(0);
-  }
+void Space::getVolume(std::map<char,double>& volumes, std::vector<double>& cavities, std::vector<std::array<double,3>>& cav_min, std::vector<std::array<double,3>>& cav_max){
+  // clear all output variables
+  volumes.clear();
+  cavities.clear();
+  cav_min.clear();
+  cav_max.clear();
+  // create maps used for tallying voxels
+  std::map<char, unsigned> type_tally;
+  std::map<unsigned char, unsigned> id_tally;
+  // contain the boundaries in which all voxels of a given ID are contained
+  std::map<unsigned char, std::array<unsigned,3>> id_min;
+  std::map<unsigned char, std::array<unsigned,3>> id_max;
 
-//  for(unsigned int i = 0; i < n_gridsteps[0] * n_gridsteps[1] * n_gridsteps[2]; i++){ // loop through all top level voxels
-  std::array<unsigned int,3> top_lvl_index;
+  // go through all top level voxels and search recursively for pure types. once found, each bottom level voxel
+  // adds 1 to the tally. at the same time the boundaries of the cavities are determined
+  std::array<unsigned,3> top_lvl_index;
   for (top_lvl_index[0] = 0; top_lvl_index[0] < n_gridsteps[0]; top_lvl_index[0]++){
     for (top_lvl_index[1] = 0; top_lvl_index[1] < n_gridsteps[1]; top_lvl_index[1]++){
       for (top_lvl_index[2] = 0; top_lvl_index[2] < n_gridsteps[2]; top_lvl_index[2]++){
-        for (size_t j = 0; j < types_to_tally.size(); j++){
-          tally[j] += getTopVxl(top_lvl_index).tallyVoxelsOfType(top_lvl_index, types_to_tally[j], max_depth);
-        }
+        getTopVxl(top_lvl_index).tallyVoxelsOfType(type_tally, id_tally, id_min, id_max, top_lvl_index, max_depth);
       }
     }
   }
-  double unit_volume = pow(grid_size,3);
 
-  std::map<char,double> volumes;
-  for (size_t i = 0; i < types_to_tally.size(); i++){
-    volumes[types_to_tally[i]] = tally[i] * unit_volume;
+  // calculate the volume of a single bottom level voxel
+  double unit_volume = pow(getVxlSize(),3);
+  // convert from units of bottom level voxels to units of volume
+  for (auto& [type,tally] : type_tally) {
+    volumes[type] = tally * unit_volume;
   }
-  return volumes;
+  // allocate memory
+  cavities = std::vector<double> (id_tally.size());
+  cav_min = std::vector<std::array<double,3>> (id_tally.size());
+  cav_max = std::vector<std::array<double,3>> (id_tally.size());
+  // convert from units of bottom level voxels to units of volume
+  // convert from index to spatial coordinates
+  // copy values from map to vector for more efficient storage and access
+  for (auto& [id,tally] : id_tally) {
+    cavities[id] = tally * unit_volume;
+    for (char i = 0; i < 3; ++i){
+      cav_min[id][i] = getOrigin()[i] + getVxlSize()*id_min[id][i];
+      cav_max[id][i] = getOrigin()[i] + getVxlSize()*(id_max[id][i]+1);
+    }
+  }
 }
 
 std::map<char,double> Space::getUnitCellVolumes(std::array<double,3> unit_cell_limits){
@@ -301,12 +373,19 @@ Voxel& Space::getTopVxl(const std::array<int,3> arr){
 /////////////////
 
 // check whether coord is inside grid bounds
-bool Space::coordInBounds(const std::array<int,3>& coord, const unsigned lvl){
+bool Space::isInBounds(const std::array<int,3>& coord, const unsigned lvl){
   for (char i = 0; i < 3; i++){
     if(coord[i] < 0 || coord[i] >= n_gridsteps[i] * std::pow(2,max_depth-lvl)){return false;}
   }
   return true;
 }
+bool Space::isInBounds(const std::array<unsigned,3>& coord, const unsigned lvl){
+  for (char i = 0; i < 3; i++){
+    if(coord[i] < 0 || coord[i] >= n_gridsteps[i] * std::pow(2,max_depth-lvl)){return false;}
+  }
+  return true;
+}
+
 
 std::array<unsigned int,3> Space::getGridsteps(){
   return n_gridsteps;
@@ -344,6 +423,7 @@ std::array<unsigned int,3> makeIndices(std::array<unsigned int,3> indices, int d
 // displays voxel grid types as matrix in the terminal. useful for debugging
 void Space::printGrid(){
 
+  bool disp_id = false;
   int depth = 0;
   std::array<unsigned int,3> indices = makeIndices(n_gridsteps, depth);
 
@@ -357,6 +437,10 @@ void Space::printGrid(){
   std::cout << "Enter 'q' to quit; 'w', 'a', 's', 'd' for directional input; 'c' to continue in z direction; 'r' to go back in z direction. Enter '+' or '-' to change the octree depth." << std::endl;
   char usr_inp = '\0';
   while (usr_inp != 'q'){
+
+    if (usr_inp == '#'){
+      disp_id = !disp_id;
+    }
 
     // if depth is changed, reset view
     if (usr_inp == '+' || usr_inp == '-'){
@@ -399,14 +483,20 @@ void Space::printGrid(){
     // print matrix
     for(unsigned int y = y_min; y < y_max; y++){
       for(unsigned int x = x_min; x < x_max; x++){
-        char to_print = (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00000011)? 'A' : 'O';
-        if (!readBit(getVxlFromGrid(x,y,z,max_depth-depth).getType(),0)){to_print = '?';}
-        if (readBit(getVxlFromGrid(x,y,z,max_depth-depth).getType(),7)){to_print = 'M';}
-        if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00000101){to_print = 'X';}
-        if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00001001){to_print = 'P';}
-        if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00010001){to_print = 'S';}
-        if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00100001){to_print = 'p';}
-        if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b01000001){to_print = 's';}
+        char to_print;
+        if (disp_id){
+          to_print = ('0' + getVxlFromGrid(x,y,z, max_depth-depth).getID());
+        }
+        else{
+          to_print = (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00000011)? 'A' : 'O';
+          if (!readBit(getVxlFromGrid(x,y,z,max_depth-depth).getType(),0)){to_print = '?';}
+          if (readBit(getVxlFromGrid(x,y,z,max_depth-depth).getType(),7)){to_print = 'M';}
+          if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00000101){to_print = 'X';}
+          if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00001001){to_print = 'P';}
+          if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00010001){to_print = 'S';}
+          if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b00100001){to_print = 'p';}
+          if (getVxlFromGrid(x,y,z,max_depth-depth).getType() == 0b01000001){to_print = 's';}
+        }
 
         std::cout << to_print << " ";
       }

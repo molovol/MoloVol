@@ -139,7 +139,10 @@ void signCombinations(std::vector<std::array<int,3>>& list, std::array<unsigned 
 // CONSTRUCTOR //
 /////////////////
 
-Voxel::Voxel(){_type = 0;}
+Voxel::Voxel(){
+  _type = 0;
+  _identity = 0;
+}
 
 ////////////
 // ACCESS //
@@ -167,11 +170,16 @@ Voxel& Voxel::getSubvoxel(std::array<unsigned,3> sub_index, const unsigned p_lvl
 }
 
 bool Voxel::hasSubvoxel(){return readBit(_type,7);}
+bool Voxel::isCore(){return readBit(_type,3);}
 bool Voxel::isAssigned(){return readBit(_type,0);}
 
 // type
 char Voxel::getType(){return _type;}
 void Voxel::setType(char input){_type = input;}
+
+// ID
+void Voxel::setID(unsigned char id){_identity = id;}
+unsigned char Voxel::getID(){return _identity;}
 
 /////////////////////////////////
 // TYPE ASSIGNMENT PREPARATION //
@@ -220,6 +228,23 @@ void Voxel::passTypeToChildren(const std::array<unsigned,3>& index, const int lv
 
         getSubvoxel(sub_index, lvl).setType(_type);
         getSubvoxel(sub_index, lvl).passTypeToChildren(sub_index, lvl-1);
+      }
+    }
+  }
+}
+
+void Voxel::passIDtoChildren(const std::array<unsigned,3>& index, const int lvl){
+  if (lvl == 0){return;}
+  std::array<unsigned,3> sub_index;
+  for (char x = 0; x < 2; ++x){
+    sub_index[0] = index[0]*2 + x;
+    for (char y = 0; y < 2; ++y){
+      sub_index[1] = index[1]*2 + y;
+      for (char z = 0; z < 2; ++z){
+        sub_index[2] = index[2]*2 + z;
+
+        getSubvoxel(sub_index, lvl).setID(_identity);
+        getSubvoxel(sub_index, lvl).passIDtoChildren(sub_index, lvl-1);
       }
     }
   }
@@ -340,6 +365,104 @@ void Voxel::listFromTree(
   }
 }
 
+///////////////
+// CAVITY ID //
+///////////////
+  
+struct VoxelLoc{
+  VoxelLoc(const std::array<unsigned,3>& index, const int lvl) : index(index), lvl(lvl) {}
+  std::array<unsigned,3> index;
+  int lvl;
+};
+
+bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& start_index, const int start_lvl){
+  assert(_type == 0b00001001);
+  if(getID() != 0){return false;}
+  setID(id);
+  passIDtoChildren(start_index, start_lvl);
+
+  std::vector<VoxelLoc> flood_stack;
+  flood_stack.push_back(VoxelLoc(start_index, start_lvl));
+  
+  // adds neighbours to the stack, IDs are assigned before adding to the stack
+  while (flood_stack.size() > 0){
+    VoxelLoc vxl = flood_stack.back();
+    flood_stack.pop_back();
+    
+    std::array<unsigned,3> nb_index;
+    for (char dim = 0; dim < 3; dim++){
+      for (bool sign : {false, true}){ // true: negative, false: positive
+        nb_index = vxl.index;
+        nb_index[dim] += sign? -1 : 1;
+        if (!s_cell->isInBounds(nb_index,vxl.lvl)){continue;} // skip if index is invalid
+        Voxel& nb_vxl = s_cell->getVxlFromGrid(nb_index,vxl.lvl);
+        if (!nb_vxl.isCore()) {continue;} // skip if neighbour is not core
+
+        if (nb_vxl.hasSubvoxel()){
+          // descend to all subvoxels that border this voxel and add to stack
+          nb_vxl.descend(flood_stack, id, nb_index, vxl.lvl, dim, sign);
+        }
+        else {
+          // ascend to highest parent of pure type and add to stack
+          nb_vxl.ascend(flood_stack, id, nb_index, vxl.lvl, vxl.index, dim);
+        }
+      }
+    }
+  }
+  return true;
+}
+
+void Voxel::descend(std::vector<VoxelLoc>& stack, const unsigned char id, const std::array<unsigned,3>& index, const int lvl, const signed char dim, const bool sign){
+  if (!isCore()){return;} // return immediatly if voxel isn't and doesn't contain core voxel
+  if (!hasSubvoxel()){
+    if (getID() == 0){
+      // when reaching a voxel that has no children and is core, set ID and add voxel to stack
+      setID(id);
+      passIDtoChildren(index, lvl);
+      stack.push_back(VoxelLoc(index, lvl));
+    }
+  }
+  else {
+    // only loop over those voxels bordering the previous voxel
+    std::array<unsigned,3> sub_index;
+    std::array<signed char,3> i;
+    i[dim] = sign? 1 : 0; 
+    for (i[(dim+1)%3] = 0; i[(dim+1)%3] < 2; ++i[(dim+1)%3]){
+      for (i[(dim+2)%3] = 0; i[(dim+2)%3] < 2; ++i[(dim+2)%3]){
+        for (char j = 0; j < 3; ++j){
+          sub_index[j] = index[j] * 2 + i[j];
+        }
+        s_cell->getVxlFromGrid(sub_index, lvl-1).descend(stack, id, sub_index, lvl-1, dim, sign);
+      }
+    }
+  }
+}
+
+void Voxel::ascend(std::vector<VoxelLoc>& stack, const unsigned char id, const std::array<unsigned,3> index, const int lvl, std::array<unsigned,3> prev_index, const signed char dim){
+  // compare index with index of previous voxel
+  // if voxel and previous voxel dont't belong to the same parent and this is not top lvl vxl
+  // then compare types of this voxel and parent voxel
+  if (index[dim]/2 != prev_index[dim]/2 && lvl != s_cell->getMaxDepth()){
+    std::array<unsigned,3> parent_index;
+    for (char i = 0; i < 3; ++i){
+      parent_index[i] = index[i]/2;
+      prev_index[i] = prev_index[i]/2;
+    }
+    // access parent
+    Voxel& parent = s_cell->getVxlFromGrid(parent_index, lvl+1);
+    // if types are the same, then move to parent voxel
+    if (parent.getType() == getType()){
+      parent.ascend(stack, id, parent_index, lvl+1, prev_index, dim);
+      return;
+    }
+  }
+  if (getID() == 0){
+    setID(id);
+    passIDtoChildren(index, lvl);
+    stack.push_back(VoxelLoc(index, lvl));
+  }
+}
+
 ///////////////////////////////
 // TYPE ASSIGNMENT 2ND ROUND //
 ///////////////////////////////
@@ -348,8 +471,7 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
   // if voxel (including all subvoxels) have been assigned, then return immediately
   if (isAssigned()){return _type;}
   else if (!hasSubvoxel()){ // vxl has no children
-    searchForCore(index, lvl, split);
-    split = true;
+    split = !searchForCore(index, lvl, split);
   }
   if (hasSubvoxel()) { // vxl has children
     std::array<unsigned int,3> index_subvxl;
@@ -372,7 +494,12 @@ char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const 
   return _type;
 }
 
-void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigned lvl, bool split){
+bool Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigned lvl, bool split){
+  // the return value of this function is used to determine, whether after splitting this voxel,
+  // the subsequent neighbour search should start from 0 or from the safe limit. The use of this
+  // return value allows avoiding calling a function to validate voxel coordinates (Space::isInBounds)
+  // which, due to the number of times the function would have to be called, saves a lot of computations
+  bool next_search_from_0 = false;
   _type = s_masking_mode? 0 : 0b00000101; // type excluded
 
   const char shell_type = s_masking_mode? 0b01000001 : 0b00010001;
@@ -381,13 +508,32 @@ void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
   for (unsigned int n = (split? Voxel::s_search_indices.getSafeLim(lvl+1)*4 : 1); n <= Voxel::s_search_indices.getUppLim(lvl); ++n){
     // called very often; keep section inexpensive
     for (std::array<int,3> coord : Voxel::s_search_indices[n]){
-      coord = add(coord, index);
+      coord = add(coord,index);
+      // if a neighbour voxel containing a probe core is found
       if (readBit((s_cell->getVxlFromGrid(coord,lvl)).getType(),bit_pos_core)){
-        _type = (n <= Voxel::s_search_indices.getSafeLim(lvl))? shell_type : 0b10000000; // mark to split
-        return;
+        Voxel& nb_vxl = s_cell->getVxlFromGrid(coord,lvl);
+        // if the neighbour is within a safe distance
+        if (n <= Voxel::s_search_indices.getSafeLim(lvl)){
+          next_search_from_0 = true;
+          setType(shell_type);
+          if (!s_masking_mode && nb_vxl.getType() != 0b00001001){
+            setType(0b10000000);
+          }
+          else {
+            setID(nb_vxl.getID());
+            passIDtoChildren(index, lvl);
+          }
+        }
+        // if the neighbour is within a questionable distance
+        else {
+          next_search_from_0 = false;
+          setType(0b10000000);
+        }
+        return next_search_from_0;
       }
     }
   }
+  return next_search_from_0;
 }
 
 ///////////
@@ -395,7 +541,12 @@ void Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
 ///////////
 
 // TODO: Optimise. Allow for tallying multiples types at once
-unsigned int Voxel::tallyVoxelsOfType(const std::array<unsigned,3>& index, const char volume_type, const int lvl)
+void Voxel::tallyVoxelsOfType(std::map<char,unsigned>& type_tally, 
+    std::map<unsigned char,unsigned>& id_tally, 
+    std::map<unsigned char,std::array<unsigned,3>>& id_min,
+    std::map<unsigned char,std::array<unsigned,3>>& id_max,
+    const std::array<unsigned,3>& index, 
+    const int lvl)
 {
   // if voxel is of type "mixed" (i.e. data vector is not empty)
   if(hasSubvoxel()){
@@ -408,18 +559,29 @@ unsigned int Voxel::tallyVoxelsOfType(const std::array<unsigned,3>& index, const
         sub_index[1] = index[1]*2 + y;
         for(char z = 0; z < 2; ++z){
           sub_index[2] = index[2]*2 + z;
-          total += getSubvoxel(sub_index, lvl).tallyVoxelsOfType(sub_index, volume_type, lvl-1);
+          getSubvoxel(sub_index, lvl).tallyVoxelsOfType(type_tally, id_tally, id_min, id_max, sub_index, lvl-1);
         }
       }
     }
-    return total;
   }
-  // if voxel is of the type of interest, tally the voxel in units of bottom level voxels
-  else if(_type == volume_type){
-    return pow(pow(2,lvl),3); // return number of bottom level voxels
+  else {
+    // tally number of bottom level voxels
+    type_tally[getType()] += pow(pow2(lvl),3);
+    id_tally[getID()] += pow(pow2(lvl),3);
+    // localise cavities
+    std::array<unsigned,3> min;
+    std::array<unsigned,3> max;
+    for (char i = 0; i < 3; i++){
+      min[i] = index[i]*pow2(lvl);
+      max[i] = ((index[i]+1)*pow2(lvl))-1;
+    }
+    if (id_min.count(getID()) == 0) {id_min[getID()] = min;}
+    if (id_max.count(getID()) == 0) {id_max[getID()] = max;}
+    for (char i = 0; i < 3; i++){
+      if (id_min[getID()][i] > min[i]) {id_min[getID()][i] = min[i];}
+      if (id_max[getID()][i] < max[i]) {id_max[getID()][i] = max[i];}
+    }
   }
-  // if neither empty nor of the type of interest, then the voxel doesn't count towards the total
-  return 0;
 }
 
 //////////////////////////////

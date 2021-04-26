@@ -22,7 +22,8 @@ class Space{
     std::array <double,3> getOrigin(); // same as getMin();
     std::array <double,3> getMax();
     std::array <double,3> getSize();
-    bool coordInBounds(const std::array<int,3>&, const unsigned); // not in use
+    bool isInBounds(const std::array<int,3>&, const unsigned);
+    bool isInBounds(const std::array<unsigned,3>&, const unsigned);
     double getVxlSize() const;
     Container3D<Voxel>& getGrid(const unsigned);
 
@@ -44,6 +45,7 @@ class Space{
 
     // type evaluation
     void assignTypeInGrid(const AtomTree&, const double, const double, bool);
+    void getVolume(std::map<char,double>&, std::vector<double>&, std::vector<std::array<double,3>>&, std::vector<std::array<double,3>>&);
     std::map<char,double> getVolumes();
     std::map<char,double> getUnitCellVolumes(std::array<double,3>);
 
@@ -61,6 +63,8 @@ class Space{
 
     const std::array<unsigned long int,3> gridstepsOnLvl(const int) const;
     void assignAtomVsCore();
+    void identifyCavities();
+    void descendToCore(unsigned char&, const std::array<unsigned,3>, int);
     void assignShellVsVoid();
 
 };

@@ -8,6 +8,7 @@
 #include <vector>
 #include <array>
 #include <unordered_map>
+#include <map>
 
 struct SearchIndex{
   public:
@@ -27,6 +28,7 @@ class Space;
 class AtomTree;
 struct Atom;
 struct AtomNode;
+struct VoxelLoc;
 class Voxel{
   public:
     Voxel();
@@ -34,24 +36,36 @@ class Voxel{
     Voxel& getSubvoxel(std::array<unsigned,3>, const unsigned, const std::array<char,3>&);
     Voxel& getSubvoxel(std::array<unsigned,3>, const unsigned, const char);
     Voxel& getSubvoxel(std::array<unsigned,3>, const unsigned);
-    bool hasSubvoxel();
-    bool isAssigned();
     void setType(char);
     char getType();
+    void setID(unsigned char);
+    unsigned char getID();
+    
+    // bitwise operations on _type
+    bool hasSubvoxel(); // state of bit 7
+    bool isCore(); // state of bit 3
+    bool isAssigned(); // state of bit 0
 
+    // calc preparation
     static void prepareTypeAssignment(Space*, AtomTree);
     static void storeProbe(const double, const bool);
     static void computeIndices();
     static void computeIndices(unsigned int);
 
+    // atom vs probe core
     char evalRelationToAtoms(const std::array<unsigned,3>&, Vector, const int);
     void traverseTree(const AtomNode*, const double, const Vector&, const double, const double, const int, 
         const char = 0b00000011, const char = 0); 
     void passTypeToChildren(const std::array<unsigned,3>&, const int);
     void splitVoxel(const std::array<unsigned,3>&, const Vector&, const double); 
 
+    // cavity id
+    bool floodFill(const unsigned char, const std::array<unsigned,3>&, const int);
+
+    // shell vs void
     char evalRelationToVoxels(const std::array<unsigned int,3>&, const unsigned, bool=false);
     
+    // unused
     static void listFromTree(
         std::vector<int>&,
         const AtomNode*,
@@ -61,21 +75,36 @@ class Voxel{
         const double&,
         const char=0);
     
-    unsigned int tallyVoxelsOfType(const std::array<unsigned,3>&, const char volume_type, const int max_depth);
+    // volume
+    void tallyVoxelsOfType(std::map<char,unsigned>&, 
+        std::map<unsigned char,unsigned>&, 
+        std::map<unsigned char,std::array<unsigned,3>>&, 
+        std::map<unsigned char,std::array<unsigned,3>>&, 
+        const std::array<unsigned,3>&, 
+        const int);
 
   private:
+    char _type;
+    unsigned char _identity;
+
     static inline Space* s_cell;
+    // atom vs core
     static inline AtomTree s_atomtree;
+    // shell vs void
     static inline double s_r_probe;
     static inline bool s_masking_mode;
     static inline SearchIndex s_search_indices;
 
     static inline double calcRadiusOfInfluence(const double& max_depth);
 
+    // atom vs core
     bool isAtom(const Atom&, const Vector&, const double, const double);
-    void searchForCore(const std::array<unsigned int,3>&, const unsigned, bool=false);
-
-    char _type;
+    // cavity id
+    void descend(std::vector<VoxelLoc>&, const unsigned char, const std::array<unsigned,3>&, const int, const signed char, const bool);
+    void ascend(std::vector<VoxelLoc>&, const unsigned char, const std::array<unsigned,3>, const int, std::array<unsigned,3>, const signed char);
+    void passIDtoChildren(const std::array<unsigned,3>&, const int);
+    // shell vs void
+    bool searchForCore(const std::array<unsigned int,3>&, const unsigned, bool=false);
 };
 
 #endif

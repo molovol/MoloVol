@@ -56,7 +56,7 @@ bool Model::setProbeRadii(const double r_1, const double r_2, const bool probe_m
     // This second check would be unnecessary when using the GUI but
     // adding it here makes the back engine Model error-proof independently from the GUI
     if (r_1 > r_2){
-      Ctrl::getInstance()->notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.");
+      Ctrl::getInstance()->notifyUser("\nProbes radii invalid!\nSet probe 2 radius > probe 1 radius.");
       return false;
     }
     else{
@@ -66,6 +66,7 @@ bool Model::setProbeRadii(const double r_1, const double r_2, const bool probe_m
   return true;
 }
 
+// TODO: consider making return value const, in order to prevent controller from messing with this
 CalcReportBundle Model::generateVolumeData(){
   // save the date and time of calculation for output files
   _time_stamp = timeNow();
@@ -175,7 +176,6 @@ void Model::storeAtomsInTree(){
 }
 
 CalcReportBundle Model::calcVolume(){
-
   // set back the default value of success to true to avoid lingering errors from previous failed calculations
   _data.success = true;
 
@@ -185,31 +185,21 @@ CalcReportBundle Model::calcVolume(){
   _data.addTime(std::chrono::duration<double>(end-start).count());
 
   // TODO remove when unnecessary
-  //_cell.printGrid(); // for testing
+  // _cell.printGrid(); // for testing
 
   start = std::chrono::steady_clock::now();
+  // TODO: update? to align with new getVolume function?
   if(_data.analyze_unit_cell){
     std::array<double,3> unit_cell_limits = {_cart_matrix[0][0],_cart_matrix[1][1],_cart_matrix[2][2]};
     _data.volumes = _cell.getUnitCellVolumes(unit_cell_limits);
   }
   else{
-    _data.volumes = _cell.getVolumes();
+    _cell.getVolume(_data.volumes, _data.cavities, _data.cav_min, _data.cav_max);
   }
   end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
 
   return _data;
-}
-
-// TODO remove when unnecessary
-void Model::debug(){
-  std::array<double,3> cell_min = _cell.getMin();
-  std::array<double,3> cell_max = _cell.getMax();
-
-  for(int dim = 0; dim < 3; dim++){
-    std::cout << "Cell Limit in Dim " << dim << ":" << cell_min[dim] << " and " << cell_max[dim] << std::endl;
-  }
-  return;
 }
 
 ////////////////////////////////////////////
@@ -237,12 +227,12 @@ bool Model::processUnitCell(){
   */
   double radius_limit = _data.grid_step + _max_atom_radius + 2*( (_data.probe_mode) ? getProbeRad2() : getProbeRad1() );
   if(space_group == ""){
-    Ctrl::getInstance()->notifyUser("Space group not found!\nCheck the structure file\nor untick the unit cell analysis checkbox.");
+    Ctrl::getInstance()->notifyUser("\nSpace group not found!\nCheck the structure file\nor untick the unit cell analysis checkbox.");
     return false;
   }
   for(int i = 0; i < 6; i++){
     if(_cell_param[i] == 0){
-      Ctrl::getInstance()->notifyUser("Unit cell parameters invalid!\nCheck the structure file\nor untick the unit cell analysis checkbox.");
+      Ctrl::getInstance()->notifyUser("\nUnit cell parameters invalid!\nCheck the structure file\nor untick the unit cell analysis checkbox.");
       return false;
     }
   }
@@ -324,7 +314,7 @@ bool Model::symmetrizeUnitCell(){
   std::vector<int> sym_matrix_XYZ;
   std::vector<double> sym_matrix_fraction;
   if(!getSymmetryElements(space_group, sym_matrix_XYZ, sym_matrix_fraction)){
-    Ctrl::getInstance()->notifyUser("Space group or symmetry not found!\nCheck the structure and space group files\nor untick the unit cell analysis checkbox.");
+    Ctrl::getInstance()->notifyUser("\nSpace group or symmetry not found!\nCheck the structure and space group files\nor untick the unit cell analysis checkbox.");
     return false;
   }
   /* To convert cartesian coordinates x y z in unit cell coordinates a b c:
