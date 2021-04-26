@@ -40,8 +40,8 @@ bool Ctrl::loadRadiusFile(){
 
   std::string radius_filepath = gui->getRadiusFilepath();
   if(!current_calculation->readRadiusFileSetMaps(radius_filepath)){
-    notifyUser("Invalid radii definition file!");
-    notifyUser("Please select a valid file or set radii manually.");
+    notifyUser("\nInvalid radii definition file!");
+    notifyUser("\nPlease select a valid file or set radii manually.");
     // shouldn't this return false? -JM
   }
   // refresh atom list using new radius map
@@ -60,11 +60,11 @@ bool Ctrl::loadAtomFile(){
   try{successful_import = current_calculation->readAtomsFromFile(gui->getAtomFilepath(), gui->getIncludeHetatm());}
 
   catch (const ExceptIllegalFileExtension& e){
-    notifyUser("Invalid structure file format!");
+    notifyUser("\nInvalid structure file format!");
     successful_import = false;
   }
   catch (const ExceptInvalidInputFile& e){
-    notifyUser("Invalid structure file!");
+    notifyUser("\nInvalid structure file!");
     successful_import = false;
   }
 
@@ -103,31 +103,38 @@ bool Ctrl::runCalculation(){
   CalcReportBundle data = current_calculation->generateVolumeData();
 
   if (data.success){
-    notifyUser("Result for " + data.chemical_formula);
-    notifyUser("Elapsed time: " + std::to_string(data.getTime()) + " s");
-    notifyUser("Van der Waals volume: " + std::to_string(data.volumes[0b00000011]) + " A^3");
-    notifyUser("Excluded void volume: " + std::to_string(data.volumes[0b00000101]) + " A^3");
-    notifyUser("Probe 1 core volume: " + std::to_string(data.volumes[0b00001001]) + " A^3");
-    notifyUser("Probe 1 shell volume: " + std::to_string(data.volumes[0b00010001]) + " A^3");
+    notifyUser("\nResult for ");
+    notifyUser(Symbol::generateChemicalFormulaUnicode(data.chemical_formula));
+    notifyUser("\nElapsed time: " + std::to_string(data.getTime()) + " s");
+    notifyUser("\nVan der Waals volume: " + std::to_string(data.volumes[0b00000011]) + " ");
+    notifyUser(Symbol::angstrom() + Symbol::cubed());
+    notifyUser("\nExcluded void volume: " + std::to_string(data.volumes[0b00000101]) + " ");
+    notifyUser(Symbol::angstrom() + Symbol::cubed());
+    notifyUser("\nProbe 1 core volume: " + std::to_string(data.volumes[0b00001001]) + " ");
+    notifyUser(Symbol::angstrom() + Symbol::cubed());
+    notifyUser("\nProbe 1 shell volume: " + std::to_string(data.volumes[0b00010001]) + " ");
+    notifyUser(Symbol::angstrom() + Symbol::cubed());
     for (size_t i = 1; i < data.cavities.size(); ++i){
-      notifyUser("Cav " + std::to_string(i) + ": " + std::to_string(data.cavities[i]) + " A^3 Pos: "
-        + "(" + std::to_string(data.getCavCentre(i)[0]) + ", "
+      notifyUser("\nCav " + std::to_string(i) + ": " + std::to_string(data.cavities[i]) + " ");
+      notifyUser(Symbol::angstrom() + Symbol::cubed());
+      notifyUser("(" + std::to_string(data.getCavCentre(i)[0]) + ", "
         + std::to_string(data.getCavCentre(i)[1]) + ", "
         + std::to_string(data.getCavCentre(i)[2]) + ")");
     }
     if(data.probe_mode){
-      notifyUser("Probe 2 core volume: " + std::to_string(data.volumes[0b00100001]) + " A^3");
-      notifyUser("Probe 2 shell volume: " + std::to_string(data.volumes[0b01000001]) + " A^3");
+      notifyUser("\nProbe 2 core volume: " + std::to_string(data.volumes[0b00100001]) + " ");
+      notifyUser(Symbol::angstrom() + Symbol::cubed());
+      notifyUser("\nProbe 2 shell volume: " + std::to_string(data.volumes[0b01000001]) + " ");
+      notifyUser(Symbol::angstrom() + Symbol::cubed());
     }
   }
   else{
-    notifyUser("Calculation failed!");
+    notifyUser("\nCalculation failed!");
   }
   return data.success;
 }
 
 void Ctrl::notifyUser(std::string str, bool to_gui){
-  str = "\n" + str;
   if (to_gui){
     gui->appendOutput(str);
   }
@@ -136,10 +143,14 @@ void Ctrl::notifyUser(std::string str, bool to_gui){
   }
 }
 
+void Ctrl::notifyUser(std::wstring wstr){
+  gui->appendOutput(wstr);
+}
+
 // TODO remove if obselete
 void Ctrl::prepareOutput(std::string atomFilePath){
   if(!current_calculation->createOutputFolder(fileName(atomFilePath))){
-      notifyUser("New output folder could not be created.\nThe output file(s) will be created in the program folder.");
+      notifyUser("\nNew output folder could not be created.\nThe output file(s) will be created in the program folder.");
   }
 }
 

@@ -59,6 +59,12 @@ void Space::setBoundaries(const std::vector<Atom> &atoms, const double add_space
     cart_min[dim] -= (add_space + max_radius);
     cart_max[dim] += (add_space + max_radius);
   }
+  // align the grid with origin (0,0,0) of atomic Cartesian coordinates, useful for unit cell analysis
+  for(int dim = 0; dim < 3; dim++){
+    if(std::fmod(cart_min[dim],grid_size) != 0){
+      cart_min[dim] -= std::fmod(cart_min[dim],grid_size);
+    }
+  }
   return;
 }
 
@@ -234,6 +240,66 @@ void Space::getVolume(std::map<char,double>& volumes, std::vector<double>& cavit
       cav_max[id][i] = getOrigin()[i] + getVxlSize()*(id_max[id][i]+1);
     }
   }
+}
+
+std::map<char,double> Space::getUnitCellVolumes(std::array<double,3> unit_cell_limits){
+  std::vector<char> types_to_tally{0b00000011,0b00000101,0b00001001,0b00010001,0b00100001,0b01000001};
+  std::map<char, double> tally;
+  for (size_t i = 0; i < types_to_tally.size(); i++){
+    tally[types_to_tally[i]] = 0;
+  }
+  std::array<unsigned int,3> unit_cell_start_index;
+  std::array<unsigned int,3> unit_cell_end_index;
+  std::array<double,3> unit_cell_mod_index;
+  for(int i = 0; i < 3; i++){
+    // +0.5 to avoid rounding errors
+    unit_cell_start_index[i] = int(0.5 - cart_min[i]/grid_size);
+    // no rounding because fmod() in unit_cell_mod_index will correct any rounding error in unit_cell_end_index
+    unit_cell_end_index[i] = unit_cell_start_index[i] + unit_cell_limits[i]/grid_size;
+    unit_cell_mod_index[i] = std::fmod(unit_cell_limits[i],grid_size);
+  }
+  std::array<unsigned int,3> bot_lvl_index;
+  for (bot_lvl_index[0] = unit_cell_start_index[0]; bot_lvl_index[0] < unit_cell_end_index[0]; bot_lvl_index[0]++){
+    for (bot_lvl_index[1] = unit_cell_start_index[1]; bot_lvl_index[1] < unit_cell_end_index[1]; bot_lvl_index[1]++){
+      for (bot_lvl_index[2] = unit_cell_start_index[2]; bot_lvl_index[2] < unit_cell_end_index[2]; bot_lvl_index[2]++){
+        tally[getVxlFromGrid(bot_lvl_index, 0).getType()] += 1;
+      }
+    }
+  }
+  // for unit cells that are not proportional to grid_size, it is necessary to only consider a partial voxel volume for the voxels partially overlapping with the unit cell
+  for(int n = 0; n < 3; n++){
+    int i = n;
+    int j = (n+1)%3;
+    int k = (n+2)%3;
+
+    // count voxels in the three end faces of the unit cell
+    bot_lvl_index[i] = unit_cell_end_index[i];
+    for (bot_lvl_index[j] = unit_cell_start_index[j]; bot_lvl_index[j] < unit_cell_end_index[j]; bot_lvl_index[j]++){
+      for (bot_lvl_index[k] = unit_cell_start_index[k]; bot_lvl_index[k] < unit_cell_end_index[k]; bot_lvl_index[k]++){
+        tally[getVxlFromGrid(bot_lvl_index, 0).getType()] += unit_cell_mod_index[i]/grid_size;
+      }
+    }
+
+    // count voxels in the three edges connecting end faces of the unit cell
+    bot_lvl_index[j] = unit_cell_end_index[j];
+    for (bot_lvl_index[k] = unit_cell_start_index[k]; bot_lvl_index[k] < unit_cell_end_index[k]; bot_lvl_index[k]++){
+      tally[getVxlFromGrid(bot_lvl_index, 0).getType()] += unit_cell_mod_index[i]*unit_cell_mod_index[j]/(grid_size*grid_size);
+    }
+  }
+
+  // add last end corner voxel
+  for(int i = 0; i < 3; i++){
+    bot_lvl_index[i] = unit_cell_end_index[i];
+  }
+  tally[getVxlFromGrid(bot_lvl_index, 0).getType()] += unit_cell_mod_index[0]*unit_cell_mod_index[1]*unit_cell_mod_index[2]/(grid_size*grid_size*grid_size);
+
+  double unit_volume = pow(grid_size,3);
+
+  std::map<char,double> volumes;
+  for (size_t i = 0; i < types_to_tally.size(); i++){
+    volumes[types_to_tally[i]] = tally[types_to_tally[i]] * unit_volume;
+  }
+  return volumes;
 }
 
 //////////////////////

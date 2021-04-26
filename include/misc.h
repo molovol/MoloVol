@@ -55,6 +55,8 @@ std::array<T1,3> add(std::array<T1,3> arr1, const std::array<T2,3>& arr2){
 
 int pow2(int);
 
+void removeEOL(std::string& str);
+
 ////////////////////
 // BIT OPERATIONS //
 ////////////////////

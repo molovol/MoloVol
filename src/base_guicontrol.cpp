@@ -24,6 +24,10 @@ void MainFrame::appendOutput(std::string& text){
   outputText->SetValue(outputText->GetValue() + text);
 }
 
+void MainFrame::appendOutput(std::wstring& text){
+  outputText->SetValue(outputText->GetValue() + text);
+}
+
 std::string MainFrame::getAtomFilepath(){
   return filepathText->GetValue().ToStdString();
 }

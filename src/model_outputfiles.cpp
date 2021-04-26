@@ -62,19 +62,19 @@ void Model::createReport(){
   }
   if(_data.probe_mode){
     output_report << "Probe mode: two probes\n";
-    output_report << "Probe 1 radius: " + std::to_string(getProbeRad1()) + " A\n";
-    output_report << "Probe 2 radius: " + std::to_string(getProbeRad2()) + " A\n";
+    output_report << "Probe 1 radius: " << getProbeRad1() << " Å\n";
+    output_report << "Probe 2 radius: " << getProbeRad2() << " Å\n";
   }
   else{
     output_report << "Probe mode: one probe\n";
-    output_report << "Probe radius: " + std::to_string(getProbeRad1()) + " A\n";
+    output_report << "Probe radius: " << getProbeRad1() << " Å\n";
   }
-  output_report << "Grid step size (resolution): " + std::to_string(_data.grid_step) + " A\n";
-  output_report << "Maximum tree depth (algorithm acceleration): " + std::to_string(_data.max_depth) << "\n";
+  output_report << "Grid step size (resolution): " << _data.grid_step << " Å\n";
+  output_report << "Maximum tree depth (algorithm acceleration): " << _data.max_depth << "\n";
   output_report << "Elements radii:\n";
   for(std::unordered_map<std::string, double>::iterator it = radius_map.begin(); it != radius_map.end(); it++){
     if(isIncluded(it->first, _data.included_elements)){
-      output_report << it->first + " : " + std::to_string(it->second) + " A\n";
+      output_report << it->first << " : " << it->second << " Å\n";
     }
   }
 
@@ -83,15 +83,19 @@ void Model::createReport(){
   output_report << "\n////////////////////////\n";
   output_report << "// Volumes calculated //\n";
   output_report << "////////////////////////\n\n";
-  output_report << "Van der Waals volume: " << std::to_string(_data.volumes[0b00000011]) << " A^3\n";
-  output_report << "Excluded void volume: " << std::to_string(_data.volumes[0b00000101]) << " A^3\n";
-  output_report << "Molecular volume (vdw + excluded void): " << std::to_string(_data.volumes[0b00000011] + _data.volumes[0b00000101]) << " A^3\n";
-  output_report << "Probe 1 core volume: " << std::to_string(_data.volumes[0b00001001]) << " A^3\n";
-  output_report << "Probe 1 shell volume: " << std::to_string(_data.volumes[0b00010001]) << " A^3\n";
+  if(_data.analyze_unit_cell){
+    output_report << "Orthogonal(ized) unit cell axes: " << _cart_matrix[0][0] << " Å, " << _cart_matrix[1][1] << " Å, " << _cart_matrix[2][2] << " Å\n";
+    output_report << "Total unit cell volume: " << _cart_matrix[0][0]*_cart_matrix[1][1]*_cart_matrix[2][2] << " Å^3\n";
+  }
+  output_report << "Van der Waals volume: " << _data.volumes[0b00000011] << " Å^3\n";
+  output_report << "Excluded void volume: " << _data.volumes[0b00000101] << " Å^3\n";
+  output_report << "Molecular volume (vdw + excluded void): " << _data.volumes[0b00000011] + _data.volumes[0b00000101] << " Å^3\n";
+  output_report << "Probe 1 core volume: " << _data.volumes[0b00001001] << " Å^3\n";
+  output_report << "Probe 1 shell volume: " << _data.volumes[0b00010001] << " Å^3\n";
   if(_data.probe_mode){
-    output_report << "Internal cavities and pockets volume (probe 1 core + shell): " << std::to_string(_data.volumes[0b00001001] + _data.volumes[0b00010001]) << " A^3\n";
-    output_report << "Probe 2 core volume: " << std::to_string(_data.volumes[0b00100001]) << " A^3\n";
-    output_report << "Probe 2 shell volume: " << std::to_string(_data.volumes[0b01000001]) << " A^3\n";
+    output_report << "Internal cavities and pockets volume (probe 1 core + shell): " << _data.volumes[0b00001001] + _data.volumes[0b00010001] << " Å^3\n";
+    output_report << "Probe 2 core volume: " << _data.volumes[0b00100001] << " Å^3\n";
+    output_report << "Probe 2 shell volume: " << _data.volumes[0b01000001] << " Å^3\n";
   }
 
   if(_data.make_full_map || _data.make_cav_maps){
@@ -152,6 +156,36 @@ void Model::writeSurfaceMap(){
   // save commonly used variable
   std::array<unsigned long int,3> n_elements = surface_map->getNumElements();
   double vxl_length = _cell.getVxlSize();
+  std::array<double,3> cell_min = _cell.getMin();
+  std::array<double,3> origin;
+  std::array<unsigned long int,3> start_index = {0,0,0};
+  std::array<unsigned long int,3> end_index = n_elements;
+
+  // in two probes mode, the outer space occupied by the second probe is useless for the surface map
+  // thus the surface map can be reduced on each side by the radius of probe 2
+  if(_data.probe_mode){
+    for(int i = 0; i < 3; i++){
+      start_index[i] += getProbeRad1()/vxl_length;
+      end_index[i] -= getProbeRad2()/vxl_length;
+      n_elements[i] = end_index[i] - start_index[i];
+    }
+  }
+
+  // in unit cell analysis mode, only the content of the unit cell should be displayed in the surface map
+  // one extra voxel is added on each side to see the surface up to the boundary of the unit cell
+  if(_data.analyze_unit_cell){
+    for(int i = 0; i < 3; i++){
+      // +0.5 to avoid rounding errors
+      start_index[i] = int(0.5 - cell_min[i]/vxl_length)-1;
+      end_index[i] = 2 + start_index[i] + int(0.5 + _cart_matrix[i][i]/vxl_length);
+      n_elements[i] = end_index[i] - start_index[i];
+    }
+  }
+
+  for (int i = 0; i < 3; i++){
+    origin[i] = cell_min[i] + ((double(start_index[i]) + 0.5) * vxl_length);
+  }
+
   // create map for assigning numbers to types
   std::map<char,int> typeToNum =
     {{0b00000011, 0},
@@ -178,7 +212,7 @@ void Model::writeSurfaceMap(){
   // line
   output_file << "origin ";
   for (char i = 0; i < 3; i++){
-    output_file << ' ' << _cell.getMin()[i] + vxl_length/2;
+    output_file << ' ' << origin[i];
   }
   output_file << '\n';
   // 3 lines
@@ -196,16 +230,16 @@ void Model::writeSurfaceMap(){
   }
   output_file << '\n';
   // line
-  output_file << "object 3 class array type double rank 0 items " << _cell.totalVxlOnLvl(0) << " data follows\n";
+  output_file << "object 3 class array type double rank 0 items " << (n_elements[0]*n_elements[1]*n_elements[2]) << " data follows\n";
   // data
   int column = 0;
-  for(size_t x = 0; x < n_elements[0]; x++){
-    for(size_t y = 0; y < n_elements[1]; y++){
-      for(size_t z = 0; z < n_elements[2]; z++){
+  for(unsigned long int x = start_index[0]; x < end_index[0]; x++){
+    for(unsigned long int y = start_index[1]; y < end_index[1]; y++){
+      for(unsigned long int z = start_index[2]; z < end_index[2]; z++){
         if (typeToNum.count(surface_map->getElement(x,y,z).getType()) != 0){
           output_file << typeToNum[surface_map->getElement(x,y,z).getType()];
         }
-        else {
+        else { // TODO inform the user that there is something odd with the surface map
           output_file << -2;
         }
         output_file << ((column == 2)? '\n' : ' ');

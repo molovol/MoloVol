@@ -13,7 +13,7 @@
 
 struct CalcReportBundle{
   // calculation returned without error
-  bool success = true;
+  bool success;
   // file paths
   std::string atom_file_path;
   // switches
@@ -118,8 +118,8 @@ class Model{
     std::string output_folder = "."; // default folder is the program folder but it is changed with the output file routine
     std::vector<std::tuple<std::string, double, double, double>> raw_atom_coordinates;
     std::vector<std::tuple<std::string, double, double, double>> processed_atom_coordinates;
-    double cell_param[6]; // unit cell parameters in order: A, B, C, alpha, beta, gamma
-    double cart_matrix[3][3]; // cartesian coordinates of vectors A, B, C
+    double _cell_param[6]; // unit cell parameters in order: A, B, C, alpha, beta, gamma
+    double _cart_matrix[3][3]; // cartesian coordinates of vectors A, B, C
     std::string space_group;
     std::unordered_map<std::string, double> radius_map;
     std::unordered_map<std::string, int> elem_Z;
@@ -129,7 +129,7 @@ class Model{
     AtomTree atomtree;
     Space _cell;
     double _max_atom_radius = 0;
- 
+
     // access functions for information stored in data
     double getCalcTime(){return _data.getTime();}
     double getProbeRad1(){return _data.r_probe1;}
