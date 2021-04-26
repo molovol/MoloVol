@@ -191,16 +191,20 @@ void Space::assignShellVsVoid(){
 }
 
 void Space::getVolume(std::map<char,double>& volumes, std::vector<double>& cavities, std::vector<std::array<double,3>>& cav_min, std::vector<std::array<double,3>>& cav_max){
+  // clear all output variables
   volumes.clear();
   cavities.clear();
   cav_min.clear();
   cav_max.clear();
+  // create maps used for tallying voxels
   std::map<char, unsigned> type_tally;
   std::map<unsigned char, unsigned> id_tally;
-  // contains the boundaries in which all voxels of a given ID are contained
+  // contain the boundaries in which all voxels of a given ID are contained
   std::map<unsigned char, std::array<unsigned,3>> id_min;
   std::map<unsigned char, std::array<unsigned,3>> id_max;
 
+  // go through all top level voxels and search recursively for pure types. once found, each bottom level voxel
+  // adds 1 to the tally. at the same time the boundaries of the cavities are determined
   std::array<unsigned,3> top_lvl_index;
   for (top_lvl_index[0] = 0; top_lvl_index[0] < n_gridsteps[0]; top_lvl_index[0]++){
     for (top_lvl_index[1] = 0; top_lvl_index[1] < n_gridsteps[1]; top_lvl_index[1]++){
@@ -210,13 +214,25 @@ void Space::getVolume(std::map<char,double>& volumes, std::vector<double>& cavit
     }
   }
 
+  // calculate the volume of a single bottom level voxel
   double unit_volume = pow(getVxlSize(),3);
+  // convert from units of bottom level voxels to units of volume
   for (auto& [type,tally] : type_tally) {
     volumes[type] = tally * unit_volume;
   }
+  // allocate memory
   cavities = std::vector<double> (id_tally.size());
+  cav_min = std::vector<std::array<double,3>> (id_tally.size());
+  cav_max = std::vector<std::array<double,3>> (id_tally.size());
+  // convert from units of bottom level voxels to units of volume
+  // convert from index to spatial coordinates
+  // copy values from map to vector for more efficient storage and access
   for (auto& [id,tally] : id_tally) {
     cavities[id] = tally * unit_volume;
+    for (char i = 0; i < 3; ++i){
+      cav_min[id][i] = getOrigin()[i] + getVxlSize()*id_min[id][i];
+      cav_max[id][i] = getOrigin()[i] + getVxlSize()*(id_max[id][i]+1);
+    }
   }
 }
 
