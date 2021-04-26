@@ -180,7 +180,11 @@ CalcReportBundle Model::calcVolume(){
   _data.success = true;
 
   auto start = std::chrono::steady_clock::now();
-  _cell.assignTypeInGrid(atomtree, getProbeRad1(), getProbeRad2(), optionProbeMode()); // assign each voxel in grid a type
+  bool error_cav = false;
+  _cell.assignTypeInGrid(atomtree, getProbeRad1(), getProbeRad2(), optionProbeMode(), error_cav); // assign each voxel in grid a type
+  if(error_cav){
+    Ctrl::getInstance()->notifyUser("\n\nWARNING: Maximum number of cavities reached. Not all cavities are reported.\nTo solve this, change probe radius (e.g. smaller probe 2 and/or larger probe 1).\n");
+  }
   auto end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
 
@@ -191,10 +195,10 @@ CalcReportBundle Model::calcVolume(){
   // TODO: update? to align with new getVolume function?
   if(_data.analyze_unit_cell){
     std::array<double,3> unit_cell_limits = {_cart_matrix[0][0],_cart_matrix[1][1],_cart_matrix[2][2]};
-    _data.volumes = _cell.getUnitCellVolumes(unit_cell_limits);
+    _cell.getUnitCellVolume(_data.volumes, _data.cavities_core, _data.cavities_shell, _data.cav_min, _data.cav_max, _data.cav_min_index, _data.cav_max_index, unit_cell_limits);
   }
   else{
-    _cell.getVolume(_data.volumes, _data.cavities, _data.cav_min, _data.cav_max);
+    _cell.getVolume(_data.volumes, _data.cavities_core, _data.cavities_shell, _data.cav_min, _data.cav_max, _data.cav_min_index, _data.cav_max_index);
   }
   end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());

@@ -40,7 +40,7 @@ class Voxel{
     char getType();
     void setID(unsigned char);
     unsigned char getID();
-    
+
     // bitwise operations on _type
     bool hasSubvoxel(); // state of bit 7
     bool isCore(); // state of bit 3
@@ -54,17 +54,17 @@ class Voxel{
 
     // atom vs probe core
     char evalRelationToAtoms(const std::array<unsigned,3>&, Vector, const int);
-    void traverseTree(const AtomNode*, const double, const Vector&, const double, const double, const int, 
-        const char = 0b00000011, const char = 0); 
+    void traverseTree(const AtomNode*, const double, const Vector&, const double, const double, const int,
+        const char = 0b00000011, const char = 0);
     void passTypeToChildren(const std::array<unsigned,3>&, const int);
-    void splitVoxel(const std::array<unsigned,3>&, const Vector&, const double); 
+    void splitVoxel(const std::array<unsigned,3>&, const Vector&, const double);
 
     // cavity id
     bool floodFill(const unsigned char, const std::array<unsigned,3>&, const int);
 
     // shell vs void
     char evalRelationToVoxels(const std::array<unsigned int,3>&, const unsigned, bool=false);
-    
+
     // unused
     static void listFromTree(
         std::vector<int>&,
@@ -74,13 +74,14 @@ class Voxel{
         const double&,
         const double&,
         const char=0);
-    
+
     // volume
-    void tallyVoxelsOfType(std::map<char,unsigned>&, 
-        std::map<unsigned char,unsigned>&, 
-        std::map<unsigned char,std::array<unsigned,3>>&, 
-        std::map<unsigned char,std::array<unsigned,3>>&, 
-        const std::array<unsigned,3>&, 
+    void tallyVoxelsOfType(std::map<char,unsigned>&,
+        std::map<unsigned char,unsigned>&,
+        std::map<unsigned char,unsigned>&,
+        std::map<unsigned char,std::array<unsigned,3>>&,
+        std::map<unsigned char,std::array<unsigned,3>>&,
+        const std::array<unsigned,3>&,
         const int);
 
   private:

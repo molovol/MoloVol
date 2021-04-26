@@ -33,9 +33,12 @@ struct CalcReportBundle{
   bool make_cav_maps;
   // calculation results
   std::map<char,double> volumes;
-  std::vector<double> cavities;
+  std::vector<double> cavities_core;
+  std::vector<double> cavities_shell;
   std::vector<std::array<double,3>> cav_min;
   std::vector<std::array<double,3>> cav_max;
+  std::vector<std::array<size_t,3>> cav_min_index;
+  std::vector<std::array<size_t,3>> cav_max_index;
   std::array<double,3> getCavCentre(const unsigned char i){
     std::array<double,3> cav_ctr;
     for (char j = 0; j < 3; ++j){

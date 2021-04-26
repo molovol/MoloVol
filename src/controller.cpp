@@ -42,7 +42,6 @@ bool Ctrl::loadRadiusFile(){
   if(!current_calculation->readRadiusFileSetMaps(radius_filepath)){
     notifyUser("\nInvalid radii definition file!");
     notifyUser("\nPlease select a valid file or set radii manually.");
-    // shouldn't this return false? -JM
   }
   // refresh atom list using new radius map
   gui->displayAtomList(current_calculation->generateAtomList());
@@ -114,18 +113,21 @@ bool Ctrl::runCalculation(){
     notifyUser(Symbol::angstrom() + Symbol::cubed());
     notifyUser("\nProbe 1 shell volume: " + std::to_string(data.volumes[0b00010001]) + " ");
     notifyUser(Symbol::angstrom() + Symbol::cubed());
-    for (size_t i = 1; i < data.cavities.size(); ++i){
-      notifyUser("\nCav " + std::to_string(i) + ": " + std::to_string(data.cavities[i]) + " ");
-      notifyUser(Symbol::angstrom() + Symbol::cubed());
-      notifyUser("(" + std::to_string(data.getCavCentre(i)[0]) + ", "
-        + std::to_string(data.getCavCentre(i)[1]) + ", "
-        + std::to_string(data.getCavCentre(i)[2]) + ")");
-    }
     if(data.probe_mode){
       notifyUser("\nProbe 2 core volume: " + std::to_string(data.volumes[0b00100001]) + " ");
       notifyUser(Symbol::angstrom() + Symbol::cubed());
       notifyUser("\nProbe 2 shell volume: " + std::to_string(data.volumes[0b01000001]) + " ");
       notifyUser(Symbol::angstrom() + Symbol::cubed());
+    }
+    if(data.cavities_core.size() > 1){
+      notifyUser("\nList of cavities = probe 1 occupied volumes (cavity center x,y,z coordinates)");
+      for (size_t i = 1; i < data.cavities_core.size(); ++i){
+        notifyUser("\nCav " + std::to_string(i) + ": " + std::to_string(data.cavities_core[i]+data.cavities_shell[i]) + " ");
+        notifyUser(Symbol::angstrom() + Symbol::cubed());
+        notifyUser("(" + std::to_string(data.getCavCentre(i)[0]) + ", "
+          + std::to_string(data.getCavCentre(i)[1]) + ", "
+          + std::to_string(data.getCavCentre(i)[2]) + ")");
+      }
     }
   }
   else{

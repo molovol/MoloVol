@@ -67,7 +67,7 @@ void printBinary(const T var){
     std::bitset<sizeof(var) * CHAR_BIT> bit(var);
     std::cout << bit << std::endl;
   }
-  catch (std::invalid_argument& e) {
+  catch (const std::invalid_argument& e) {
     throw;
   }
 }

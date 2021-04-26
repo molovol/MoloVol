@@ -89,7 +89,7 @@ void Space::initGrid(){
 /////////////////////
 
 // sets all voxel's types, determined by the input atoms
-void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, const double r_probe2, bool probe_mode){
+void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, const double r_probe2, bool probe_mode, bool &error_cav){
   // save variable that all voxels need access to for their type determination as static members of Voxel class
   Voxel::prepareTypeAssignment(this, atomtree);
   printf("\nVoxels assignment progress:\n");
@@ -111,7 +111,8 @@ void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, co
 
   printf("\nIdentifying cavities:\n");
   try{identifyCavities();}
-  catch (std::overflow_error e){// TODO: relay exception to controller and inform user
+  catch (const std::overflow_error& e){
+    error_cav = true; // TODO: consider making a bool function if no other error could arise and only this one should be reported
   }
 
   printf("\nAssigning probe 1 shell and excluded void:\n");
@@ -148,7 +149,7 @@ void Space::identifyCavities(){
         try{
           descendToCore(id,vxl_index,getMaxDepth()); // id gets iterated inside this function
         }
-        catch (std::overflow_error e){
+        catch (const std::overflow_error& e){
           throw;
         }
       }
@@ -177,7 +178,7 @@ void Space::descendToCore(unsigned char& id, const std::array<unsigned,3> index,
         for (char k = 0; k < 2; ++k){
           subindex[2] = index[2]*2 + k;
           try {descendToCore(id, subindex, lvl-1);}
-          catch (std::overflow_error e){throw;}
+          catch (const std::overflow_error& e){throw;}
         }
       }
     }
@@ -196,18 +197,35 @@ void Space::assignShellVsVoid(){
   }
 }
 
-void Space::getVolume(std::map<char,double>& volumes, std::vector<double>& cavities, std::vector<std::array<double,3>>& cav_min, std::vector<std::array<double,3>>& cav_max){
+void Space::getVolume(std::map<char,double>& volumes,
+                      std::vector<double>& cavities_core,
+                      std::vector<double>& cavities_shell,
+                      std::vector<std::array<double,3>>& cav_min,
+                      std::vector<std::array<double,3>>& cav_max,
+                      std::vector<std::array<size_t,3>>& cav_min_index,
+                      std::vector<std::array<size_t,3>>& cav_max_index){
   // clear all output variables
   volumes.clear();
-  cavities.clear();
+  cavities_core.clear();
+  cavities_shell.clear();
   cav_min.clear();
   cav_max.clear();
+  cav_min_index.clear();
+  cav_max_index.clear();
   // create maps used for tallying voxels
   std::map<char, unsigned> type_tally;
-  std::map<unsigned char, unsigned> id_tally;
+  std::map<unsigned char, unsigned> id_core_tally;
+  std::map<unsigned char, unsigned> id_shell_tally;
   // contain the boundaries in which all voxels of a given ID are contained
   std::map<unsigned char, std::array<unsigned,3>> id_min;
   std::map<unsigned char, std::array<unsigned,3>> id_max;
+  // set id 0 in maps for convenience when converting to vector
+  id_core_tally[0] = 0;
+  id_shell_tally[0] = 0;
+  for(char i = 0; i < 3; i++){
+    id_min[0][i] = 0;
+    id_max[0][i] = 0;
+  }
 
   // go through all top level voxels and search recursively for pure types. once found, each bottom level voxel
   // adds 1 to the tally. at the same time the boundaries of the cavities are determined
@@ -215,7 +233,7 @@ void Space::getVolume(std::map<char,double>& volumes, std::vector<double>& cavit
   for (top_lvl_index[0] = 0; top_lvl_index[0] < n_gridsteps[0]; top_lvl_index[0]++){
     for (top_lvl_index[1] = 0; top_lvl_index[1] < n_gridsteps[1]; top_lvl_index[1]++){
       for (top_lvl_index[2] = 0; top_lvl_index[2] < n_gridsteps[2]; top_lvl_index[2]++){
-        getTopVxl(top_lvl_index).tallyVoxelsOfType(type_tally, id_tally, id_min, id_max, top_lvl_index, max_depth);
+        getTopVxl(top_lvl_index).tallyVoxelsOfType(type_tally, id_core_tally, id_shell_tally, id_min, id_max, top_lvl_index, max_depth);
       }
     }
   }
@@ -227,27 +245,53 @@ void Space::getVolume(std::map<char,double>& volumes, std::vector<double>& cavit
     volumes[type] = tally * unit_volume;
   }
   // allocate memory
-  cavities = std::vector<double> (id_tally.size());
-  cav_min = std::vector<std::array<double,3>> (id_tally.size());
-  cav_max = std::vector<std::array<double,3>> (id_tally.size());
+  cavities_core = std::vector<double> (id_core_tally.size());
+  cavities_shell = std::vector<double> (id_shell_tally.size());
+  cav_min = std::vector<std::array<double,3>> (id_core_tally.size());
+  cav_max = std::vector<std::array<double,3>> (id_core_tally.size());
+  cav_min_index = std::vector<std::array<size_t,3>> (id_core_tally.size());
+  cav_max_index = std::vector<std::array<size_t,3>> (id_core_tally.size());
   // convert from units of bottom level voxels to units of volume
   // convert from index to spatial coordinates
   // copy values from map to vector for more efficient storage and access
-  for (auto& [id,tally] : id_tally) {
-    cavities[id] = tally * unit_volume;
+  for (auto& [id,tally] : id_core_tally) {
+    cavities_core[id] = tally * unit_volume;
+    cavities_shell[id] = id_shell_tally[id] * unit_volume;
     for (char i = 0; i < 3; ++i){
       cav_min[id][i] = getOrigin()[i] + getVxlSize()*id_min[id][i];
       cav_max[id][i] = getOrigin()[i] + getVxlSize()*(id_max[id][i]+1);
+      cav_min_index[id][i] = id_min[id][i];
+      cav_max_index[id][i] = id_max[id][i];
     }
   }
 }
 
-std::map<char,double> Space::getUnitCellVolumes(std::array<double,3> unit_cell_limits){
+void Space::getUnitCellVolume(std::map<char,double>& volumes,
+                              std::vector<double>& cavities_core,
+                              std::vector<double>& cavities_shell,
+                              std::vector<std::array<double,3>>& cav_min,
+                              std::vector<std::array<double,3>>& cav_max,
+                              std::vector<std::array<size_t,3>>& cav_min_index,
+                              std::vector<std::array<size_t,3>>& cav_max_index,
+                              std::array<double,3> unit_cell_limits){
+  // clear all output variables
+  volumes.clear();
+  cavities_core.clear();
+  cavities_shell.clear();
+  cav_min.clear();
+  cav_max.clear();
+  cav_min_index.clear();
+  cav_max_index.clear();
+  // create maps used for tallying voxels
+  std::map<char, double> type_tally;
+  std::map<unsigned char, double> id_core_tally;
+  std::map<unsigned char, double> id_shell_tally;
+  // contain the boundaries in which all voxels of a given ID are contained
+  std::map<unsigned char, std::array<unsigned,3>> id_min;
+  std::map<unsigned char, std::array<unsigned,3>> id_max;
+
   std::vector<char> types_to_tally{0b00000011,0b00000101,0b00001001,0b00010001,0b00100001,0b01000001};
-  std::map<char, double> tally;
-  for (size_t i = 0; i < types_to_tally.size(); i++){
-    tally[types_to_tally[i]] = 0;
-  }
+
   std::array<unsigned int,3> unit_cell_start_index;
   std::array<unsigned int,3> unit_cell_end_index;
   std::array<double,3> unit_cell_mod_index;
@@ -262,7 +306,7 @@ std::map<char,double> Space::getUnitCellVolumes(std::array<double,3> unit_cell_l
   for (bot_lvl_index[0] = unit_cell_start_index[0]; bot_lvl_index[0] < unit_cell_end_index[0]; bot_lvl_index[0]++){
     for (bot_lvl_index[1] = unit_cell_start_index[1]; bot_lvl_index[1] < unit_cell_end_index[1]; bot_lvl_index[1]++){
       for (bot_lvl_index[2] = unit_cell_start_index[2]; bot_lvl_index[2] < unit_cell_end_index[2]; bot_lvl_index[2]++){
-        tally[getVxlFromGrid(bot_lvl_index, 0).getType()] += 1;
+        tallyVoxelsUnitCell(bot_lvl_index, 1, type_tally, id_core_tally, id_shell_tally, id_min, id_max);
       }
     }
   }
@@ -276,14 +320,16 @@ std::map<char,double> Space::getUnitCellVolumes(std::array<double,3> unit_cell_l
     bot_lvl_index[i] = unit_cell_end_index[i];
     for (bot_lvl_index[j] = unit_cell_start_index[j]; bot_lvl_index[j] < unit_cell_end_index[j]; bot_lvl_index[j]++){
       for (bot_lvl_index[k] = unit_cell_start_index[k]; bot_lvl_index[k] < unit_cell_end_index[k]; bot_lvl_index[k]++){
-        tally[getVxlFromGrid(bot_lvl_index, 0).getType()] += unit_cell_mod_index[i]/grid_size;
+        double voxel_fraction = unit_cell_mod_index[i]/grid_size;
+        tallyVoxelsUnitCell(bot_lvl_index, voxel_fraction, type_tally, id_core_tally, id_shell_tally, id_min, id_max);
       }
     }
 
     // count voxels in the three edges connecting end faces of the unit cell
     bot_lvl_index[j] = unit_cell_end_index[j];
     for (bot_lvl_index[k] = unit_cell_start_index[k]; bot_lvl_index[k] < unit_cell_end_index[k]; bot_lvl_index[k]++){
-      tally[getVxlFromGrid(bot_lvl_index, 0).getType()] += unit_cell_mod_index[i]*unit_cell_mod_index[j]/(grid_size*grid_size);
+      double voxel_fraction = unit_cell_mod_index[i]*unit_cell_mod_index[j]/(grid_size*grid_size);
+      tallyVoxelsUnitCell(bot_lvl_index, voxel_fraction, type_tally, id_core_tally, id_shell_tally, id_min, id_max);
     }
   }
 
@@ -291,15 +337,76 @@ std::map<char,double> Space::getUnitCellVolumes(std::array<double,3> unit_cell_l
   for(int i = 0; i < 3; i++){
     bot_lvl_index[i] = unit_cell_end_index[i];
   }
-  tally[getVxlFromGrid(bot_lvl_index, 0).getType()] += unit_cell_mod_index[0]*unit_cell_mod_index[1]*unit_cell_mod_index[2]/(grid_size*grid_size*grid_size);
+  double voxel_fraction = unit_cell_mod_index[0]*unit_cell_mod_index[1]*unit_cell_mod_index[2]/(grid_size*grid_size*grid_size);
+  tallyVoxelsUnitCell(bot_lvl_index, voxel_fraction, type_tally, id_core_tally, id_shell_tally, id_min, id_max);
 
+  // calculate the volume of a single bottom level voxel
   double unit_volume = pow(grid_size,3);
 
-  std::map<char,double> volumes;
   for (size_t i = 0; i < types_to_tally.size(); i++){
-    volumes[types_to_tally[i]] = tally[types_to_tally[i]] * unit_volume;
+    volumes[types_to_tally[i]] = type_tally[types_to_tally[i]] * unit_volume;
   }
-  return volumes;
+  // start vectors with 0 volume element for compatibility with non unit cell mode that has 0 volume for id 0
+  std::array<double,3> min_arr = {0,0,0};
+  std::array<double,3> max_arr = {0,0,0};
+  std::array<size_t,3> min_index_arr = {0,0,0};
+  std::array<size_t,3> max_index_arr = {0,0,0};
+  cavities_core.emplace_back(0);
+  cavities_shell.emplace_back(0);
+  cav_min.emplace_back(min_arr);
+  cav_max.emplace_back(max_arr);
+  cav_min_index.emplace_back(min_index_arr);
+  cav_max_index.emplace_back(max_index_arr);
+  // convert from units of bottom level voxels to units of volume
+  // convert from index to spatial coordinates
+  // copy values from map to vector for more efficient storage and access
+  for (auto& [id,tally] : id_core_tally) {
+    cavities_core.emplace_back(tally * unit_volume);
+    cavities_shell.emplace_back(id_shell_tally[id] * unit_volume);
+    for (char i = 0; i < 3; ++i){
+      min_arr[i] = getOrigin()[i] + getVxlSize()*id_min[id][i];
+      max_arr[i] = getOrigin()[i] + getVxlSize()*(id_max[id][i]+1);
+      min_index_arr[i] = id_min[id][i];
+      max_index_arr[i] = id_max[id][i];
+    }
+    cav_min.emplace_back(min_arr);
+    cav_max.emplace_back(max_arr);
+    cav_min_index.emplace_back(min_index_arr);
+    cav_max_index.emplace_back(max_index_arr);
+  }
+}
+
+void Space::tallyVoxelsUnitCell(std::array<unsigned int,3> bot_lvl_index,
+                                double voxel_fraction,
+                                std::map<char, double>& type_tally,
+                                std::map<unsigned char, double>& id_core_tally,
+                                std::map<unsigned char, double>& id_shell_tally,
+                                std::map<unsigned char, std::array<unsigned,3>>& id_min,
+                                std::map<unsigned char, std::array<unsigned,3>>& id_max){
+  // add voxel by type
+  type_tally[getVxlFromGrid(bot_lvl_index, 0).getType()] += voxel_fraction;
+  // add voxel by id and type
+  if(getVxlFromGrid(bot_lvl_index, 0).getType() == 0b00001001){
+    id_core_tally[getVxlFromGrid(bot_lvl_index, 0).getID()] += voxel_fraction;
+  }
+  else if(getVxlFromGrid(bot_lvl_index, 0).getType() == 0b00010001){
+    id_shell_tally[getVxlFromGrid(bot_lvl_index, 0).getID()] += voxel_fraction;
+  }
+  // set cavity min/max indexes
+  if (id_min.count(getVxlFromGrid(bot_lvl_index, 0).getID()) == 0){
+    id_min[getVxlFromGrid(bot_lvl_index, 0).getID()] = bot_lvl_index;
+  }
+  if (id_max.count(getVxlFromGrid(bot_lvl_index, 0).getID()) == 0){
+    id_max[getVxlFromGrid(bot_lvl_index, 0).getID()] = bot_lvl_index;
+  }
+  for (char i = 0; i < 3; i++){
+    if (id_min[getVxlFromGrid(bot_lvl_index, 0).getID()][i] > bot_lvl_index[i]){
+      id_min[getVxlFromGrid(bot_lvl_index, 0).getID()][i] = bot_lvl_index[i];
+    }
+    if (id_max[getVxlFromGrid(bot_lvl_index, 0).getID()][i] < bot_lvl_index[i]){
+      id_max[getVxlFromGrid(bot_lvl_index, 0).getID()][i] = bot_lvl_index[i];
+    }
+  }
 }
 
 //////////////////////

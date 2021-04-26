@@ -165,7 +165,7 @@ void Model::writeSurfaceMap(){
   // thus the surface map can be reduced on each side by the radius of probe 2
   if(_data.probe_mode){
     for(int i = 0; i < 3; i++){
-      start_index[i] += getProbeRad1()/vxl_length;
+      start_index[i] += getProbeRad2()/vxl_length;
       end_index[i] -= getProbeRad2()/vxl_length;
       n_elements[i] = end_index[i] - start_index[i];
     }
