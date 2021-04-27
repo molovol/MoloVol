@@ -165,6 +165,6 @@ void Ctrl::exportSurfaceMap(bool cavities){
     current_calculation->writeCavitiesMaps();
   }
   else{
-    current_calculation->writeSurfaceMap();
+    current_calculation->writeTotalSurfaceMap();
   }
 }

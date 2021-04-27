@@ -82,8 +82,9 @@ class Model{
     bool createOutputFolder(std::string);
     void createReport();
     void writeXYZfile(std::vector<std::tuple<std::string, double, double, double>>&, std::string);
+    void writeTotalSurfaceMap();
     void writeCavitiesMaps();
-    void writeSurfaceMap();
+    void writeSurfaceMap(size_t, std::string, double, std::array<unsigned long int,3>, std::array<double,3>, std::array<size_t,3>, std::array<size_t,3>);
 
     std::vector<std::string> listElementsInStructure();
 
