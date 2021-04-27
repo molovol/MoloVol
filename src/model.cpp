@@ -71,6 +71,9 @@ CalcReportBundle Model::generateVolumeData(){
   // save the date and time of calculation for output files
   _time_stamp = timeNow();
 
+  // clear calculation times from previous runs
+  _data.elapsed_seconds.clear();
+
   auto start = std::chrono::steady_clock::now();
   // process atom data for unit cell analysis if the option it ticked
   if(optionAnalyzeUnitCell()){

@@ -575,8 +575,15 @@ void MainFrame::InitDepthPanel(){
 }
 
 void MainFrame::InitOutputpathPanel(){
-  outputdirText = new wxStaticText(outputpathPanel, TEXT_Outputdir, "Output directory:");
-  outputdirPicker = new wxDirPickerCtrl(outputpathPanel, BUTTON_Output, ".");
+  outputdirText = new wxStaticText(outputpathPanel, TEXT_Outputdir, "Output directory (default, same as the program):");
+  outputdirPicker = new wxDirPickerCtrl(outputpathPanel,
+                                        BUTTON_Output,
+                                        ".",
+                                        _("Select Output Directory"),
+                                        wxDefaultPosition,
+                                        wxDefaultSize,
+                                        wxDD_DEFAULT_STYLE|wxDIRP_USE_TEXTCTRL|wxDD_NEW_DIR_BUTTON|wxDIRP_CHANGE_DIR,
+                                        wxDefaultValidator);
 
   wxBoxSizer *outputSizer = new wxBoxSizer(wxHORIZONTAL);
   outputSizer->Add(outputdirText,0, wxALIGN_CENTRE_VERTICAL | wxALL,10);
