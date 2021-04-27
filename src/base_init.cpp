@@ -414,7 +414,7 @@ void MainFrame::InitParametersPanel(){
   surfaceMapCheckbox = new wxCheckBox
     (parameterPanel,
      CHECKBOX_SurfaceMap,
-     "Generate a total surface map file (to visualize in PyMol and Chimera)",
+     "Generate a total surface map file (to visualize in PyMOL and Chimera)",
      wxDefaultPosition,
      wxDefaultSize,
      0,
@@ -427,7 +427,7 @@ void MainFrame::InitParametersPanel(){
   cavityMapsCheckbox = new wxCheckBox
     (parameterPanel,
      CHECKBOX_CavityMaps,
-     "Generate a surface map file for each cavity/pocket (to visualize in PyMol and Chimera)",
+     "Generate a surface map file for each cavity/pocket (to visualize in PyMOL and Chimera)",
      wxDefaultPosition,
      wxDefaultSize,
      0,
