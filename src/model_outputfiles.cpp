@@ -51,9 +51,9 @@ void Model::createReport(){
   output_report << "Chemical formula: " + _data.chemical_formula << "\n";
   output_report << "Duration of the calculation: " << _data.getTime() << " s\n";
 
-  output_report << "\n////////////////////////////\n";
-  output_report << "// Calculation parameters //\n";
-  output_report << "////////////////////////////\n\n";
+  output_report << "\n\n\t////////////////////////////\n";
+  output_report << "\t// Calculation parameters //\n";
+  output_report << "\t////////////////////////////\n\n";
   if(fileExtension(_data.atom_file_path) == "pdb"){
     if(_data.analyze_unit_cell){
       output_report << "Analyze crystal structure unit cell\n";
@@ -80,9 +80,9 @@ void Model::createReport(){
 
   // TODO consider crystal unit cell report with density, volumes per gram and volume ratio
 
-  output_report << "\n////////////////////////\n";
-  output_report << "// Volumes calculated //\n";
-  output_report << "////////////////////////\n\n";
+  output_report << "\n\n\t//////////////////////////////\n";
+  output_report << "\t// Total Volumes calculated //\n";
+  output_report << "\t//////////////////////////////\n\n";
   if(_data.analyze_unit_cell){
     output_report << "Orthogonal(ized) unit cell axes: " << _cart_matrix[0][0] << " Å, " << _cart_matrix[1][1] << " Å, " << _cart_matrix[2][2] << " Å\n";
     output_report << "Total unit cell volume: " << _cart_matrix[0][0]*_cart_matrix[1][1]*_cart_matrix[2][2] << " Å^3\n";
@@ -98,10 +98,43 @@ void Model::createReport(){
     output_report << "Probe 2 shell volume: " << _data.volumes[0b01000001] << " Å^3\n";
   }
 
+  if(_data.cavities_core.size() > 1){
+    output_report << "\n\n\t///////////////////////////////\n";
+    output_report << "\t// Cavities and pockets data //\n";
+    output_report << "\t///////////////////////////////\n\n";
+
+    if(_data.cavities_core.size() > 255){
+      output_report << "!!! WARNING !!!\n";
+      output_report << "Maximum number of cavities reached. Some cavities might be missing.\n";
+      output_report << "To solve this issue, change probe radii (e.g. smaller probe 2 and/or larger probe 1).\n\n";
+    }
+    output_report << "Note 1:\tPockets and isolated cavities are not differentiated yet.\n";
+    output_report << "\tThis feature might be added in future versions if requested by the community.\n";
+    output_report << "Note 2:\tSeparate cavities are defined by space accessible to the core of probe 1.\n";
+    output_report << "\tTwo cavities can be in contact but if a probe cannot pass from one to the other, they are considered separated.\n";
+    output_report << "Note 3:\tIn single probe mode, the first 'cavity' consist of the outside space and pockets.\n";
+    output_report << "Note 4:\tSome very small isolated chunks of probe 1 cores can be detected and lead to small cavities.\n";
+    output_report << "Note 5:\tProbe occupied volume correspond to empty space as defined by the molecular surface (similar to the Connolly surface).\n";
+    output_report << "Note 6:\tProbe accessible volume correspond to empty space as defined\n";
+    output_report << "\tby the surface accessible to its core (similar to the Lee-Richards surface).\n";
+    output_report << "Note 7:\tFor a detailed shape of each cavity, check the surface maps.\n\n";
+
+    output_report << "Cavity\tOccupied\tAccessible\tCavity center coordinates (Å)\n";
+    output_report << "ID\tVolume (Å^3)\tVolume (Å^3)\tx\ty\tz\n";
+    for(unsigned int i = 1; i < _data.cavities_core.size(); i++){
+      std::array<double,3> cav_center = _data.getCavCenter(i);
+      // default precision is 6, which means that double values will take less than a tab space
+      output_report << i << "\t"
+                    << _data.cavities_core[i]+_data.cavities_shell[i] << "\t\t"
+                    << _data.cavities_core[i] << "\t\t"
+                    << cav_center[0] << "\t" << cav_center[1] << "\t" << cav_center[2] << "\n";
+    }
+  }
+
   if(_data.make_full_map || _data.make_cav_maps){
-    output_report << "\n/////////////////////////////\n";
-    output_report << "// Surface map information //\n";
-    output_report << "/////////////////////////////\n\n";
+    output_report << "\n\n\t/////////////////////////////\n";
+    output_report << "\t// Surface map information //\n";
+    output_report << "\t/////////////////////////////\n\n";
     output_report << "The surface map files generated (.dx, OpenDX format) can be opened with\n";
     output_report << "PyMOL, USCF Chimera or USCF ChimeraX.\n\n";
     output_report << "Use the following isosurface levels to visualize the desired surface:\n";
@@ -113,7 +146,7 @@ void Model::createReport(){
     }
     else{
       output_report << "Level 2 : Molecular surface (probe 1 excluded, similar to the Connolly surface)\n";
-      output_report << "Level 5 : Probe 1 accessible surface (similar to Lee-Richards molecular surface)\n";
+      output_report << "Level 5 : Probe 1 accessible surface (similar to the Lee-Richards molecular surface)\n";
     }
     output_report << "\nFor help on how to vizualize maps:\n";
     output_report << " - in PyMOL, simply open the map file then click 'A' in the right panel, choose mesh or surface and select the level.\n";
