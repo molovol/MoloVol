@@ -110,8 +110,9 @@ class Model{
     void linkAtomsToAdjacentAtoms(const double&);
     void linkToAdjacentAtoms(const double&, Atom&);
     CalcReportBundle calcVolume();
+    void sortCavities();
     bool setParameters(std::string, std::string, bool, bool, bool, double, double, double, int, bool, bool, bool, std::unordered_map<std::string, double>, std::vector<std::string>, double);
-    CalcReportBundle getBundle(); // TODO remove is unused
+    CalcReportBundle getBundle(); // TODO remove if unused
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void setRadiusMap(std::unordered_map<std::string, double> map);
     bool setProbeRadii(const double, const double, const bool);
