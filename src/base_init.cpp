@@ -50,7 +50,7 @@ bool MainApp::OnInit()
     return true;
   }
   // initialise the GUI
-  MainFrame* MainWin = new MainFrame(_("MoloVol"), wxDefaultPosition, wxDefaultSize);
+  MainFrame* MainWin = new MainFrame(_("MoloVol " + Ctrl::s_version), wxDefaultPosition, wxDefaultSize);
   MainWin->SetBackgroundColour(col_win);
   MainWin->Show(true);
   SetTopWindow(MainWin);
@@ -427,7 +427,7 @@ void MainFrame::InitParametersPanel(){
   cavityMapsCheckbox = new wxCheckBox
     (parameterPanel,
      CHECKBOX_CavityMaps,
-     "Generate a surface map file for each cavity/pocket (to visualize in PyMol and Chimera) (NOT AVAILABLE YET !)",
+     "Generate a surface map file for each cavity/pocket (to visualize in PyMol and Chimera)",
      wxDefaultPosition,
      wxDefaultSize,
      0,

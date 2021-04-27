@@ -10,6 +10,7 @@ class Model;
 class MainFrame;
 class Ctrl{
   public:
+    inline static const std::string s_version = "alpha";
     bool loadRadiusFile();
     bool loadAtomFile();
     bool runCalculation();
@@ -19,7 +20,7 @@ class Ctrl{
     void notifyUser(std::wstring wstr);
     void prepareOutput(std::string);
     void exportReport();
-    void exportSurfaceMap();
+    void exportSurfaceMap(bool);
     // unit tests
     bool unittestExcluded();
     bool unittestProtein();

@@ -203,7 +203,8 @@ void Space::getVolume(std::map<char,double>& volumes,
                       std::vector<std::array<double,3>>& cav_min,
                       std::vector<std::array<double,3>>& cav_max,
                       std::vector<std::array<size_t,3>>& cav_min_index,
-                      std::vector<std::array<size_t,3>>& cav_max_index){
+                      std::vector<std::array<size_t,3>>& cav_max_index,
+                      std::vector<unsigned char>& cav_id){
   // clear all output variables
   volumes.clear();
   cavities_core.clear();
@@ -212,6 +213,7 @@ void Space::getVolume(std::map<char,double>& volumes,
   cav_max.clear();
   cav_min_index.clear();
   cav_max_index.clear();
+  cav_id.clear();
   // create maps used for tallying voxels
   std::map<char, unsigned> type_tally;
   std::map<unsigned char, unsigned> id_core_tally;
@@ -246,17 +248,19 @@ void Space::getVolume(std::map<char,double>& volumes,
   }
   // allocate memory
   cavities_core = std::vector<double> (id_core_tally.size());
-  cavities_shell = std::vector<double> (id_shell_tally.size());
+  cavities_shell = std::vector<double> (id_core_tally.size());
   cav_min = std::vector<std::array<double,3>> (id_core_tally.size());
   cav_max = std::vector<std::array<double,3>> (id_core_tally.size());
   cav_min_index = std::vector<std::array<size_t,3>> (id_core_tally.size());
   cav_max_index = std::vector<std::array<size_t,3>> (id_core_tally.size());
+  cav_id = std::vector<unsigned char> (id_core_tally.size());
   // convert from units of bottom level voxels to units of volume
   // convert from index to spatial coordinates
   // copy values from map to vector for more efficient storage and access
   for (auto& [id,tally] : id_core_tally) {
     cavities_core[id] = tally * unit_volume;
     cavities_shell[id] = id_shell_tally[id] * unit_volume;
+    cav_id[id] = id;
     for (char i = 0; i < 3; ++i){
       cav_min[id][i] = getOrigin()[i] + getVxlSize()*id_min[id][i];
       cav_max[id][i] = getOrigin()[i] + getVxlSize()*(id_max[id][i]+1);
@@ -273,6 +277,7 @@ void Space::getUnitCellVolume(std::map<char,double>& volumes,
                               std::vector<std::array<double,3>>& cav_max,
                               std::vector<std::array<size_t,3>>& cav_min_index,
                               std::vector<std::array<size_t,3>>& cav_max_index,
+                              std::vector<unsigned char>& cav_id,
                               std::array<double,3> unit_cell_limits){
   // clear all output variables
   volumes.clear();
@@ -282,6 +287,7 @@ void Space::getUnitCellVolume(std::map<char,double>& volumes,
   cav_max.clear();
   cav_min_index.clear();
   cav_max_index.clear();
+  cav_id.clear();
   // create maps used for tallying voxels
   std::map<char, double> type_tally;
   std::map<unsigned char, double> id_core_tally;
@@ -357,12 +363,14 @@ void Space::getUnitCellVolume(std::map<char,double>& volumes,
   cav_max.emplace_back(max_arr);
   cav_min_index.emplace_back(min_index_arr);
   cav_max_index.emplace_back(max_index_arr);
+  cav_id.emplace_back(0);
   // convert from units of bottom level voxels to units of volume
   // convert from index to spatial coordinates
   // copy values from map to vector for more efficient storage and access
   for (auto& [id,tally] : id_core_tally) {
     cavities_core.emplace_back(tally * unit_volume);
     cavities_shell.emplace_back(id_shell_tally[id] * unit_volume);
+    cav_id.emplace_back(id);
     for (char i = 0; i < 3; ++i){
       min_arr[i] = getOrigin()[i] + getVxlSize()*id_min[id][i];
       max_arr[i] = getOrigin()[i] + getVxlSize()*(id_max[id][i]+1);

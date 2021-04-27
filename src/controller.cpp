@@ -160,6 +160,11 @@ void Ctrl::exportReport(){
   current_calculation->createReport();
 }
 
-void Ctrl::exportSurfaceMap(){
-  current_calculation->writeSurfaceMap();
+void Ctrl::exportSurfaceMap(bool cavities){
+  if(cavities){
+    current_calculation->writeCavitiesMaps();
+  }
+  else{
+    current_calculation->writeSurfaceMap();
+  }
 }

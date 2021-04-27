@@ -33,6 +33,7 @@ struct CalcReportBundle{
   bool make_cav_maps;
   // calculation results
   std::map<char,double> volumes;
+  std::vector<unsigned char> cav_id; // this is necessary for unit cell mode since only cavities inside the unit cell are saved so cavity id might not be the same as vector index
   std::vector<double> cavities_core;
   std::vector<double> cavities_shell;
   std::vector<std::array<double,3>> cav_min;
@@ -81,6 +82,7 @@ class Model{
     bool createOutputFolder(std::string);
     void createReport();
     void writeXYZfile(std::vector<std::tuple<std::string, double, double, double>>&, std::string);
+    void writeCavitiesMaps();
     void writeSurfaceMap();
 
     std::vector<std::string> listElementsInStructure();

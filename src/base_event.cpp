@@ -71,13 +71,13 @@ void MainFrame::OnCalc(wxCommandEvent& event){
 
   // write total surface map file if option is toggled
   if(getMakeSurfaceMap()){
-    Ctrl::getInstance()->exportSurfaceMap();
+    Ctrl::getInstance()->exportSurfaceMap(0);
   }
-  /* TODO make function to generate cavity maps
-  if(getMakeCavityMaps()){
 
+  if(getMakeCavityMaps()){
+    Ctrl::getInstance()->exportSurfaceMap(1);
   }
-  */
+
 
   wxYield(); // without wxYield, the clicks on disabled buttons are queued
   enableGuiElements(true);

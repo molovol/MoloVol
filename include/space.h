@@ -51,7 +51,8 @@ class Space{
                    std::vector<std::array<double,3>>&,
                    std::vector<std::array<double,3>>&,
                    std::vector<std::array<size_t,3>>&,
-                   std::vector<std::array<size_t,3>>&);
+                   std::vector<std::array<size_t,3>>&,
+                   std::vector<unsigned char>&);
     void getUnitCellVolume(std::map<char,double>&,
                            std::vector<double>&,
                            std::vector<double>&,
@@ -59,6 +60,7 @@ class Space{
                            std::vector<std::array<double,3>>&,
                            std::vector<std::array<size_t,3>>&,
                            std::vector<std::array<size_t,3>>&,
+                           std::vector<unsigned char>&,
                            std::array<double,3>);
     void tallyVoxelsUnitCell(std::array<unsigned int,3>,
                             double,
