@@ -3,7 +3,7 @@
 #include "misc.h"
 #include "atom.h"
 #include <cmath> // abs, pow
-#include <algorithm> // max_element
+#include <algorithm> // max_element, swap
 #include <cassert>
 #include <unordered_map>
 
@@ -104,10 +104,10 @@ std::vector<std::array<int,3>> logPermutations(const std::array<unsigned int,3> 
     for (int j = i+1; j < ((inp_arr[1]==inp_arr[2])? 2 : 3); j++){
       std::array<unsigned int,3> arr = inp_arr;
       if (arr[i] != arr[j]){ // if i and j are different, swap and store
-        swap(arr[i], arr[j]);
+        std::swap(arr[i], arr[j]);
         signCombinations(list, arr);
         if (i!=1 && arr[1]!=arr[2]){ // if 1 and 2 are different, swap and store
-          swap(arr[1], arr[2]);
+          std::swap(arr[1], arr[2]);
           signCombinations(list, arr);
         }
       }

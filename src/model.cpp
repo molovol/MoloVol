@@ -205,83 +205,17 @@ CalcReportBundle Model::calcVolume(){
   // TODO: update? to align with new getVolume function?
   if(_data.analyze_unit_cell){
     std::array<double,3> unit_cell_limits = {_cart_matrix[0][0],_cart_matrix[1][1],_cart_matrix[2][2]};
-    _cell.getUnitCellVolume(_data.volumes, _data.cavities_core, _data.cavities_shell, _data.cav_min, _data.cav_max, _data.cav_min_index, _data.cav_max_index, _data.cav_id, unit_cell_limits);
+    _cell.getUnitCellVolume(_data.volumes, _data.cavities, unit_cell_limits);
   }
   else{
-    _cell.getVolume(_data.volumes, _data.cavities_core, _data.cavities_shell, _data.cav_min, _data.cav_max, _data.cav_min_index, _data.cav_max_index, _data.cav_id);
+    _cell.getVolume(_data.volumes, _data.cavities);
   }
   end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
 
-  sortCavities();
+  inverseSort(_data.cavities);
 
   return _data;
-}
-
-// sort cavities related vectors in _data in descending occupied volume order
-void Model::sortCavities(){
-  std::vector<unsigned char> temp_cav_id;
-  std::vector<double> temp_cavities_core;
-  std::vector<double> temp_cavities_shell;
-  std::vector<double> cavities_vol;
-  std::vector<std::array<double,3>> temp_cav_min;
-  std::vector<std::array<double,3>> temp_cav_max;
-  std::vector<std::array<size_t,3>> temp_cav_min_index;
-  std::vector<std::array<size_t,3>> temp_cav_max_index;
-  // transfer the first empty cavity data of id 0
-  temp_cav_id.emplace_back(_data.cav_id[0]);
-  temp_cavities_core.emplace_back(_data.cavities_core[0]);
-  temp_cavities_shell.emplace_back(_data.cavities_shell[0]);
-  temp_cav_min.emplace_back(_data.cav_min[0]);
-  temp_cav_max.emplace_back(_data.cav_max[0]);
-  temp_cav_min_index.emplace_back(_data.cav_min_index[0]);
-  temp_cav_max_index.emplace_back(_data.cav_max_index[0]);
-  // erase the first empty cavity data of id 0
-  _data.cav_id.erase(_data.cav_id.begin());
-  _data.cavities_core.erase(_data.cavities_core.begin());
-  _data.cavities_shell.erase(_data.cavities_shell.begin());
-  _data.cav_min.erase(_data.cav_min.begin());
-  _data.cav_max.erase(_data.cav_max.begin());
-  _data.cav_min_index.erase(_data.cav_min_index.begin());
-  _data.cav_max_index.erase(_data.cav_max_index.begin());
-
-  // store total occupied volume for sorting
-  size_t n_cav = _data.cavities_core.size();
-  for(size_t i = 0; i < n_cav; i++){
-    cavities_vol.emplace_back(_data.cavities_core[i]+_data.cavities_shell[i]);
-  }
-
-  for(size_t i = 0; i < n_cav; i++){
-    // find index of highest cavity volume
-    size_t index = std::distance(cavities_vol.begin(), std::max_element(cavities_vol.begin(), cavities_vol.end()));
-
-    // store in temporary vectors in descending volume order
-    temp_cav_id.emplace_back(_data.cav_id[index]);
-    temp_cavities_core.emplace_back(_data.cavities_core[index]);
-    temp_cavities_shell.emplace_back(_data.cavities_shell[index]);
-    temp_cav_min.emplace_back(_data.cav_min[index]);
-    temp_cav_max.emplace_back(_data.cav_max[index]);
-    temp_cav_min_index.emplace_back(_data.cav_min_index[index]);
-    temp_cav_max_index.emplace_back(_data.cav_max_index[index]);
-
-    // erase data from original vectors
-    _data.cav_id.erase(_data.cav_id.begin()+index);
-    _data.cavities_core.erase(_data.cavities_core.begin()+index);
-    _data.cavities_shell.erase(_data.cavities_shell.begin()+index);
-    _data.cav_min.erase(_data.cav_min.begin()+index);
-    _data.cav_max.erase(_data.cav_max.begin()+index);
-    _data.cav_min_index.erase(_data.cav_min_index.begin()+index);
-    _data.cav_max_index.erase(_data.cav_max_index.begin()+index);
-    cavities_vol.erase(cavities_vol.begin()+index);
-  }
-  // copy newly sorted temporary vectors to original vectors
-  _data.cav_id = temp_cav_id;
-  _data.cavities_core = temp_cavities_core;
-  _data.cavities_shell = temp_cavities_shell;
-  _data.cav_min = temp_cav_min;
-  _data.cav_max = temp_cav_max;
-  _data.cav_min_index = temp_cav_min_index;
-  _data.cav_max_index = temp_cav_max_index;
 }
 
 ////////////////////////////////////////////

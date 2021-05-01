@@ -5,6 +5,7 @@
 // class for dealing with program logic
 #include "atomtree.h"
 #include "space.h"
+#include "cavity.h"
 #include <iostream>
 #include <vector>
 #include <map>
@@ -33,17 +34,12 @@ struct CalcReportBundle{
   bool make_cav_maps;
   // calculation results
   std::map<char,double> volumes;
-  std::vector<unsigned char> cav_id; // this is necessary for unit cell mode since only cavities inside the unit cell are saved so cavity id might not be the same as vector index
-  std::vector<double> cavities_core;
-  std::vector<double> cavities_shell;
-  std::vector<std::array<double,3>> cav_min;
-  std::vector<std::array<double,3>> cav_max;
-  std::vector<std::array<size_t,3>> cav_min_index;
-  std::vector<std::array<size_t,3>> cav_max_index;
+  std::vector<Cavity> cavities;
+  double getCavVolume(const unsigned char i){return cavities[i].getVolume();}
   std::array<double,3> getCavCentre(const unsigned char i){
     std::array<double,3> cav_ctr;
     for (char j = 0; j < 3; ++j){
-      cav_ctr[j] = (cav_min[i][j] + cav_max[i][j])/2;
+      cav_ctr[j] = (cavities[i].min_bound[j] + cavities[i].max_bound[j])/2;
     }
     return cav_ctr;
   }
@@ -111,7 +107,6 @@ class Model{
     void linkAtomsToAdjacentAtoms(const double&);
     void linkToAdjacentAtoms(const double&, Atom&);
     CalcReportBundle calcVolume();
-    void sortCavities();
     bool setParameters(std::string, std::string, bool, bool, bool, double, double, double, int, bool, bool, bool, std::unordered_map<std::string, double>, std::vector<std::string>, double);
     CalcReportBundle getBundle(); // TODO remove if unused
     std::vector<std::tuple<std::string, int, double>> generateAtomList();

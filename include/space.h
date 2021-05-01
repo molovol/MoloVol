@@ -4,6 +4,7 @@
 
 #include "voxel.h"
 #include "container3d.h"
+#include "cavity.h"
 #include <vector>
 #include <array>
 #include <map>
@@ -45,23 +46,8 @@ class Space{
 
     // type evaluation
     void assignTypeInGrid(const AtomTree&, const double, const double, bool, bool&);
-    void getVolume(std::map<char,double>&,
-                   std::vector<double>&,
-                   std::vector<double>&,
-                   std::vector<std::array<double,3>>&,
-                   std::vector<std::array<double,3>>&,
-                   std::vector<std::array<size_t,3>>&,
-                   std::vector<std::array<size_t,3>>&,
-                   std::vector<unsigned char>&);
-    void getUnitCellVolume(std::map<char,double>&,
-                           std::vector<double>&,
-                           std::vector<double>&,
-                           std::vector<std::array<double,3>>&,
-                           std::vector<std::array<double,3>>&,
-                           std::vector<std::array<size_t,3>>&,
-                           std::vector<std::array<size_t,3>>&,
-                           std::vector<unsigned char>&,
-                           std::array<double,3>);
+    void getVolume(std::map<char,double>&, std::vector<Cavity>&);
+    void getUnitCellVolume(std::map<char,double>&, std::vector<Cavity>&, std::array<double,3>);
     void tallyVoxelsUnitCell(std::array<unsigned int,3>,
                             double,
                             std::map<char, double>&,

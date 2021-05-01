@@ -98,12 +98,12 @@ void Model::createReport(){
     output_report << "Probe 2 shell volume: " << _data.volumes[0b01000001] << " Å^3\n";
   }
 
-  if(_data.cavities_core.size() > 1){
+  if(!_data.cavities.empty()){
     output_report << "\n\n\t///////////////////////////////\n";
     output_report << "\t// Cavities and pockets data //\n";
     output_report << "\t///////////////////////////////\n\n";
 
-    if(_data.cavities_core.size() > 255){
+    if(_data.cavities.size() > 255){
       output_report << "!!! WARNING !!!\n";
       output_report << "Maximum number of cavities reached. Some cavities might be missing.\n";
       output_report << "To solve this issue, change probe radii (e.g. smaller probe 2 and/or larger probe 1).\n\n";
@@ -121,12 +121,12 @@ void Model::createReport(){
 
     output_report << "Cavity\tOccupied\tAccessible\tCavity center coordinates (Å)\n";
     output_report << "ID\tVolume (Å^3)\tVolume (Å^3)\tx\ty\tz\n";
-    for(unsigned int i = 1; i < _data.cavities_core.size(); i++){
+    for(unsigned int i = 1; i < _data.cavities.size(); i++){
       std::array<double,3> cav_center = _data.getCavCenter(i);
       // default precision is 6, which means that double values will take less than a tab space
       output_report << i << "\t"
-                    << _data.cavities_core[i]+_data.cavities_shell[i] << "\t\t"
-                    << _data.cavities_core[i] << "\t\t"
+                    << _data.cavities[i].getVolume() << "\t\t"
+                    << _data.cavities[i].core_vol << "\t\t"
                     << cav_center[0] << "\t" << cav_center[1] << "\t" << cav_center[2] << "\n";
     }
   }
@@ -244,10 +244,10 @@ void Model::writeCavitiesMaps(){
   std::array<size_t,3> end_index;
 
   // loop over each cavity id with exception of id 0 that does not contain any cavity information
-  for(size_t id = 1; id < _data.cavities_core.size(); id++){
+  for(size_t id = 1; id < _data.cavities.size(); id++){
     std::array<unsigned long int,3> n_elements = surface_map->getNumElements();
-    start_index = _data.cav_min_index[id];
-    end_index = _data.cav_max_index[id];
+    start_index = _data.cavities[id].min_index;
+    end_index = _data.cavities[id].max_index;
     // increase size of surface map grid by 1 voxel in each direction to avoid having surfaces on the border of the map
     for(char i = 0; i < 3; i++){
       if(start_index[i] > 0){start_index[i]--;}
@@ -324,7 +324,7 @@ void Model::writeSurfaceMap(size_t id,
     for(unsigned long int y = start_index[1]; y < end_index[1]; y++){
       for(unsigned long int z = start_index[2]; z < end_index[2]; z++){
         if (typeToNum.count(surface_map->getElement(x,y,z).getType()) != 0){
-          if (id == 0 || (id > 0 && surface_map->getElement(x,y,z).getID() == _data.cav_id[id])){
+          if (id == 0 || (id > 0 && surface_map->getElement(x,y,z).getID() == _data.cavities[id].id)){
             output_file << typeToNum[surface_map->getElement(x,y,z).getType()];
           }
           else {
