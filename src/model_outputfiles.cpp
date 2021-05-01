@@ -188,11 +188,8 @@ void Model::writeXYZfile(std::vector<std::tuple<std::string, double, double, dou
 ////////////////////////
 
 void Model::writeTotalSurfaceMap(){
-
-  // assemble data
-  Container3D<Voxel>* surface_map = &_cell.getGrid(0);
   // save commonly used variable
-  std::array<unsigned long int,3> n_elements = surface_map->getNumElements();
+  std::array<unsigned long int,3> n_elements = _cell.getGrid(0).getNumElements();
   double vxl_length = _cell.getVxlSize();
   std::array<double,3> cell_min = _cell.getMin();
   std::array<double,3> origin;
@@ -232,10 +229,6 @@ void Model::writeTotalSurfaceMap(){
 }
 
 void Model::writeCavitiesMaps(){
-
-  // assemble data
-  Container3D<Voxel>* surface_map = &_cell.getGrid(0);
-
   // save commonly used variable
   double vxl_length = _cell.getVxlSize();
   std::array<double,3> cell_min = _cell.getMin();
@@ -243,9 +236,9 @@ void Model::writeCavitiesMaps(){
   std::array<size_t,3> start_index;
   std::array<size_t,3> end_index;
 
-  // loop over each cavity id with exception of id 0 that does not contain any cavity information
+  // loop over each cavity id
   for(size_t id = 0; id < _data.cavities.size(); id++){
-    std::array<unsigned long int,3> n_elements = surface_map->getNumElements();
+    std::array<unsigned long int,3> n_elements = _cell.getGrid(0).getNumElements();
     start_index = _data.cavities[id].min_index;
     end_index = _data.cavities[id].max_index;
     // increase size of surface map grid by 1 voxel in each direction to avoid having surfaces on the border of the map
