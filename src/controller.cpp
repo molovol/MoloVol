@@ -39,6 +39,7 @@ bool Ctrl::loadRadiusFile(){
   }
 
   std::string radius_filepath = gui->getRadiusFilepath();
+  // even if there is no valid radii file, the program can be used by manually setting radii in the GUI after loading a structure
   if(!current_calculation->readRadiusFileSetMaps(radius_filepath)){
     notifyUser("\nInvalid radii definition file!");
     notifyUser("\nPlease select a valid file or set radii manually.");

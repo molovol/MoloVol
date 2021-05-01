@@ -71,11 +71,11 @@ void MainFrame::OnCalc(wxCommandEvent& event){
 
   // write total surface map file if option is toggled
   if(getMakeSurfaceMap()){
-    Ctrl::getInstance()->exportSurfaceMap(0);
+    Ctrl::getInstance()->exportSurfaceMap(false);
   }
 
   if(getMakeCavityMaps()){
-    Ctrl::getInstance()->exportSurfaceMap(1);
+    Ctrl::getInstance()->exportSurfaceMap(true);
   }
 
 

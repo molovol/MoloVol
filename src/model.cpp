@@ -188,6 +188,7 @@ CalcReportBundle Model::calcVolume(){
   _data.success = true;
 
   auto start = std::chrono::steady_clock::now();
+  // TODO make a better error reporting system
   bool error_cav = false;
   _cell.assignTypeInGrid(atomtree, getProbeRad1(), getProbeRad2(), optionProbeMode(), error_cav); // assign each voxel in grid a type
   if(error_cav){
