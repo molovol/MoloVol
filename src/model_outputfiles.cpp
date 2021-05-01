@@ -103,7 +103,7 @@ void Model::createReport(){
     output_report << "\t// Cavities and pockets data //\n";
     output_report << "\t///////////////////////////////\n\n";
 
-    if(_data.cavities.size() > 255){
+    if(_data.cavities.size() >= 255){
       output_report << "!!! WARNING !!!\n";
       output_report << "Maximum number of cavities reached. Some cavities might be missing.\n";
       output_report << "To solve this issue, change probe radii (e.g. smaller probe 2 and/or larger probe 1).\n\n";
@@ -121,10 +121,10 @@ void Model::createReport(){
 
     output_report << "Cavity\tOccupied\tAccessible\tCavity center coordinates (Å)\n";
     output_report << "ID\tVolume (Å^3)\tVolume (Å^3)\tx\ty\tz\n";
-    for(unsigned int i = 1; i < _data.cavities.size(); i++){
+    for(unsigned int i = 0; i < _data.cavities.size(); i++){
       std::array<double,3> cav_center = _data.getCavCenter(i);
       // default precision is 6, which means that double values will take less than a tab space
-      output_report << i << "\t"
+      output_report << i+1 << "\t"
                     << _data.cavities[i].getVolume() << "\t\t"
                     << _data.cavities[i].core_vol << "\t\t"
                     << cav_center[0] << "\t" << cav_center[1] << "\t" << cav_center[2] << "\n";
@@ -244,7 +244,7 @@ void Model::writeCavitiesMaps(){
   std::array<size_t,3> end_index;
 
   // loop over each cavity id with exception of id 0 that does not contain any cavity information
-  for(size_t id = 1; id < _data.cavities.size(); id++){
+  for(size_t id = 0; id < _data.cavities.size(); id++){
     std::array<unsigned long int,3> n_elements = surface_map->getNumElements();
     start_index = _data.cavities[id].min_index;
     end_index = _data.cavities[id].max_index;
@@ -257,7 +257,7 @@ void Model::writeCavitiesMaps(){
       n_elements[i] = end_index[i] - start_index[i];
       origin[i] = cell_min[i] + ((double(start_index[i]) + 0.5) * vxl_length);
     }
-    std::string file_name = "/cav" + std::to_string(id) + "_surface_map_" + _time_stamp + ".dx";
+    std::string file_name = "/cav" + std::to_string(id+1) + "_surface_map_" + _time_stamp + ".dx";
     writeSurfaceMap(id, file_name, vxl_length, n_elements, origin, start_index, end_index);
   }
 }

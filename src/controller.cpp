@@ -122,8 +122,8 @@ bool Ctrl::runCalculation(){
     }
     if(!data.cavities.empty()){
       notifyUser("\nList of cavities = probe 1 occupied volumes (cavity center x,y,z coordinates)");
-      for (size_t i = 1; i < data.cavities.size(); ++i){
-        notifyUser("\nCav " + std::to_string(i) + ": " + std::to_string(data.getCavVolume(i)) + " ");
+      for (size_t i = 0; i < data.cavities.size(); ++i){
+        notifyUser("\nCav " + std::to_string(i+1) + ": " + std::to_string(data.getCavVolume(i)) + " ");
         notifyUser(Symbol::angstrom() + Symbol::cubed());
         notifyUser("(" + std::to_string(data.getCavCentre(i)[0]) + ", "
           + std::to_string(data.getCavCentre(i)[1]) + ", "

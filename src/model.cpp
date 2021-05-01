@@ -202,7 +202,6 @@ CalcReportBundle Model::calcVolume(){
   // _cell.printGrid(); // for testing
 
   start = std::chrono::steady_clock::now();
-  // TODO: update? to align with new getVolume function?
   if(_data.analyze_unit_cell){
     std::array<double,3> unit_cell_limits = {_cart_matrix[0][0],_cart_matrix[1][1],_cart_matrix[2][2]};
     _cell.getUnitCellVolume(_data.volumes, _data.cavities, unit_cell_limits);

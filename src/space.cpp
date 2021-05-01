@@ -234,19 +234,20 @@ void Space::getVolume(std::map<char,double>& volumes, std::vector<Cavity>& cavit
     volumes[type] = tally * unit_volume;
   }
   // allocate memory
-  cavities = std::vector<Cavity> (id_core_tally.size());
+  cavities = std::vector<Cavity> (id_core_tally.size()-1);
   // convert from units of bottom level voxels to units of volume
   // convert from index to spatial coordinates
   // copy values from map to vector for more efficient storage and access
+  // ignore id == 0; this is not a cavity but all voxels that are neither core nor shell
   for (auto& [id,tally] : id_core_tally) {
-    cavities[id].core_vol = tally * unit_volume;
-    cavities[id].shell_vol = id_shell_tally[id] * unit_volume;
-    cavities[id].id = id;
+    cavities[id-1].core_vol = tally * unit_volume;
+    cavities[id-1].shell_vol = id_shell_tally[id] * unit_volume;
+    cavities[id-1].id = id;
     for (char i = 0; i < 3; ++i){
-      cavities[id].min_bound[i] = getOrigin()[i] + getVxlSize()*id_min[id][i];
-      cavities[id].max_bound[i] = getOrigin()[i] + getVxlSize()*(id_max[id][i]+1);
-      cavities[id].min_index[i] = id_min[id][i];
-      cavities[id].max_index[i] = id_max[id][i];
+      cavities[id-1].min_bound[i] = getOrigin()[i] + getVxlSize()*id_min[id][i];
+      cavities[id-1].max_bound[i] = getOrigin()[i] + getVxlSize()*(id_max[id][i]+1);
+      cavities[id-1].min_index[i] = id_min[id][i];
+      cavities[id-1].max_index[i] = id_max[id][i];
     }
   }
 }
@@ -321,15 +322,13 @@ void Space::getUnitCellVolume(std::map<char,double>& volumes,
   for (size_t i = 0; i < types_to_tally.size(); i++){
     volumes[types_to_tally[i]] = type_tally[types_to_tally[i]] * unit_volume;
   }
-  // start vectors with 0 volume element for compatibility with non unit cell mode that has 0 volume for id 0
-  cavities.push_back(Cavity());
+  // convert from units of bottom level voxels to units of volume
+  // convert from index to spatial coordinates
+  // copy values from map to vector for more efficient storage and access
   std::array<double,3> min_arr = {0,0,0};
   std::array<double,3> max_arr = {0,0,0};
   std::array<size_t,3> min_index_arr = {0,0,0};
   std::array<size_t,3> max_index_arr = {0,0,0};
-  // convert from units of bottom level voxels to units of volume
-  // convert from index to spatial coordinates
-  // copy values from map to vector for more efficient storage and access
   for (auto& [id,tally] : id_core_tally) {
     for (char i = 0; i < 3; ++i){
       min_arr[i] = getOrigin()[i] + getVxlSize()*id_min[id][i];
