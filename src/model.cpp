@@ -34,7 +34,12 @@ bool Model::setParameters(std::string file_path,
     return false;
   }
   _data.atom_file_path = file_path;
-  output_folder = output_dir;
+  if(output_dir.empty()){
+    output_folder = ".";
+  }
+  else{
+    output_folder = output_dir;
+  }
   _data.inc_hetatm = inc_hetatm;
   _data.analyze_unit_cell = analyze_unit_cell;
   _data.grid_step = grid_step;
