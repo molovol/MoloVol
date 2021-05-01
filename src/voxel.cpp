@@ -3,7 +3,7 @@
 #include "misc.h"
 #include "atom.h"
 #include <cmath> // abs, pow
-#include <algorithm> // max_element
+#include <algorithm> // max_element, swap
 #include <cassert>
 #include <unordered_map>
 
@@ -104,10 +104,10 @@ std::vector<std::array<int,3>> logPermutations(const std::array<unsigned int,3> 
     for (int j = i+1; j < ((inp_arr[1]==inp_arr[2])? 2 : 3); j++){
       std::array<unsigned int,3> arr = inp_arr;
       if (arr[i] != arr[j]){ // if i and j are different, swap and store
-        swap(arr[i], arr[j]);
+        std::swap(arr[i], arr[j]);
         signCombinations(list, arr);
         if (i!=1 && arr[1]!=arr[2]){ // if 1 and 2 are different, swap and store
-          swap(arr[1], arr[2]);
+          std::swap(arr[1], arr[2]);
           signCombinations(list, arr);
         }
       }
@@ -368,7 +368,7 @@ void Voxel::listFromTree(
 ///////////////
 // CAVITY ID //
 ///////////////
-  
+
 struct VoxelLoc{
   VoxelLoc(const std::array<unsigned,3>& index, const int lvl) : index(index), lvl(lvl) {}
   std::array<unsigned,3> index;
@@ -383,12 +383,12 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
 
   std::vector<VoxelLoc> flood_stack;
   flood_stack.push_back(VoxelLoc(start_index, start_lvl));
-  
+
   // adds neighbours to the stack, IDs are assigned before adding to the stack
   while (flood_stack.size() > 0){
     VoxelLoc vxl = flood_stack.back();
     flood_stack.pop_back();
-    
+
     std::array<unsigned,3> nb_index;
     for (char dim = 0; dim < 3; dim++){
       for (bool sign : {false, true}){ // true: negative, false: positive
@@ -426,7 +426,7 @@ void Voxel::descend(std::vector<VoxelLoc>& stack, const unsigned char id, const 
     // only loop over those voxels bordering the previous voxel
     std::array<unsigned,3> sub_index;
     std::array<signed char,3> i;
-    i[dim] = sign? 1 : 0; 
+    i[dim] = sign? 1 : 0;
     for (i[(dim+1)%3] = 0; i[(dim+1)%3] < 2; ++i[(dim+1)%3]){
       for (i[(dim+2)%3] = 0; i[(dim+2)%3] < 2; ++i[(dim+2)%3]){
         for (char j = 0; j < 3; ++j){
@@ -541,11 +541,12 @@ bool Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
 ///////////
 
 // TODO: Optimise. Allow for tallying multiples types at once
-void Voxel::tallyVoxelsOfType(std::map<char,unsigned>& type_tally, 
-    std::map<unsigned char,unsigned>& id_tally, 
+void Voxel::tallyVoxelsOfType(std::map<char,unsigned>& type_tally,
+    std::map<unsigned char,unsigned>& id_core_tally,
+    std::map<unsigned char,unsigned>& id_shell_tally,
     std::map<unsigned char,std::array<unsigned,3>>& id_min,
     std::map<unsigned char,std::array<unsigned,3>>& id_max,
-    const std::array<unsigned,3>& index, 
+    const std::array<unsigned,3>& index,
     const int lvl)
 {
   // if voxel is of type "mixed" (i.e. data vector is not empty)
@@ -559,7 +560,7 @@ void Voxel::tallyVoxelsOfType(std::map<char,unsigned>& type_tally,
         sub_index[1] = index[1]*2 + y;
         for(char z = 0; z < 2; ++z){
           sub_index[2] = index[2]*2 + z;
-          getSubvoxel(sub_index, lvl).tallyVoxelsOfType(type_tally, id_tally, id_min, id_max, sub_index, lvl-1);
+          getSubvoxel(sub_index, lvl).tallyVoxelsOfType(type_tally, id_core_tally, id_shell_tally, id_min, id_max, sub_index, lvl-1);
         }
       }
     }
@@ -567,7 +568,12 @@ void Voxel::tallyVoxelsOfType(std::map<char,unsigned>& type_tally,
   else {
     // tally number of bottom level voxels
     type_tally[getType()] += pow(pow2(lvl),3);
-    id_tally[getID()] += pow(pow2(lvl),3);
+    if(getType() == 0b00001001){
+      id_core_tally[getID()] += pow(pow2(lvl),3);
+    }
+    else if(getType() == 0b00010001){
+      id_shell_tally[getID()] += pow(pow2(lvl),3);
+    }
     // localise cavities
     std::array<unsigned,3> min;
     std::array<unsigned,3> max;

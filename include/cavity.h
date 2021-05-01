@@ -1,0 +1,28 @@
+#ifndef CAVITY_H
+
+#define CAVITY_H
+
+#include <array>
+#include <algorithm>
+#include <vector>
+
+struct Cavity{
+  Cavity() = default;
+  Cavity(unsigned char id, double core_vol, double shell_vol, std::array<double,3> min_bound, std::array<double,3> max_bound, std::array<size_t,3> min_index, std::array<size_t,3> max_index) : 
+    id(id), core_vol(core_vol), shell_vol(shell_vol), min_bound(min_bound), max_bound(max_bound), min_index(min_index), max_index(max_index){};
+  unsigned char id;
+  double core_vol;
+  double shell_vol;
+  std::array<double,3> min_bound;
+  std::array<double,3> max_bound;
+  std::array<size_t,3> min_index;
+  std::array<size_t,3> max_index;
+
+  double getVolume() const;
+};
+
+bool compareVolume(const Cavity& a, const Cavity& b);
+
+void inverseSort(std::vector<Cavity>& cavities);
+
+#endif

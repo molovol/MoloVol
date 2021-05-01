@@ -42,7 +42,6 @@ void MainFrame::OnPrint(wxCommandEvent& event){
 void MainFrame::OnCalc(wxCommandEvent& event){
   enableGuiElements(false);
 
-
   // stop calculation if probe 2 radius is too small in two probes mode
   if(getProbeMode() && getProbe1Radius() > getProbe2Radius()){
     Ctrl::getInstance()->notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.");
@@ -50,13 +49,6 @@ void MainFrame::OnCalc(wxCommandEvent& event){
     enableGuiElements(true);
     return;
   }
-
-  /* TODO remove if obselete
-  // create output folder if any output file option is toggled
-  if(getMakeReport() || getMakeSurfaceMap() || getMakeCavityMaps() || getAnalyzeUnitCell()){
-    Ctrl::getInstance()->prepareOutput(getAtomFilepath());
-  }
-  */
 
   if(!Ctrl::getInstance()->runCalculation()){
     wxYield(); // without wxYield, the clicks on disabled buttons are queued
@@ -71,13 +63,12 @@ void MainFrame::OnCalc(wxCommandEvent& event){
 
   // write total surface map file if option is toggled
   if(getMakeSurfaceMap()){
-    Ctrl::getInstance()->exportSurfaceMap();
+    Ctrl::getInstance()->exportSurfaceMap(false);
   }
-  /* TODO make function to generate cavity maps
-  if(getMakeCavityMaps()){
 
+  if(getMakeCavityMaps()){
+    Ctrl::getInstance()->exportSurfaceMap(true);
   }
-  */
 
   wxYield(); // without wxYield, the clicks on disabled buttons are queued
   enableGuiElements(true);

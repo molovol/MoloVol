@@ -34,7 +34,12 @@ bool Model::setParameters(std::string file_path,
     return false;
   }
   _data.atom_file_path = file_path;
-  output_folder = output_dir;
+  if(output_dir.empty()){
+    output_folder = ".";
+  }
+  else{
+    output_folder = output_dir;
+  }
   _data.inc_hetatm = inc_hetatm;
   _data.analyze_unit_cell = analyze_unit_cell;
   _data.grid_step = grid_step;
@@ -70,6 +75,9 @@ bool Model::setProbeRadii(const double r_1, const double r_2, const bool probe_m
 CalcReportBundle Model::generateVolumeData(){
   // save the date and time of calculation for output files
   _time_stamp = timeNow();
+
+  // clear calculation times from previous runs
+  _data.elapsed_seconds.clear();
 
   auto start = std::chrono::steady_clock::now();
   // process atom data for unit cell analysis if the option it ticked
@@ -180,7 +188,13 @@ CalcReportBundle Model::calcVolume(){
   _data.success = true;
 
   auto start = std::chrono::steady_clock::now();
-  _cell.assignTypeInGrid(atomtree, getProbeRad1(), getProbeRad2(), optionProbeMode()); // assign each voxel in grid a type
+  // TODO make a better error reporting system
+  bool error_cav = false;
+  _cell.assignTypeInGrid(atomtree, getProbeRad1(), getProbeRad2(), optionProbeMode(), error_cav); // assign each voxel in grid a type
+  if(error_cav){
+    Ctrl::getInstance()->notifyUser("\n\nWARNING: Maximum number of cavities reached. Not all cavities are reported.");
+    Ctrl::getInstance()->notifyUser("\nTo solve this, change probe radius (e.g. smaller probe 2 and/or larger probe 1).\n");
+  }
   auto end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
 
@@ -188,16 +202,17 @@ CalcReportBundle Model::calcVolume(){
   // _cell.printGrid(); // for testing
 
   start = std::chrono::steady_clock::now();
-  // TODO: update? to align with new getVolume function?
   if(_data.analyze_unit_cell){
     std::array<double,3> unit_cell_limits = {_cart_matrix[0][0],_cart_matrix[1][1],_cart_matrix[2][2]};
-    _data.volumes = _cell.getUnitCellVolumes(unit_cell_limits);
+    _cell.getUnitCellVolume(_data.volumes, _data.cavities, unit_cell_limits);
   }
   else{
-    _cell.getVolume(_data.volumes, _data.cavities, _data.cav_min, _data.cav_max);
+    _cell.getVolume(_data.volumes, _data.cavities);
   }
   end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
+
+  inverseSort(_data.cavities);
 
   return _data;
 }

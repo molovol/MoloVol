@@ -45,15 +45,15 @@ void Model::createReport(){
   output_report << "Source code available at https://github.com/jmaglic/MoloVol under the MIT licence\n";
   output_report << "Copyright © 2020-2021 Jasmin B. Maglic, Roy Lavendomme\n\n";
   output_report << "MoloVol program: calculation results report\n";
-  output_report << "version: alpha\n\n"; // TODO make a variable for the version to simplify updates
+  output_report << "version: " + Ctrl::s_version + "\n\n";
   output_report << "Time of the calculation: " << _time_stamp << "\n";
   output_report << "Structure file analyzed: " << _data.atom_file_path << "\n";
   output_report << "Chemical formula: " + _data.chemical_formula << "\n";
   output_report << "Duration of the calculation: " << _data.getTime() << " s\n";
 
-  output_report << "\n////////////////////////////\n";
-  output_report << "// Calculation parameters //\n";
-  output_report << "////////////////////////////\n\n";
+  output_report << "\n\n\t////////////////////////////\n";
+  output_report << "\t// Calculation parameters //\n";
+  output_report << "\t////////////////////////////\n\n";
   if(fileExtension(_data.atom_file_path) == "pdb"){
     if(_data.analyze_unit_cell){
       output_report << "Analyze crystal structure unit cell\n";
@@ -80,9 +80,9 @@ void Model::createReport(){
 
   // TODO consider crystal unit cell report with density, volumes per gram and volume ratio
 
-  output_report << "\n////////////////////////\n";
-  output_report << "// Volumes calculated //\n";
-  output_report << "////////////////////////\n\n";
+  output_report << "\n\n\t//////////////////////////////\n";
+  output_report << "\t// Total Volumes calculated //\n";
+  output_report << "\t//////////////////////////////\n\n";
   if(_data.analyze_unit_cell){
     output_report << "Orthogonal(ized) unit cell axes: " << _cart_matrix[0][0] << " Å, " << _cart_matrix[1][1] << " Å, " << _cart_matrix[2][2] << " Å\n";
     output_report << "Total unit cell volume: " << _cart_matrix[0][0]*_cart_matrix[1][1]*_cart_matrix[2][2] << " Å^3\n";
@@ -98,13 +98,45 @@ void Model::createReport(){
     output_report << "Probe 2 shell volume: " << _data.volumes[0b01000001] << " Å^3\n";
   }
 
+  if(!_data.cavities.empty()){
+    output_report << "\n\n\t///////////////////////////////\n";
+    output_report << "\t// Cavities and pockets data //\n";
+    output_report << "\t///////////////////////////////\n\n";
+
+    if(_data.cavities.size() >= 255){
+      output_report << "!!! WARNING !!!\n";
+      output_report << "Maximum number of cavities reached. Some cavities might be missing.\n";
+      output_report << "To solve this issue, change probe radii (e.g. smaller probe 2 and/or larger probe 1).\n\n";
+    }
+    output_report << "Note 1:\tPockets and isolated cavities are not differentiated yet.\n";
+    output_report << "\tThis feature might be added in future versions if requested by the community.\n";
+    output_report << "Note 2:\tSeparate cavities are defined by space accessible to the core of probe 1.\n";
+    output_report << "\tTwo cavities can be in contact but if a probe cannot pass from one to the other, they are considered separated.\n";
+    output_report << "Note 3:\tIn single probe mode, the first 'cavity' consist of the outside space and pockets.\n";
+    output_report << "Note 4:\tSome very small isolated chunks of probe 1 cores can be detected and lead to small cavities.\n";
+    output_report << "Note 5:\tProbe occupied volume correspond to empty space as defined by the molecular surface (similar to the Connolly surface).\n";
+    output_report << "Note 6:\tProbe accessible volume correspond to empty space as defined\n";
+    output_report << "\tby the surface accessible to its core (similar to the Lee-Richards surface).\n";
+    output_report << "Note 7:\tFor a detailed shape of each cavity, check the surface maps.\n\n";
+
+    output_report << "Cavity\tOccupied\tAccessible\tCavity center coordinates (Å)\n";
+    output_report << "ID\tVolume (Å^3)\tVolume (Å^3)\tx\ty\tz\n";
+    for(unsigned int i = 0; i < _data.cavities.size(); i++){
+      std::array<double,3> cav_center = _data.getCavCenter(i);
+      // default precision is 6, which means that double values will take less than a tab space
+      output_report << i+1 << "\t"
+                    << _data.cavities[i].getVolume() << "\t\t"
+                    << _data.cavities[i].core_vol << "\t\t"
+                    << cav_center[0] << "\t" << cav_center[1] << "\t" << cav_center[2] << "\n";
+    }
+  }
+
   if(_data.make_full_map || _data.make_cav_maps){
-    // TODO add commands to change atomic radii in PyMol
-    output_report << "\n/////////////////////////////\n";
-    output_report << "// Surface map information //\n";
-    output_report << "/////////////////////////////\n\n";
+    output_report << "\n\n\t/////////////////////////////\n";
+    output_report << "\t// Surface map information //\n";
+    output_report << "\t/////////////////////////////\n\n";
     output_report << "The surface map files generated (.dx, OpenDX format) can be opened with\n";
-    output_report << "PyMol, USCF Chimera or USCF ChimeraX.\n\n";
+    output_report << "PyMOL, USCF Chimera or USCF ChimeraX.\n\n";
     output_report << "Use the following isosurface levels to visualize the desired surface:\n";
     output_report << "Level 0.5 : Van der Waals surface\n";
     if(_data.probe_mode){
@@ -114,13 +146,23 @@ void Model::createReport(){
     }
     else{
       output_report << "Level 2 : Molecular surface (probe 1 excluded, similar to the Connolly surface)\n";
-      output_report << "Level 5 : Probe 1 accessible surface (similar to Lee-Richards molecular surface)\n";
+      output_report << "Level 5 : Probe 1 accessible surface (similar to the Lee-Richards molecular surface)\n";
     }
     output_report << "\nFor help on how to vizualize maps:\n";
-    output_report << " - in Pymol, simply open the map file then click 'A' in the right panel, choose mesh or surface and select the level.\n";
+    output_report << " - in PyMOL, simply open the map file then click 'A' in the right panel, choose mesh or surface and select the level.\n";
     output_report << "   For more information, check https://pymolwiki.org/index.php/Isomesh and https://pymolwiki.org/index.php/Isosurface \n";
     output_report << " - in USCF Chimera, check https://www.cgl.ucsf.edu/chimera/docs/ContributedSoftware/volumeviewer/volumeviewer.html \n";
     output_report << " - in USCF ChimeraX, check https://www.cgl.ucsf.edu/chimerax/docs/user/tools/volumeviewer.html \n";
+
+    output_report << "\nIf you wish to visualize the structure file in PyMOL with the same element radii as in the MoloVol calculation,\n";
+    output_report << "paste the following command lines (all at once) in the command prompt of PyMOL after opening the structure file.\n\n";
+
+    for(std::unordered_map<std::string, double>::iterator it = radius_map.begin(); it != radius_map.end(); it++){
+      if(isIncluded(it->first, _data.included_elements)){
+      output_report << "alter (elem " << it->first << "),vdw=" << it->second << "\n";
+      }
+    }
+    output_report << "rebuild\n\n";
   }
   output_report.close();
 }
@@ -145,27 +187,23 @@ void Model::writeXYZfile(std::vector<std::tuple<std::string, double, double, dou
 // SURFACE MAP OUTPUT //
 ////////////////////////
 
-void Model::writeSurfaceMap(){
-  // TODO reduce the size of total surface map in two probes mode (can also be reduced to a lesser extent in single probe mode)
-  // in two probes mode, the surface map will be unnecessarily large due to the useless probe 2 voxel types filling the sides of the map
-  // we can thus reduce the size of the map by removing a chunk of voxel from each side corresponding to the radius of probe 2
-
-
-  // assemble data
-  Container3D<Voxel>* surface_map = &_cell.getGrid(0);
+void Model::writeTotalSurfaceMap(){
   // save commonly used variable
-  std::array<unsigned long int,3> n_elements = surface_map->getNumElements();
+  std::array<unsigned long int,3> n_elements = _cell.getGrid(0).getNumElements();
   double vxl_length = _cell.getVxlSize();
   std::array<double,3> cell_min = _cell.getMin();
   std::array<double,3> origin;
-  std::array<unsigned long int,3> start_index = {0,0,0};
-  std::array<unsigned long int,3> end_index = n_elements;
+  std::array<size_t,3> start_index = {0,0,0};
+  std::array<size_t,3> end_index;
+  for(int i = 0; i < 3; i++){
+    end_index[i] = n_elements[i];
+  }
 
   // in two probes mode, the outer space occupied by the second probe is useless for the surface map
   // thus the surface map can be reduced on each side by the radius of probe 2
   if(_data.probe_mode){
     for(int i = 0; i < 3; i++){
-      start_index[i] += getProbeRad1()/vxl_length;
+      start_index[i] += getProbeRad2()/vxl_length;
       end_index[i] -= getProbeRad2()/vxl_length;
       n_elements[i] = end_index[i] - start_index[i];
     }
@@ -186,8 +224,51 @@ void Model::writeSurfaceMap(){
     origin[i] = cell_min[i] + ((double(start_index[i]) + 0.5) * vxl_length);
   }
 
+  std::string file_name = "/full_surface_map_" + _time_stamp + ".dx";
+  writeSurfaceMap(file_name, vxl_length, n_elements, origin, start_index, end_index);
+}
+
+void Model::writeCavitiesMaps(){
+  // save commonly used variable
+  double vxl_length = _cell.getVxlSize();
+  std::array<double,3> cell_min = _cell.getMin();
+  std::array<double,3> origin;
+  std::array<size_t,3> start_index;
+  std::array<size_t,3> end_index;
+
+  // loop over each cavity id
+  for(size_t id = 0; id < _data.cavities.size(); id++){
+    std::array<unsigned long int,3> n_elements = _cell.getGrid(0).getNumElements();
+    start_index = _data.cavities[id].min_index;
+    end_index = _data.cavities[id].max_index;
+    // increase size of surface map grid by 1 voxel in each direction to avoid having surfaces on the border of the map
+    for(char i = 0; i < 3; i++){
+      if(start_index[i] > 0){start_index[i]--;}
+      // increase end_index twice because it should be above the range of indexes checked like vector and array sizes in C++
+      if(end_index[i] < n_elements[i]){end_index[i]++;}
+      if(end_index[i] < n_elements[i]){end_index[i]++;}
+      n_elements[i] = end_index[i] - start_index[i];
+      origin[i] = cell_min[i] + ((double(start_index[i]) + 0.5) * vxl_length);
+    }
+    std::string file_name = "/cav" + std::to_string(id+1) + "_surface_map_" + _time_stamp + ".dx";
+    writeSurfaceMap(file_name, vxl_length, n_elements, origin, start_index, end_index, true, id);
+  }
+}
+
+void Model::writeSurfaceMap(std::string file_name,
+                            double vxl_length,
+                            std::array<unsigned long int,3> n_elements,
+                            std::array<double,3> origin,
+                            std::array<size_t,3> start_index,
+                            std::array<size_t,3> end_index,
+                            const bool partial_map,
+                            const unsigned char id){
+
+  // assemble data
+  Container3D<Voxel>* surface_map = &_cell.getGrid(0);
+
   // create map for assigning numbers to types
-  std::map<char,int> typeToNum =
+  const std::map<char,int> typeToNum =
     {{0b00000011, 0},
      {0b00000101, 1},
      {0b00001001, 6},
@@ -197,10 +278,10 @@ void Model::writeSurfaceMap(){
 
   // create and open new file
   std::ofstream output_file;
-  output_file.open(output_folder + "/full_surface_map_"+ _time_stamp +".dx");
+  output_file.open(output_folder + file_name);
   // comments
   output_file << "# OpenDX density file generated by MoloVol\n";
-  output_file << "# Contains 3D surface map data to read in PyMol or Chimera\n";
+  output_file << "# Contains 3D surface map data to read in PyMOL or Chimera\n";
   output_file << "# Data is written in C array order: In grid[x,y,z] the axis x is fastest\n";
   output_file << "# varying, then y, then finally z.\n";
   // line
@@ -237,7 +318,12 @@ void Model::writeSurfaceMap(){
     for(unsigned long int y = start_index[1]; y < end_index[1]; y++){
       for(unsigned long int z = start_index[2]; z < end_index[2]; z++){
         if (typeToNum.count(surface_map->getElement(x,y,z).getType()) != 0){
-          output_file << typeToNum[surface_map->getElement(x,y,z).getType()];
+          if (partial_map? surface_map->getElement(x,y,z).getID() == _data.cavities[id].id : true){
+            output_file << typeToNum.find(surface_map->getElement(x,y,z).getType())->second;
+          }
+          else {
+            output_file << 0;
+          }
         }
         else { // TODO inform the user that there is something odd with the surface map
           output_file << -2;
@@ -259,7 +345,3 @@ void Model::writeSurfaceMap(){
   // close the file
   output_file.close();
 }
-
-
-
-

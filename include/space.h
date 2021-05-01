@@ -4,6 +4,7 @@
 
 #include "voxel.h"
 #include "container3d.h"
+#include "cavity.h"
 #include <vector>
 #include <array>
 #include <map>
@@ -44,10 +45,16 @@ class Space{
     void printGrid();
 
     // type evaluation
-    void assignTypeInGrid(const AtomTree&, const double, const double, bool);
-    void getVolume(std::map<char,double>&, std::vector<double>&, std::vector<std::array<double,3>>&, std::vector<std::array<double,3>>&);
-    std::map<char,double> getVolumes();
-    std::map<char,double> getUnitCellVolumes(std::array<double,3>);
+    void assignTypeInGrid(const AtomTree&, const double, const double, bool, bool&);
+    void getVolume(std::map<char,double>&, std::vector<Cavity>&);
+    void getUnitCellVolume(std::map<char,double>&, std::vector<Cavity>&, std::array<double,3>);
+    void tallyVoxelsUnitCell(std::array<unsigned int,3>,
+                            double,
+                            std::map<char, double>&,
+                            std::map<unsigned char, double>&,
+                            std::map<unsigned char, double>&,
+                            std::map<unsigned char, std::array<unsigned,3>>&,
+                            std::map<unsigned char, std::array<unsigned,3>>&);
 
   private:
     std::array <double,3> cart_min; // this is also the "origin" of the space

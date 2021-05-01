@@ -37,13 +37,13 @@ void print(std::array<T,3> arr){
   }
   std::cout << std::endl;
 }
-
+/*
 template <typename T>
 void swap(T& i, T& j){
   int temp = i;
   i = j;
   j = temp;
-}
+}*/
 
 template <typename T1, typename T2>
 std::array<T1,3> add(std::array<T1,3> arr1, const std::array<T2,3>& arr2){
@@ -67,7 +67,7 @@ void printBinary(const T var){
     std::bitset<sizeof(var) * CHAR_BIT> bit(var);
     std::cout << bit << std::endl;
   }
-  catch (std::invalid_argument& e) {
+  catch (const std::invalid_argument& e) {
     throw;
   }
 }

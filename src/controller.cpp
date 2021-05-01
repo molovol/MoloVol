@@ -39,10 +39,10 @@ bool Ctrl::loadRadiusFile(){
   }
 
   std::string radius_filepath = gui->getRadiusFilepath();
+  // even if there is no valid radii file, the program can be used by manually setting radii in the GUI after loading a structure
   if(!current_calculation->readRadiusFileSetMaps(radius_filepath)){
     notifyUser("\nInvalid radii definition file!");
     notifyUser("\nPlease select a valid file or set radii manually.");
-    // shouldn't this return false? -JM
   }
   // refresh atom list using new radius map
   gui->displayAtomList(current_calculation->generateAtomList());
@@ -114,18 +114,21 @@ bool Ctrl::runCalculation(){
     notifyUser(Symbol::angstrom() + Symbol::cubed());
     notifyUser("\nProbe 1 shell volume: " + std::to_string(data.volumes[0b00010001]) + " ");
     notifyUser(Symbol::angstrom() + Symbol::cubed());
-    for (size_t i = 1; i < data.cavities.size(); ++i){
-      notifyUser("\nCav " + std::to_string(i) + ": " + std::to_string(data.cavities[i]) + " ");
-      notifyUser(Symbol::angstrom() + Symbol::cubed());
-      notifyUser("(" + std::to_string(data.getCavCentre(i)[0]) + ", "
-        + std::to_string(data.getCavCentre(i)[1]) + ", "
-        + std::to_string(data.getCavCentre(i)[2]) + ")");
-    }
     if(data.probe_mode){
       notifyUser("\nProbe 2 core volume: " + std::to_string(data.volumes[0b00100001]) + " ");
       notifyUser(Symbol::angstrom() + Symbol::cubed());
       notifyUser("\nProbe 2 shell volume: " + std::to_string(data.volumes[0b01000001]) + " ");
       notifyUser(Symbol::angstrom() + Symbol::cubed());
+    }
+    if(!data.cavities.empty()){
+      notifyUser("\nList of cavities = probe 1 occupied volumes (cavity center x,y,z coordinates)");
+      for (size_t i = 0; i < data.cavities.size(); ++i){
+        notifyUser("\nCav " + std::to_string(i+1) + ": " + std::to_string(data.getCavVolume(i)) + " ");
+        notifyUser(Symbol::angstrom() + Symbol::cubed());
+        notifyUser("(" + std::to_string(data.getCavCentre(i)[0]) + ", "
+          + std::to_string(data.getCavCentre(i)[1]) + ", "
+          + std::to_string(data.getCavCentre(i)[2]) + ")");
+      }
     }
   }
   else{
@@ -158,6 +161,11 @@ void Ctrl::exportReport(){
   current_calculation->createReport();
 }
 
-void Ctrl::exportSurfaceMap(){
-  current_calculation->writeSurfaceMap();
+void Ctrl::exportSurfaceMap(bool cavities){
+  if(cavities){
+    current_calculation->writeCavitiesMaps();
+  }
+  else{
+    current_calculation->writeTotalSurfaceMap();
+  }
 }

@@ -50,7 +50,7 @@ bool MainApp::OnInit()
     return true;
   }
   // initialise the GUI
-  MainFrame* MainWin = new MainFrame(_("MoloVol"), wxDefaultPosition, wxDefaultSize);
+  MainFrame* MainWin = new MainFrame(_("MoloVol " + Ctrl::s_version), wxDefaultPosition, wxDefaultSize);
   MainWin->SetBackgroundColour(col_win);
   MainWin->Show(true);
   SetTopWindow(MainWin);
@@ -414,7 +414,7 @@ void MainFrame::InitParametersPanel(){
   surfaceMapCheckbox = new wxCheckBox
     (parameterPanel,
      CHECKBOX_SurfaceMap,
-     "Generate a total surface map file (to visualize in PyMol and Chimera)",
+     "Generate a total surface map file (to visualize in PyMOL and Chimera)",
      wxDefaultPosition,
      wxDefaultSize,
      0,
@@ -427,7 +427,7 @@ void MainFrame::InitParametersPanel(){
   cavityMapsCheckbox = new wxCheckBox
     (parameterPanel,
      CHECKBOX_CavityMaps,
-     "Generate a surface map file for each cavity/pocket (to visualize in PyMol and Chimera) (NOT AVAILABLE YET !)",
+     "Generate a surface map file for each cavity/pocket (to visualize in PyMOL and Chimera)",
      wxDefaultPosition,
      wxDefaultSize,
      0,
@@ -575,8 +575,15 @@ void MainFrame::InitDepthPanel(){
 }
 
 void MainFrame::InitOutputpathPanel(){
-  outputdirText = new wxStaticText(outputpathPanel, TEXT_Outputdir, "Output directory:");
-  outputdirPicker = new wxDirPickerCtrl(outputpathPanel, BUTTON_Output, ".");
+  outputdirText = new wxStaticText(outputpathPanel, TEXT_Outputdir, "Output directory (default, same as the program):");
+  outputdirPicker = new wxDirPickerCtrl(outputpathPanel,
+                                        BUTTON_Output,
+                                        "",
+                                        _("Select Output Directory"),
+                                        wxDefaultPosition,
+                                        wxDefaultSize,
+                                        wxDIRP_DEFAULT_STYLE,
+                                        wxDefaultValidator);
 
   wxBoxSizer *outputSizer = new wxBoxSizer(wxHORIZONTAL);
   outputSizer->Add(outputdirText,0, wxALIGN_CENTRE_VERTICAL | wxALL,10);

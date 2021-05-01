@@ -5,6 +5,7 @@
 // class for dealing with program logic
 #include "atomtree.h"
 #include "space.h"
+#include "cavity.h"
 #include <iostream>
 #include <vector>
 #include <map>
@@ -33,13 +34,12 @@ struct CalcReportBundle{
   bool make_cav_maps;
   // calculation results
   std::map<char,double> volumes;
-  std::vector<double> cavities;
-  std::vector<std::array<double,3>> cav_min;
-  std::vector<std::array<double,3>> cav_max;
+  std::vector<Cavity> cavities;
+  double getCavVolume(const unsigned char i){return cavities[i].getVolume();}
   std::array<double,3> getCavCentre(const unsigned char i){
     std::array<double,3> cav_ctr;
     for (char j = 0; j < 3; ++j){
-      cav_ctr[j] = (cav_min[i][j] + cav_max[i][j])/2;
+      cav_ctr[j] = (cavities[i].min_bound[j] + cavities[i].max_bound[j])/2;
     }
     return cav_ctr;
   }
@@ -78,7 +78,9 @@ class Model{
     bool createOutputFolder(std::string);
     void createReport();
     void writeXYZfile(std::vector<std::tuple<std::string, double, double, double>>&, std::string);
-    void writeSurfaceMap();
+    void writeTotalSurfaceMap();
+    void writeCavitiesMaps();
+    void writeSurfaceMap(std::string, double, std::array<unsigned long int,3>, std::array<double,3>, std::array<size_t,3>, std::array<size_t,3>, const bool=false, const unsigned char=0);
 
     std::vector<std::string> listElementsInStructure();
 
@@ -106,7 +108,7 @@ class Model{
     void linkToAdjacentAtoms(const double&, Atom&);
     CalcReportBundle calcVolume();
     bool setParameters(std::string, std::string, bool, bool, bool, double, double, double, int, bool, bool, bool, std::unordered_map<std::string, double>, std::vector<std::string>, double);
-    CalcReportBundle getBundle(); // TODO remove is unused
+    CalcReportBundle getBundle(); // TODO remove if unused
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void setRadiusMap(std::unordered_map<std::string, double> map);
     bool setProbeRadii(const double, const double, const bool);
