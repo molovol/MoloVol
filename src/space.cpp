@@ -240,6 +240,7 @@ void Space::getVolume(std::map<char,double>& volumes, std::vector<Cavity>& cavit
   // copy values from map to vector for more efficient storage and access
   // ignore id == 0; this is not a cavity but all voxels that are neither core nor shell
   for (auto& [id,tally] : id_core_tally) {
+    if (id == 0){continue;}
     cavities[id-1].core_vol = tally * unit_volume;
     cavities[id-1].shell_vol = id_shell_tally[id] * unit_volume;
     cavities[id-1].id = id;

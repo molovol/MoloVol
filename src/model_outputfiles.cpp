@@ -228,7 +228,7 @@ void Model::writeTotalSurfaceMap(){
   }
 
   std::string file_name = "/full_surface_map_" + _time_stamp + ".dx";
-  writeSurfaceMap(0, file_name, vxl_length, n_elements, origin, start_index, end_index);
+  writeSurfaceMap(file_name, vxl_length, n_elements, origin, start_index, end_index);
 }
 
 void Model::writeCavitiesMaps(){
@@ -258,23 +258,24 @@ void Model::writeCavitiesMaps(){
       origin[i] = cell_min[i] + ((double(start_index[i]) + 0.5) * vxl_length);
     }
     std::string file_name = "/cav" + std::to_string(id+1) + "_surface_map_" + _time_stamp + ".dx";
-    writeSurfaceMap(id, file_name, vxl_length, n_elements, origin, start_index, end_index);
+    writeSurfaceMap(file_name, vxl_length, n_elements, origin, start_index, end_index, true, id);
   }
 }
 
-void Model::writeSurfaceMap(size_t id,
-                            std::string file_name,
+void Model::writeSurfaceMap(std::string file_name,
                             double vxl_length,
                             std::array<unsigned long int,3> n_elements,
                             std::array<double,3> origin,
                             std::array<size_t,3> start_index,
-                            std::array<size_t,3> end_index){
+                            std::array<size_t,3> end_index,
+                            const bool partial_map,
+                            const unsigned char id){
 
   // assemble data
   Container3D<Voxel>* surface_map = &_cell.getGrid(0);
 
   // create map for assigning numbers to types
-  std::map<char,int> typeToNum =
+  const std::map<char,int> typeToNum =
     {{0b00000011, 0},
      {0b00000101, 1},
      {0b00001001, 6},
@@ -324,8 +325,8 @@ void Model::writeSurfaceMap(size_t id,
     for(unsigned long int y = start_index[1]; y < end_index[1]; y++){
       for(unsigned long int z = start_index[2]; z < end_index[2]; z++){
         if (typeToNum.count(surface_map->getElement(x,y,z).getType()) != 0){
-          if (id == 0 || (id > 0 && surface_map->getElement(x,y,z).getID() == _data.cavities[id].id)){
-            output_file << typeToNum[surface_map->getElement(x,y,z).getType()];
+          if (partial_map? surface_map->getElement(x,y,z).getID() == _data.cavities[id].id : true){
+            output_file << typeToNum.find(surface_map->getElement(x,y,z).getType())->second;
           }
           else {
             output_file << 0;
@@ -351,5 +352,3 @@ void Model::writeSurfaceMap(size_t id,
   // close the file
   output_file.close();
 }
-
-
