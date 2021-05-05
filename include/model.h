@@ -100,6 +100,7 @@ class Model{
 
     // controller-model communication
     CalcReportBundle generateVolumeData();
+    CalcReportBundle generateSurfaceData();
     // calls the Space constructor and creates a cell containing all atoms. Cell size is defined by atom positions
     void defineCell();
     void setAtomListForCalculation();

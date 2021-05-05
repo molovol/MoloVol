@@ -100,7 +100,12 @@ bool Ctrl::runCalculation(){
       gui->getMaxRad())){
     return false;
   }
+
   CalcReportBundle data = current_calculation->generateVolumeData();
+  // surface calculation requires running the volume calculation first, but shouldn't be inside the volume calc function
+  if (data.success){
+    data = current_calculation->generateSurfaceData();
+  }
 
   if (data.success){
     notifyUser("\nResult for ");

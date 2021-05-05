@@ -99,8 +99,11 @@ CalcReportBundle Model::generateVolumeData(){
   auto end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
 
-  // create a report bundle
   return calcVolume();
+}
+
+CalcReportBundle Model::generateSurfaceData(){
+  return _data;
 }
 
 void Model::setAtomListForCalculation(){
