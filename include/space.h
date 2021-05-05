@@ -57,7 +57,7 @@ class Space{
                             std::map<unsigned char, std::array<unsigned,3>>&);
 
     // surface area
-    std::vector<std::vector<double>> sumSurfArea(const std::vector<std::vector<char>>&, const std::vector<bool>&);
+    std::vector<std::vector<double>> sumSurfArea(const std::vector<std::vector<char>>&, const std::vector<bool>&, const unsigned char);
 
   private:
     std::array <double,3> cart_min; // this is also the "origin" of the space

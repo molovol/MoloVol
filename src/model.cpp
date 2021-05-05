@@ -133,7 +133,7 @@ CalcReportBundle Model::generateSurfaceData(){
 
   std::vector<bool> for_every_cavity = {false, false, true, true};
 
-  std::vector<std::vector<double>> surface_areas = _cell.sumSurfArea(solid_types, for_every_cavity);
+  std::vector<std::vector<double>> surface_areas = _cell.sumSurfArea(solid_types, for_every_cavity, _data.cavities.size());
 
   _data.surf_vdw = 0; // 0b00000011
   _data.surf_probe_inaccessible = 0; // 0b00000011 + 0b00000101

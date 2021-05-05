@@ -384,9 +384,14 @@ void Space::tallyVoxelsUnitCell(std::array<unsigned int,3> bot_lvl_index,
 // SURFACE AREA //
 //////////////////
 
-std::vector<std::vector<double>> Space::sumSurfArea(const std::vector<std::vector<char>>& solid_types, const std::vector<bool>& for_every_cavity){
+std::vector<std::vector<double>> Space::sumSurfArea(const std::vector<std::vector<char>>& solid_types, const std::vector<bool>& for_every_cavity, const unsigned char n_cavities){
   assert(solid_types.size() == for_every_cavity.size());
+  // allocate memory
   std::vector<std::vector<double>> surface_areas(solid_types.size());
+  for (char i = 0; i < surface_areas.size(); ++i){
+    surface_areas[i] = std::vector<double> (for_every_cavity[i]? n_cavities : 1);
+  }
+
   return surface_areas;
 }
 
