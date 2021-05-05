@@ -122,7 +122,29 @@ CalcReportBundle Model::generateVolumeData(){
 }
 
 CalcReportBundle Model::generateSurfaceData(){
-  // TODO
+  // TODO: add way for this function to tell whether volume calculation has been conducted before
+  auto start = std::chrono::steady_clock::now();
+
+  std::vector<std::vector<char>> solid_types = 
+  { {0b00000011},
+    {0b00000011, 0b00000101},
+    {0b00000011, 0b00000101, 0b00100001, 0b01000001},
+    {0b00000011, 0b00000101, 0b00010001, 0b00100001, 0b01000001}};
+
+  std::vector<bool> for_every_cavity = {false, false, true, true};
+
+//  std::vector<std::vector<double>> surface_areas = _cell.sumSurfArea(solid_types, for_every_cavity);
+
+  _data.surf_vdw = 0; // 0b00000011
+  _data.surf_probe_inaccessible = 0; // 0b00000011 + 0b00000101
+
+  for (Cavity& cav : _data.cavities){
+    cav.surf_shell = 0; // 0b00000011 + 0b00000101 + 0b00100001 + 0b01000001
+    cav.surf_core = 0; // 0b00000011 + 0b00000101 + 0b00010001 + 0b00100001 + 0b01000001
+  }
+
+  auto end = std::chrono::steady_clock::now();
+  _data.addTime(std::chrono::duration<double>(end-start).count());
   return _data;
 }
 
