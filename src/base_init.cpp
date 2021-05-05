@@ -45,6 +45,9 @@ bool MainApp::OnInit()
     else if (unittest_id=="2probe"){
       Ctrl::getInstance()->unittest2Probe();
     }
+    else if (unittest_id=="surface"){
+      Ctrl::getInstance()->unittestSurface();
+    }
     else {
       std::cout << "Invalid selection" << std::endl;}
     return true;

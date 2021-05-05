@@ -410,7 +410,6 @@ std::vector<std::vector<double>> Space::sumSurfArea(const std::vector<std::vecto
             getVxlFromGrid(x+1,y+1,z+1,lvl)},
           surface_areas,
           for_every_cavity);
-        printBinary(getVxlFromGrid(x,y,z,0).getType());
       }
     }
   }
