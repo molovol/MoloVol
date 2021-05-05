@@ -384,6 +384,8 @@ void Space::tallyVoxelsUnitCell(std::array<unsigned int,3> bot_lvl_index,
 // SURFACE AREA //
 //////////////////
 
+void evalCube(const std::array<Voxel,8>, std::vector<std::vector<double>>&, const std::vector<bool>&);
+
 std::vector<std::vector<double>> Space::sumSurfArea(const std::vector<std::vector<char>>& solid_types, const std::vector<bool>& for_every_cavity, const unsigned char n_cavities){
   assert(solid_types.size() == for_every_cavity.size());
   // allocate memory
@@ -392,7 +394,32 @@ std::vector<std::vector<double>> Space::sumSurfArea(const std::vector<std::vecto
     surface_areas[i] = std::vector<double> (for_every_cavity[i]? n_cavities : 1);
   }
 
+  constexpr char lvl = 0;
+  std::array<unsigned long,3> n_vxl = gridstepsOnLvl(lvl);
+  for (unsigned x = 0; x < n_vxl[0]-1; ++x){
+    for (unsigned y = 0; y < n_vxl[1]-1; ++y){
+      for (unsigned z = 0; z < n_vxl[2]-1; ++z){
+        // TODO: consider passing voxels by reference rather than value
+        evalCube({getVxlFromGrid(x,y,z,lvl),
+            getVxlFromGrid(x+1,y,z,lvl),
+            getVxlFromGrid(x,y+1,z,lvl),
+            getVxlFromGrid(x+1,y+1,z,lvl),
+            getVxlFromGrid(x,y,z+1,lvl),
+            getVxlFromGrid(x+1,y,z+1,lvl),
+            getVxlFromGrid(x,y+1,z+1,lvl),
+            getVxlFromGrid(x+1,y+1,z+1,lvl)},
+          surface_areas,
+          for_every_cavity);
+        printBinary(getVxlFromGrid(x,y,z,0).getType());
+      }
+    }
+  }
+
   return surface_areas;
+}
+
+void evalCube(const std::array<Voxel,8> vertices, std::vector<std::vector<double>>& surface_areas, const std::vector<bool>& for_every_cavity){
+
 }
 
 //////////////////////
@@ -493,6 +520,7 @@ unsigned long int Space::totalVxlOnLvl(const int lvl) const{
   return total;
 }
 
+// TODO: read this value from Container3D and remove n_gridsteps entirely
 const std::array<unsigned long int,3> Space::gridstepsOnLvl(const int level) const {
   if (level > max_depth){throw ExceptIllegalFunctionCall();}
   std::array<unsigned long int,3> n_voxels;
