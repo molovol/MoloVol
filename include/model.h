@@ -24,38 +24,29 @@ struct CalcReportBundle{
   // parameters for calculation
   double grid_step;
   int max_depth;
-  double r_probe1 = 0;
-  double r_probe2 = 0;
+  double r_probe1;
+  double r_probe2;
   std::vector<std::string> included_elements;
   std::string chemical_formula;
   // output options
   bool make_report;
   bool make_full_map;
   bool make_cav_maps;
-  // calculation results
+  // volumes
   std::map<char,double> volumes;
+  // surfaces
+  double surf_vdw;
+  double surf_probe_inaccessible;
+  // cavity volumes and surfaces
   std::vector<Cavity> cavities;
   double getCavVolume(const unsigned char i){return cavities[i].getVolume();}
-  std::array<double,3> getCavCentre(const unsigned char i){
-    std::array<double,3> cav_ctr;
-    for (char j = 0; j < 3; ++j){
-      cav_ctr[j] = (cavities[i].min_bound[j] + cavities[i].max_bound[j])/2;
-    }
-    return cav_ctr;
-  }
+  std::array<double,3> getCavCentre(const unsigned char);
   std::array<double,3> getCavCenter(const unsigned char i){return getCavCentre(i);}
-  std::map<char,double> surfaces;
   // time
   std::vector<double> elapsed_seconds;
   void addTime(const double t){elapsed_seconds.push_back(t);}
   double getTime(const unsigned i){return elapsed_seconds[i];}
-  double getTime(){
-    double total_seconds = 0;
-    for (const double time : elapsed_seconds){
-      total_seconds += time;
-    }
-    return total_seconds;
-  }
+  double getTime();
 };
 
 class AtomTree;

@@ -9,6 +9,25 @@
 #include <string>
 #include <vector>
 
+//////////////////////
+// CALCRESULTBUNDLE //
+//////////////////////
+
+std::array<double,3> CalcReportBundle::getCavCentre(const unsigned char i){
+  std::array<double,3> cav_ctr;
+  for (char j = 0; j < 3; ++j){
+    cav_ctr[j] = (cavities[i].min_bound[j] + cavities[i].max_bound[j])/2;
+  }
+  return cav_ctr;
+}
+
+double CalcReportBundle::getTime(){
+  double total_seconds = 0;
+  for (const double time : elapsed_seconds){
+    total_seconds += time;
+  }
+  return total_seconds;
+}
 
 ////////////////////////////////////
 // CONTROLLER-MODEL COMMUNICATION //
@@ -103,6 +122,7 @@ CalcReportBundle Model::generateVolumeData(){
 }
 
 CalcReportBundle Model::generateSurfaceData(){
+  // TODO
   return _data;
 }
 
