@@ -380,6 +380,16 @@ void Space::tallyVoxelsUnitCell(std::array<unsigned int,3> bot_lvl_index,
   }
 }
 
+//////////////////
+// SURFACE AREA //
+//////////////////
+
+std::vector<std::vector<double>> Space::sumSurfArea(const std::vector<std::vector<char>>& solid_types, const std::vector<bool>& for_every_cavity){
+  assert(solid_types.size() == for_every_cavity.size());
+  std::vector<std::vector<double>> surface_areas(solid_types.size());
+  return surface_areas;
+}
+
 //////////////////////
 // ACCESS FUNCTIONS //
 //////////////////////
