@@ -418,7 +418,13 @@ std::vector<std::vector<double>> Space::sumSurfArea(const std::vector<std::vecto
     }
   }
 
-  // TODO: multiply every surface area value by the square of voxel side length
+  for (auto& area_type : surface_areas){
+    for (auto& area_value : area_type){
+      area_value *= getVxlSize()*getVxlSize();
+//      std::cout << area_value << std::endl;
+    }
+//    std::cout << std::endl;
+  }
 
   return surface_areas;
 }
@@ -428,13 +434,15 @@ void evalCubeMultiSurface(const std::array<Voxel,8> vertices, std::vector<std::v
   for (size_t i = 0; i < surface_areas.size(); ++i){
 
     if (for_every_cavity[i]) {
+      // TODO: issue in this section: different cavities are not handeled properly as not only the IDs of bit 1 voxels
+      // but also the IDs of bit 2 voxels need to be taken into account
       for (unsigned char cav_id = 1; cav_id <= surface_areas[i].size(); ++cav_id){
         //unsigned char surf_config = evalSurfConfig(vertices, solid_types[i], cav_id);
         unsigned char surf_config = 0;
         for (char j = 0; j < 8; ++j){
           setBit(surf_config, j, isSolid(vertices[j], solid_types[i], cav_id));
         }
-        //surface_areas[i][cav_id-1] += typeToArea(configToType(surf_config));
+        surface_areas[i][cav_id-1] += SurfaceLUT::typeToArea(SurfaceLUT::configToType(surf_config));
       }
     }
     else {
@@ -442,14 +450,13 @@ void evalCubeMultiSurface(const std::array<Voxel,8> vertices, std::vector<std::v
       for (char j = 0; j < 8; ++j){
         setBit(surf_config, j, isSolid(vertices[j], solid_types[i]));
       }
-      
       surface_areas[i][0] += SurfaceLUT::typeToArea(SurfaceLUT::configToType(surf_config));
     }
   }
 }
 
 bool isSolid(const Voxel& vxl, const std::vector<char>& solid_types, const unsigned char id){
-  if (vxl.getID() == id) {
+  if (vxl.getID() == id) { // THIS LINE IS WRONG
     return std::find(solid_types.begin(), solid_types.end(), vxl.getType()) != solid_types.end();
   }
   return false;
