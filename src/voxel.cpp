@@ -174,12 +174,12 @@ bool Voxel::isCore(){return readBit(_type,3);}
 bool Voxel::isAssigned(){return readBit(_type,0);}
 
 // type
-char Voxel::getType(){return _type;}
+char Voxel::getType() const {return _type;}
 void Voxel::setType(char input){_type = input;}
 
 // ID
 void Voxel::setID(unsigned char id){_identity = id;}
-unsigned char Voxel::getID(){return _identity;}
+unsigned char Voxel::getID() const {return _identity;}
 
 /////////////////////////////////
 // TYPE ASSIGNMENT PREPARATION //

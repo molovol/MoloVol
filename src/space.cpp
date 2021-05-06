@@ -7,6 +7,7 @@
 #include <cmath>
 #include <cassert>
 #include <stdexcept>
+#include <algorithm> // find
 
 /////////////////
 // CONSTRUCTOR //
@@ -384,7 +385,9 @@ void Space::tallyVoxelsUnitCell(std::array<unsigned int,3> bot_lvl_index,
 // SURFACE AREA //
 //////////////////
 
-void evalCube(const std::array<Voxel,8>, std::vector<std::vector<double>>&, const std::vector<bool>&);
+void evalCubeMultiSurface(const std::array<Voxel,8> vertices, std::vector<std::vector<double>>& surface_areas, const std::vector<std::vector<char>>& solid_types, const std::vector<bool>& for_every_cavity);
+bool isSolid(const Voxel&, const std::vector<char>&, const unsigned char);
+bool isSolid(const Voxel&, const std::vector<char>&);
 
 std::vector<std::vector<double>> Space::sumSurfArea(const std::vector<std::vector<char>>& solid_types, const std::vector<bool>& for_every_cavity, const unsigned char n_cavities){
   assert(solid_types.size() == for_every_cavity.size());
@@ -400,7 +403,7 @@ std::vector<std::vector<double>> Space::sumSurfArea(const std::vector<std::vecto
     for (unsigned y = 0; y < n_vxl[1]-1; ++y){
       for (unsigned z = 0; z < n_vxl[2]-1; ++z){
         // TODO: consider passing voxels by reference rather than value
-        evalCube({getVxlFromGrid(x,y,z,lvl),
+        evalCubeMultiSurface({getVxlFromGrid(x,y,z,lvl),
             getVxlFromGrid(x+1,y,z,lvl),
             getVxlFromGrid(x,y+1,z,lvl),
             getVxlFromGrid(x+1,y+1,z,lvl),
@@ -409,16 +412,51 @@ std::vector<std::vector<double>> Space::sumSurfArea(const std::vector<std::vecto
             getVxlFromGrid(x,y+1,z+1,lvl),
             getVxlFromGrid(x+1,y+1,z+1,lvl)},
           surface_areas,
+          solid_types,
           for_every_cavity);
       }
     }
   }
 
+  // TODO: multiply every surface area value by the square of voxel side length
+
   return surface_areas;
 }
 
-void evalCube(const std::array<Voxel,8> vertices, std::vector<std::vector<double>>& surface_areas, const std::vector<bool>& for_every_cavity){
+void evalCubeMultiSurface(const std::array<Voxel,8> vertices, std::vector<std::vector<double>>& surface_areas, const std::vector<std::vector<char>>& solid_types, const std::vector<bool>& for_every_cavity){
 
+  for (size_t i = 0; i < surface_areas.size(); ++i){
+
+    if (for_every_cavity[i]) {
+      for (unsigned char cav_id = 1; cav_id <= surface_areas[i].size(); ++cav_id){
+        //unsigned char surf_config = evalSurfConfig(vertices, solid_types[i], cav_id);
+        unsigned char surf_config = 0;
+        for (char j = 0; j < 8; ++j){
+          setBit(surf_config, j, isSolid(vertices[j], solid_types[i], cav_id));
+        }
+        //surface_areas[i][cav_id-1] += TypeToArea(configToType(surf_config));
+      }
+    }
+    else {
+      unsigned char surf_config = 0;
+      for (char j = 0; j < 8; ++j){
+        setBit(surf_config, j, isSolid(vertices[j], solid_types[i]));
+      }
+      
+      //surface_areas[i][0] += TypeToArea(configToType(surf_config));
+    }
+  }
+}
+
+bool isSolid(const Voxel& vxl, const std::vector<char>& solid_types, const unsigned char id){
+  if (vxl.getID() == id) {
+    return std::find(solid_types.begin(), solid_types.end(), vxl.getType()) != solid_types.end();
+  }
+  return false;
+}
+
+bool isSolid(const Voxel& vxl, const std::vector<char>& solid_types){
+  return std::find(solid_types.begin(), solid_types.end(), vxl.getType()) != solid_types.end();
 }
 
 //////////////////////
@@ -629,4 +667,3 @@ void Space::printGrid(){
     std::cin >> usr_inp;
   }
 }
-
