@@ -79,4 +79,13 @@ class Space{
 
 };
 
+class SurfaceLUT {
+  private:
+    static const std::array<unsigned char,256> types_by_config;
+    static const std::array<double, 15> area_by_config;
+  public:
+    static unsigned char configToType(unsigned char config);
+    static double typeToArea(unsigned char type);
+};
+
 #endif

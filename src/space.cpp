@@ -434,7 +434,7 @@ void evalCubeMultiSurface(const std::array<Voxel,8> vertices, std::vector<std::v
         for (char j = 0; j < 8; ++j){
           setBit(surf_config, j, isSolid(vertices[j], solid_types[i], cav_id));
         }
-        //surface_areas[i][cav_id-1] += TypeToArea(configToType(surf_config));
+        //surface_areas[i][cav_id-1] += typeToArea(configToType(surf_config));
       }
     }
     else {
@@ -443,7 +443,7 @@ void evalCubeMultiSurface(const std::array<Voxel,8> vertices, std::vector<std::v
         setBit(surf_config, j, isSolid(vertices[j], solid_types[i]));
       }
       
-      //surface_areas[i][0] += TypeToArea(configToType(surf_config));
+      surface_areas[i][0] += SurfaceLUT::typeToArea(SurfaceLUT::configToType(surf_config));
     }
   }
 }
@@ -666,4 +666,17 @@ void Space::printGrid(){
     std::cout << "INPUT: ";
     std::cin >> usr_inp;
   }
+}
+
+///////////////////////////
+// SURFACE LOOK UP TABLE //
+///////////////////////////
+
+const constexpr std::array<unsigned char,256> SurfaceLUT::types_by_config = {1,2,2,3,2,3,4,6,2,4,3,6,3,6,6,9,2,3,4,6,4,6,8,10,5,7,7,13,7,13,11,6,2,4,3,6,5,7,7,13,4,8,6,10,7,11,13,6,3,6,6,9,7,13,11,6,7,11,13,6,12,7,7,3,2,4,5,7,3,6,7,13,4,8,7,11,6,10,13,6,3,6,7,13,6,9,11,6,7,11,12,7,13,6,7,3,4,8,7,11,7,11,12,7,8,14,11,8,11,8,7,4,6,10,13,6,13,6,7,3,11,8,7,4,7,4,5,2,2,5,4,7,4,7,8,11,3,7,6,13,6,13,10,6,4,7,8,11,8,11,14,8,7,12,11,7,11,7,8,4,3,7,6,13,7,12,11,7,6,11,9,6,13,7,6,3,6,13,10,6,11,7,8,4,13,7,6,3,7,5,4,2,3,7,7,12,6,13,11,7,6,11,13,7,9,6,6,3,6,13,11,7,10,6,8,4,13,7,7,5,6,3,4,2,6,11,13,7,13,7,7,5,10,8,6,4,6,4,3,2,9,6,6,3,6,3,4,2,6,4,3,2,3,2,2,1};
+const constexpr std::array<double, 15> SurfaceLUT::area_by_config = {0,0,0.21650635,0.707106781,0.4330127,0.4330127,1.149451549,0.923613131,0.64951905,1,1.299,1.365957899,1.414213562,0,0.8660254};
+unsigned char SurfaceLUT::configToType(unsigned char config) {
+  return types_by_config[config];
+}
+double SurfaceLUT::typeToArea(unsigned char type) {
+  return area_by_config[type];
 }
