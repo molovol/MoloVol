@@ -362,7 +362,7 @@ void MainFrame::InitParametersPanel(){
   surfaceAreaCheckbox = new wxCheckBox
     (parameterPanel,
      CHECKBOX_SurfaceArea,
-     "Calculate surface areas (NOT AVAILABLE YET !)",
+     "Calculate surface areas",
      wxDefaultPosition,
      wxDefaultSize,
      0,
