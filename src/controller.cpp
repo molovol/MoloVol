@@ -112,6 +112,10 @@ bool Ctrl::runCalculation(){
     notifyUser(Symbol::angstrom() + Symbol::cubed());
     notifyUser("\nExcluded void volume: " + std::to_string(data.volumes[0b00000101]) + " ");
     notifyUser(Symbol::angstrom() + Symbol::cubed());
+    if (data.calc_surface_areas){
+      notifyUser("\nVan der Waals surface: " + std::to_string(data.getSurfVdw()));
+      notifyUser("\nProbe inaccessible surface: " + std::to_string(data.getSurfProbeInaccessible()));
+    }
     notifyUser("\nProbe 1 core volume: " + std::to_string(data.volumes[0b00001001]) + " ");
     notifyUser(Symbol::angstrom() + Symbol::cubed());
     notifyUser("\nProbe 1 shell volume: " + std::to_string(data.volumes[0b00010001]) + " ");
@@ -127,9 +131,13 @@ bool Ctrl::runCalculation(){
       for (size_t i = 0; i < data.cavities.size(); ++i){
         notifyUser("\nCav " + std::to_string(i+1) + ": " + std::to_string(data.getCavVolume(i)) + " ");
         notifyUser(Symbol::angstrom() + Symbol::cubed());
-        notifyUser("(" + std::to_string(data.getCavCentre(i)[0]) + ", "
+        notifyUser(" (" + std::to_string(data.getCavCentre(i)[0]) + ", "
           + std::to_string(data.getCavCentre(i)[1]) + ", "
           + std::to_string(data.getCavCentre(i)[2]) + ")");
+        if (data.calc_surface_areas){
+          notifyUser("\nCore Area: " + std::to_string(data.getCavSurfCore(i)));
+          notifyUser(" Shell Area: " + std::to_string(data.getCavSurfShell(i)));
+        }
       }
     }
   }

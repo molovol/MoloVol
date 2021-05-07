@@ -22,6 +22,8 @@ struct Cavity{
   double surf_shell;
 
   double getVolume() const;
+  double getSurfCore() const;
+  double getSurfShell() const;
 };
 
 bool compareVolume(const Cavity& a, const Cavity& b);

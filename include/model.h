@@ -38,11 +38,15 @@ struct CalcReportBundle{
   // surfaces
   double surf_vdw;
   double surf_probe_inaccessible;
+  double getSurfVdw(){return surf_vdw;}
+  double getSurfProbeInaccessible(){return surf_probe_inaccessible;}
   // cavity volumes and surfaces
   std::vector<Cavity> cavities;
   double getCavVolume(const unsigned char i){return cavities[i].getVolume();}
   std::array<double,3> getCavCentre(const unsigned char);
   std::array<double,3> getCavCenter(const unsigned char i){return getCavCentre(i);}
+  double getCavSurfCore(const unsigned char i) const {return cavities[i].getSurfCore();}
+  double getCavSurfShell(const unsigned char i) const {return cavities[i].getSurfShell();}
   // time
   std::vector<double> elapsed_seconds;
   void addTime(const double t){elapsed_seconds.push_back(t);}
