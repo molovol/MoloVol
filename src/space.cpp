@@ -8,6 +8,7 @@
 #include <cassert>
 #include <stdexcept>
 #include <algorithm> // find
+#include <numeric> // accumulate
 
 /////////////////
 // CONSTRUCTOR //
@@ -421,11 +422,8 @@ std::vector<std::vector<double>> Space::sumSurfArea(const std::vector<std::vecto
   for (auto& area_type : surface_areas){
     for (auto& area_value : area_type){
       area_value *= getVxlSize()*getVxlSize();
-//      std::cout << area_value << std::endl;
     }
-//    std::cout << std::endl;
   }
-
   return surface_areas;
 }
 
@@ -434,9 +432,22 @@ void evalCubeMultiSurface(const std::array<Voxel,8> vertices, std::vector<std::v
   for (size_t i = 0; i < surface_areas.size(); ++i){
 
     if (for_every_cavity[i]) {
-      // TODO: issue in this section: different cavities are not handeled properly as not only the IDs of bit 1 voxels
-      // but also the IDs of bit 2 voxels need to be taken into account
-      for (unsigned char cav_id = 1; cav_id <= surface_areas[i].size(); ++cav_id){
+      std::map<unsigned char, unsigned char> id_tally;
+      unsigned char surf_config = 0;
+      for (char j = 0; j < 8; ++j){
+        setBit(surf_config, j, isSolid(vertices[j], solid_types[i]));
+        id_tally[vertices[j].getID()]++;
+      }
+      id_tally[0] = 0;
+      unsigned char total = std::accumulate(id_tally.begin(), id_tally.end(), 0, [](unsigned char i, std::pair<unsigned char, unsigned char> p){return (i+p.second);});
+
+      for (auto const& [id,tally] : id_tally){
+        if (id){
+          surface_areas[i][id-1] += SurfaceLUT::typeToArea(SurfaceLUT::configToType(surf_config)) * tally/total;
+        }
+      }
+      /*
+      for (unsigned char cav_id = 1; cav_id <= surface_areas[i].size(); ++cav_id){ // AVOID THIS LOOP
         //unsigned char surf_config = evalSurfConfig(vertices, solid_types[i], cav_id);
         unsigned char surf_config = 0;
         for (char j = 0; j < 8; ++j){
@@ -444,6 +455,7 @@ void evalCubeMultiSurface(const std::array<Voxel,8> vertices, std::vector<std::v
         }
         surface_areas[i][cav_id-1] += SurfaceLUT::typeToArea(SurfaceLUT::configToType(surf_config));
       }
+      */
     }
     else {
       unsigned char surf_config = 0;
