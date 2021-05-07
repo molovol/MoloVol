@@ -37,6 +37,7 @@ bool Model::setParameters(std::string file_path,
             std::string output_dir,
             bool inc_hetatm,
             bool analyze_unit_cell,
+            bool calc_surface_areas,
             bool probe_mode,
             double r_probe1,
             double r_probe2,
@@ -61,6 +62,7 @@ bool Model::setParameters(std::string file_path,
   }
   _data.inc_hetatm = inc_hetatm;
   _data.analyze_unit_cell = analyze_unit_cell;
+  _data.calc_surface_areas = calc_surface_areas;
   _data.grid_step = grid_step;
   _data.max_depth = max_depth;
   _data.make_report = make_report;
@@ -89,8 +91,17 @@ bool Model::setProbeRadii(const double r_1, const double r_2, const bool probe_m
   }
   return true;
 }
-
+  
 // TODO: consider making return value const, in order to prevent controller from messing with this
+CalcReportBundle Model::generateData(){
+  CalcReportBundle data = generateVolumeData();
+  // surface calculation requires running the volume calculation first, but shouldn't be inside the volume calc function
+  if (optionCalcSurfaceAreas() && data.success){
+    data = generateSurfaceData();
+  }
+  return data;
+}
+
 CalcReportBundle Model::generateVolumeData(){
   // save the date and time of calculation for output files
   _time_stamp = timeNow();

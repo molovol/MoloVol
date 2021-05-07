@@ -20,6 +20,7 @@ struct CalcReportBundle{
   // switches
   bool inc_hetatm;
   bool analyze_unit_cell;
+  bool calc_surface_areas;
   bool probe_mode;
   // parameters for calculation
   double grid_step;
@@ -90,6 +91,7 @@ class Model{
     inline double findRadiusOfAtom(const Atom&); //TODO has not been tested
 
     // controller-model communication
+    CalcReportBundle generateData();
     CalcReportBundle generateVolumeData();
     CalcReportBundle generateSurfaceData();
     // calls the Space constructor and creates a cell containing all atoms. Cell size is defined by atom positions
@@ -99,7 +101,7 @@ class Model{
     void linkAtomsToAdjacentAtoms(const double&);
     void linkToAdjacentAtoms(const double&, Atom&);
     CalcReportBundle calcVolume();
-    bool setParameters(std::string, std::string, bool, bool, bool, double, double, double, int, bool, bool, bool, std::unordered_map<std::string, double>, std::vector<std::string>, double);
+    bool setParameters(std::string, std::string, bool, bool, bool, bool, double, double, double, int, bool, bool, bool, std::unordered_map<std::string, double>, std::vector<std::string>, double);
     CalcReportBundle getBundle(); // TODO remove if unused
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void setRadiusMap(std::unordered_map<std::string, double> map);
@@ -135,6 +137,7 @@ class Model{
     bool optionIncludeHetatm(){return _data.inc_hetatm;}
     bool optionAnalyzeUnitCell(){return _data.analyze_unit_cell;}
     bool optionAnalyseUnitCell(){return _data.analyze_unit_cell;}
+    bool optionCalcSurfaceAreas(){return _data.calc_surface_areas;}
 };
 
 

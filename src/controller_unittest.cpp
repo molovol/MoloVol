@@ -33,6 +33,7 @@ bool Ctrl::unittestExcluded(){
         false,
         false,
         false,
+        false,
         rad_probe1,
         0,
         grid_step,
@@ -44,7 +45,7 @@ bool Ctrl::unittestExcluded(){
         included_elements,
         3);
 
-    data[i] = current_calculation->generateVolumeData();
+    data[i] = current_calculation->generateData();
     if(data[i].success){
       error[i] = abs(data[i].volumes[0b00000101]-expected_volumes[i])/data[i].volumes[0b00000101];
     }
@@ -88,6 +89,7 @@ bool Ctrl::unittestProtein(){
       false,
       false,
       false,
+      false,
       rad_probe1,
       0,
       grid_step,
@@ -99,7 +101,7 @@ bool Ctrl::unittestProtein(){
       included_elements,
       3);
 
-  data = current_calculation->generateVolumeData();
+  data = current_calculation->generateData();
   if(data.success){
     error_vdwVolume = abs(data.volumes[0b00000011]-expected_vdwVolume)/data.volumes[0b00000011];
     diff_time = data.getTime() - expected_time;
@@ -141,6 +143,7 @@ bool Ctrl::unittestRadius(){
             "./output",
             false,
             false,
+            false,
             two_probe,
             rad_probe1,
             rad_probe2,
@@ -153,7 +156,7 @@ bool Ctrl::unittestRadius(){
             included_elements,
             3);
 
-        data = current_calculation->generateVolumeData();
+        data = current_calculation->generateData();
 
         if(data.success){
           printf("f: %40s, g: %4.2f, d: %4i, r: %4.1f\n", atom_filepath.c_str(), grid_step, max_depth, rad_probe1);
@@ -192,6 +195,7 @@ bool Ctrl::unittest2Probe(){
       "./output",
       false,
       false,
+      false,
       two_probe,
       rad_probe1,
       rad_probe2,
@@ -204,7 +208,7 @@ bool Ctrl::unittest2Probe(){
       included_elements,
       3);
 
-  data = current_calculation->generateVolumeData();
+  data = current_calculation->generateData();
 
   if(data.success){
     printf("f: %40s, g: %4.2f, d: %4i, r1: %4.1f, r2: %4.1f\n", 
@@ -229,6 +233,7 @@ bool Ctrl::unittestSurface(){
   double rad_probe2 = 2;
   double rad_probe1 = 0.5;
   bool two_probe = false;
+  bool surf_areas = true;
   int max_depth = 4;
   double grid_step = 0.1;
 
@@ -243,6 +248,7 @@ bool Ctrl::unittestSurface(){
       "./output",
       false,
       false,
+      surf_areas,
       two_probe,
       rad_probe1,
       rad_probe2,
@@ -255,8 +261,7 @@ bool Ctrl::unittestSurface(){
       included_elements,
       3);
 
-  current_calculation->generateVolumeData();
-  data = current_calculation->generateSurfaceData();
+  data = current_calculation->generateData();
 
   if(data.success){
     printf("f: %40s, g: %4.2f, d: %4i, r1: %4.1f\n", atom_filepath.c_str(), grid_step, max_depth, rad_probe1);

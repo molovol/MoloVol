@@ -87,6 +87,7 @@ bool Ctrl::runCalculation(){
       gui->getOutputDir(),
       gui->getIncludeHetatm(),
       gui->getAnalyzeUnitCell(),
+      gui->getCalcSurfaceAreas(),
       gui->getProbeMode(),
       gui->getProbe1Radius(),
       gui->getProbe2Radius(),
@@ -101,11 +102,7 @@ bool Ctrl::runCalculation(){
     return false;
   }
 
-  CalcReportBundle data = current_calculation->generateVolumeData();
-  // surface calculation requires running the volume calculation first, but shouldn't be inside the volume calc function
-  if (data.success){
-    data = current_calculation->generateSurfaceData();
-  }
+  CalcReportBundle data = current_calculation->generateData();
 
   if (data.success){
     notifyUser("\nResult for ");
