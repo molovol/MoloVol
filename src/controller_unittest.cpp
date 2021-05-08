@@ -26,7 +26,7 @@ bool Ctrl::unittestExcluded(){
   for (int i = 0; i < 3; i++){
     current_calculation->readAtomsFromFile(atom_filepaths[i], false);
     std::vector<std::string> included_elements = current_calculation->listElementsInStructure();
-    
+
     current_calculation->setParameters(
         atom_filepaths[i],
         "./output",
@@ -211,7 +211,7 @@ bool Ctrl::unittest2Probe(){
   data = current_calculation->generateData();
 
   if(data.success){
-    printf("f: %40s, g: %4.2f, d: %4i, r1: %4.1f, r2: %4.1f\n", 
+    printf("f: %40s, g: %4.2f, d: %4i, r1: %4.1f, r2: %4.1f\n",
         atom_filepath.c_str(), grid_step, max_depth, rad_probe1, rad_probe2);
     printf("vdW: %20.10f, Excluded: %20.10f\n", data.volumes[0b00000011]-28.866, data.volumes[0b00000101]-6.224);
     printf("P1 Core: %20.10f, P1 Shell: %20.10f\n", data.volumes[0b00001001]-0.202, data.volumes[0b00010001]-5.702);
@@ -268,7 +268,7 @@ bool Ctrl::unittestSurface(){
     printf("vdW: %20.10f, Excluded: %20.10f\n", data.volumes[0b00000011]-28.948, data.volumes[0b00000101]-1.86);
     printf("P1 Core: %20.10f, P1 Shell: %20.10f\n", data.volumes[0b00001001]-247.748, data.volumes[0b00010001]-49.124);
     std::vector<double> cav = {294.75,1.34,0.252,0.187,0.187,0.078,0.078};
-    for (int i = 0; i< data.cavities.size(); ++i){
+    for (size_t i = 0; i< data.cavities.size(); ++i){
       printf("Cavity vol: %20.10f A^3\n", data.getCavVolume(i)-cav[i]);
     }
     printf("Time elapsed: %10.5f s\n", data.getTime()-0.83+0.74);

@@ -91,7 +91,7 @@ bool Model::setProbeRadii(const double r_1, const double r_2, const bool probe_m
   }
   return true;
 }
-  
+
 // TODO: consider making return value const, in order to prevent controller from messing with this
 CalcReportBundle Model::generateData(){
   CalcReportBundle data = generateVolumeData();
@@ -136,7 +136,9 @@ CalcReportBundle Model::generateSurfaceData(){
   // TODO: add way for this function to tell whether volume calculation has been conducted before
   auto start = std::chrono::steady_clock::now();
 
-  std::vector<std::vector<char>> solid_types = 
+  // TODO: consider using inverse values in last two vectors to keep vector size smaller than 4. It might help with the find() function
+  // TODO: consider making different solid_types for each probe mode
+  std::vector<std::vector<char>> solid_types =
   { {0b00000011},
     {0b00000011, 0b00000101},
     {0b00000011, 0b00000101, 0b00100001, 0b01000001},
@@ -153,7 +155,7 @@ CalcReportBundle Model::generateSurfaceData(){
     cav.surf_shell = surface_areas[2][cav.id-1]; // 0b00000011 + 0b00000101 + 0b00100001 + 0b01000001
     cav.surf_core = surface_areas[3][cav.id-1]; // 0b00000011 + 0b00000101 + 0b00010001 + 0b00100001 + 0b01000001
   }
-  
+
   auto end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
   return _data;

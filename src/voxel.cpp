@@ -552,6 +552,7 @@ void Voxel::tallyVoxelsOfType(std::map<char,unsigned>& type_tally,
   // if voxel is of type "mixed" (i.e. data vector is not empty)
   if(hasSubvoxel()){
     // then total number of voxels is given by tallying all subvoxels
+    // TODO remove if unneeded
     unsigned int total = 0;
     std::array<unsigned,3> sub_index;
     for(char x = 0; x < 2; ++x){
