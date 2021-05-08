@@ -20,42 +20,38 @@ struct CalcReportBundle{
   // switches
   bool inc_hetatm;
   bool analyze_unit_cell;
+  bool calc_surface_areas;
   bool probe_mode;
   // parameters for calculation
   double grid_step;
   int max_depth;
-  double r_probe1 = 0;
-  double r_probe2 = 0;
+  double r_probe1;
+  double r_probe2;
   std::vector<std::string> included_elements;
   std::string chemical_formula;
   // output options
   bool make_report;
   bool make_full_map;
   bool make_cav_maps;
-  // calculation results
+  // volumes
   std::map<char,double> volumes;
+  // surfaces
+  double surf_vdw;
+  double surf_probe_inaccessible;
+  double getSurfVdw(){return surf_vdw;}
+  double getSurfProbeInaccessible(){return surf_probe_inaccessible;}
+  // cavity volumes and surfaces
   std::vector<Cavity> cavities;
   double getCavVolume(const unsigned char i){return cavities[i].getVolume();}
-  std::array<double,3> getCavCentre(const unsigned char i){
-    std::array<double,3> cav_ctr;
-    for (char j = 0; j < 3; ++j){
-      cav_ctr[j] = (cavities[i].min_bound[j] + cavities[i].max_bound[j])/2;
-    }
-    return cav_ctr;
-  }
+  std::array<double,3> getCavCentre(const unsigned char);
   std::array<double,3> getCavCenter(const unsigned char i){return getCavCentre(i);}
-  std::map<char,double> surfaces;
+  double getCavSurfCore(const unsigned char i) const {return cavities[i].getSurfCore();}
+  double getCavSurfShell(const unsigned char i) const {return cavities[i].getSurfShell();}
   // time
   std::vector<double> elapsed_seconds;
   void addTime(const double t){elapsed_seconds.push_back(t);}
   double getTime(const unsigned i){return elapsed_seconds[i];}
-  double getTime(){
-    double total_seconds = 0;
-    for (const double time : elapsed_seconds){
-      total_seconds += time;
-    }
-    return total_seconds;
-  }
+  double getTime();
 };
 
 class AtomTree;
@@ -99,7 +95,9 @@ class Model{
     inline double findRadiusOfAtom(const Atom&); //TODO has not been tested
 
     // controller-model communication
+    CalcReportBundle generateData();
     CalcReportBundle generateVolumeData();
+    CalcReportBundle generateSurfaceData();
     // calls the Space constructor and creates a cell containing all atoms. Cell size is defined by atom positions
     void defineCell();
     void setAtomListForCalculation();
@@ -107,7 +105,7 @@ class Model{
     void linkAtomsToAdjacentAtoms(const double&);
     void linkToAdjacentAtoms(const double&, Atom&);
     CalcReportBundle calcVolume();
-    bool setParameters(std::string, std::string, bool, bool, bool, double, double, double, int, bool, bool, bool, std::unordered_map<std::string, double>, std::vector<std::string>, double);
+    bool setParameters(std::string, std::string, bool, bool, bool, bool, double, double, double, int, bool, bool, bool, std::unordered_map<std::string, double>, std::vector<std::string>, double);
     CalcReportBundle getBundle(); // TODO remove if unused
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void setRadiusMap(std::unordered_map<std::string, double> map);
@@ -143,6 +141,7 @@ class Model{
     bool optionIncludeHetatm(){return _data.inc_hetatm;}
     bool optionAnalyzeUnitCell(){return _data.analyze_unit_cell;}
     bool optionAnalyseUnitCell(){return _data.analyze_unit_cell;}
+    bool optionCalcSurfaceAreas(){return _data.calc_surface_areas;}
 };
 
 

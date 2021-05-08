@@ -7,6 +7,8 @@
 #include <cmath>
 #include <cassert>
 #include <stdexcept>
+#include <algorithm> // find
+#include <numeric> // accumulate
 
 /////////////////
 // CONSTRUCTOR //
@@ -337,8 +339,8 @@ void Space::getUnitCellVolume(std::map<char,double>& volumes,
       min_index_arr[i] = id_min[id][i];
       max_index_arr[i] = id_max[id][i];
     }
-    cavities.push_back(Cavity(id, 
-                       tally*unit_volume, 
+    cavities.push_back(Cavity(id,
+                       tally*unit_volume,
                        id_shell_tally[id] * unit_volume,
                        min_arr,
                        max_arr,
@@ -378,6 +380,92 @@ void Space::tallyVoxelsUnitCell(std::array<unsigned int,3> bot_lvl_index,
       id_max[getVxlFromGrid(bot_lvl_index, 0).getID()][i] = bot_lvl_index[i];
     }
   }
+}
+
+//////////////////
+// SURFACE AREA //
+//////////////////
+
+void evalCubeMultiSurface(const std::array<Voxel,8> vertices, std::vector<std::vector<double>>& surface_areas, const std::vector<std::vector<char>>& solid_types, const std::vector<bool>& for_every_cavity);
+bool isSolid(const Voxel&, const std::vector<char>&, const unsigned char);
+bool isSolid(const Voxel&, const std::vector<char>&);
+
+std::vector<std::vector<double>> Space::sumSurfArea(const std::vector<std::vector<char>>& solid_types, const std::vector<bool>& for_every_cavity, const unsigned char n_cavities){
+  assert(solid_types.size() == for_every_cavity.size());
+  // allocate memory
+  std::vector<std::vector<double>> surface_areas(solid_types.size());
+  for (size_t i = 0; i < surface_areas.size(); ++i){
+    surface_areas[i] = std::vector<double> (for_every_cavity[i]? n_cavities : 1);
+  }
+
+  constexpr char lvl = 0;
+  std::array<unsigned long,3> n_vxl = gridstepsOnLvl(lvl);
+  for (unsigned x = 0; x < n_vxl[0]-1; ++x){
+    for (unsigned y = 0; y < n_vxl[1]-1; ++y){
+      for (unsigned z = 0; z < n_vxl[2]-1; ++z){
+        // TODO: consider passing voxels by reference rather than value
+        evalCubeMultiSurface({getVxlFromGrid(x,y,z,lvl),
+            getVxlFromGrid(x+1,y,z,lvl),
+            getVxlFromGrid(x,y+1,z,lvl),
+            getVxlFromGrid(x+1,y+1,z,lvl),
+            getVxlFromGrid(x,y,z+1,lvl),
+            getVxlFromGrid(x+1,y,z+1,lvl),
+            getVxlFromGrid(x,y+1,z+1,lvl),
+            getVxlFromGrid(x+1,y+1,z+1,lvl)},
+          surface_areas,
+          solid_types,
+          for_every_cavity);
+      }
+    }
+  }
+
+  for (auto& area_type : surface_areas){
+    for (auto& area_value : area_type){
+      area_value *= getVxlSize()*getVxlSize();
+    }
+  }
+  return surface_areas;
+}
+
+void evalCubeMultiSurface(const std::array<Voxel,8> vertices, std::vector<std::vector<double>>& surface_areas, const std::vector<std::vector<char>>& solid_types, const std::vector<bool>& for_every_cavity){
+
+  for (size_t i = 0; i < surface_areas.size(); ++i){
+
+    if (for_every_cavity[i]) {
+      std::map<unsigned char, unsigned char> id_tally;
+      unsigned char surf_config = 0;
+      for (char j = 0; j < 8; ++j){
+        setBit(surf_config, j, isSolid(vertices[j], solid_types[i]));
+        id_tally[vertices[j].getID()]++;
+      }
+      id_tally[0] = 0;
+      unsigned char total = std::accumulate(id_tally.begin(), id_tally.end(), 0, [](unsigned char i, std::pair<unsigned char, unsigned char> p){return (i+p.second);});
+
+      for (auto const& [id,tally] : id_tally){
+        if (id){
+          surface_areas[i][id-1] += SurfaceLUT::typeToArea(SurfaceLUT::configToType(surf_config)) * tally/total;
+        }
+      }
+    }
+    else {
+      unsigned char surf_config = 0;
+      for (char j = 0; j < 8; ++j){
+        setBit(surf_config, j, isSolid(vertices[j], solid_types[i]));
+      }
+      surface_areas[i][0] += SurfaceLUT::typeToArea(SurfaceLUT::configToType(surf_config));
+    }
+  }
+}
+
+bool isSolid(const Voxel& vxl, const std::vector<char>& solid_types, const unsigned char id){
+  if (vxl.getID() == id) { // THIS LINE IS WRONG
+    return std::find(solid_types.begin(), solid_types.end(), vxl.getType()) != solid_types.end();
+  }
+  return false;
+}
+
+bool isSolid(const Voxel& vxl, const std::vector<char>& solid_types){
+  return std::find(solid_types.begin(), solid_types.end(), vxl.getType()) != solid_types.end();
 }
 
 //////////////////////
@@ -478,6 +566,7 @@ unsigned long int Space::totalVxlOnLvl(const int lvl) const{
   return total;
 }
 
+// TODO: read this value from Container3D and remove n_gridsteps entirely
 const std::array<unsigned long int,3> Space::gridstepsOnLvl(const int level) const {
   if (level > max_depth){throw ExceptIllegalFunctionCall();}
   std::array<unsigned long int,3> n_voxels;
@@ -588,3 +677,18 @@ void Space::printGrid(){
   }
 }
 
+///////////////////////////
+// SURFACE LOOK UP TABLE //
+///////////////////////////
+
+const constexpr std::array<unsigned char,256> SurfaceLUT::types_by_config = {1,2,2,3,2,3,4,6,2,4,3,6,3,6,6,9,2,3,4,6,4,6,8,10,5,7,7,13,7,13,11,6,2,4,3,6,5,7,7,13,4,8,6,10,7,11,13,6,3,6,6,9,7,13,11,6,7,11,13,6,12,7,7,3,2,4,5,7,3,6,7,13,4,8,7,11,6,10,13,6,3,6,7,13,6,9,11,6,7,11,12,7,13,6,7,3,4,8,7,11,7,11,12,7,8,14,11,8,11,8,7,4,6,10,13,6,13,6,7,3,11,8,7,4,7,4,5,2,2,5,4,7,4,7,8,11,3,7,6,13,6,13,10,6,4,7,8,11,8,11,14,8,7,12,11,7,11,7,8,4,3,7,6,13,7,12,11,7,6,11,9,6,13,7,6,3,6,13,10,6,11,7,8,4,13,7,6,3,7,5,4,2,3,7,7,12,6,13,11,7,6,11,13,7,9,6,6,3,6,13,11,7,10,6,8,4,13,7,7,5,6,3,4,2,6,11,13,7,13,7,7,5,10,8,6,4,6,4,3,2,9,6,6,3,6,3,4,2,6,4,3,2,3,2,2,1};
+// Theoretical values from https://doi.org/10.1007/978-3-540-39966-7_33
+// const constexpr std::array<double, 15> SurfaceLUT::area_by_config = {0,0,0.2118,0.669,0.4236,0.4236,0.9779,0.8808,0.6354,0.927,1.2706,1.1897,1.338,1.5731,0.8472};
+// Semi-empirical values from https://doi.org/10.1016/j.imavis.2004.06.012
+const constexpr std::array<double, 15> SurfaceLUT::area_by_config = {0,0,0.636,0.669,1.272,1.272,0.5537,1.305,1.908,0.927,0.4222,1.1897,1.338,1.5731,2.544};
+unsigned char SurfaceLUT::configToType(unsigned char config) {
+  return types_by_config[config];
+}
+double SurfaceLUT::typeToArea(unsigned char type) {
+  return area_by_config[type];
+}

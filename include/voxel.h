@@ -37,9 +37,9 @@ class Voxel{
     Voxel& getSubvoxel(std::array<unsigned,3>, const unsigned, const char);
     Voxel& getSubvoxel(std::array<unsigned,3>, const unsigned);
     void setType(char);
-    char getType();
+    char getType() const;
     void setID(unsigned char);
-    unsigned char getID();
+    unsigned char getID() const;
 
     // bitwise operations on _type
     bool hasSubvoxel(); // state of bit 7

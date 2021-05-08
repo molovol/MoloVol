@@ -7,6 +7,10 @@ std::wstring Symbol::angstrom(){
   return L"\u212B";
 }
 
+std::wstring Symbol::squared(){
+  return L"\u00B2";
+}
+
 std::wstring Symbol::cubed(){
   return L"\u00B3";
 }

@@ -9,6 +9,25 @@
 #include <string>
 #include <vector>
 
+//////////////////////
+// CALCRESULTBUNDLE //
+//////////////////////
+
+std::array<double,3> CalcReportBundle::getCavCentre(const unsigned char i){
+  std::array<double,3> cav_ctr;
+  for (char j = 0; j < 3; ++j){
+    cav_ctr[j] = (cavities[i].min_bound[j] + cavities[i].max_bound[j])/2;
+  }
+  return cav_ctr;
+}
+
+double CalcReportBundle::getTime(){
+  double total_seconds = 0;
+  for (const double time : elapsed_seconds){
+    total_seconds += time;
+  }
+  return total_seconds;
+}
 
 ////////////////////////////////////
 // CONTROLLER-MODEL COMMUNICATION //
@@ -18,6 +37,7 @@ bool Model::setParameters(std::string file_path,
             std::string output_dir,
             bool inc_hetatm,
             bool analyze_unit_cell,
+            bool calc_surface_areas,
             bool probe_mode,
             double r_probe1,
             double r_probe2,
@@ -42,6 +62,7 @@ bool Model::setParameters(std::string file_path,
   }
   _data.inc_hetatm = inc_hetatm;
   _data.analyze_unit_cell = analyze_unit_cell;
+  _data.calc_surface_areas = calc_surface_areas;
   _data.grid_step = grid_step;
   _data.max_depth = max_depth;
   _data.make_report = make_report;
@@ -72,6 +93,15 @@ bool Model::setProbeRadii(const double r_1, const double r_2, const bool probe_m
 }
 
 // TODO: consider making return value const, in order to prevent controller from messing with this
+CalcReportBundle Model::generateData(){
+  CalcReportBundle data = generateVolumeData();
+  // surface calculation requires running the volume calculation first, but shouldn't be inside the volume calc function
+  if (optionCalcSurfaceAreas() && data.success){
+    data = generateSurfaceData();
+  }
+  return data;
+}
+
 CalcReportBundle Model::generateVolumeData(){
   // save the date and time of calculation for output files
   _time_stamp = timeNow();
@@ -99,8 +129,36 @@ CalcReportBundle Model::generateVolumeData(){
   auto end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
 
-  // create a report bundle
   return calcVolume();
+}
+
+CalcReportBundle Model::generateSurfaceData(){
+  // TODO: add way for this function to tell whether volume calculation has been conducted before
+  auto start = std::chrono::steady_clock::now();
+
+  // TODO: consider using inverse values in last two vectors to keep vector size smaller than 4. It might help with the find() function
+  // TODO: consider making different solid_types for each probe mode
+  std::vector<std::vector<char>> solid_types =
+  { {0b00000011},
+    {0b00000011, 0b00000101},
+    {0b00000011, 0b00000101, 0b00100001, 0b01000001},
+    {0b00000011, 0b00000101, 0b00010001, 0b00100001, 0b01000001}};
+
+  std::vector<bool> for_every_cavity = {false, false, true, true};
+
+  std::vector<std::vector<double>> surface_areas = _cell.sumSurfArea(solid_types, for_every_cavity, _data.cavities.size());
+
+  _data.surf_vdw = surface_areas[0][0]; // 0b00000011
+  _data.surf_probe_inaccessible = surface_areas[1][0]; // 0b00000011 + 0b00000101
+
+  for (Cavity& cav : _data.cavities){
+    cav.surf_shell = surface_areas[2][cav.id-1]; // 0b00000011 + 0b00000101 + 0b00100001 + 0b01000001
+    cav.surf_core = surface_areas[3][cav.id-1]; // 0b00000011 + 0b00000101 + 0b00010001 + 0b00100001 + 0b01000001
+  }
+
+  auto end = std::chrono::steady_clock::now();
+  _data.addTime(std::chrono::duration<double>(end-start).count());
+  return _data;
 }
 
 void Model::setAtomListForCalculation(){

@@ -174,12 +174,12 @@ bool Voxel::isCore(){return readBit(_type,3);}
 bool Voxel::isAssigned(){return readBit(_type,0);}
 
 // type
-char Voxel::getType(){return _type;}
+char Voxel::getType() const {return _type;}
 void Voxel::setType(char input){_type = input;}
 
 // ID
 void Voxel::setID(unsigned char id){_identity = id;}
-unsigned char Voxel::getID(){return _identity;}
+unsigned char Voxel::getID() const {return _identity;}
 
 /////////////////////////////////
 // TYPE ASSIGNMENT PREPARATION //
@@ -552,6 +552,7 @@ void Voxel::tallyVoxelsOfType(std::map<char,unsigned>& type_tally,
   // if voxel is of type "mixed" (i.e. data vector is not empty)
   if(hasSubvoxel()){
     // then total number of voxels is given by tallying all subvoxels
+    // TODO remove if unneeded
     unsigned int total = 0;
     std::array<unsigned,3> sub_index;
     for(char x = 0; x < 2; ++x){

@@ -56,6 +56,9 @@ class Space{
                             std::map<unsigned char, std::array<unsigned,3>>&,
                             std::map<unsigned char, std::array<unsigned,3>>&);
 
+    // surface area
+    std::vector<std::vector<double>> sumSurfArea(const std::vector<std::vector<char>>&, const std::vector<bool>&, const unsigned char);
+
   private:
     std::array <double,3> cart_min; // this is also the "origin" of the space
     std::array <double,3> cart_max;
@@ -74,6 +77,15 @@ class Space{
     void descendToCore(unsigned char&, const std::array<unsigned,3>, int);
     void assignShellVsVoid();
 
+};
+
+class SurfaceLUT {
+  private:
+    static const std::array<unsigned char,256> types_by_config;
+    static const std::array<double, 15> area_by_config;
+  public:
+    static unsigned char configToType(unsigned char config);
+    static double typeToArea(unsigned char type);
 };
 
 #endif

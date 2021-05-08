@@ -26,6 +26,7 @@ class Ctrl{
     bool unittestProtein();
     bool unittestRadius();
     bool unittest2Probe();
+    bool unittestSurface();
 
   private:
     // consider making static pointer for model

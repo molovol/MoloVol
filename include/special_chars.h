@@ -8,6 +8,7 @@
 class Symbol{
   public:
     static std::wstring angstrom();
+    static std::wstring squared();
     static std::wstring cubed();
     static std::wstring numSubscript(int num);
     static std::wstring numSubscript(std::string num);

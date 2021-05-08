@@ -26,10 +26,11 @@ bool Ctrl::unittestExcluded(){
   for (int i = 0; i < 3; i++){
     current_calculation->readAtomsFromFile(atom_filepaths[i], false);
     std::vector<std::string> included_elements = current_calculation->listElementsInStructure();
-    
+
     current_calculation->setParameters(
         atom_filepaths[i],
         "./output",
+        false,
         false,
         false,
         false,
@@ -44,7 +45,7 @@ bool Ctrl::unittestExcluded(){
         included_elements,
         3);
 
-    data[i] = current_calculation->generateVolumeData();
+    data[i] = current_calculation->generateData();
     if(data[i].success){
       error[i] = abs(data[i].volumes[0b00000101]-expected_volumes[i])/data[i].volumes[0b00000101];
     }
@@ -88,6 +89,7 @@ bool Ctrl::unittestProtein(){
       false,
       false,
       false,
+      false,
       rad_probe1,
       0,
       grid_step,
@@ -99,7 +101,7 @@ bool Ctrl::unittestProtein(){
       included_elements,
       3);
 
-  data = current_calculation->generateVolumeData();
+  data = current_calculation->generateData();
   if(data.success){
     error_vdwVolume = abs(data.volumes[0b00000011]-expected_vdwVolume)/data.volumes[0b00000011];
     diff_time = data.getTime() - expected_time;
@@ -141,6 +143,7 @@ bool Ctrl::unittestRadius(){
             "./output",
             false,
             false,
+            false,
             two_probe,
             rad_probe1,
             rad_probe2,
@@ -153,7 +156,7 @@ bool Ctrl::unittestRadius(){
             included_elements,
             3);
 
-        data = current_calculation->generateVolumeData();
+        data = current_calculation->generateData();
 
         if(data.success){
           printf("f: %40s, g: %4.2f, d: %4i, r: %4.1f\n", atom_filepath.c_str(), grid_step, max_depth, rad_probe1);
@@ -192,6 +195,7 @@ bool Ctrl::unittest2Probe(){
       "./output",
       false,
       false,
+      false,
       two_probe,
       rad_probe1,
       rad_probe2,
@@ -204,14 +208,14 @@ bool Ctrl::unittest2Probe(){
       included_elements,
       3);
 
-  data = current_calculation->generateVolumeData();
+  data = current_calculation->generateData();
 
   if(data.success){
-    printf("f: %40s, g: %4.2f, d: %4i, r1: %4.1f, r2: %4.1f\n", 
+    printf("f: %40s, g: %4.2f, d: %4i, r1: %4.1f, r2: %4.1f\n",
         atom_filepath.c_str(), grid_step, max_depth, rad_probe1, rad_probe2);
     printf("vdW: %20.10f, Excluded: %20.10f\n", data.volumes[0b00000011]-28.866, data.volumes[0b00000101]-6.224);
     printf("P1 Core: %20.10f, P1 Shell: %20.10f\n", data.volumes[0b00001001]-0.202, data.volumes[0b00010001]-5.702);
-    printf("P2 Core: %20.10f, P1 Shell: %20.10f\n", data.volumes[0b00100001]-681.534, data.volumes[0b01000001]-309.664);
+    printf("P2 Core: %20.10f, P2 Shell: %20.10f\n", data.volumes[0b00100001]-681.534, data.volumes[0b01000001]-309.664);
     printf("Time elapsed: %10.5f s\n", data.getTime()-2.12);
   }
   else{
@@ -220,3 +224,57 @@ bool Ctrl::unittest2Probe(){
   return true;
 }
 
+bool Ctrl::unittestSurface(){
+  if(current_calculation == NULL){current_calculation = new Model();}
+
+  // parameters for unittest:
+  const std::string atom_filepath = "./inputfile/probetest_quadruplet.xyz";
+  const std::string radius_filepath = "./inputfile/radii.txt";
+  double rad_probe2 = 2;
+  double rad_probe1 = 0.5;
+  bool two_probe = false;
+  bool surf_areas = true;
+  int max_depth = 4;
+  double grid_step = 0.1;
+
+  std::unordered_map<std::string, double> rad_map = current_calculation->importRadiusMap(radius_filepath);
+
+  CalcReportBundle data;
+  current_calculation->readAtomsFromFile(atom_filepath, false);
+  std::vector<std::string> included_elements = current_calculation->listElementsInStructure();
+
+  current_calculation->setParameters(
+      atom_filepath,
+      "./output",
+      false,
+      false,
+      surf_areas,
+      two_probe,
+      rad_probe1,
+      rad_probe2,
+      grid_step,
+      max_depth,
+      false,
+      false,
+      false,
+      rad_map,
+      included_elements,
+      3);
+
+  data = current_calculation->generateData();
+
+  if(data.success){
+    printf("f: %40s, g: %4.2f, d: %4i, r1: %4.1f\n", atom_filepath.c_str(), grid_step, max_depth, rad_probe1);
+    printf("vdW: %20.10f, Excluded: %20.10f\n", data.volumes[0b00000011]-28.948, data.volumes[0b00000101]-1.86);
+    printf("P1 Core: %20.10f, P1 Shell: %20.10f\n", data.volumes[0b00001001]-247.748, data.volumes[0b00010001]-49.124);
+    std::vector<double> cav = {294.75,1.34,0.252,0.187,0.187,0.078,0.078};
+    for (size_t i = 0; i< data.cavities.size(); ++i){
+      printf("Cavity vol: %20.10f A^3\n", data.getCavVolume(i)-cav[i]);
+    }
+    printf("Time elapsed: %10.5f s\n", data.getTime()-0.83+0.74);
+  }
+  else{
+    std::cout << "Calculation failed" << std::endl;
+  }
+  return true;
+}
