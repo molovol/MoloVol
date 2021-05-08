@@ -446,16 +446,6 @@ void evalCubeMultiSurface(const std::array<Voxel,8> vertices, std::vector<std::v
           surface_areas[i][id-1] += SurfaceLUT::typeToArea(SurfaceLUT::configToType(surf_config)) * tally/total;
         }
       }
-      /* TODO: remove if unused
-      for (unsigned char cav_id = 1; cav_id <= surface_areas[i].size(); ++cav_id){ // AVOID THIS LOOP
-        //unsigned char surf_config = evalSurfConfig(vertices, solid_types[i], cav_id);
-        unsigned char surf_config = 0;
-        for (char j = 0; j < 8; ++j){
-          setBit(surf_config, j, isSolid(vertices[j], solid_types[i], cav_id));
-        }
-        surface_areas[i][cav_id-1] += SurfaceLUT::typeToArea(SurfaceLUT::configToType(surf_config));
-      }
-      */
     }
     else {
       unsigned char surf_config = 0;
