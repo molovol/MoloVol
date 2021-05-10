@@ -267,9 +267,10 @@ bool Ctrl::unittestSurface(){
     printf("f: %40s, g: %4.2f, d: %4i, r1: %4.1f\n", atom_filepath.c_str(), grid_step, max_depth, rad_probe1);
     printf("vdW: %20.10f, Excluded: %20.10f\n", data.volumes[0b00000011]-28.948, data.volumes[0b00000101]-1.86);
     printf("P1 Core: %20.10f, P1 Shell: %20.10f\n", data.volumes[0b00001001]-247.748, data.volumes[0b00010001]-49.124);
-    std::vector<double> cav = {294.75,1.34,0.252,0.187,0.187,0.078,0.078};
+    //std::vector<double> cav = {294.75,1.34,0.252,0.187,0.187,0.078,0.078};
     for (size_t i = 0; i< data.cavities.size(); ++i){
-      printf("Cavity vol: %20.10f A^3\n", data.getCavVolume(i)-cav[i]);
+      //printf("Cavity vol: %20.10f A^3\n", data.getCavVolume(i)-cav[i]);
+      printf("Cavity vol: %20.10f A^3\n", data.getCavVolume(i));
     }
     printf("Time elapsed: %10.5f s\n", data.getTime()-0.83+0.74);
   }
