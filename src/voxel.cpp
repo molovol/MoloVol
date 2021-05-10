@@ -385,6 +385,7 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
   flood_stack.push_back(VoxelLoc(start_index, start_lvl));
 
   std::vector<std::vector<std::array<int,3>>> neighbour_indices = SearchIndex().computeIndices(3);
+  // TODO: remove the first element {0,0,0}
 
   // adds neighbours to the stack, IDs are assigned before adding to the stack
   while (flood_stack.size() > 0){
@@ -392,27 +393,10 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
     flood_stack.pop_back();
 
     std::array<unsigned,3> nb_index;
-/*
-    26
-    1 0 0
-    0 1 0 x 2
-    0 0 1 x 2
-    1 1 0 x 4
-    1 0 1 x 4
-    0 1 1 x 4
-    1 1 1 x 8
-    */
-
     for (const auto& shell : neighbour_indices){
       for (const auto& rel_index : shell){
-/*
-    for (char dim = 0; dim < 3; dim++){
-      for (bool sign : {false, true}){ // true: negative, false: positive
-      */
         
         nb_index = add(vxl.index, rel_index);
-//        nb_index = vxl.index;
- //       nb_index[dim] += sign? -1 : 1;
         if (!s_cell->isInBounds(nb_index,vxl.lvl)){continue;} // skip if index is invalid
         Voxel& nb_vxl = s_cell->getVxlFromGrid(nb_index,vxl.lvl);
         if (!nb_vxl.isCore()) {continue;} // skip if neighbour is not core
