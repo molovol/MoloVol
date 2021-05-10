@@ -467,7 +467,7 @@ void Voxel::ascend(std::vector<VoxelLoc>& stack, const unsigned char id, const s
     }
   }
 
-  if (same_vxl && lvl != s_cell->getMaxDepth()){
+  if (!same_vxl && lvl != s_cell->getMaxDepth()){
     std::array<unsigned,3> parent_index;
     for (char i = 0; i < 3; ++i){
       parent_index[i] = index[i]/2;
