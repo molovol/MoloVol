@@ -441,7 +441,7 @@ void Voxel::descend(std::vector<VoxelLoc>& stack, const unsigned char id, const 
         loop_i[dim] = {0,1};
       }
     }
-    
+
     for (char i : loop_i[0]){
       sub_index[0] = index[0] * 2 + i;
       for (char j : loop_i[1]){
@@ -463,7 +463,7 @@ void Voxel::ascend(std::vector<VoxelLoc>& stack, const unsigned char id, const s
   bool same_vxl = false;
   for (char dim = 0; dim < 3; ++dim){
     if (!nb_relation[dim]){
-      same_vxl &= index[dim]/2 == prev_index[dim]/2;
+      same_vxl &= (index[dim]/2 == prev_index[dim]/2);
     }
   }
 
