@@ -384,27 +384,30 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
   std::vector<VoxelLoc> flood_stack;
   flood_stack.push_back(VoxelLoc(start_index, start_lvl));
 
+  std::vector<std::vector<std::array<int,3>>> neighbour_indices = SearchIndex().computeIndices(3);
+  neighbour_indices.erase(neighbour_indices.begin());
+
   // adds neighbours to the stack, IDs are assigned before adding to the stack
   while (flood_stack.size() > 0){
     VoxelLoc vxl = flood_stack.back();
     flood_stack.pop_back();
 
     std::array<unsigned,3> nb_index;
-    for (char dim = 0; dim < 3; dim++){
-      for (bool sign : {false, true}){ // true: negative, false: positive
-        nb_index = vxl.index;
-        nb_index[dim] += sign? -1 : 1;
+    for (const auto& shell : neighbour_indices){
+      for (const auto& rel_index : shell){
+        
+        nb_index = add(vxl.index, rel_index);
         if (!s_cell->isInBounds(nb_index,vxl.lvl)){continue;} // skip if index is invalid
         Voxel& nb_vxl = s_cell->getVxlFromGrid(nb_index,vxl.lvl);
         if (!nb_vxl.isCore()) {continue;} // skip if neighbour is not core
 
         if (nb_vxl.hasSubvoxel()){
           // descend to all subvoxels that border this voxel and add to stack
-          nb_vxl.descend(flood_stack, id, nb_index, vxl.lvl, dim, sign);
+          nb_vxl.descend(flood_stack, id, nb_index, vxl.lvl, rel_index);
         }
         else {
           // ascend to highest parent of pure type and add to stack
-          nb_vxl.ascend(flood_stack, id, nb_index, vxl.lvl, vxl.index, dim);
+          nb_vxl.ascend(flood_stack, id, nb_index, vxl.lvl, vxl.index, rel_index);
         }
       }
     }
@@ -412,7 +415,7 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
   return true;
 }
 
-void Voxel::descend(std::vector<VoxelLoc>& stack, const unsigned char id, const std::array<unsigned,3>& index, const int lvl, const signed char dim, const bool sign){
+void Voxel::descend(std::vector<VoxelLoc>& stack, const unsigned char id, const std::array<unsigned,3>& index, const int lvl, const std::array<int,3>& nb_relation){
   if (!isCore()){return;} // return immediatly if voxel isn't and doesn't contain core voxel
   if (!hasSubvoxel()){
     if (getID() == 0){
@@ -425,24 +428,46 @@ void Voxel::descend(std::vector<VoxelLoc>& stack, const unsigned char id, const 
   else {
     // only loop over those voxels bordering the previous voxel
     std::array<unsigned,3> sub_index;
-    std::array<signed char,3> i;
-    i[dim] = sign? 1 : 0;
-    for (i[(dim+1)%3] = 0; i[(dim+1)%3] < 2; ++i[(dim+1)%3]){
-      for (i[(dim+2)%3] = 0; i[(dim+2)%3] < 2; ++i[(dim+2)%3]){
-        for (char j = 0; j < 3; ++j){
-          sub_index[j] = index[j] * 2 + i[j];
+
+    // the subvoxels that need to be added to the flood fill stack are determined by the relation of the previous
+    // voxel and the current voxel. the following block evaluates the relation to determine, which subvoxels to
+    // loop through
+    std::array<std::vector<char>,3> loop_i;
+    for (char dim = 0; dim < 3; ++ dim){
+      if (nb_relation[dim]){
+        loop_i[dim] = {static_cast<char>((nb_relation[dim] > 0)? 0 : 1)};
+      }
+      else {
+        loop_i[dim] = {0,1};
+      }
+    }
+
+    for (char i : loop_i[0]){
+      sub_index[0] = index[0] * 2 + i;
+      for (char j : loop_i[1]){
+        sub_index[1] = index[1] * 2 + j;
+        for (char k : loop_i[2]){
+          sub_index[2] = index[2] * 2 + k;
+          s_cell->getVxlFromGrid(sub_index, lvl-1).descend(stack, id, sub_index, lvl-1, nb_relation);
         }
-        s_cell->getVxlFromGrid(sub_index, lvl-1).descend(stack, id, sub_index, lvl-1, dim, sign);
       }
     }
   }
 }
 
-void Voxel::ascend(std::vector<VoxelLoc>& stack, const unsigned char id, const std::array<unsigned,3> index, const int lvl, std::array<unsigned,3> prev_index, const signed char dim){
+void Voxel::ascend(std::vector<VoxelLoc>& stack, const unsigned char id, const std::array<unsigned,3> index, const int lvl, std::array<unsigned,3> prev_index, const std::array<int,3>& nb_relation){
   // compare index with index of previous voxel
   // if voxel and previous voxel dont't belong to the same parent and this is not top lvl vxl
   // then compare types of this voxel and parent voxel
-  if (index[dim]/2 != prev_index[dim]/2 && lvl != s_cell->getMaxDepth()){
+  
+  bool same_vxl = false;
+  for (char dim = 0; dim < 3; ++dim){
+    if (!nb_relation[dim]){
+      same_vxl &= (index[dim]/2 == prev_index[dim]/2);
+    }
+  }
+
+  if (!same_vxl && lvl != s_cell->getMaxDepth()){
     std::array<unsigned,3> parent_index;
     for (char i = 0; i < 3; ++i){
       parent_index[i] = index[i]/2;
@@ -452,7 +477,7 @@ void Voxel::ascend(std::vector<VoxelLoc>& stack, const unsigned char id, const s
     Voxel& parent = s_cell->getVxlFromGrid(parent_index, lvl+1);
     // if types are the same, then move to parent voxel
     if (parent.getType() == getType()){
-      parent.ascend(stack, id, parent_index, lvl+1, prev_index, dim);
+      parent.ascend(stack, id, parent_index, lvl+1, prev_index, nb_relation);
       return;
     }
   }

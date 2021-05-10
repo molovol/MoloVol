@@ -48,6 +48,9 @@ bool MainApp::OnInit()
     else if (unittest_id=="surface"){
       Ctrl::getInstance()->unittestSurface();
     }
+    else if (unittest_id=="floodfill"){
+      Ctrl::getInstance()->unittestFloodfill();
+    }
     else {
       std::cout << "Invalid selection" << std::endl;}
     return true;

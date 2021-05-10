@@ -27,6 +27,7 @@ class Ctrl{
     bool unittestRadius();
     bool unittest2Probe();
     bool unittestSurface();
+    bool unittestFloodfill();
 
   private:
     // consider making static pointer for model
