@@ -385,7 +385,7 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
   flood_stack.push_back(VoxelLoc(start_index, start_lvl));
 
   std::vector<std::vector<std::array<int,3>>> neighbour_indices = SearchIndex().computeIndices(3);
-  // TODO: remove the first element {0,0,0}
+  neighbour_indices.erase(neighbour_indices.begin());
 
   // adds neighbours to the stack, IDs are assigned before adding to the stack
   while (flood_stack.size() > 0){
