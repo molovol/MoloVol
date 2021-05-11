@@ -431,36 +431,55 @@ std::vector<std::vector<double>> Space::sumSurfArea(const std::vector<std::vecto
   return surface_areas;
 }
 
-double Space::calcSurfArea(const std::vector<char>& types, const unsigned char& id, std::array<unsigned int,3> start_index, std::array<unsigned int,3> end_index, const bool& unit_cell, const bool& cavity){
-  // loop on all voxels in a range (never include the last index of x, y or z)
-  double surface = 0;
-  std::array<unsigned long int,3> n_elements = getGrid(0).getNumElements();
-  if(!unit_cell && !cavity){
-    start_index = {0,0,0};
+double Space::calcSurfArea(const std::vector<char>& types, const bool unit_cell){
+  std::array<unsigned int,3> start_index = {0,0,0};
+  std::array<unsigned int,3> end_index;
+  if(!unit_cell){
+    std::array<unsigned long int,3> n_elements = getGrid(0).getNumElements();
     end_index = {n_elements[0], n_elements[1], n_elements[2]};
   }
-  else if(!unit_cell && cavity){
+  else{
+    start_index = unit_cell_start_index;
+    end_index = unit_cell_end_index;
+  }
+  double surface = tallySurface(types, start_index, end_index, unit_cell);
+  // scale the surface area in squared gridstep units
+  surface *=  grid_size*grid_size;
+  return surface;
+}
+
+double Space::calcSurfArea(const std::vector<char>& types, const bool unit_cell, const unsigned char id, std::array<unsigned int,3> start_index, std::array<unsigned int,3> end_index){
+  // the surface area is counted between voxels, thus we need to check voxels around the limits of the cavity
+  if(!unit_cell){
     for(char i = 0; i < 3; i++){
-      // the surface area is counted between voxels, thus we need to check voxels around the limits of the cavity
+      std::array<unsigned long int,3> n_elements = getGrid(0).getNumElements();
       if(start_index[i] > 0){start_index[i]--;}
       // increase end_index twice because it should be above the range of indexes checked like vector and array sizes in C++
       if(end_index[i] < n_elements[i]){end_index[i]++;}
       if(end_index[i] < n_elements[i]){end_index[i]++;}
     }
   }
-  else if(unit_cell && !cavity){
-    start_index = unit_cell_start_index;
-    end_index = unit_cell_end_index;
-  }
-  else{ // if unit_cell && cavity
+  // for unit cell analysis, surfaces outside the unit cell should not be included
+  else{
     for(char i = 0; i < 3; i++){
-      // the surface area is counted between voxels, thus we need to check voxels around the limits of the cavity
       if(start_index[i] > unit_cell_start_index[i]){start_index[i]--;}
       // increase end_index twice because it should be above the range of indexes checked like vector and array sizes in C++
       if(end_index[i] < unit_cell_end_index[i]){end_index[i]++;}
       if(end_index[i] < unit_cell_end_index[i]){end_index[i]++;}
     }
   }
+  double surface = tallySurface(types, start_index, end_index, unit_cell, id, true);
+    // scale the surface area in squared gridstep units
+  surface *=  grid_size*grid_size;
+  return surface;
+}
+
+double Space::tallySurface(const std::vector<char>& types, std::array<unsigned int,3>& start_index, std::array<unsigned int,3>& end_index, const bool unit_cell){
+  return tallySurface(types, start_index, end_index, unit_cell, 0, false);
+}
+
+double Space::tallySurface(const std::vector<char>& types, std::array<unsigned int,3>& start_index, std::array<unsigned int,3>& end_index, const bool unit_cell, const unsigned char id, const bool cavity){
+  double surface = 0;
 
   // loop over all voxels within range minus one in each direction because the +1 neighbors will be checked at the same time
   std::array<unsigned int,3> index;
@@ -569,28 +588,24 @@ double Space::calcSurfArea(const std::vector<char>& types, const unsigned char& 
       for (index[k] = unit_cell_start_index[k]; index[k] < unit_cell_end_index[k]-1; index[k]++){
         surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) * ((1/4) + (unit_cell_mod_index[i]/2)));
       }
-
     }
-
   }
-  // scale the surface area in squared gridstep units
-  surface *=  grid_size*grid_size;
   return surface;
 }
 
-unsigned char Space::evalMarchingCubeConfig(const std::array<unsigned int,3>& index, const std::vector<char>& types, const unsigned char& id, const bool& cavity){
-  unsigned char bit = 1;
+unsigned char Space::evalMarchingCubeConfig(const std::array<unsigned int,3>& index, const std::vector<char>& types, const unsigned char id, const bool cavity){
+  unsigned char bit_pos = 0;
   unsigned char config = 0; // configuration of the marching cube stored as a byte
   // check the starting voxel and its 7 neighbors to define a marching cube configuration
-  for(unsigned int pos_x = 0; pos_x < 2; pos_x++){
-    for(unsigned int pos_y = 0; pos_y < 2; pos_y++){
-      for(unsigned int pos_z = 0; pos_z < 2; pos_z++){
+  for(unsigned int x = 0; x < 2; x++){
+    for(unsigned int y = 0; y < 2; y++){
+      for(unsigned int z = 0; z < 2; z++){
         // condition for a bit to be true in the byte
-        if(std::find(types.begin(), types.end(), getVxlFromGrid(index[0]+pos_x, index[1]+pos_y, index[2]+pos_z, 0).getType()) != types.end()
-           && (!cavity || getVxlFromGrid(index[0]+pos_x, index[1]+pos_y, index[2]+pos_z, 0).getID() == id)){
-          config += bit;
+        if(std::find(types.begin(), types.end(), getVxlFromGrid(index[0]+x, index[1]+y, index[2]+z, 0).getType()) != types.end()
+           && (!cavity || getVxlFromGrid(index[0]+x, index[1]+y, index[2]+z, 0).getID() == id)){
+          setBitOn(config, bit_pos);
         }
-        bit *= 2;
+        bit_pos++;
       }
     }
   }

@@ -60,8 +60,8 @@ class Space{
 
     // surface area
     std::vector<std::vector<double>> sumSurfArea(const std::vector<std::vector<char>>&, const std::vector<bool>&, const unsigned char); // TODO: remove if we keep the faster alternative version
-    double calcSurfArea(const std::vector<char>&, const unsigned char&, std::array<unsigned int,3>, std::array<unsigned int,3>, const bool&, const bool&);
-    unsigned char evalMarchingCubeConfig(const std::array<unsigned int,3>&, const std::vector<char>&, const unsigned char&, const bool&);
+    double calcSurfArea(const std::vector<char>&, const bool);
+    double calcSurfArea(const std::vector<char>&, const bool, const unsigned char, std::array<unsigned int,3>, std::array<unsigned int,3>);
 
   private:
     std::array <double,3> cart_min; // this is also the "origin" of the space
@@ -83,6 +83,10 @@ class Space{
     void identifyCavities();
     void descendToCore(unsigned char&, const std::array<unsigned,3>, int);
     void assignShellVsVoid();
+
+    double tallySurface(const std::vector<char>&, std::array<unsigned int,3>&, std::array<unsigned int,3>&, const bool);
+    double tallySurface(const std::vector<char>&, std::array<unsigned int,3>&, std::array<unsigned int,3>&, const bool, const unsigned char, const bool);
+    unsigned char evalMarchingCubeConfig(const std::array<unsigned int,3>&, const std::vector<char>&, const unsigned char, const bool);
 
 };
 

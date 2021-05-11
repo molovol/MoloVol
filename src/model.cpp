@@ -150,22 +150,22 @@ CalcReportBundle Model::generateSurfaceData(){
 
   // std::vector<bool> for_every_cavity = {false, false, true, true};
 
-  _data.surf_vdw = _cell.calcSurfArea(solid_types[0], 0, {0,0,0}, {0,0,0}, _data.analyze_unit_cell, 0);
+  _data.surf_vdw = _cell.calcSurfArea(solid_types[0], _data.analyze_unit_cell);
 
-  _data.surf_molecular = _cell.calcSurfArea(solid_types[1], 0, {0,0,0}, {0,0,0}, _data.analyze_unit_cell, 0);
+  _data.surf_molecular = _cell.calcSurfArea(solid_types[1], _data.analyze_unit_cell);
 
   if(_data.probe_mode){
-  _data.surf_probe_excluded = _cell.calcSurfArea(solid_types[2], 0, {0,0,0}, {0,0,0}, _data.analyze_unit_cell, 0);
+  _data.surf_probe_excluded = _cell.calcSurfArea(solid_types[2], _data.analyze_unit_cell);
   }
   else{
     _data.surf_probe_excluded = _data.surf_molecular;
   }
 
-  _data.surf_probe_accessible = _cell.calcSurfArea(solid_types[3], 0, {0,0,0}, {0,0,0}, _data.analyze_unit_cell, 0);
+  _data.surf_probe_accessible = _cell.calcSurfArea(solid_types[3], _data.analyze_unit_cell);
 
   for (Cavity& cav : _data.cavities){
-    cav.surf_shell = _cell.calcSurfArea(solid_types[2], cav.id, cav.min_index, cav.max_index, _data.analyze_unit_cell, 1);
-    cav.surf_core = _cell.calcSurfArea(solid_types[3], cav.id, cav.min_index, cav.max_index, _data.analyze_unit_cell, 1);
+    cav.surf_shell = _cell.calcSurfArea(solid_types[2], _data.analyze_unit_cell, cav.id, cav.min_index, cav.max_index);
+    cav.surf_core = _cell.calcSurfArea(solid_types[3], _data.analyze_unit_cell, cav.id, cav.min_index, cav.max_index);
   }
 
   /* TODO: remove if we keep the faster alternative version
