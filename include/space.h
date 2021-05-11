@@ -38,6 +38,7 @@ class Space{
     Voxel& getTopVxl(const std::array<unsigned int,3>);
     Voxel& getTopVxl(const std::array<int,3>);
     std::array<unsigned int,3> getGridsteps();
+    std::array<std::array<unsigned int,3>,2> getUnitCellIndexes();
     unsigned long int totalVxlOnLvl(const int) const;
 
     int getMaxDepth(){return max_depth;}
@@ -48,6 +49,7 @@ class Space{
     void assignTypeInGrid(const AtomTree&, const double, const double, bool, bool&);
     void getVolume(std::map<char,double>&, std::vector<Cavity>&);
     void getUnitCellVolume(std::map<char,double>&, std::vector<Cavity>&, std::array<double,3>);
+    void setUnitCellIndexes(const std::array<double,3>);
     void tallyVoxelsUnitCell(std::array<unsigned int,3>,
                             double,
                             std::map<char, double>&,
@@ -57,13 +59,18 @@ class Space{
                             std::map<unsigned char, std::array<unsigned,3>>&);
 
     // surface area
-    std::vector<std::vector<double>> sumSurfArea(const std::vector<std::vector<char>>&, const std::vector<bool>&, const unsigned char);
+    std::vector<std::vector<double>> sumSurfArea(const std::vector<std::vector<char>>&, const std::vector<bool>&, const unsigned char); // TODO: remove if we keep the faster alternative version
+    double calcSurfArea(const std::vector<char>&, const unsigned char&, std::array<unsigned int,3>, std::array<unsigned int,3>, const bool&, const bool&);
+    unsigned char evalMarchingCubeConfig(const std::array<unsigned int,3>&, const std::vector<char>&, const unsigned char&, const bool&);
 
   private:
     std::array <double,3> cart_min; // this is also the "origin" of the space
     std::array <double,3> cart_max;
     std::vector<Container3D<Voxel>> _grid;
     std::array<unsigned int,3> n_gridsteps; // number of top level voxels in x,y,z direction
+    std::array<unsigned int,3> unit_cell_start_index; // bottom level voxels indexes for the start of the unit cell in x,y,z direction
+    std::array<unsigned int,3> unit_cell_end_index;  // bottom level voxels indexes for the end of the unit cell in x,y,z direction
+    std::array<double,3> unit_cell_mod_index; // bottom level voxels fractional indexes for the end of the unit cell in x,y,z direction
     double grid_size;
     int max_depth; // for voxels
 
@@ -86,6 +93,7 @@ class SurfaceLUT {
   public:
     static unsigned char configToType(unsigned char config);
     static double typeToArea(unsigned char type);
+    static double configToArea(unsigned char config);
 };
 
 #endif

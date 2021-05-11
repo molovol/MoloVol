@@ -271,16 +271,9 @@ void Space::getUnitCellVolume(std::map<char,double>& volumes,
 
   std::vector<char> types_to_tally{0b00000011,0b00000101,0b00001001,0b00010001,0b00100001,0b01000001};
 
-  std::array<unsigned int,3> unit_cell_start_index;
-  std::array<unsigned int,3> unit_cell_end_index;
-  std::array<double,3> unit_cell_mod_index;
-  for(int i = 0; i < 3; i++){
-    // +0.5 to avoid rounding errors
-    unit_cell_start_index[i] = int(0.5 - cart_min[i]/grid_size);
-    // no rounding because fmod() in unit_cell_mod_index will correct any rounding error in unit_cell_end_index
-    unit_cell_end_index[i] = unit_cell_start_index[i] + unit_cell_limits[i]/grid_size;
-    unit_cell_mod_index[i] = std::fmod(unit_cell_limits[i],grid_size);
-  }
+  setUnitCellIndexes(unit_cell_limits);
+
+  // count bottom level voxels per type inside the unit cell
   std::array<unsigned int,3> bot_lvl_index;
   for (bot_lvl_index[0] = unit_cell_start_index[0]; bot_lvl_index[0] < unit_cell_end_index[0]; bot_lvl_index[0]++){
     for (bot_lvl_index[1] = unit_cell_start_index[1]; bot_lvl_index[1] < unit_cell_end_index[1]; bot_lvl_index[1]++){
@@ -312,7 +305,7 @@ void Space::getUnitCellVolume(std::map<char,double>& volumes,
     }
   }
 
-  // add last end corner voxel
+  // add last end vertex voxel
   for(int i = 0; i < 3; i++){
     bot_lvl_index[i] = unit_cell_end_index[i];
   }
@@ -330,8 +323,8 @@ void Space::getUnitCellVolume(std::map<char,double>& volumes,
   // copy values from map to vector for more efficient storage and access
   std::array<double,3> min_arr = {0,0,0};
   std::array<double,3> max_arr = {0,0,0};
-  std::array<size_t,3> min_index_arr = {0,0,0};
-  std::array<size_t,3> max_index_arr = {0,0,0};
+  std::array<unsigned int,3> min_index_arr = {0,0,0};
+  std::array<unsigned int,3> max_index_arr = {0,0,0};
   for (auto& [id,tally] : id_core_tally) {
     for (char i = 0; i < 3; ++i){
       min_arr[i] = getOrigin()[i] + getVxlSize()*id_min[id][i];
@@ -346,6 +339,16 @@ void Space::getUnitCellVolume(std::map<char,double>& volumes,
                        max_arr,
                        min_index_arr,
                        max_index_arr));
+  }
+}
+
+void Space::setUnitCellIndexes(const std::array<double,3> unit_cell_limits){
+  for(int i = 0; i < 3; i++){
+    // +0.5 to avoid rounding errors
+    unit_cell_start_index[i] = int(0.5 - cart_min[i]/grid_size);
+    // no rounding because fmod() in unit_cell_mod_index will correct any rounding error in unit_cell_end_index
+    unit_cell_end_index[i] = unit_cell_start_index[i] + unit_cell_limits[i]/grid_size;
+    unit_cell_mod_index[i] = std::fmod(unit_cell_limits[i],grid_size);
   }
 }
 
@@ -386,10 +389,11 @@ void Space::tallyVoxelsUnitCell(std::array<unsigned int,3> bot_lvl_index,
 // SURFACE AREA //
 //////////////////
 
+// TODO: remove if we keep the faster alternative version
 void evalCubeMultiSurface(const std::array<Voxel,8> vertices, std::vector<std::vector<double>>& surface_areas, const std::vector<std::vector<char>>& solid_types, const std::vector<bool>& for_every_cavity);
-bool isSolid(const Voxel&, const std::vector<char>&, const unsigned char);
 bool isSolid(const Voxel&, const std::vector<char>&);
 
+// TODO: remove if we keep the faster alternative version
 std::vector<std::vector<double>> Space::sumSurfArea(const std::vector<std::vector<char>>& solid_types, const std::vector<bool>& for_every_cavity, const unsigned char n_cavities){
   assert(solid_types.size() == for_every_cavity.size());
   // allocate memory
@@ -427,6 +431,173 @@ std::vector<std::vector<double>> Space::sumSurfArea(const std::vector<std::vecto
   return surface_areas;
 }
 
+double Space::calcSurfArea(const std::vector<char>& types, const unsigned char& id, std::array<unsigned int,3> start_index, std::array<unsigned int,3> end_index, const bool& unit_cell, const bool& cavity){
+  // loop on all voxels in a range (never include the last index of x, y or z)
+  double surface = 0;
+  std::array<unsigned long int,3> n_elements = getGrid(0).getNumElements();
+  if(!unit_cell && !cavity){
+    start_index = {0,0,0};
+    end_index = {n_elements[0], n_elements[1], n_elements[2]};
+  }
+  else if(!unit_cell && cavity){
+    for(char i = 0; i < 3; i++){
+      // the surface area is counted between voxels, thus we need to check voxels around the limits of the cavity
+      if(start_index[i] > 0){start_index[i]--;}
+      // increase end_index twice because it should be above the range of indexes checked like vector and array sizes in C++
+      if(end_index[i] < n_elements[i]){end_index[i]++;}
+      if(end_index[i] < n_elements[i]){end_index[i]++;}
+    }
+  }
+  else if(unit_cell && !cavity){
+    start_index = unit_cell_start_index;
+    end_index = unit_cell_end_index;
+  }
+  else{ // if unit_cell && cavity
+    for(char i = 0; i < 3; i++){
+      // the surface area is counted between voxels, thus we need to check voxels around the limits of the cavity
+      if(start_index[i] > unit_cell_start_index[i]){start_index[i]--;}
+      // increase end_index twice because it should be above the range of indexes checked like vector and array sizes in C++
+      if(end_index[i] < unit_cell_end_index[i]){end_index[i]++;}
+      if(end_index[i] < unit_cell_end_index[i]){end_index[i]++;}
+    }
+  }
+
+  // loop over all voxels within range minus one in each direction because the +1 neighbors will be checked at the same time
+  std::array<unsigned int,3> index;
+  for(index[2] = start_index[2]; index[2] < end_index[2]-1; index[2]++){
+    for(index[1] = start_index[1]; index[1] < end_index[1]-1; index[1]++){
+      for(index[0] = start_index[0]; index[0] < end_index[0]-1; index[0]++){
+        surface += SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity));
+      }
+    }
+  }
+  if(unit_cell){
+    /* the surface area is counted between voxels, thus the borders of the unit cell should include partial surface area by configuration
+    since the surface area is not homogeneous over the voxel, the surface area from the borders will be an approximation
+    -1,-1,-1 *1/8 on 1 vertex
+    -1,-1,i  *1/4 on 3 edges
+    -1,i,i   *1/2 on 3 faces
+    -1,n,i   *((1/4)+(mod/2)) on 6 edges
+    -1,-1,n  *((1/8)+(mod/4)) on 3 vertices
+    -1,n,n   *((1/8)+(modA/4)+(modB/4)+(modA*modB/2)) on 3 vertices
+    n,i,i    *((1/2)+mod) on 3 faces
+    n,n,i    *((1/4)+(modA/2)+(modB/2)+(modA*modB)) on 3 edges
+    n,n,n    *((1/8)+(modA/4)+(modB/4)+(modC/4)+(modA*modB/2)+(modA*modC/2)+(modB*modC/2)+(modA*modB*modC)) on 1 vertex
+    */
+
+    // add first -1,-1,-1 vertex
+    for(int i = 0; i < 3; i++){
+      index[i] = unit_cell_start_index[i]-1;
+    }
+    surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) / 8);
+
+    // add last n,n,n vertex
+    for(int i = 0; i < 3; i++){
+      index[i] = unit_cell_end_index[i]-1;
+    }
+    surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) *
+                ((1/8) +
+                 ((unit_cell_mod_index[0] + unit_cell_mod_index[1] + unit_cell_mod_index[2])/4) +
+                 (unit_cell_mod_index[0] * unit_cell_mod_index[1]/2) +
+                 (unit_cell_mod_index[0] * unit_cell_mod_index[2]/2) +
+                 (unit_cell_mod_index[1] * unit_cell_mod_index[2]/2) +
+                 (unit_cell_mod_index[0] * unit_cell_mod_index[1] * unit_cell_mod_index[2])));
+
+    // swap x,y,z
+    for(int n = 0; n < 3; n++){
+      int i = n;
+      int j = (n+1)%3;
+      int k = (n+2)%3;
+
+      // add the first three intermediate vertices -1,-1,n
+      index[i] = unit_cell_start_index[i]-1;
+      index[j] = unit_cell_start_index[j]-1;
+      index[k] = unit_cell_end_index[k]-1;
+      surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) * ((1/8) + (unit_cell_mod_index[k]/4)));
+
+      // add the last three intermediate vertices -1,n,n
+      index[i] = unit_cell_start_index[i]-1;
+      index[j] = unit_cell_end_index[j]-1;
+      index[k] = unit_cell_end_index[k]-1;
+      surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) *
+                  ((1/8) +
+                   ((unit_cell_mod_index[j] + unit_cell_mod_index[k])/4) +
+                   (unit_cell_mod_index[j] * unit_cell_mod_index[k]/2)));
+
+
+      // add the three start edges -1,-1,k
+      index[i] = unit_cell_start_index[i]-1;
+      index[j] = unit_cell_start_index[j]-1;
+      for (index[k] = unit_cell_start_index[k]; index[k] < unit_cell_end_index[k]-1; index[k]++){
+        surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) / 4);
+      }
+
+      // add the three end edges n,n,k
+      index[i] = unit_cell_end_index[i]-1;
+      index[j] = unit_cell_end_index[j]-1;
+      for (index[k] = unit_cell_start_index[k]; index[k] < unit_cell_end_index[k]-1; index[k]++){
+        surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) *
+                    ((1/4) +
+                     ((unit_cell_mod_index[j] + unit_cell_mod_index[k])/2) +
+                     (unit_cell_mod_index[j] * unit_cell_mod_index[k])));
+      }
+
+      // add the three start faces -1,j,k
+      index[i] = unit_cell_start_index[i]-1;
+      for (index[j] = unit_cell_start_index[j]; index[j] < unit_cell_end_index[j]-1; index[j]++){
+        for (index[k] = unit_cell_start_index[k]; index[k] < unit_cell_end_index[k]-1; index[k]++){
+          surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) / 2);
+        }
+      }
+
+      // add the three end faces n,j,k
+      index[i] = unit_cell_end_index[i]-1;
+      for (index[j] = unit_cell_start_index[j]; index[j] < unit_cell_end_index[j]-1; index[j]++){
+        for (index[k] = unit_cell_start_index[k]; index[k] < unit_cell_end_index[k]-1; index[k]++){
+          surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) * ((1/2) + unit_cell_mod_index[i]));
+        }
+      }
+
+      // add the six intermediate edges -1,n,k and n,-1,k
+      index[i] = unit_cell_start_index[i]-1;
+      index[j] = unit_cell_end_index[j]-1;
+      for (index[k] = unit_cell_start_index[k]; index[k] < unit_cell_end_index[k]-1; index[k]++){
+        surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) * ((1/4) + (unit_cell_mod_index[j]/2)));
+      }
+      index[i] = unit_cell_end_index[i]-1;
+      index[j] = unit_cell_start_index[j]-1;
+      for (index[k] = unit_cell_start_index[k]; index[k] < unit_cell_end_index[k]-1; index[k]++){
+        surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) * ((1/4) + (unit_cell_mod_index[i]/2)));
+      }
+
+    }
+
+  }
+  // scale the surface area in squared gridstep units
+  surface *=  grid_size*grid_size;
+  return surface;
+}
+
+unsigned char Space::evalMarchingCubeConfig(const std::array<unsigned int,3>& index, const std::vector<char>& types, const unsigned char& id, const bool& cavity){
+  unsigned char bit = 1;
+  unsigned char config = 0; // configuration of the marching cube stored as a byte
+  // check the starting voxel and its 7 neighbors to define a marching cube configuration
+  for(unsigned int pos_x = 0; pos_x < 2; pos_x++){
+    for(unsigned int pos_y = 0; pos_y < 2; pos_y++){
+      for(unsigned int pos_z = 0; pos_z < 2; pos_z++){
+        // condition for a bit to be true in the byte
+        if(std::find(types.begin(), types.end(), getVxlFromGrid(index[0]+pos_x, index[1]+pos_y, index[2]+pos_z, 0).getType()) != types.end()
+           && (!cavity || getVxlFromGrid(index[0]+pos_x, index[1]+pos_y, index[2]+pos_z, 0).getID() == id)){
+          config += bit;
+        }
+        bit *= 2;
+      }
+    }
+  }
+  return config;
+}
+
+// TODO: remove if we keep the faster alternative version
 void evalCubeMultiSurface(const std::array<Voxel,8> vertices, std::vector<std::vector<double>>& surface_areas, const std::vector<std::vector<char>>& solid_types, const std::vector<bool>& for_every_cavity){
 
   for (size_t i = 0; i < surface_areas.size(); ++i){
@@ -457,13 +628,7 @@ void evalCubeMultiSurface(const std::array<Voxel,8> vertices, std::vector<std::v
   }
 }
 
-bool isSolid(const Voxel& vxl, const std::vector<char>& solid_types, const unsigned char id){
-  if (vxl.getID() == id) { // THIS LINE IS WRONG
-    return std::find(solid_types.begin(), solid_types.end(), vxl.getType()) != solid_types.end();
-  }
-  return false;
-}
-
+// TODO: remove if we keep the faster alternative version
 bool isSolid(const Voxel& vxl, const std::vector<char>& solid_types){
   return std::find(solid_types.begin(), solid_types.end(), vxl.getType()) != solid_types.end();
 }
@@ -555,6 +720,10 @@ bool Space::isInBounds(const std::array<unsigned,3>& coord, const unsigned lvl){
 
 std::array<unsigned int,3> Space::getGridsteps(){
   return n_gridsteps;
+}
+
+std::array<std::array<unsigned int,3>,2> Space::getUnitCellIndexes(){
+  return {unit_cell_start_index, unit_cell_end_index};
 }
 
 unsigned long int Space::totalVxlOnLvl(const int lvl) const{
@@ -691,4 +860,7 @@ unsigned char SurfaceLUT::configToType(unsigned char config) {
 }
 double SurfaceLUT::typeToArea(unsigned char type) {
   return area_by_config[type];
+}
+double SurfaceLUT::configToArea(unsigned char config) {
+  return area_by_config[types_by_config[config]];
 }

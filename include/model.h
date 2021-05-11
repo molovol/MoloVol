@@ -37,9 +37,13 @@ struct CalcReportBundle{
   std::map<char,double> volumes;
   // surfaces
   double surf_vdw;
+  double surf_molecular;
   double surf_probe_inaccessible;
+  double surf_probe_accessible;
   double getSurfVdw(){return surf_vdw;}
+  double getSurfMolecular(){return surf_molecular;}
   double getSurfProbeInaccessible(){return surf_probe_inaccessible;}
+  double getSurfProbeAccessible(){return surf_probe_accessible;}
   // cavity volumes and surfaces
   std::vector<Cavity> cavities;
   double getCavVolume(const unsigned char i){return cavities[i].getVolume();}
@@ -76,7 +80,7 @@ class Model{
     void writeXYZfile(std::vector<std::tuple<std::string, double, double, double>>&, std::string);
     void writeTotalSurfaceMap();
     void writeCavitiesMaps();
-    void writeSurfaceMap(std::string, double, std::array<unsigned long int,3>, std::array<double,3>, std::array<size_t,3>, std::array<size_t,3>, const bool=false, const unsigned char=0);
+    void writeSurfaceMap(std::string, double, std::array<unsigned long int,3>, std::array<double,3>, std::array<unsigned int,3>, std::array<unsigned int,3>, const bool=false, const unsigned char=0);
 
     std::vector<std::string> listElementsInStructure();
 

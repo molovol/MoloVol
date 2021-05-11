@@ -112,7 +112,7 @@ void Model::createReport(){
     output_report << "\tThis feature might be added in future versions if requested by the community.\n";
     output_report << "Note 2:\tSeparate cavities are defined by space accessible to the core of probe 1.\n";
     output_report << "\tTwo cavities can be in contact but if a probe cannot pass from one to the other, they are considered separated.\n";
-    output_report << "Note 3:\tIn single probe mode, the first 'cavity' consist of the outside space and pockets.\n";
+    output_report << "Note 3:\tIn single probe mode, the first 'cavity' consists of the outside space and pockets.\n";
     output_report << "Note 4:\tSome very small isolated chunks of probe 1 cores can be detected and lead to small cavities.\n";
     output_report << "Note 5:\tProbe occupied volume correspond to empty space as defined by the molecular surface (similar to the Connolly surface).\n";
     output_report << "Note 6:\tProbe accessible volume correspond to empty space as defined\n";
@@ -193,8 +193,8 @@ void Model::writeTotalSurfaceMap(){
   double vxl_length = _cell.getVxlSize();
   std::array<double,3> cell_min = _cell.getMin();
   std::array<double,3> origin;
-  std::array<size_t,3> start_index = {0,0,0};
-  std::array<size_t,3> end_index;
+  std::array<unsigned int,3> start_index = {0,0,0};
+  std::array<unsigned int,3> end_index;
   for(int i = 0; i < 3; i++){
     end_index[i] = n_elements[i];
   }
@@ -233,8 +233,8 @@ void Model::writeCavitiesMaps(){
   double vxl_length = _cell.getVxlSize();
   std::array<double,3> cell_min = _cell.getMin();
   std::array<double,3> origin;
-  std::array<size_t,3> start_index;
-  std::array<size_t,3> end_index;
+  std::array<unsigned int,3> start_index;
+  std::array<unsigned int,3> end_index;
 
   // loop over each cavity id
   for(size_t id = 0; id < _data.cavities.size(); id++){
@@ -259,8 +259,8 @@ void Model::writeSurfaceMap(std::string file_name,
                             double vxl_length,
                             std::array<unsigned long int,3> n_elements,
                             std::array<double,3> origin,
-                            std::array<size_t,3> start_index,
-                            std::array<size_t,3> end_index,
+                            std::array<unsigned int,3> start_index,
+                            std::array<unsigned int,3> end_index,
                             const bool partial_map,
                             const unsigned char id){
 

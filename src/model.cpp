@@ -141,11 +141,34 @@ CalcReportBundle Model::generateSurfaceData(){
   std::vector<std::vector<char>> solid_types =
   { {0b00000011},
     {0b00000011, 0b00000101},
+    /* the "negative" versions below are better since fewer members needs to be searched through
     {0b00000011, 0b00000101, 0b00100001, 0b01000001},
-    {0b00000011, 0b00000101, 0b00010001, 0b00100001, 0b01000001}};
+    {0b00000011, 0b00000101, 0b00010001, 0b00100001, 0b01000001},
+    */
+    {0b00001001, 0b00010001},
+    {0b00001001} };
 
-  std::vector<bool> for_every_cavity = {false, false, true, true};
+  // std::vector<bool> for_every_cavity = {false, false, true, true};
 
+  _data.surf_vdw = _cell.calcSurfArea(solid_types[0], 0, {0,0,0}, {0,0,0}, _data.analyze_unit_cell, 0);
+
+  _data.surf_molecular = _cell.calcSurfArea(solid_types[1], 0, {0,0,0}, {0,0,0}, _data.analyze_unit_cell, 0);
+
+  if(_data.probe_mode){
+  _data.surf_probe_inaccessible = _cell.calcSurfArea(solid_types[2], 0, {0,0,0}, {0,0,0}, _data.analyze_unit_cell, 0);
+  }
+  else{
+    _data.surf_probe_inaccessible = _data.surf_molecular;
+  }
+
+  _data.surf_probe_accessible = _cell.calcSurfArea(solid_types[3], 0, {0,0,0}, {0,0,0}, _data.analyze_unit_cell, 0);
+
+  for (Cavity& cav : _data.cavities){
+    cav.surf_shell = _cell.calcSurfArea(solid_types[2], cav.id, cav.min_index, cav.max_index, _data.analyze_unit_cell, 1); // 0b00000011 + 0b00000101 + 0b00100001 + 0b01000001
+    cav.surf_core = _cell.calcSurfArea(solid_types[3], cav.id, cav.min_index, cav.max_index, _data.analyze_unit_cell, 1); // 0b00000011 + 0b00000101 + 0b00010001 + 0b00100001 + 0b01000001
+  }
+
+  /* TODO: remove if we keep the faster alternative version
   std::vector<std::vector<double>> surface_areas = _cell.sumSurfArea(solid_types, for_every_cavity, _data.cavities.size());
 
   _data.surf_vdw = surface_areas[0][0]; // 0b00000011
@@ -155,7 +178,7 @@ CalcReportBundle Model::generateSurfaceData(){
     cav.surf_shell = surface_areas[2][cav.id-1]; // 0b00000011 + 0b00000101 + 0b00100001 + 0b01000001
     cav.surf_core = surface_areas[3][cav.id-1]; // 0b00000011 + 0b00000101 + 0b00010001 + 0b00100001 + 0b01000001
   }
-
+  */
   auto end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
   return _data;
