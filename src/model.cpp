@@ -155,17 +155,17 @@ CalcReportBundle Model::generateSurfaceData(){
   _data.surf_molecular = _cell.calcSurfArea(solid_types[1], 0, {0,0,0}, {0,0,0}, _data.analyze_unit_cell, 0);
 
   if(_data.probe_mode){
-  _data.surf_probe_inaccessible = _cell.calcSurfArea(solid_types[2], 0, {0,0,0}, {0,0,0}, _data.analyze_unit_cell, 0);
+  _data.surf_probe_excluded = _cell.calcSurfArea(solid_types[2], 0, {0,0,0}, {0,0,0}, _data.analyze_unit_cell, 0);
   }
   else{
-    _data.surf_probe_inaccessible = _data.surf_molecular;
+    _data.surf_probe_excluded = _data.surf_molecular;
   }
 
   _data.surf_probe_accessible = _cell.calcSurfArea(solid_types[3], 0, {0,0,0}, {0,0,0}, _data.analyze_unit_cell, 0);
 
   for (Cavity& cav : _data.cavities){
-    cav.surf_shell = _cell.calcSurfArea(solid_types[2], cav.id, cav.min_index, cav.max_index, _data.analyze_unit_cell, 1); // 0b00000011 + 0b00000101 + 0b00100001 + 0b01000001
-    cav.surf_core = _cell.calcSurfArea(solid_types[3], cav.id, cav.min_index, cav.max_index, _data.analyze_unit_cell, 1); // 0b00000011 + 0b00000101 + 0b00010001 + 0b00100001 + 0b01000001
+    cav.surf_shell = _cell.calcSurfArea(solid_types[2], cav.id, cav.min_index, cav.max_index, _data.analyze_unit_cell, 1);
+    cav.surf_core = _cell.calcSurfArea(solid_types[3], cav.id, cav.min_index, cav.max_index, _data.analyze_unit_cell, 1);
   }
 
   /* TODO: remove if we keep the faster alternative version

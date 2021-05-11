@@ -98,6 +98,18 @@ void Model::createReport(){
     output_report << "Probe 2 shell volume: " << _data.volumes[0b01000001] << " Å^3\n";
   }
 
+  if(_data.calc_surface_areas){
+    output_report << "\n\n\t////////////////////////////////////\n";
+    output_report << "\t// Total Surface Areas calculated //\n";
+    output_report << "\t////////////////////////////////////\n\n";
+    output_report << "Van der Waals surface: " << _data.surf_vdw << " Å^2\n";
+    if(_data.probe_mode){
+      output_report << "Molecular surface: " << _data.surf_molecular << " Å^2 (probes 1 and 2 excluded surface, similar to the Connolly surface)\n";
+    }
+    output_report << "Probe 1 excluded surface: " << _data.surf_probe_excluded << " Å^2 (similar to the Connolly surface)\n";
+    output_report << "Probe 1 accessible surface: " << _data.surf_probe_accessible << " Å^2 (similar to the Lee-Richards surface)\n";
+  }
+
   if(!_data.cavities.empty()){
     output_report << "\n\n\t///////////////////////////////\n";
     output_report << "\t// Cavities and pockets data //\n";
@@ -119,15 +131,19 @@ void Model::createReport(){
     output_report << "\tby the surface accessible to its core (similar to the Lee-Richards surface).\n";
     output_report << "Note 7:\tFor a detailed shape of each cavity, check the surface maps.\n\n";
 
-    output_report << "Cavity\tOccupied\tAccessible\tCavity center coordinates (Å)\n";
-    output_report << "ID\tVolume (Å^3)\tVolume (Å^3)\tx\ty\tz\n";
+    output_report << "Cavity\tOccupied\tAccessible\t" << (_data.calc_surface_areas ? "Excluded\tAccessible\t" : "") << "Cavity center coordinates (Å)\n";
+    output_report << "ID\tVolume (Å^3)\tVolume (Å^3)\t" << (_data.calc_surface_areas ? "Surface (Å^2)\tSurface (Å^2)\t" : "") << "x\ty\tz\n";
     for(unsigned int i = 0; i < _data.cavities.size(); i++){
       std::array<double,3> cav_center = _data.getCavCenter(i);
       // default precision is 6, which means that double values will take less than a tab space
       output_report << i+1 << "\t"
                     << _data.cavities[i].getVolume() << "\t\t"
-                    << _data.cavities[i].core_vol << "\t\t"
-                    << cav_center[0] << "\t" << cav_center[1] << "\t" << cav_center[2] << "\n";
+                    << _data.cavities[i].core_vol << "\t\t";
+      if(_data.calc_surface_areas){
+        output_report << _data.cavities[i].surf_shell << "\t\t"
+                      << _data.cavities[i].surf_core << "\t\t";
+      }
+      output_report << cav_center[0] << "\t" << cav_center[1] << "\t" << cav_center[2] << "\n";
     }
   }
 

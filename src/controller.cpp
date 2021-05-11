@@ -123,7 +123,7 @@ bool Ctrl::runCalculation(){
         notifyUser("\nMolecular surface: " + std::to_string(data.getSurfMolecular()) + " ");
         notifyUser(Symbol::angstrom() + Symbol::squared());
       }
-      notifyUser("\nProbe inaccessible surface: " + std::to_string(data.getSurfProbeInaccessible()) + " ");
+      notifyUser("\nProbe excluded surface: " + std::to_string(data.getSurfProbeExcluded()) + " ");
       notifyUser(Symbol::angstrom() + Symbol::squared());
       notifyUser("\nProbe accessible surface: " + std::to_string(data.getSurfProbeAccessible()) + " ");
       notifyUser(Symbol::angstrom() + Symbol::squared());

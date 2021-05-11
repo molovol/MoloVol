@@ -38,11 +38,11 @@ struct CalcReportBundle{
   // surfaces
   double surf_vdw;
   double surf_molecular;
-  double surf_probe_inaccessible;
+  double surf_probe_excluded;
   double surf_probe_accessible;
   double getSurfVdw(){return surf_vdw;}
   double getSurfMolecular(){return surf_molecular;}
-  double getSurfProbeInaccessible(){return surf_probe_inaccessible;}
+  double getSurfProbeExcluded(){return surf_probe_excluded;}
   double getSurfProbeAccessible(){return surf_probe_accessible;}
   // cavity volumes and surfaces
   std::vector<Cavity> cavities;
