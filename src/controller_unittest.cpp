@@ -228,10 +228,10 @@ bool Ctrl::unittestSurface(){
   if(current_calculation == NULL){current_calculation = new Model();}
 
   // parameters for unittest:
-  const std::string atom_filepath = "./inputfile/probetest_quadruplet.xyz";
+  const std::string atom_filepath = "./inputfile/6s8y.xyz";
   const std::string radius_filepath = "./inputfile/radii.txt";
   double rad_probe2 = 2;
-  double rad_probe1 = 0.5;
+  double rad_probe1 = 1.2;
   bool two_probe = false;
   bool surf_areas = true;
   int max_depth = 4;
@@ -265,14 +265,14 @@ bool Ctrl::unittestSurface(){
 
   if(data.success){
     printf("f: %40s, g: %4.2f, d: %4i, r1: %4.1f\n", atom_filepath.c_str(), grid_step, max_depth, rad_probe1);
-    printf("vdW: %20.10f, Excluded: %20.10f\n", data.volumes[0b00000011]-28.948, data.volumes[0b00000101]-1.86);
-    printf("P1 Core: %20.10f, P1 Shell: %20.10f\n", data.volumes[0b00001001]-247.748, data.volumes[0b00010001]-49.124);
-    //std::vector<double> cav = {294.75,1.34,0.252,0.187,0.187,0.078,0.078};
+    printf("vdW: %20.10f, Excluded: %20.10f\n", data.volumes[0b00000011]-14337.45, data.volumes[0b00000101]-3952.565);
+    printf("P1 Core: %20.10f, P1 Shell: %20.10f\n", data.volumes[0b00001001]-103215.383, data.volumes[0b00010001]-9157.002);
+    std::vector<double> cav = {112156.364,30.030,29.831,27.885,23.585,17.232,14.418,13.883,10.940,10.467,9.698,9.116,8.658,3.965,2.354,1.831,1.437,0.479,0.212};
     for (size_t i = 0; i< data.cavities.size(); ++i){
-      //printf("Cavity vol: %20.10f A^3\n", data.getCavVolume(i)-cav[i]);
-      printf("Cavity vol: %20.10f A^3\n", data.getCavVolume(i));
+      printf("Cavity vol: %20.10f A^3\n", data.getCavVolume(i)-cav[i]);
+//      printf("Cavity vol: %20.10f A^3\n", data.getCavVolume(i));
     }
-    printf("Time elapsed: %10.5f s\n", data.getTime()-0.83+0.74);
+    printf("Time elapsed: %10.5f s\n", data.getTime()-0.83+0.74-136.8);
   }
   else{
     std::cout << "Calculation failed" << std::endl;

@@ -436,7 +436,7 @@ double Space::calcSurfArea(const std::vector<char>& types, const bool unit_cell)
   std::array<unsigned int,3> end_index;
   if(!unit_cell){
     std::array<unsigned long int,3> n_elements = getGrid(0).getNumElements();
-    end_index = {n_elements[0], n_elements[1], n_elements[2]};
+    end_index = {static_cast<unsigned>(n_elements[0]), static_cast<unsigned>(n_elements[1]), static_cast<unsigned>(n_elements[2])};
   }
   else{
     start_index = unit_cell_start_index;
