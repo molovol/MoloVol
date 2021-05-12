@@ -431,23 +431,17 @@ std::vector<std::vector<double>> Space::sumSurfArea(const std::vector<std::vecto
   return surface_areas;
 }
 
+// overloaded for full molecule surfaces
+// sets the appropriate start and end indices
 double Space::calcSurfArea(const std::vector<char>& types, const bool unit_cell){
-  std::array<unsigned int,3> start_index = {0,0,0};
-  std::array<unsigned int,3> end_index;
-  if(!unit_cell){
-    std::array<unsigned long int,3> n_elements = getGrid(0).getNumElements();
-    end_index = {static_cast<unsigned>(n_elements[0]), static_cast<unsigned>(n_elements[1]), static_cast<unsigned>(n_elements[2])};
-  }
-  else{
-    start_index = unit_cell_start_index;
-    end_index = unit_cell_end_index;
-  }
+  std::array<unsigned,3> start_index = unit_cell? unit_cell_start_index : std::array<unsigned,3>({0,0,0});
+  std::array<unsigned,3> end_index   = unit_cell? unit_cell_end_index   : getGrid(0).getNumElements<unsigned>();
   double surface = tallySurface(types, start_index, end_index, unit_cell);
   // scale the surface area in squared gridstep units
-  surface *=  grid_size*grid_size;
-  return surface;
+  return (surface * (grid_size*grid_size));
 }
 
+// overload for cavity surfaces
 double Space::calcSurfArea(const std::vector<char>& types, const bool unit_cell, const unsigned char id, std::array<unsigned int,3> start_index, std::array<unsigned int,3> end_index){
   // the surface area is counted between voxels, thus we need to check voxels around the limits of the cavity
   if(!unit_cell){

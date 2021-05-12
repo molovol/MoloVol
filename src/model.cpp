@@ -136,49 +136,32 @@ CalcReportBundle Model::generateSurfaceData(){
   // TODO: add way for this function to tell whether volume calculation has been conducted before
   auto start = std::chrono::steady_clock::now();
 
-  // TODO: consider using inverse values in last two vectors to keep vector size smaller than 4. It might help with the find() function
   // TODO: consider making different solid_types for each probe mode
   std::vector<std::vector<char>> solid_types =
   { {0b00000011},
     {0b00000011, 0b00000101},
-    /* the "negative" versions below are better since fewer members needs to be searched through
-    {0b00000011, 0b00000101, 0b00100001, 0b01000001},
-    {0b00000011, 0b00000101, 0b00010001, 0b00100001, 0b01000001},
-    */
-    {0b00001001, 0b00010001},
-    {0b00001001} };
+    // the "negative" versions below are better since fewer members needs to be searched
+    {0b00001001, 0b00010001}, //{0b00000011, 0b00000101, 0b00100001, 0b01000001},
+    {0b00001001} }; //{0b00000011, 0b00000101, 0b00010001, 0b00100001, 0b01000001},
 
-  // std::vector<bool> for_every_cavity = {false, false, true, true};
-
+  // full structure surfaces
   _data.surf_vdw = _cell.calcSurfArea(solid_types[0], _data.analyze_unit_cell);
-
   _data.surf_molecular = _cell.calcSurfArea(solid_types[1], _data.analyze_unit_cell);
 
   if(_data.probe_mode){
-  _data.surf_probe_excluded = _cell.calcSurfArea(solid_types[2], _data.analyze_unit_cell);
+    _data.surf_probe_excluded = _cell.calcSurfArea(solid_types[2], _data.analyze_unit_cell);
   }
   else{
     _data.surf_probe_excluded = _data.surf_molecular;
   }
-
   _data.surf_probe_accessible = _cell.calcSurfArea(solid_types[3], _data.analyze_unit_cell);
 
+  // cavity surfaces
   for (Cavity& cav : _data.cavities){
     cav.surf_shell = _cell.calcSurfArea(solid_types[2], _data.analyze_unit_cell, cav.id, cav.min_index, cav.max_index);
     cav.surf_core = _cell.calcSurfArea(solid_types[3], _data.analyze_unit_cell, cav.id, cav.min_index, cav.max_index);
   }
-
-  /* TODO: remove if we keep the faster alternative version
-  std::vector<std::vector<double>> surface_areas = _cell.sumSurfArea(solid_types, for_every_cavity, _data.cavities.size());
-
-  _data.surf_vdw = surface_areas[0][0]; // 0b00000011
-  _data.surf_probe_inaccessible = surface_areas[1][0]; // 0b00000011 + 0b00000101
-
-  for (Cavity& cav : _data.cavities){
-    cav.surf_shell = surface_areas[2][cav.id-1]; // 0b00000011 + 0b00000101 + 0b00100001 + 0b01000001
-    cav.surf_core = surface_areas[3][cav.id-1]; // 0b00000011 + 0b00000101 + 0b00010001 + 0b00100001 + 0b01000001
-  }
-  */
+  
   auto end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
   return _data;
