@@ -446,7 +446,7 @@ double Space::calcSurfArea(const std::vector<char>& types, const bool unit_cell,
   // the surface area is counted between voxels, thus we need to check voxels around the limits of the cavity
   if(!unit_cell){
     for(char i = 0; i < 3; i++){
-      std::array<unsigned long int,3> n_elements = getGrid(0).getNumElements();
+      std::array<unsigned long,3> n_elements = getGrid(0).getNumElements();
       if(start_index[i] > 0){start_index[i]--;}
       // increase end_index twice because it should be above the range of indexes checked like vector and array sizes in C++
       if(end_index[i] < n_elements[i]){end_index[i]++;}
@@ -463,13 +463,8 @@ double Space::calcSurfArea(const std::vector<char>& types, const bool unit_cell,
     }
   }
   double surface = tallySurface(types, start_index, end_index, unit_cell, id, true);
-    // scale the surface area in squared gridstep units
-  surface *=  grid_size*grid_size;
-  return surface;
-}
-
-double Space::tallySurface(const std::vector<char>& types, std::array<unsigned int,3>& start_index, std::array<unsigned int,3>& end_index, const bool unit_cell){
-  return tallySurface(types, start_index, end_index, unit_cell, 0, false);
+  // scale the surface area in squared gridstep units
+  return (surface * (grid_size*grid_size));
 }
 
 double Space::tallySurface(const std::vector<char>& types, std::array<unsigned int,3>& start_index, std::array<unsigned int,3>& end_index, const bool unit_cell, const unsigned char id, const bool cavity){

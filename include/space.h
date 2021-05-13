@@ -84,8 +84,7 @@ class Space{
     void descendToCore(unsigned char&, const std::array<unsigned,3>, int);
     void assignShellVsVoid();
 
-    double tallySurface(const std::vector<char>&, std::array<unsigned int,3>&, std::array<unsigned int,3>&, const bool);
-    double tallySurface(const std::vector<char>&, std::array<unsigned int,3>&, std::array<unsigned int,3>&, const bool, const unsigned char, const bool);
+    double tallySurface(const std::vector<char>&, std::array<unsigned int,3>&, std::array<unsigned int,3>&, const bool, const unsigned char=0, const bool=false);
     unsigned char evalMarchingCubeConfig(const std::array<unsigned int,3>&, const std::vector<char>&, const unsigned char, const bool);
 
 };
