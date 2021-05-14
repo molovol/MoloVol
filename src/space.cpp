@@ -583,18 +583,19 @@ double Space::tallySurface(const std::vector<char>& types, std::array<unsigned i
 }
 
 unsigned char Space::evalMarchingCubeConfig(const std::array<unsigned int,3>& index, const std::vector<char>& types, const unsigned char id, const bool cavity){
-  unsigned char bit_pos = 0;
   unsigned char config = 0; // configuration of the marching cube stored as a byte
   // check the starting voxel and its 7 neighbors to define a marching cube configuration
+  std::array<unsigned,3> subindex;
   for(unsigned int x = 0; x < 2; x++){
+    subindex[0] = index[0] + x;
     for(unsigned int y = 0; y < 2; y++){
+      subindex[1] = index[1] + y;
       for(unsigned int z = 0; z < 2; z++){
+        subindex[2] = index[2] + z;
         // condition for a bit to be true in the byte
-        if(std::find(types.begin(), types.end(), getVxlFromGrid(index[0]+x, index[1]+y, index[2]+z, 0).getType()) != types.end()
-           && (!cavity || getVxlFromGrid(index[0]+x, index[1]+y, index[2]+z, 0).getID() == id)){
-          setBitOn(config, bit_pos);
-        }
-        bit_pos++;
+        bool bit_state = isSolid(getVxlFromGrid(subindex, 0), types);
+        if (cavity) {bit_state &= getVxlFromGrid(subindex, 0).getID() == id;}
+        setBit(config, z + 2*y + 4*x, bit_state);
       }
     }
   }
@@ -632,7 +633,6 @@ void evalCubeMultiSurface(const std::array<Voxel,8> vertices, std::vector<std::v
   }
 }
 
-// TODO: remove if we keep the faster alternative version
 bool isSolid(const Voxel& vxl, const std::vector<char>& solid_types){
   return std::find(solid_types.begin(), solid_types.end(), vxl.getType()) != solid_types.end();
 }

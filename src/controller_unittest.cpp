@@ -267,10 +267,12 @@ bool Ctrl::unittestSurface(){
     printf("f: %40s, g: %4.2f, d: %4i, r1: %4.1f\n", atom_filepath.c_str(), grid_step, max_depth, rad_probe1);
     printf("vdW: %20.10f, Excluded: %20.10f\n", data.volumes[0b00000011]-14337.45, data.volumes[0b00000101]-3952.565);
     printf("P1 Core: %20.10f, P1 Shell: %20.10f\n", data.volumes[0b00001001]-103215.383, data.volumes[0b00010001]-9157.002);
-    std::vector<double> cav = {112156.364,30.030,29.831,27.885,23.585,17.232,14.418,13.883,10.940,10.467,9.698,9.116,8.658,3.965,2.354,1.831,1.437,0.479,0.212};
+    std::vector<double> cav_core = {7993.6335860991,5.8886820000,2.8789670000,5.2640810000,3.3330790000,1.2919890000,0.6405240000,1.1345240000,0.8640930000,1.4862960000,0.2028680000,0.1426710000,0.1014340000,0.0508800000,0.0508800000,0.0508800000,0.0508800000,0.0508800000,0.0508800000};
+    std::vector<double> cav_shell = {6881.3565860501,48.9658290000,52.5750410000,46.1779240000,41.7236070000,33.4249720000,29.8395440000,29.0761200000,25.4241840000,28.5505040000,22.4953940000,21.2451750000,20.8986260000,16.7730830000,11.5013900000,10.8661130000,10.3173070000, 5.0289150000, 3.0740820000};
+
     for (size_t i = 0; i< data.cavities.size(); ++i){
-      printf("Cavity vol: %20.10f A^3\n", data.getCavVolume(i)-cav[i]);
-//      printf("Cavity vol: %20.10f A^3\n", data.getCavVolume(i));
+      printf("Cavity surf core: %20.10f A^3\n", data.getCavSurfCore(i)-cav_core[i]);
+      printf("Cavity surf shell: %20.10f A^3\n", data.getCavSurfShell(i)-cav_shell[i]);
     }
     printf("Time elapsed: %10.5f s\n", data.getTime()-0.83+0.74-136.8);
   }
