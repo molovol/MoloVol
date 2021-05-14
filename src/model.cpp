@@ -1,4 +1,3 @@
-
 #include "model.h"
 #include "controller.h"
 #include "atom.h"
@@ -140,9 +139,8 @@ CalcReportBundle Model::generateSurfaceData(){
   std::vector<std::vector<char>> solid_types =
   { {0b00000011},
     {0b00000011, 0b00000101},
-    // the "negative" versions below are better since fewer members needs to be searched
-    {0b00001001, 0b00010001}, //{0b00000011, 0b00000101, 0b00100001, 0b01000001},
-    {0b00001001} }; //{0b00000011, 0b00000101, 0b00010001, 0b00100001, 0b01000001},
+    {0b00001001, 0b00010001}, 
+    {0b00001001} };
 
   // full structure surfaces
   _data.surf_vdw = _cell.calcSurfArea(solid_types[0], _data.analyze_unit_cell);

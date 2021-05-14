@@ -442,6 +442,7 @@ double Space::calcSurfArea(const std::vector<char>& types, const bool unit_cell)
 }
 
 // overload for cavity surfaces
+// solid types MUST also have appropriate ID!
 double Space::calcSurfArea(const std::vector<char>& types, const bool unit_cell, const unsigned char id, std::array<unsigned int,3> start_index, std::array<unsigned int,3> end_index){
   // the surface area is counted between voxels, thus we need to check voxels around the limits of the cavity
   if(!unit_cell){
@@ -633,7 +634,7 @@ void evalCubeMultiSurface(const std::array<Voxel,8> vertices, std::vector<std::v
   }
 }
 
-bool isSolid(const Voxel& vxl, const std::vector<char>& solid_types){
+inline bool isSolid(const Voxel& vxl, const std::vector<char>& solid_types){
   return std::find(solid_types.begin(), solid_types.end(), vxl.getType()) != solid_types.end();
 }
 
