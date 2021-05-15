@@ -145,7 +145,7 @@ CalcReportBundle Model::generateSurfaceData(){
   // full structure surfaces
   _data.surf_vdw = _cell.calcSurfArea(solid_types[0], _data.analyze_unit_cell);
   _data.surf_molecular = _cell.calcSurfArea(solid_types[1], _data.analyze_unit_cell);
- 
+  
   _data.surf_probe_excluded 
     = optionProbeMode()? _cell.calcSurfArea(solid_types[2], _data.analyze_unit_cell) : _data.surf_molecular;
 

@@ -59,7 +59,6 @@ class Space{
                             std::map<unsigned char, std::array<unsigned,3>>&);
 
     // surface area
-    std::vector<std::vector<double>> sumSurfArea(const std::vector<std::vector<char>>&, const std::vector<bool>&, const unsigned char); // TODO: remove if we keep the faster alternative version
     double calcSurfArea(const std::vector<char>&, const bool);
     double calcSurfArea(const std::vector<char>&, const bool, const unsigned char, std::array<unsigned int,3>, std::array<unsigned int,3>);
 

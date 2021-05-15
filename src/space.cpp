@@ -389,48 +389,6 @@ void Space::tallyVoxelsUnitCell(std::array<unsigned int,3> bot_lvl_index,
 // SURFACE AREA //
 //////////////////
 
-// TODO: remove if we keep the faster alternative version
-void evalCubeMultiSurface(const std::array<Voxel,8> vertices, std::vector<std::vector<double>>& surface_areas, const std::vector<std::vector<char>>& solid_types, const std::vector<bool>& for_every_cavity);
-bool isSolid(const Voxel&, const std::vector<char>&);
-
-// TODO: remove if we keep the faster alternative version
-std::vector<std::vector<double>> Space::sumSurfArea(const std::vector<std::vector<char>>& solid_types, const std::vector<bool>& for_every_cavity, const unsigned char n_cavities){
-  assert(solid_types.size() == for_every_cavity.size());
-  // allocate memory
-  std::vector<std::vector<double>> surface_areas(solid_types.size());
-  for (size_t i = 0; i < surface_areas.size(); ++i){
-    surface_areas[i] = std::vector<double> (for_every_cavity[i]? n_cavities : 1);
-  }
-
-  constexpr char lvl = 0;
-  std::array<unsigned long,3> n_vxl = gridstepsOnLvl(lvl);
-  for (unsigned x = 0; x < n_vxl[0]-1; ++x){
-    for (unsigned y = 0; y < n_vxl[1]-1; ++y){
-      for (unsigned z = 0; z < n_vxl[2]-1; ++z){
-        // TODO: consider passing voxels by reference rather than value
-        evalCubeMultiSurface({getVxlFromGrid(x,y,z,lvl),
-            getVxlFromGrid(x+1,y,z,lvl),
-            getVxlFromGrid(x,y+1,z,lvl),
-            getVxlFromGrid(x+1,y+1,z,lvl),
-            getVxlFromGrid(x,y,z+1,lvl),
-            getVxlFromGrid(x+1,y,z+1,lvl),
-            getVxlFromGrid(x,y+1,z+1,lvl),
-            getVxlFromGrid(x+1,y+1,z+1,lvl)},
-          surface_areas,
-          solid_types,
-          for_every_cavity);
-      }
-    }
-  }
-
-  for (auto& area_type : surface_areas){
-    for (auto& area_value : area_type){
-      area_value *= getVxlSize()*getVxlSize();
-    }
-  }
-  return surface_areas;
-}
-
 // overloaded for full molecule surfaces
 // sets the appropriate start and end indices
 double Space::calcSurfArea(const std::vector<char>& types, const bool unit_cell){
@@ -583,6 +541,8 @@ double Space::tallySurface(const std::vector<char>& types, std::array<unsigned i
   return surface;
 }
 
+bool isSolid(const Voxel&, const std::vector<char>&);
+
 unsigned char Space::evalMarchingCubeConfig(const std::array<unsigned int,3>& index, const std::vector<char>& types, const unsigned char id, const bool cavity){
   unsigned char config = 0; // configuration of the marching cube stored as a byte
   // check the starting voxel and its 7 neighbors to define a marching cube configuration
@@ -601,37 +561,6 @@ unsigned char Space::evalMarchingCubeConfig(const std::array<unsigned int,3>& in
     }
   }
   return config;
-}
-
-// TODO: remove if we keep the faster alternative version
-void evalCubeMultiSurface(const std::array<Voxel,8> vertices, std::vector<std::vector<double>>& surface_areas, const std::vector<std::vector<char>>& solid_types, const std::vector<bool>& for_every_cavity){
-
-  for (size_t i = 0; i < surface_areas.size(); ++i){
-
-    if (for_every_cavity[i]) {
-      std::map<unsigned char, unsigned char> id_tally;
-      unsigned char surf_config = 0;
-      for (char j = 0; j < 8; ++j){
-        setBit(surf_config, j, isSolid(vertices[j], solid_types[i]));
-        id_tally[vertices[j].getID()]++;
-      }
-      id_tally[0] = 0;
-      unsigned char total = std::accumulate(id_tally.begin(), id_tally.end(), 0, [](unsigned char i, std::pair<unsigned char, unsigned char> p){return (i+p.second);});
-
-      for (auto const& [id,tally] : id_tally){
-        if (id){
-          surface_areas[i][id-1] += SurfaceLUT::typeToArea(SurfaceLUT::configToType(surf_config)) * tally/total;
-        }
-      }
-    }
-    else {
-      unsigned char surf_config = 0;
-      for (char j = 0; j < 8; ++j){
-        setBit(surf_config, j, isSolid(vertices[j], solid_types[i]));
-      }
-      surface_areas[i][0] += SurfaceLUT::typeToArea(SurfaceLUT::configToType(surf_config));
-    }
-  }
 }
 
 inline bool isSolid(const Voxel& vxl, const std::vector<char>& solid_types){
