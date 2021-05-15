@@ -145,13 +145,10 @@ CalcReportBundle Model::generateSurfaceData(){
   // full structure surfaces
   _data.surf_vdw = _cell.calcSurfArea(solid_types[0], _data.analyze_unit_cell);
   _data.surf_molecular = _cell.calcSurfArea(solid_types[1], _data.analyze_unit_cell);
+ 
+  _data.surf_probe_excluded 
+    = optionProbeMode()? _cell.calcSurfArea(solid_types[2], _data.analyze_unit_cell) : _data.surf_molecular;
 
-  if(_data.probe_mode){
-    _data.surf_probe_excluded = _cell.calcSurfArea(solid_types[2], _data.analyze_unit_cell);
-  }
-  else{
-    _data.surf_probe_excluded = _data.surf_molecular;
-  }
   _data.surf_probe_accessible = _cell.calcSurfArea(solid_types[3], _data.analyze_unit_cell);
 
   // cavity surfaces
