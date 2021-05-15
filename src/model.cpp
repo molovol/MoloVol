@@ -139,24 +139,24 @@ CalcReportBundle Model::generateSurfaceData(){
   std::vector<std::vector<char>> solid_types =
   { {0b00000011},
     {0b00000011, 0b00000101},
-    {0b00001001, 0b00010001}, 
+    {0b00001001, 0b00010001},
     {0b00001001} };
 
   // full structure surfaces
-  _data.surf_vdw = _cell.calcSurfArea(solid_types[0], _data.analyze_unit_cell);
-  _data.surf_molecular = _cell.calcSurfArea(solid_types[1], _data.analyze_unit_cell);
-  
-  _data.surf_probe_excluded 
-    = optionProbeMode()? _cell.calcSurfArea(solid_types[2], _data.analyze_unit_cell) : _data.surf_molecular;
+  _data.surf_vdw = _cell.calcSurfArea(solid_types[0]);
+  _data.surf_molecular = _cell.calcSurfArea(solid_types[1]);
 
-  _data.surf_probe_accessible = _cell.calcSurfArea(solid_types[3], _data.analyze_unit_cell);
+  _data.surf_probe_excluded
+    = optionProbeMode()? _cell.calcSurfArea(solid_types[2]) : _data.surf_molecular;
+
+  _data.surf_probe_accessible = _cell.calcSurfArea(solid_types[3]);
 
   // cavity surfaces
   for (Cavity& cav : _data.cavities){
-    cav.surf_shell = _cell.calcSurfArea(solid_types[2], _data.analyze_unit_cell, cav.id, cav.min_index, cav.max_index);
-    cav.surf_core = _cell.calcSurfArea(solid_types[3], _data.analyze_unit_cell, cav.id, cav.min_index, cav.max_index);
+    cav.surf_shell = _cell.calcSurfArea(solid_types[2], cav.id, cav.min_index, cav.max_index);
+    cav.surf_core = _cell.calcSurfArea(solid_types[3], cav.id, cav.min_index, cav.max_index);
   }
-  
+
   auto end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
   return _data;
@@ -234,7 +234,11 @@ CalcReportBundle Model::getBundle(){
 ///////////////////////////
 
 void Model::defineCell(){
-  _cell = Space(atoms, _data.grid_step, _data.max_depth, optionProbeMode()? getProbeRad2() : getProbeRad1());
+  std::array<double, 3> unit_cell_limits = {0,0,0};
+  if(optionAnalyzeUnitCell()){
+    unit_cell_limits = {_cart_matrix[0][0], _cart_matrix[1][1], _cart_matrix[2][2]};
+  }
+  _cell = Space(atoms, _data.grid_step, _data.max_depth, optionProbeMode()? getProbeRad2() : getProbeRad1(), optionAnalyzeUnitCell(), unit_cell_limits);
   return;
 }
 
@@ -263,7 +267,7 @@ CalcReportBundle Model::calcVolume(){
   start = std::chrono::steady_clock::now();
   if(_data.analyze_unit_cell){
     std::array<double,3> unit_cell_limits = {_cart_matrix[0][0],_cart_matrix[1][1],_cart_matrix[2][2]};
-    _cell.getUnitCellVolume(_data.volumes, _data.cavities, unit_cell_limits);
+    _cell.getUnitCellVolume(_data.volumes, _data.cavities);
   }
   else{
     _cell.getVolume(_data.volumes, _data.cavities);

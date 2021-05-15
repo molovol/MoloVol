@@ -14,8 +14,8 @@
 // CONSTRUCTOR //
 /////////////////
 
-Space::Space(std::vector<Atom> &atoms, const double bot_lvl_vxl_dist, const int depth, const double r_probe)
-  :grid_size(bot_lvl_vxl_dist), max_depth(depth){
+Space::Space(std::vector<Atom> &atoms, const double bot_lvl_vxl_dist, const int depth, const double r_probe, const bool unit_cell_option, const std::array<double,3> unit_cell_axes)
+  :grid_size(bot_lvl_vxl_dist), max_depth(depth), unit_cell_limits(unit_cell_axes), unit_cell(unit_cell_option){
   setBoundaries(atoms,r_probe+2*bot_lvl_vxl_dist);
   initGrid();
 }
@@ -60,6 +60,18 @@ void Space::setBoundaries(const std::vector<Atom> &atoms, const double add_space
   for(int dim = 0; dim < 3; dim++){
     cart_min[dim] -= (add_space + max_radius);
     cart_max[dim] += (add_space + max_radius);
+  }
+  // in case the unit cell has wide empty gaps on the sides, the grid would be smaller than the unit cell which would cause problems for volume and surface calculation
+  // the grid boundaries need to be set further than the unit cell boundaries
+  if(unit_cell){
+    for(int dim = 0; dim < 3; dim++){
+      if(cart_min[dim] >= -2 * grid_size){
+        cart_min[dim] = -2 * grid_size;
+      }
+      if(cart_max[dim] <= unit_cell_limits[dim] + 2 * grid_size){
+        cart_max[dim] = unit_cell_limits[dim] + 2 * grid_size;
+      }
+    }
   }
   // align the grid with origin (0,0,0) of atomic Cartesian coordinates, useful for unit cell analysis
   for(int dim = 0; dim < 3; dim++){
@@ -256,8 +268,7 @@ void Space::getVolume(std::map<char,double>& volumes, std::vector<Cavity>& cavit
 }
 
 void Space::getUnitCellVolume(std::map<char,double>& volumes,
-                              std::vector<Cavity>& cavities,
-                              std::array<double,3> unit_cell_limits){
+                              std::vector<Cavity>& cavities){
   // clear all output variables
   volumes.clear();
   cavities.clear();
@@ -271,7 +282,7 @@ void Space::getUnitCellVolume(std::map<char,double>& volumes,
 
   std::vector<char> types_to_tally{0b00000011,0b00000101,0b00001001,0b00010001,0b00100001,0b01000001};
 
-  setUnitCellIndexes(unit_cell_limits);
+  setUnitCellIndexes();
 
   // count bottom level voxels per type inside the unit cell
   std::array<unsigned int,3> bot_lvl_index;
@@ -292,7 +303,7 @@ void Space::getUnitCellVolume(std::map<char,double>& volumes,
     bot_lvl_index[i] = unit_cell_end_index[i];
     for (bot_lvl_index[j] = unit_cell_start_index[j]; bot_lvl_index[j] < unit_cell_end_index[j]; bot_lvl_index[j]++){
       for (bot_lvl_index[k] = unit_cell_start_index[k]; bot_lvl_index[k] < unit_cell_end_index[k]; bot_lvl_index[k]++){
-        double voxel_fraction = unit_cell_mod_index[i]/grid_size;
+        double voxel_fraction = unit_cell_mod_index[i];
         tallyVoxelsUnitCell(bot_lvl_index, voxel_fraction, type_tally, id_core_tally, id_shell_tally, id_min, id_max);
       }
     }
@@ -300,7 +311,7 @@ void Space::getUnitCellVolume(std::map<char,double>& volumes,
     // count voxels in the three edges connecting end faces of the unit cell
     bot_lvl_index[j] = unit_cell_end_index[j];
     for (bot_lvl_index[k] = unit_cell_start_index[k]; bot_lvl_index[k] < unit_cell_end_index[k]; bot_lvl_index[k]++){
-      double voxel_fraction = unit_cell_mod_index[i]*unit_cell_mod_index[j]/(grid_size*grid_size);
+      double voxel_fraction = unit_cell_mod_index[i]*unit_cell_mod_index[j];
       tallyVoxelsUnitCell(bot_lvl_index, voxel_fraction, type_tally, id_core_tally, id_shell_tally, id_min, id_max);
     }
   }
@@ -309,7 +320,7 @@ void Space::getUnitCellVolume(std::map<char,double>& volumes,
   for(int i = 0; i < 3; i++){
     bot_lvl_index[i] = unit_cell_end_index[i];
   }
-  double voxel_fraction = unit_cell_mod_index[0]*unit_cell_mod_index[1]*unit_cell_mod_index[2]/(grid_size*grid_size*grid_size);
+  double voxel_fraction = unit_cell_mod_index[0]*unit_cell_mod_index[1]*unit_cell_mod_index[2];
   tallyVoxelsUnitCell(bot_lvl_index, voxel_fraction, type_tally, id_core_tally, id_shell_tally, id_min, id_max);
 
   // calculate the volume of a single bottom level voxel
@@ -342,14 +353,15 @@ void Space::getUnitCellVolume(std::map<char,double>& volumes,
   }
 }
 
-void Space::setUnitCellIndexes(const std::array<double,3> unit_cell_limits){
+void Space::setUnitCellIndexes(){
   for(int i = 0; i < 3; i++){
     // +0.5 to avoid rounding errors
     unit_cell_start_index[i] = int(0.5 - cart_min[i]/grid_size);
-    // no rounding because fmod() in unit_cell_mod_index will correct any rounding error in unit_cell_end_index
-    unit_cell_end_index[i] = unit_cell_start_index[i] + unit_cell_limits[i]/grid_size;
-    unit_cell_mod_index[i] = std::fmod(unit_cell_limits[i],grid_size);
-  }
+    // no rounding because unit_cell_mod_index will correct any rounding error in unit_cell_end_index
+    unit_cell_end_index[i] = unit_cell_start_index[i] + (unit_cell_limits[i]/grid_size);
+    // warning: fmod() provided a wrong value in some cases so the fmod calculation is done manually
+    unit_cell_mod_index[i] = (unit_cell_limits[i] - (int(unit_cell_limits[i]/grid_size) * grid_size)) / grid_size;
+   }
 }
 
 void Space::tallyVoxelsUnitCell(std::array<unsigned int,3> bot_lvl_index,
@@ -391,7 +403,7 @@ void Space::tallyVoxelsUnitCell(std::array<unsigned int,3> bot_lvl_index,
 
 // overloaded for full molecule surfaces
 // sets the appropriate start and end indices
-double Space::calcSurfArea(const std::vector<char>& types, const bool unit_cell){
+double Space::calcSurfArea(const std::vector<char>& types){
   std::array<unsigned,3> start_index = unit_cell? unit_cell_start_index : std::array<unsigned,3>({0,0,0});
   std::array<unsigned,3> end_index   = unit_cell? unit_cell_end_index   : getGrid(0).getNumElements<unsigned>();
   double surface = tallySurface(types, start_index, end_index, unit_cell);
@@ -401,7 +413,7 @@ double Space::calcSurfArea(const std::vector<char>& types, const bool unit_cell)
 
 // overload for cavity surfaces
 // solid types MUST also have appropriate ID!
-double Space::calcSurfArea(const std::vector<char>& types, const bool unit_cell, const unsigned char id, std::array<unsigned int,3> start_index, std::array<unsigned int,3> end_index){
+double Space::calcSurfArea(const std::vector<char>& types, const unsigned char id, std::array<unsigned int,3> start_index, std::array<unsigned int,3> end_index){
   // the surface area is counted between voxels, thus we need to check voxels around the limits of the cavity
   if(!unit_cell){
     for(char i = 0; i < 3; i++){
@@ -421,12 +433,12 @@ double Space::calcSurfArea(const std::vector<char>& types, const bool unit_cell,
       if(end_index[i] < unit_cell_end_index[i]){end_index[i]++;}
     }
   }
-  double surface = tallySurface(types, start_index, end_index, unit_cell, id, true);
+  double surface = tallySurface(types, start_index, end_index, id, true);
   // scale the surface area in squared gridstep units
   return (surface * (grid_size*grid_size));
 }
 
-double Space::tallySurface(const std::vector<char>& types, std::array<unsigned int,3>& start_index, std::array<unsigned int,3>& end_index, const bool unit_cell, const unsigned char id, const bool cavity){
+double Space::tallySurface(const std::vector<char>& types, std::array<unsigned int,3>& start_index, std::array<unsigned int,3>& end_index, const unsigned char id, const bool cavity){
   double surface = 0;
 
   // loop over all voxels within range minus one in each direction because the +1 neighbors will be checked at the same time
