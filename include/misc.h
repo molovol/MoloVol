@@ -37,13 +37,6 @@ void print(std::array<T,3> arr){
   }
   std::cout << std::endl;
 }
-/*
-template <typename T>
-void swap(T& i, T& j){
-  int temp = i;
-  i = j;
-  j = temp;
-}*/
 
 template <typename T1, typename T2>
 std::array<T1,3> add(std::array<T1,3> arr1, const std::array<T2,3>& arr2){
@@ -56,6 +49,10 @@ std::array<T1,3> add(std::array<T1,3> arr1, const std::array<T2,3>& arr2){
 int pow2(int);
 
 void removeEOL(std::string& str);
+
+inline double custom_fmod(double numer, double denom){
+  return (numer - int((numer/denom)) * denom);
+}
 
 ////////////////////
 // BIT OPERATIONS //

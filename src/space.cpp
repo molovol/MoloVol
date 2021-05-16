@@ -75,8 +75,8 @@ void Space::setBoundaries(const std::vector<Atom> &atoms, const double add_space
   }
   // align the grid with origin (0,0,0) of atomic Cartesian coordinates, useful for unit cell analysis
   for(int dim = 0; dim < 3; dim++){
-    if(std::fmod(_cart_min[dim],_grid_size) != 0){
-      _cart_min[dim] -= std::fmod(_cart_min[dim],_grid_size);
+    if(custom_fmod(_cart_min[dim],_grid_size) != 0){
+      _cart_min[dim] -= custom_fmod(_cart_min[dim],_grid_size);
     }
   }
   return;
@@ -359,8 +359,8 @@ void Space::setUnitCellIndexes(){
     _unit_cell_start_index[i] = int(0.5 - _cart_min[i]/_grid_size);
     // no rounding because _unit_cell_mod_index will correct any rounding error in _unit_cell_end_index
     _unit_cell_end_index[i] = _unit_cell_start_index[i] + (_unit_cell_limits[i]/_grid_size);
-    // warning: fmod() provided a wrong value in some cases so the fmod calculation is done manually
-    _unit_cell_mod_index[i] = (_unit_cell_limits[i] - (int(_unit_cell_limits[i]/_grid_size) * _grid_size)) / _grid_size;
+    // warning: std::fmod() provided a wrong value in some cases so the fmod calculation is done manually
+    _unit_cell_mod_index[i] = custom_fmod(_unit_cell_limits[i],_grid_size) / _grid_size;
    }
 }
 
