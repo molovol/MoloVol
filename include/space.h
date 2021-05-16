@@ -63,15 +63,15 @@ class Space{
     double calcSurfArea(const std::vector<char>&, const unsigned char, std::array<unsigned int,3>, std::array<unsigned int,3>);
 
   private:
-    std::array <double,3> cart_min; // this is also the "origin" of the space
-    std::array <double,3> cart_max;
+    std::array <double,3> _cart_min; // this is also the "origin" of the space
+    std::array <double,3> _cart_max;
     std::vector<Container3D<Voxel>> _grid;
-    std::array<unsigned int,3> n_gridsteps; // number of top level voxels in x,y,z direction
-    bool unit_cell; // option to analyze unit cell
-    std::array<double,3> unit_cell_limits; // cartesian coordinates of the unit cell orthogonal axes
-    std::array<unsigned int,3> unit_cell_start_index; // bottom level voxels indexes for the start of the unit cell in x,y,z direction
-    std::array<unsigned int,3> unit_cell_end_index; // bottom level voxels indexes for the end of the unit cell in x,y,z direction
-    std::array<double,3> unit_cell_mod_index; // bottom level voxels fractional indexes for the end of the unit cell in x,y,z direction
+    std::array<unsigned int,3> _n_gridsteps; // number of top level voxels in x,y,z direction
+    bool _unit_cell; // option to analyze unit cell
+    std::array<double,3> _unit_cell_limits; // cartesian coordinates of the unit cell orthogonal axes
+    std::array<unsigned int,3> _unit_cell_start_index; // bottom level voxels indexes for the start of the unit cell in x,y,z direction
+    std::array<unsigned int,3> _unit_cell_end_index; // bottom level voxels indexes for the end of the unit cell in x,y,z direction
+    std::array<double,3> _unit_cell_mod_index; // bottom level voxels fractional indexes for the end of the unit cell in x,y,z direction
     double grid_size;
     int max_depth; // for voxels
 
@@ -93,7 +93,7 @@ class Space{
 class SurfaceLUT {
   private:
     static const std::array<unsigned char,256> types_by_config;
-    static const std::array<double, 15> area_by_config;
+    static const std::array<double, 15> area_by_type;
   public:
     static unsigned char configToType(unsigned char config);
     static double typeToArea(unsigned char type);
