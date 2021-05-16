@@ -41,7 +41,7 @@ class Space{
     std::array<std::array<unsigned int,3>,2> getUnitCellIndexes();
     unsigned long int totalVxlOnLvl(const int) const;
 
-    int getMaxDepth(){return max_depth;}
+    int getMaxDepth(){return _max_depth;}
     // output
     void printGrid();
 
@@ -72,8 +72,8 @@ class Space{
     std::array<unsigned int,3> _unit_cell_start_index; // bottom level voxels indexes for the start of the unit cell in x,y,z direction
     std::array<unsigned int,3> _unit_cell_end_index; // bottom level voxels indexes for the end of the unit cell in x,y,z direction
     std::array<double,3> _unit_cell_mod_index; // bottom level voxels fractional indexes for the end of the unit cell in x,y,z direction
-    double grid_size;
-    int max_depth; // for voxels
+    double _grid_size;
+    int _max_depth; // for voxels
 
     void setBoundaries(const std::vector<Atom>&, const double);
 
