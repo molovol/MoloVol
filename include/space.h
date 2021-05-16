@@ -67,13 +67,13 @@ class Space{
     std::array <double,3> _cart_max;
     std::vector<Container3D<Voxel>> _grid;
     std::array<unsigned int,3> _n_gridsteps; // number of top level voxels in x,y,z direction
-    bool _unit_cell; // option to analyze unit cell
-    std::array<double,3> _unit_cell_limits; // cartesian coordinates of the unit cell orthogonal axes
     std::array<unsigned int,3> _unit_cell_start_index; // bottom level voxels indexes for the start of the unit cell in x,y,z direction
     std::array<unsigned int,3> _unit_cell_end_index; // bottom level voxels indexes for the end of the unit cell in x,y,z direction
     std::array<double,3> _unit_cell_mod_index; // bottom level voxels fractional indexes for the end of the unit cell in x,y,z direction
     double _grid_size;
     int _max_depth; // for voxels
+    std::array<double,3> _unit_cell_limits; // cartesian coordinates of the unit cell orthogonal axes
+    bool _unit_cell; // option to analyze unit cell
 
     void setBoundaries(const std::vector<Atom>&, const double);
 

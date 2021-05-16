@@ -266,7 +266,6 @@ CalcReportBundle Model::calcVolume(){
 
   start = std::chrono::steady_clock::now();
   if(_data.analyze_unit_cell){
-    std::array<double,3> unit_cell_limits = {_cart_matrix[0][0],_cart_matrix[1][1],_cart_matrix[2][2]};
     _cell.getUnitCellVolume(_data.volumes, _data.cavities);
   }
   else{
