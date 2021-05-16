@@ -104,7 +104,7 @@ bool Ctrl::runCalculation(){
 
   CalcReportBundle data = current_calculation->generateData();
 
-  if (data.success){
+  if(data.success){
     notifyUser("\nResult for ");
     notifyUser(Symbol::generateChemicalFormulaUnicode(data.chemical_formula));
     notifyUser("\nElapsed time: " + std::to_string(data.getTime()) + " s");
@@ -112,16 +112,22 @@ bool Ctrl::runCalculation(){
     notifyUser(Symbol::angstrom() + Symbol::cubed());
     notifyUser("\nExcluded void volume: " + std::to_string(data.volumes[0b00000101]) + " ");
     notifyUser(Symbol::angstrom() + Symbol::cubed());
-    if (data.calc_surface_areas){
-      notifyUser("\nVan der Waals surface: " + std::to_string(data.getSurfVdw()) + " ");
-      notifyUser(Symbol::angstrom() + Symbol::squared());
-      notifyUser("\nProbe inaccessible surface: " + std::to_string(data.getSurfProbeInaccessible()) + " ");
-      notifyUser(Symbol::angstrom() + Symbol::squared());
-    }
     notifyUser("\nProbe 1 core volume: " + std::to_string(data.volumes[0b00001001]) + " ");
     notifyUser(Symbol::angstrom() + Symbol::cubed());
     notifyUser("\nProbe 1 shell volume: " + std::to_string(data.volumes[0b00010001]) + " ");
     notifyUser(Symbol::angstrom() + Symbol::cubed());
+    if(data.calc_surface_areas){
+      notifyUser("\nVan der Waals surface: " + std::to_string(data.getSurfVdw()) + " ");
+      notifyUser(Symbol::angstrom() + Symbol::squared());
+      if(data.probe_mode){
+        notifyUser("\nMolecular surface: " + std::to_string(data.getSurfMolecular()) + " ");
+        notifyUser(Symbol::angstrom() + Symbol::squared());
+      }
+      notifyUser("\nProbe excluded surface: " + std::to_string(data.getSurfProbeExcluded()) + " ");
+      notifyUser(Symbol::angstrom() + Symbol::squared());
+      notifyUser("\nProbe accessible surface: " + std::to_string(data.getSurfProbeAccessible()) + " ");
+      notifyUser(Symbol::angstrom() + Symbol::squared());
+    }
     if(data.probe_mode){
       notifyUser("\nProbe 2 core volume: " + std::to_string(data.volumes[0b00100001]) + " ");
       notifyUser(Symbol::angstrom() + Symbol::cubed());

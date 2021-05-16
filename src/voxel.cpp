@@ -81,8 +81,6 @@ std::vector<std::vector<std::array<int,3>>> SearchIndex::computeIndices(unsigned
 // list all unique combinations of three integers, whose sum added results in n
 std::vector<std::array<unsigned int,3>> sumOfThreeSquares(unsigned long int n){
   std::vector<std::array<unsigned int,3>> list_of_roots;
-  // TODO roots is unused => remove ?
-  std::array<unsigned int,3> roots;
   for (unsigned int x = 0; x <= std::sqrt(n); x++){
     unsigned int diff = n - std::pow(x,2);
     for (unsigned int y = x; y <= std::sqrt(diff); y++){
@@ -395,7 +393,7 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
     std::array<unsigned,3> nb_index;
     for (const auto& shell : neighbour_indices){
       for (const auto& rel_index : shell){
-        
+
         nb_index = add(vxl.index, rel_index);
         if (!s_cell->isInBounds(nb_index,vxl.lvl)){continue;} // skip if index is invalid
         Voxel& nb_vxl = s_cell->getVxlFromGrid(nb_index,vxl.lvl);
@@ -459,7 +457,7 @@ void Voxel::ascend(std::vector<VoxelLoc>& stack, const unsigned char id, const s
   // compare index with index of previous voxel
   // if voxel and previous voxel dont't belong to the same parent and this is not top lvl vxl
   // then compare types of this voxel and parent voxel
-  
+
   bool same_vxl = false;
   for (char dim = 0; dim < 3; ++dim){
     if (!nb_relation[dim]){
@@ -577,8 +575,6 @@ void Voxel::tallyVoxelsOfType(std::map<char,unsigned>& type_tally,
   // if voxel is of type "mixed" (i.e. data vector is not empty)
   if(hasSubvoxel()){
     // then total number of voxels is given by tallying all subvoxels
-    // TODO remove if unneeded
-    unsigned int total = 0;
     std::array<unsigned,3> sub_index;
     for(char x = 0; x < 2; ++x){
       sub_index[0] = index[0]*2 + x;

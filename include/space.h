@@ -16,7 +16,7 @@ class Space{
   public:
     // constructors
     Space() = default;
-    Space(std::vector<Atom>&, const double, const int, const double);
+    Space(std::vector<Atom>&, const double, const int, const double, const bool, const std::array<double,3>);
 
     // access
     std::array <double,3> getMin();
@@ -38,16 +38,18 @@ class Space{
     Voxel& getTopVxl(const std::array<unsigned int,3>);
     Voxel& getTopVxl(const std::array<int,3>);
     std::array<unsigned int,3> getGridsteps();
+    std::array<std::array<unsigned int,3>,2> getUnitCellIndexes();
     unsigned long int totalVxlOnLvl(const int) const;
 
-    int getMaxDepth(){return max_depth;}
+    int getMaxDepth(){return _max_depth;}
     // output
     void printGrid();
 
     // type evaluation
     void assignTypeInGrid(const AtomTree&, const double, const double, bool, bool&);
     void getVolume(std::map<char,double>&, std::vector<Cavity>&);
-    void getUnitCellVolume(std::map<char,double>&, std::vector<Cavity>&, std::array<double,3>);
+    void getUnitCellVolume(std::map<char,double>&, std::vector<Cavity>&);
+    void setUnitCellIndexes();
     void tallyVoxelsUnitCell(std::array<unsigned int,3>,
                             double,
                             std::map<char, double>&,
@@ -57,15 +59,21 @@ class Space{
                             std::map<unsigned char, std::array<unsigned,3>>&);
 
     // surface area
-    std::vector<std::vector<double>> sumSurfArea(const std::vector<std::vector<char>>&, const std::vector<bool>&, const unsigned char);
+    double calcSurfArea(const std::vector<char>&);
+    double calcSurfArea(const std::vector<char>&, const unsigned char, std::array<unsigned int,3>, std::array<unsigned int,3>);
 
   private:
-    std::array <double,3> cart_min; // this is also the "origin" of the space
-    std::array <double,3> cart_max;
+    std::array <double,3> _cart_min; // this is also the "origin" of the space
+    std::array <double,3> _cart_max;
     std::vector<Container3D<Voxel>> _grid;
-    std::array<unsigned int,3> n_gridsteps; // number of top level voxels in x,y,z direction
-    double grid_size;
-    int max_depth; // for voxels
+    std::array<unsigned int,3> _n_gridsteps; // number of top level voxels in x,y,z direction
+    std::array<unsigned int,3> _unit_cell_start_index; // bottom level voxels indexes for the start of the unit cell in x,y,z direction
+    std::array<unsigned int,3> _unit_cell_end_index; // bottom level voxels indexes for the end of the unit cell in x,y,z direction
+    std::array<double,3> _unit_cell_mod_index; // bottom level voxels fractional indexes for the end of the unit cell in x,y,z direction
+    double _grid_size;
+    int _max_depth; // for voxels
+    std::array<double,3> _unit_cell_limits; // cartesian coordinates of the unit cell orthogonal axes
+    bool _unit_cell; // option to analyze unit cell
 
     void setBoundaries(const std::vector<Atom>&, const double);
 
@@ -77,15 +85,19 @@ class Space{
     void descendToCore(unsigned char&, const std::array<unsigned,3>, int);
     void assignShellVsVoid();
 
+    double tallySurface(const std::vector<char>&, std::array<unsigned int,3>&, std::array<unsigned int,3>&, const unsigned char=0, const bool=false);
+    unsigned char evalMarchingCubeConfig(const std::array<unsigned int,3>&, const std::vector<char>&, const unsigned char, const bool);
+
 };
 
 class SurfaceLUT {
   private:
     static const std::array<unsigned char,256> types_by_config;
-    static const std::array<double, 15> area_by_config;
+    static const std::array<double, 15> area_by_type;
   public:
     static unsigned char configToType(unsigned char config);
     static double typeToArea(unsigned char type);
+    static double configToArea(unsigned char config);
 };
 
 #endif

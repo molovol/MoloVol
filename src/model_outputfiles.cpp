@@ -98,6 +98,18 @@ void Model::createReport(){
     output_report << "Probe 2 shell volume: " << _data.volumes[0b01000001] << " Å^3\n";
   }
 
+  if(_data.calc_surface_areas){
+    output_report << "\n\n\t////////////////////////////////////\n";
+    output_report << "\t// Total Surface Areas calculated //\n";
+    output_report << "\t////////////////////////////////////\n\n";
+    output_report << "Van der Waals surface: " << _data.surf_vdw << " Å^2\n";
+    if(_data.probe_mode){
+      output_report << "Molecular surface: " << _data.surf_molecular << " Å^2 (probes 1 and 2 excluded surface, similar to the Connolly surface)\n";
+    }
+    output_report << "Probe 1 excluded surface: " << _data.surf_probe_excluded << " Å^2 (similar to the Connolly surface)\n";
+    output_report << "Probe 1 accessible surface: " << _data.surf_probe_accessible << " Å^2 (similar to the Lee-Richards surface)\n";
+  }
+
   if(!_data.cavities.empty()){
     output_report << "\n\n\t///////////////////////////////\n";
     output_report << "\t// Cavities and pockets data //\n";
@@ -112,22 +124,26 @@ void Model::createReport(){
     output_report << "\tThis feature might be added in future versions if requested by the community.\n";
     output_report << "Note 2:\tSeparate cavities are defined by space accessible to the core of probe 1.\n";
     output_report << "\tTwo cavities can be in contact but if a probe cannot pass from one to the other, they are considered separated.\n";
-    output_report << "Note 3:\tIn single probe mode, the first 'cavity' consist of the outside space and pockets.\n";
+    output_report << "Note 3:\tIn single probe mode, the first 'cavity' consists of the outside space and pockets.\n";
     output_report << "Note 4:\tSome very small isolated chunks of probe 1 cores can be detected and lead to small cavities.\n";
     output_report << "Note 5:\tProbe occupied volume correspond to empty space as defined by the molecular surface (similar to the Connolly surface).\n";
     output_report << "Note 6:\tProbe accessible volume correspond to empty space as defined\n";
     output_report << "\tby the surface accessible to its core (similar to the Lee-Richards surface).\n";
     output_report << "Note 7:\tFor a detailed shape of each cavity, check the surface maps.\n\n";
 
-    output_report << "Cavity\tOccupied\tAccessible\tCavity center coordinates (Å)\n";
-    output_report << "ID\tVolume (Å^3)\tVolume (Å^3)\tx\ty\tz\n";
+    output_report << "Cavity\tOccupied\tAccessible\t" << (_data.calc_surface_areas ? "Excluded\tAccessible\t" : "") << "Cavity center coordinates (Å)\n";
+    output_report << "ID\tVolume (Å^3)\tVolume (Å^3)\t" << (_data.calc_surface_areas ? "Surface (Å^2)\tSurface (Å^2)\t" : "") << "x\ty\tz\n";
     for(unsigned int i = 0; i < _data.cavities.size(); i++){
       std::array<double,3> cav_center = _data.getCavCenter(i);
       // default precision is 6, which means that double values will take less than a tab space
       output_report << i+1 << "\t"
                     << _data.cavities[i].getVolume() << "\t\t"
-                    << _data.cavities[i].core_vol << "\t\t"
-                    << cav_center[0] << "\t" << cav_center[1] << "\t" << cav_center[2] << "\n";
+                    << _data.cavities[i].core_vol << "\t\t";
+      if(_data.calc_surface_areas){
+        output_report << _data.cavities[i].surf_shell << "\t\t"
+                      << _data.cavities[i].surf_core << "\t\t";
+      }
+      output_report << cav_center[0] << "\t" << cav_center[1] << "\t" << cav_center[2] << "\n";
     }
   }
 
@@ -193,8 +209,8 @@ void Model::writeTotalSurfaceMap(){
   double vxl_length = _cell.getVxlSize();
   std::array<double,3> cell_min = _cell.getMin();
   std::array<double,3> origin;
-  std::array<size_t,3> start_index = {0,0,0};
-  std::array<size_t,3> end_index;
+  std::array<unsigned int,3> start_index = {0,0,0};
+  std::array<unsigned int,3> end_index;
   for(int i = 0; i < 3; i++){
     end_index[i] = n_elements[i];
   }
@@ -233,8 +249,8 @@ void Model::writeCavitiesMaps(){
   double vxl_length = _cell.getVxlSize();
   std::array<double,3> cell_min = _cell.getMin();
   std::array<double,3> origin;
-  std::array<size_t,3> start_index;
-  std::array<size_t,3> end_index;
+  std::array<unsigned int,3> start_index;
+  std::array<unsigned int,3> end_index;
 
   // loop over each cavity id
   for(size_t id = 0; id < _data.cavities.size(); id++){
@@ -259,8 +275,8 @@ void Model::writeSurfaceMap(std::string file_name,
                             double vxl_length,
                             std::array<unsigned long int,3> n_elements,
                             std::array<double,3> origin,
-                            std::array<size_t,3> start_index,
-                            std::array<size_t,3> end_index,
+                            std::array<unsigned int,3> start_index,
+                            std::array<unsigned int,3> end_index,
                             const bool partial_map,
                             const unsigned char id){
 

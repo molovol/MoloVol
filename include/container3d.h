@@ -52,8 +52,13 @@ class Container3D{
     T& getElement(const std::array<int,3> coord){
       return _data[coord[2] * _n_elements[0] * _n_elements[1] + coord[1] * _n_elements[0] + coord[0]];}
     // get boundaries
-    std::array<unsigned long int,3> getNumElements() const {
-      return _n_elements;
+    template <typename Q = unsigned long>
+    std::array<Q,3> getNumElements() const {
+      std::array<Q,3> arr;
+      for (char i = 0; i < 3; ++i){
+        arr[i] = static_cast<Q>(_n_elements[i]);
+      }
+      return arr;
     }
     // display 
     void print(){
