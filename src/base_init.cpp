@@ -123,11 +123,11 @@ void MainFrame::InitTopLevel(){
 
   // initPreCalcPanel();
   // contains browse panel and atom list panel
-  leftMainPanel = new wxPanel(this,PANEL_LeftMain);
+  leftMainPanel = new wxPanel(preCalcPanel,PANEL_LeftMain);
   leftMainPanel->SetBackgroundColour(col_panel);
 
   // contains parameter panel and send-and-receive panel
-  rightMainPanel = new wxPanel(this,PANEL_RightMain);
+  rightMainPanel = new wxPanel(preCalcPanel,PANEL_RightMain);
   rightMainPanel->SetBackgroundColour(col_panel);
   
   InitLeftMainPanel();
@@ -139,11 +139,11 @@ void MainFrame::InitTopLevel(){
   preCalcPanel->SetSizerAndFit(topLevelSizerH);
 
   // initPostCalcPanel();
-
+  //communicationPanel(); 
   //
   wxBoxSizer *boxSizerV = new wxBoxSizer(wxVERTICAL);
-  boxSizerV->Add(preCalcPanel, 1, wxBOTTOM, 5);
-  boxSizerV->Add(postCalcPanel, 1, wxTOP, 5);
+  boxSizerV->Add(preCalcPanel, 0, wxBOTTOM, 5);
+  boxSizerV->Add(postCalcPanel, 0, wxTOP, 5);
   SetSizerAndFit(boxSizerV);
 
   InitDefaultStates();
