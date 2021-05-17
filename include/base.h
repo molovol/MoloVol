@@ -62,55 +62,73 @@ class MainFrame: public wxFrame
     MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
 
   private:
+    wxPanel* preCalcPanel;
+      wxPanel* leftMainPanel;
+        wxPanel* browsePanel;
+          wxPanel* atomfilePanel;
+            wxStaticText* atomText;
+            wxButton* browseButton;
+            wxTextCtrl* filepathText;
+          wxPanel* radiusfilePanel;
+            wxStaticText* radiusText;
+            wxButton* radiusButton;
+            wxTextCtrl* radiuspathText;
+          wxPanel* fileOptionsPanel;
+            wxCheckBox* pdbHetatmCheckbox;
+            wxButton* loadFilesButton;
+        wxPanel* atomListPanel;
+          wxGrid* atomListGrid;
 
-    wxPanel* leftMainPanel;
-      wxPanel* browsePanel;
-        wxPanel* atomfilePanel;
-          wxStaticText* atomText;
-          wxButton* browseButton;
-          wxTextCtrl* filepathText;
-        wxPanel* radiusfilePanel;
-          wxStaticText* radiusText;
-          wxButton* radiusButton;
-          wxTextCtrl* radiuspathText;
-        wxPanel* fileOptionsPanel;
-          wxCheckBox* pdbHetatmCheckbox;
-          wxButton* loadFilesButton;
-      wxPanel* atomListPanel;
-        wxGrid* atomListGrid;
-
-    wxPanel* rightMainPanel;
-      wxPanel* parameterPanel;
-        wxCheckBox* unitCellCheckbox;
-        wxCheckBox* surfaceAreaCheckbox;
-        wxCheckBox* twoProbesCheckbox;
-        wxPanel* probe1Panel;
-          wxStaticText* probe1Text;
-          wxPanel* probe1InputPanel;
-            wxTextCtrl* probe1InputText;
-            wxStaticText* probe1UnitText; // possibly usable universally?
-        wxPanel* probe2Panel;
-          wxStaticText* probe2Text;
-          wxPanel* probe2InputPanel;
-            wxTextCtrl* probe2InputText;
-            wxStaticText* probe2UnitText; // possibly usable universally?
-        wxPanel* gridsizePanel;
-          wxStaticText* gridsizeText;
-          wxPanel* gridsizeInputPanel;
-            wxTextCtrl* gridsizeInputText;
-            wxStaticText* gridsizeUnitText; // possibly usable universally?
-        wxPanel* depthPanel;
-          wxStaticText* depthText;
-          wxSpinCtrl* depthInput;
-        wxCheckBox* reportCheckbox;
-        wxCheckBox* surfaceMapCheckbox;
-        wxCheckBox* cavityMapsCheckbox;
-        wxPanel* outputpathPanel;
-          wxStaticText* outputdirText;
-          wxDirPickerCtrl* outputdirPicker;
-      wxPanel* sandrPanel;
-        wxTextCtrl* outputText;
-        wxButton* calcButton;
+      wxPanel* rightMainPanel;
+        wxPanel* parameterPanel;
+          wxCheckBox* unitCellCheckbox;
+          wxCheckBox* surfaceAreaCheckbox;
+          wxCheckBox* twoProbesCheckbox;
+          wxPanel* probe1Panel;
+            wxStaticText* probe1Text;
+            wxPanel* probe1InputPanel;
+              wxTextCtrl* probe1InputText;
+              wxStaticText* probe1UnitText; // possibly usable universally?
+          wxPanel* probe2Panel;
+            wxStaticText* probe2Text;
+            wxPanel* probe2InputPanel;
+              wxTextCtrl* probe2InputText;
+              wxStaticText* probe2UnitText; // possibly usable universally?
+          wxPanel* gridsizePanel;
+            wxStaticText* gridsizeText;
+            wxPanel* gridsizeInputPanel;
+              wxTextCtrl* gridsizeInputText;
+              wxStaticText* gridsizeUnitText; // possibly usable universally?
+          wxPanel* depthPanel;
+            wxStaticText* depthText;
+            wxSpinCtrl* depthInput;
+          wxCheckBox* reportCheckbox;
+          wxCheckBox* surfaceMapCheckbox;
+          wxCheckBox* cavityMapsCheckbox;
+          wxPanel* outputpathPanel;
+            wxStaticText* outputdirText;
+            wxDirPickerCtrl* outputdirPicker;
+        wxPanel* sandrPanel;
+          wxTextCtrl* outputText;
+          wxButton* calcButton;
+    
+    wxPanel* postCalcPanel;
+      wxPanel* communicationPanel;
+        //wxGauge*
+        wxPanel* outputPanel;
+          //outputText from above
+          //wxGrid*
+      wxPanel* exportPanel;
+        wxPanel* reportExportPanel;
+          //wxButton*
+          //wxCheckBox*
+        wxPanel* totalMapExportPanel;
+          //wxButton*
+          //wxCheckBox*
+        wxPanel* cavityMapExportPanel;
+          //wxButton*
+          //wxCheckBox*
+        wxPanel* autoExportPanel;
 
     // set and manipulate gui interactivity
     void InitDefaultStates();
@@ -165,54 +183,73 @@ class MainFrame: public wxFrame
 enum
 {
   // assign an ID
-  PANEL_LeftMain = wxID_HIGHEST + 1,
-    PANEL_Browse,
-      PANEL_Atomfile,
-        TEXT_Atom,
-        BUTTON_Browse,
-        TEXT_Filename,
-      PANEL_Radiusfile,
-        TEXT_Radius,
-        BUTTON_Radius,
-        TEXT_Radiuspath,
-      PANEL_FileOptions,
-        CHECKBOX_Hetatm,
-        BUTTON_LoadFiles,
-    PANEL_AtomList,
-      GRID_AtomList,
-
-  PANEL_RightMain,
-    PANEL_Parameters,
-      CHECKBOX_UnitCell,
-      CHECKBOX_SurfaceArea,
-      CHECKBOX_TwoProbes,
-      PANEL_Probe1,
-        TEXT_Probe1,
-        PANEL_Probe1Input,
-          TEXT_Probe1Input,
-          TEXT_Probe1Unit,
-      PANEL_Probe2,
-        TEXT_Probe2,
-        PANEL_Probe2Input,
-          TEXT_Probe2Input,
-          TEXT_Probe2Unit,
-      PANEL_Grid,
-        TEXT_Grid,
-        PANEL_Gridinput,
-          TEXT_Gridinput,
-          TEXT_Gridunit,
-      PANEL_Depth,
-        TEXT_Depth,
-        SPIN_Depthinput,
-      CHECKBOX_Report,
-      CHECKBOX_SurfaceMap,
-      CHECKBOX_CavityMaps,
-      PANEL_Outputpath,
-        TEXT_Outputdir,
-        BUTTON_Output,
-    PANEL_Sandr,
-      TEXT_Output,
-      BUTTON_Calc
+  PANEL_PreCalc,
+    PANEL_LeftMain = wxID_HIGHEST + 1,
+      PANEL_Browse,
+        PANEL_Atomfile,
+          TEXT_Atom,
+          BUTTON_Browse,
+          TEXT_Filename,
+        PANEL_Radiusfile,
+          TEXT_Radius,
+          BUTTON_Radius,
+          TEXT_Radiuspath,
+        PANEL_FileOptions,
+          CHECKBOX_Hetatm,
+          BUTTON_LoadFiles,
+      PANEL_AtomList,
+        GRID_AtomList,
+  
+    PANEL_RightMain,
+      PANEL_Parameters,
+        CHECKBOX_UnitCell,
+        CHECKBOX_SurfaceArea,
+        CHECKBOX_TwoProbes,
+        PANEL_Probe1,
+          TEXT_Probe1,
+          PANEL_Probe1Input,
+            TEXT_Probe1Input,
+            TEXT_Probe1Unit,
+        PANEL_Probe2,
+          TEXT_Probe2,
+          PANEL_Probe2Input,
+            TEXT_Probe2Input,
+            TEXT_Probe2Unit,
+        PANEL_Grid,
+          TEXT_Grid,
+          PANEL_Gridinput,
+            TEXT_Gridinput,
+            TEXT_Gridunit,
+        PANEL_Depth,
+          TEXT_Depth,
+          SPIN_Depthinput,
+        CHECKBOX_Report,
+        CHECKBOX_SurfaceMap,
+        CHECKBOX_CavityMaps,
+        PANEL_Outputpath,
+          TEXT_Outputdir,
+          BUTTON_Output,
+      PANEL_Sandr,
+        TEXT_Output,
+        BUTTON_Calc,
+   
+  PANEL_PostCalc,
+    PANEL_Communication,
+      //wxGauge*
+      PANEL_Output,
+        //outputText from above
+        //wxGrid*
+    PANEL_Export,
+      PANEL_ReportExport,
+        //wxButton*
+        //wxCheckBox*
+      PANEL_TotalMapExport,
+        //wxButton*
+        //wxCheckBox*
+      PANEL_CavityMapExport,
+        //wxButton*
+        //wxCheckBox*
+      PANEL_AutoExport
 
 };
 
