@@ -114,33 +114,37 @@ bool MainApp::isSilent(){return _silent;}
 // TOP LEVEL FRAME //
 /////////////////////
 void MainFrame::InitTopLevel(){
+  // contains import panel (left main) and options panel (right main)
+  preCalcPanel = new wxPanel(this,PANEL_PreCalc);
+  preCalcPanel->SetBackgroundColour(col_panel);
+
+  postCalcPanel = new wxPanel(this,PANEL_PostCalc);
+  postCalcPanel->SetBackgroundColour(col_panel);
+
+  // initPreCalcPanel();
   // contains browse panel and atom list panel
-  leftMainPanel = new wxPanel
-    (this,
-     PANEL_LeftMain,
-     wxDefaultPosition,
-     wxDefaultSize,
-     wxTAB_TRAVERSAL
-    );
+  leftMainPanel = new wxPanel(this,PANEL_LeftMain);
   leftMainPanel->SetBackgroundColour(col_panel);
 
   // contains parameter panel and send-and-receive panel
-  rightMainPanel = new wxPanel
-    (this,
-     PANEL_RightMain,
-     wxDefaultPosition,
-     wxDefaultSize,
-     wxTAB_TRAVERSAL
-    );
+  rightMainPanel = new wxPanel(this,PANEL_RightMain);
   rightMainPanel->SetBackgroundColour(col_panel);
-
+  
   InitLeftMainPanel();
   InitRightMainPanel();
 
   wxBoxSizer *topLevelSizerH = new wxBoxSizer(wxHORIZONTAL);
   topLevelSizerH->Add(leftMainPanel,1,wxRIGHT | wxEXPAND,5);
   topLevelSizerH->Add(rightMainPanel,1,wxLEFT | wxEXPAND,5);
-  SetSizerAndFit(topLevelSizerH);
+  preCalcPanel->SetSizerAndFit(topLevelSizerH);
+
+  // initPostCalcPanel();
+
+  //
+  wxBoxSizer *boxSizerV = new wxBoxSizer(wxVERTICAL);
+  boxSizerV->Add(preCalcPanel, 1, wxBOTTOM, 5);
+  boxSizerV->Add(postCalcPanel, 1, wxTOP, 5);
+  SetSizerAndFit(boxSizerV);
 
   InitDefaultStates();
 }
