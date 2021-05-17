@@ -146,20 +146,26 @@ void MainFrame::InitTopLevel(){
 
     //initCommunicationPanel();
     {
+      progressGauge = new wxGauge(communicationPanel,GAUGE_Progress, 100);
+      outputPanel = new wxPanel(communicationPanel,PANEL_Output);
 
+      wxStaticBoxSizer *boxSizerV = new wxStaticBoxSizer(wxVERTICAL,postCalcPanel);
+      boxSizerV->Add(progressGauge, 0, wxEXPAND, 0);
+      boxSizerV->Add(outputPanel, 0, wxEXPAND, 0);
+      communicationPanel->SetSizerAndFit(boxSizerV);
     }
     //initExportPanel();
 
     wxBoxSizer *boxSizerV = new wxBoxSizer(wxVERTICAL);
-    boxSizerV->Add(communicationPanel);
-    boxSizerV->Add(exportPanel);
+    boxSizerV->Add(communicationPanel, 0, wxEXPAND, 0);
+    boxSizerV->Add(exportPanel, 0, wxEXPAND, 0);
     postCalcPanel->SetSizerAndFit(boxSizerV);
     
   }
   //
   wxBoxSizer *boxSizerV = new wxBoxSizer(wxVERTICAL);
-  boxSizerV->Add(preCalcPanel, 0, wxBOTTOM, 5);
-  boxSizerV->Add(postCalcPanel, 0, wxTOP, 5);
+  boxSizerV->Add(preCalcPanel, 0, wxBOTTOM | wxEXPAND, 5);
+  boxSizerV->Add(postCalcPanel, 0, wxTOP | wxEXPAND, 5);
   SetSizerAndFit(boxSizerV);
 
   InitDefaultStates();

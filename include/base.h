@@ -114,7 +114,7 @@ class MainFrame: public wxFrame
     
     wxPanel* postCalcPanel;
       wxPanel* communicationPanel;
-        //wxGauge*
+        wxGauge* progressGauge;
         wxPanel* outputPanel;
           //outputText from above
           //wxGrid*
@@ -235,7 +235,7 @@ enum
    
   PANEL_PostCalc,
     PANEL_Communication,
-      //wxGauge*
+      GAUGE_Progress,
       PANEL_Output,
         //outputText from above
         //wxGrid*
