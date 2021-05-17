@@ -153,7 +153,8 @@ void MainFrame::InitTopLevel(){
         outputText = new wxTextCtrl(outputPanel, TEXT_Output, _("Output"), wxDefaultPosition, wxSize(-1,100), wxTE_MULTILINE | wxTE_READONLY);
         outputText->SetBackgroundColour(col_output);
 
-        outputGrid = new wxGrid(outputPanel, GRID_Output, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS);
+        outputGrid = new wxGrid(outputPanel, GRID_Output);
+        outputGrid->SetRowLabelSize(0);
         outputGrid->CreateGrid(2, 4, wxGrid::wxGridSelectCells);
         outputGrid->SetDefaultCellAlignment (wxALIGN_CENTRE, wxALIGN_CENTRE);
 
@@ -173,14 +174,14 @@ void MainFrame::InitTopLevel(){
         outputGrid->SetColFormatFloat(3, 5, 3); // 2nd argument is width, last argument is precision      
 
         wxBoxSizer *boxSizerH = new wxBoxSizer(wxHORIZONTAL);
-        boxSizerH->Add(outputText, 1, wxEXPAND, 0);
-        boxSizerH->Add(outputGrid, 1, wxEXPAND, 0);
+        boxSizerH->Add(outputText, 1, wxRIGHT | wxEXPAND, 2);
+        boxSizerH->Add(outputGrid, 1, wxLEFT | wxEXPAND, 2);
         outputPanel->SetSizerAndFit(boxSizerH);
       }
 
       wxStaticBoxSizer *boxSizerV = new wxStaticBoxSizer(wxVERTICAL,postCalcPanel);
-      boxSizerV->Add(progressGauge, 0, wxEXPAND, 0);
-      boxSizerV->Add(outputPanel, 0, wxEXPAND, 0);
+      boxSizerV->Add(progressGauge, 0, wxBOTTOM | wxEXPAND, 5);
+      boxSizerV->Add(outputPanel, 0, wxTOP | wxEXPAND, 5);
       communicationPanel->SetSizerAndFit(boxSizerV);
     }
     //initExportPanel();
