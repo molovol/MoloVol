@@ -468,14 +468,14 @@ double Space::tallySurface(const std::vector<char>& types, std::array<unsigned i
     for(int i = 0; i < 3; i++){
       index[i] = _unit_cell_start_index[i]-1;
     }
-    surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) / 8);
+    surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) * 0.125);
 
     // add last n,n,n vertex
     for(int i = 0; i < 3; i++){
       index[i] = _unit_cell_end_index[i]-1;
     }
     surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) *
-                ((1/8) +
+                (0.125 +
                  ((_unit_cell_mod_index[0] + _unit_cell_mod_index[1] + _unit_cell_mod_index[2])/4) +
                  (_unit_cell_mod_index[0] * _unit_cell_mod_index[1]/2) +
                  (_unit_cell_mod_index[0] * _unit_cell_mod_index[2]/2) +
@@ -492,23 +492,22 @@ double Space::tallySurface(const std::vector<char>& types, std::array<unsigned i
       index[i] = _unit_cell_start_index[i]-1;
       index[j] = _unit_cell_start_index[j]-1;
       index[k] = _unit_cell_end_index[k]-1;
-      surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) * ((1/8) + (_unit_cell_mod_index[k]/4)));
+      surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) * (0.125 + (_unit_cell_mod_index[k]/4)));
 
       // add the last three intermediate vertices -1,n,n
       index[i] = _unit_cell_start_index[i]-1;
       index[j] = _unit_cell_end_index[j]-1;
       index[k] = _unit_cell_end_index[k]-1;
       surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) *
-                  ((1/8) +
+                  (0.125 +
                    ((_unit_cell_mod_index[j] + _unit_cell_mod_index[k])/4) +
                    (_unit_cell_mod_index[j] * _unit_cell_mod_index[k]/2)));
-
 
       // add the three start edges -1,-1,k
       index[i] = _unit_cell_start_index[i]-1;
       index[j] = _unit_cell_start_index[j]-1;
       for (index[k] = _unit_cell_start_index[k]; index[k] < _unit_cell_end_index[k]-1; index[k]++){
-        surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) / 4);
+        surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) * 0.25);
       }
 
       // add the three end edges n,n,k
@@ -516,7 +515,7 @@ double Space::tallySurface(const std::vector<char>& types, std::array<unsigned i
       index[j] = _unit_cell_end_index[j]-1;
       for (index[k] = _unit_cell_start_index[k]; index[k] < _unit_cell_end_index[k]-1; index[k]++){
         surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) *
-                    ((1/4) +
+                    (0.25 +
                      ((_unit_cell_mod_index[j] + _unit_cell_mod_index[k])/2) +
                      (_unit_cell_mod_index[j] * _unit_cell_mod_index[k])));
       }
@@ -525,7 +524,7 @@ double Space::tallySurface(const std::vector<char>& types, std::array<unsigned i
       index[i] = _unit_cell_start_index[i]-1;
       for (index[j] = _unit_cell_start_index[j]; index[j] < _unit_cell_end_index[j]-1; index[j]++){
         for (index[k] = _unit_cell_start_index[k]; index[k] < _unit_cell_end_index[k]-1; index[k]++){
-          surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) / 2);
+          surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) * 0.5);
         }
       }
 
@@ -533,7 +532,7 @@ double Space::tallySurface(const std::vector<char>& types, std::array<unsigned i
       index[i] = _unit_cell_end_index[i]-1;
       for (index[j] = _unit_cell_start_index[j]; index[j] < _unit_cell_end_index[j]-1; index[j]++){
         for (index[k] = _unit_cell_start_index[k]; index[k] < _unit_cell_end_index[k]-1; index[k]++){
-          surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) * ((1/2) + _unit_cell_mod_index[i]));
+          surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) * (0.5 + _unit_cell_mod_index[i]));
         }
       }
 
@@ -541,12 +540,12 @@ double Space::tallySurface(const std::vector<char>& types, std::array<unsigned i
       index[i] = _unit_cell_start_index[i]-1;
       index[j] = _unit_cell_end_index[j]-1;
       for (index[k] = _unit_cell_start_index[k]; index[k] < _unit_cell_end_index[k]-1; index[k]++){
-        surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) * ((1/4) + (_unit_cell_mod_index[j]/2)));
+        surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) * (0.25 + (_unit_cell_mod_index[j]/2)));
       }
       index[i] = _unit_cell_end_index[i]-1;
       index[j] = _unit_cell_start_index[j]-1;
       for (index[k] = _unit_cell_start_index[k]; index[k] < _unit_cell_end_index[k]-1; index[k]++){
-        surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) * ((1/4) + (_unit_cell_mod_index[i]/2)));
+        surface += (SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity)) * (0.25 + (_unit_cell_mod_index[i]/2)));
       }
     }
   }
