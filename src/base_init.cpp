@@ -149,6 +149,35 @@ void MainFrame::InitTopLevel(){
       progressGauge = new wxGauge(communicationPanel,GAUGE_Progress, 100);
       outputPanel = new wxPanel(communicationPanel,PANEL_Output);
 
+      {
+        outputText = new wxTextCtrl(outputPanel, TEXT_Output, _("Output"), wxDefaultPosition, wxSize(-1,100), wxTE_MULTILINE | wxTE_READONLY);
+        outputText->SetBackgroundColour(col_output);
+
+        outputGrid = new wxGrid(outputPanel, GRID_Output, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS);
+        outputGrid->CreateGrid(2, 4, wxGrid::wxGridSelectCells);
+        outputGrid->SetDefaultCellAlignment (wxALIGN_CENTRE, wxALIGN_CENTRE);
+
+        // columns
+        outputGrid->SetColLabelValue(0, "Cavity");
+        outputGrid->SetColFormatNumber(0);
+
+        outputGrid->SetColLabelValue(1, "Volume");
+        outputGrid->SetColFormatFloat(1);
+
+        outputGrid->SetColLabelValue(2, "Core Surface");
+        outputGrid->SetColFormatFloat(2);
+        
+        outputGrid->SetColLabelValue(3, "Core Surface");
+        outputGrid->SetColFormatFloat(3);
+
+        outputGrid->SetColFormatFloat(3, 5, 3); // 2nd argument is width, last argument is precision      
+
+        wxBoxSizer *boxSizerH = new wxBoxSizer(wxHORIZONTAL);
+        boxSizerH->Add(outputText, 1, wxEXPAND, 0);
+        boxSizerH->Add(outputGrid, 1, wxEXPAND, 0);
+        outputPanel->SetSizerAndFit(boxSizerH);
+      }
+
       wxStaticBoxSizer *boxSizerV = new wxStaticBoxSizer(wxVERTICAL,postCalcPanel);
       boxSizerV->Add(progressGauge, 0, wxEXPAND, 0);
       boxSizerV->Add(outputPanel, 0, wxEXPAND, 0);
@@ -263,32 +292,10 @@ void MainFrame::InitBrowsePanel(){
 ////////////////////////////
 void MainFrame::InitSandr(){
 
-  calcButton = new wxButton
-    (sandrPanel,
-     BUTTON_Calc,
-     "Calculate",
-     wxDefaultPosition,
-     wxDefaultSize,
-     0,
-     wxDefaultValidator,
-     "begin calculation"
-    );
+  calcButton = new wxButton(sandrPanel,BUTTON_Calc,"Calculate");
 	calcButton->Enable(false);
 
-  outputText = new wxTextCtrl
-    (sandrPanel,
-     TEXT_Output,
-     _("Output"),
-     wxDefaultPosition,
-     wxSize(-1,100), // height of the output text control
-     wxTE_MULTILINE | wxTE_READONLY,
-     wxDefaultValidator,
-     "output result"
-    );
-  outputText->SetBackgroundColour(col_output);
-
   wxStaticBoxSizer *sandrSizer = new wxStaticBoxSizer(wxHORIZONTAL,sandrPanel);
-  sandrSizer->Add(outputText,5,wxALIGN_LEFT | wxALL,10);
   sandrSizer->Add(calcButton,1,wxALIGN_CENTRE_VERTICAL | wxALL,10);
   sandrPanel->SetSizerAndFit(sandrSizer);
 

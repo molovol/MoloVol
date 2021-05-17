@@ -109,15 +109,14 @@ class MainFrame: public wxFrame
             wxStaticText* outputdirText;
             wxDirPickerCtrl* outputdirPicker;
         wxPanel* sandrPanel;
-          wxTextCtrl* outputText;
           wxButton* calcButton;
     
     wxPanel* postCalcPanel;
       wxPanel* communicationPanel;
         wxGauge* progressGauge;
         wxPanel* outputPanel;
-          //outputText from above
-          //wxGrid*
+          wxTextCtrl* outputText;
+          wxGrid* outputGrid;
       wxPanel* exportPanel;
         wxPanel* reportExportPanel;
           //wxButton*
@@ -230,15 +229,14 @@ enum
           TEXT_Outputdir,
           BUTTON_Output,
       PANEL_Sandr,
-        TEXT_Output,
         BUTTON_Calc,
    
   PANEL_PostCalc,
     PANEL_Communication,
       GAUGE_Progress,
       PANEL_Output,
-        //outputText from above
-        //wxGrid*
+        TEXT_Output,
+        GRID_Output,
     PANEL_Export,
       PANEL_ReportExport,
         //wxButton*
