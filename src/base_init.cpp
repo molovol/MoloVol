@@ -121,39 +121,9 @@ void MainFrame::InitTopLevel(){
   postCalcPanel = new wxPanel(this,PANEL_PostCalc);
   postCalcPanel->SetBackgroundColour(col_panel);
 
-  // initPreCalcPanel();
-  {
-    // contains browse panel and atom list panel
-    leftMainPanel = new wxPanel(preCalcPanel,PANEL_LeftMain);
-    leftMainPanel->SetBackgroundColour(col_panel);
-
-    // contains parameter panel and send-and-receive panel
-    rightMainPanel = new wxPanel(preCalcPanel,PANEL_RightMain);
-    rightMainPanel->SetBackgroundColour(col_panel);
-    
-    InitLeftMainPanel();
-    InitRightMainPanel();
-
-    wxBoxSizer *topLevelSizerH = new wxBoxSizer(wxHORIZONTAL);
-    topLevelSizerH->Add(leftMainPanel,1,wxRIGHT | wxEXPAND,5);
-    topLevelSizerH->Add(rightMainPanel,1,wxLEFT | wxEXPAND,5);
-    preCalcPanel->SetSizerAndFit(topLevelSizerH);
-  }
-  // initPostCalcPanel();
-  {
-    communicationPanel = new wxPanel(postCalcPanel,PANEL_Communication);
-    exportPanel = new wxPanel(postCalcPanel,PANEL_Export);
-
-    InitCommunicationPanel();
-    InitExportPanel();
-
-    wxBoxSizer *boxSizerV = new wxBoxSizer(wxVERTICAL);
-    boxSizerV->Add(communicationPanel, 0, wxEXPAND, 0);
-    boxSizerV->Add(exportPanel, 0, wxEXPAND, 0);
-    postCalcPanel->SetSizerAndFit(boxSizerV);
-    
-  }
-  //
+  InitPreCalcPanel();
+  InitPostCalcPanel();
+  
   wxBoxSizer *boxSizerV = new wxBoxSizer(wxVERTICAL);
   boxSizerV->Add(preCalcPanel, 0, wxBOTTOM | wxEXPAND, 5);
   boxSizerV->Add(postCalcPanel, 0, wxTOP | wxEXPAND, 5);
@@ -162,19 +132,35 @@ void MainFrame::InitTopLevel(){
   InitDefaultStates();
 }
 
+////////////////////
+// PRE CALC PANEL //
+////////////////////
+
+void MainFrame::InitPreCalcPanel(){
+  // contains browse panel and atom list panel
+  leftMainPanel = new wxPanel(preCalcPanel,PANEL_LeftMain);
+  leftMainPanel->SetBackgroundColour(col_panel);
+
+  // contains parameter panel and send-and-receive panel
+  rightMainPanel = new wxPanel(preCalcPanel,PANEL_RightMain);
+  rightMainPanel->SetBackgroundColour(col_panel);
+  
+  InitLeftMainPanel();
+  InitRightMainPanel();
+
+  wxBoxSizer *topLevelSizerH = new wxBoxSizer(wxHORIZONTAL);
+  topLevelSizerH->Add(leftMainPanel,1,wxRIGHT | wxEXPAND,5);
+  topLevelSizerH->Add(rightMainPanel,1,wxLEFT | wxEXPAND,5);
+  preCalcPanel->SetSizerAndFit(topLevelSizerH);
+}
+
 /////////////////////////
 // SECOND LEVEL PANELS //
 /////////////////////////
 
 void MainFrame::InitLeftMainPanel(){
   // contains file panels and load button
-  browsePanel = new wxPanel
-    (leftMainPanel,
-     PANEL_Browse,
-     wxDefaultPosition,
-     wxDefaultSize,
-     wxTAB_TRAVERSAL
-    );
+  browsePanel = new wxPanel(leftMainPanel, PANEL_Browse);
   browsePanel->SetBackgroundColour(col_panel);
   browsePanel->SetMaxSize(wxSize(-1,160));
 
@@ -555,6 +541,23 @@ void MainFrame::InitAtomListPanel(){
   atomListSizer->Add(atomListGrid,1,wxEXPAND,20); // proportion factor has to be 1, else atom list does not expand
   atomListPanel->SetSizerAndFit(atomListSizer);
   return;
+}
+
+/////////////////////
+// POST CALC PANEL //
+/////////////////////
+
+void MainFrame::InitPostCalcPanel(){
+  communicationPanel = new wxPanel(postCalcPanel,PANEL_Communication);
+  exportPanel = new wxPanel(postCalcPanel,PANEL_Export);
+
+  InitCommunicationPanel();
+  InitExportPanel();
+
+  wxBoxSizer *boxSizerV = new wxBoxSizer(wxVERTICAL);
+  boxSizerV->Add(communicationPanel, 0, wxEXPAND, 0);
+  boxSizerV->Add(exportPanel, 0, wxEXPAND, 0);
+  postCalcPanel->SetSizerAndFit(boxSizerV);
 }
 
 /////////////////////////

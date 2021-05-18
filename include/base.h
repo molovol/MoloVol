@@ -134,6 +134,8 @@ class MainFrame: public wxFrame
 
     // methods to initialise gui
     void InitTopLevel();
+    
+    void InitPreCalcPanel();
     void InitLeftMainPanel();
     void InitBrowsePanel();
     void InitAtomfilePanel();
@@ -141,6 +143,7 @@ class MainFrame: public wxFrame
     void SetSizerFilePanel(wxPanel*, wxStaticText*, wxButton*, wxTextCtrl*);
     void InitFileOptionsPanel();
     void InitAtomListPanel();
+
     void InitRightMainPanel();
     void InitParametersPanel();
     void InitProbe1Panel();
@@ -151,9 +154,11 @@ class MainFrame: public wxFrame
     void InitGridinputPanel();
     void InitDepthPanel();
     void InitSandr();
-
+    
+    void InitPostCalcPanel();
     void InitCommunicationPanel();
     void InitOutputPanel();
+
     void InitExportPanel();
     void InitReportExportPanel();
     void InitTotalMapExportPanel();
