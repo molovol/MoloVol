@@ -174,13 +174,12 @@ void MainFrame::InitLeftMainPanel(){
   // contains a grid widget that displays a table of atoms
   atomListPanel = new wxPanel(leftMainPanel,PANEL_AtomList);
   atomListPanel->SetBackgroundColour(col_panel);
-  atomListPanel->SetMaxSize(wxSize(-1,200));
 
   InitBrowsePanel();
   InitAtomListPanel();
 
   wxBoxSizer *leftSizerV = new wxBoxSizer(wxVERTICAL);
-  leftSizerV->Add(browsePanel,1,wxEXPAND);
+  leftSizerV->Add(browsePanel,0,wxEXPAND);
   leftSizerV->Add(atomListPanel,1,wxEXPAND);
   leftMainPanel->SetSizerAndFit(leftSizerV);
 }
@@ -329,18 +328,18 @@ void MainFrame::InitParametersPanel(){
 
     wxBoxSizer* boxSizer = new wxBoxSizer(wxVERTICAL);
     int dist_inbetween = 6;
-    boxSizer->Add(unitCellCheckbox, 0, wxALIGN_LEFT | wxBOTTOM, dist_inbetween);
-    boxSizer->Add(surfaceAreaCheckbox, 0, wxALIGN_LEFT | wxTOP | wxBOTTOM, dist_inbetween);
-    boxSizer->Add(twoProbesCheckbox, 0, wxALIGN_LEFT | wxTOP | wxBOTTOM, dist_inbetween);
-    boxSizer->Add(probe1Panel, 0, wxEXPAND | wxBOTTOM, dist_inbetween);
-    boxSizer->Add(probe2Panel, 0, wxEXPAND | wxBOTTOM, dist_inbetween);
-    boxSizer->Add(gridsizePanel, 0, wxEXPAND | wxTOP | wxBOTTOM, dist_inbetween);
-    boxSizer->Add(depthPanel, 0, wxEXPAND | wxTOP, dist_inbetween);
+    boxSizer->Add(unitCellCheckbox, -1, wxALIGN_LEFT | wxBOTTOM, dist_inbetween);
+    boxSizer->Add(surfaceAreaCheckbox, -1, wxALIGN_LEFT | wxTOP | wxBOTTOM, dist_inbetween);
+    boxSizer->Add(twoProbesCheckbox, -1, wxALIGN_LEFT | wxTOP | wxBOTTOM, dist_inbetween);
+    boxSizer->Add(probe1Panel, -1, wxEXPAND | wxBOTTOM, dist_inbetween);
+    boxSizer->Add(probe2Panel, -1, wxEXPAND | wxBOTTOM, dist_inbetween);
+    boxSizer->Add(gridsizePanel, -1, wxEXPAND | wxTOP | wxBOTTOM, dist_inbetween);
+    boxSizer->Add(depthPanel, -1, wxEXPAND | wxTOP, dist_inbetween);
     framePanel->SetSizerAndFit(boxSizer);
   }
 
   wxStaticBoxSizer *parameterSizer = new wxStaticBoxSizer(wxVERTICAL,parameterPanel);
-  parameterSizer->Add(framePanel, 0, wxEXPAND | wxALL, 5);
+  parameterSizer->Add(framePanel, 1, wxEXPAND | wxALL, 5);
   parameterPanel->SetSizerAndFit(parameterSizer);
 
   return;
@@ -536,7 +535,7 @@ void MainFrame::InitOutputPanel(){
   outputGrid->SetColLabelValue(2, "Core Surface");
   outputGrid->SetColFormatFloat(2);
   
-  outputGrid->SetColLabelValue(3, "Core Surface");
+  outputGrid->SetColLabelValue(3, "Shell Surface");
   outputGrid->SetColFormatFloat(3);
 
   outputGrid->SetColFormatFloat(3, 5, 3); // 2nd argument is width, last argument is precision
