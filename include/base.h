@@ -8,6 +8,7 @@
 #include <wx/spinctrl.h>
 #include <wx/grid.h>
 #include <wx/cmdline.h>
+#include <wx/statusbr.h>
 #include <wchar.h>
 #include <string>
 #include <iostream>
@@ -62,6 +63,8 @@ class MainFrame: public wxFrame
     MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
 
   private:
+    wxStatusBar* statusBar;
+
     wxPanel* preCalcPanel;
       wxPanel* leftMainPanel;
         wxPanel* browsePanel;
@@ -191,8 +194,10 @@ class MainFrame: public wxFrame
 enum
 {
   // assign an ID
+  STATUSBAR = wxID_HIGHEST+1,
+
   PANEL_PreCalc,
-    PANEL_LeftMain = wxID_HIGHEST + 1,
+    PANEL_LeftMain,
       PANEL_Browse,
         PANEL_Atomfile,
           TEXT_Atom,

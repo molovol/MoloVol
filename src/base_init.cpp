@@ -126,9 +126,14 @@ void MainFrame::InitTopLevel(){
   InitPreCalcPanel();
   InitPostCalcPanel();
   
+  statusBar = new wxStatusBar(this, STATUSBAR);
+  statusBar->SetFieldsCount(1);
+  statusBar->SetStatusText("Welcome!");
+
   wxBoxSizer *boxSizerV = new wxBoxSizer(wxVERTICAL);
-  boxSizerV->Add(preCalcPanel, 0, wxEXPAND);
-  boxSizerV->Add(postCalcPanel, 0, wxEXPAND);
+  boxSizerV->Add(preCalcPanel, 1, wxEXPAND);
+  boxSizerV->Add(postCalcPanel, 1, wxEXPAND);
+  boxSizerV->Add(statusBar, 0, wxEXPAND);
   SetSizerAndFit(boxSizerV);
 
   InitDefaultStates();
@@ -193,7 +198,7 @@ void MainFrame::InitRightMainPanel(){
   InitSandr();
 
   wxBoxSizer *rightSizerV = new wxBoxSizer(wxVERTICAL);
-  rightSizerV->Add(parameterPanel, 0, wxEXPAND);
+  rightSizerV->Add(parameterPanel, 1, wxEXPAND);
   rightSizerV->Add(sandrPanel, 0, wxEXPAND);
   rightMainPanel->SetSizerAndFit(rightSizerV);
 }
@@ -475,7 +480,7 @@ void MainFrame::InitAtomListPanel(){
   atomListGrid->SetColFormatFloat(3, 5, 3); // 2nd argument is width, last argument is precision
 
   wxStaticBoxSizer *atomListSizer = new wxStaticBoxSizer(wxVERTICAL,atomListPanel);
-  atomListSizer->Add(atomListGrid,1,wxEXPAND); // proportion factor has to be 1, else atom list does not expand
+  atomListSizer->Add(atomListGrid,1,wxEXPAND);
   atomListPanel->SetSizerAndFit(atomListSizer);
   return;
 }
@@ -492,7 +497,7 @@ void MainFrame::InitPostCalcPanel(){
   InitExportPanel();
 
   wxBoxSizer *boxSizerV = new wxBoxSizer(wxVERTICAL);
-  boxSizerV->Add(communicationPanel, 0, wxEXPAND, 0);
+  boxSizerV->Add(communicationPanel, 1, wxEXPAND, 0);
   boxSizerV->Add(exportPanel, 0, wxEXPAND, 0);
   postCalcPanel->SetSizerAndFit(boxSizerV);
 }
@@ -508,7 +513,7 @@ void MainFrame::InitCommunicationPanel(){
 
   wxStaticBoxSizer *boxSizerV = new wxStaticBoxSizer(wxVERTICAL,communicationPanel);
   boxSizerV->Add(progressGauge, 0, wxBOTTOM | wxLEFT | wxRIGHT | wxEXPAND, 5);
-  boxSizerV->Add(outputPanel, 0, wxTOP | wxEXPAND, 5);
+  boxSizerV->Add(outputPanel, 1, wxTOP | wxEXPAND, 5);
   communicationPanel->SetSizerAndFit(boxSizerV);
 }
 
