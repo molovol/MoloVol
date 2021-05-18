@@ -144,103 +144,8 @@ void MainFrame::InitTopLevel(){
     communicationPanel = new wxPanel(postCalcPanel,PANEL_Communication);
     exportPanel = new wxPanel(postCalcPanel,PANEL_Export);
 
-    //initCommunicationPanel();
-    {
-      progressGauge = new wxGauge(communicationPanel,GAUGE_Progress, 100);
-      outputPanel = new wxPanel(communicationPanel,PANEL_Output);
-      // initOutputPanel();
-      {
-        outputText = new wxTextCtrl(outputPanel, TEXT_Output, _("Output"), wxDefaultPosition, wxSize(-1,100), wxTE_MULTILINE | wxTE_READONLY);
-        outputText->SetBackgroundColour(col_output);
-
-        outputGrid = new wxGrid(outputPanel, GRID_Output);
-        outputGrid->SetRowLabelSize(0);
-        outputGrid->CreateGrid(2, 4, wxGrid::wxGridSelectCells);
-        outputGrid->SetDefaultCellAlignment (wxALIGN_CENTRE, wxALIGN_CENTRE);
-
-        // columns
-        outputGrid->SetColLabelValue(0, "Cavity");
-        outputGrid->SetColFormatNumber(0);
-
-        outputGrid->SetColLabelValue(1, "Volume");
-        outputGrid->SetColFormatFloat(1);
-
-        outputGrid->SetColLabelValue(2, "Core Surface");
-        outputGrid->SetColFormatFloat(2);
-        
-        outputGrid->SetColLabelValue(3, "Core Surface");
-        outputGrid->SetColFormatFloat(3);
-
-        outputGrid->SetColFormatFloat(3, 5, 3); // 2nd argument is width, last argument is precision
-
-        wxBoxSizer *boxSizerH = new wxBoxSizer(wxHORIZONTAL);
-        boxSizerH->Add(outputText, 1, wxRIGHT | wxEXPAND, 2);
-        boxSizerH->Add(outputGrid, 1, wxLEFT | wxEXPAND, 2);
-        outputPanel->SetSizerAndFit(boxSizerH);
-      }
-
-      wxStaticBoxSizer *boxSizerV = new wxStaticBoxSizer(wxVERTICAL,communicationPanel);
-      boxSizerV->Add(progressGauge, 0, wxBOTTOM | wxEXPAND, 5);
-      boxSizerV->Add(outputPanel, 0, wxTOP | wxEXPAND, 5);
-      communicationPanel->SetSizerAndFit(boxSizerV);
-    }
-    //initExportPanel();
-    {
-      reportExportPanel = new wxPanel(exportPanel, PANEL_ReportExport);
-      totalMapExportPanel = new wxPanel(exportPanel, PANEL_TotalMapExport);
-      cavityMapExportPanel = new wxPanel(exportPanel, PANEL_CavityMapExport);
-      autoExportPanel = new wxPanel(exportPanel, PANEL_AutoExport);
-
-      // initReportExportPanel();
-      {
-        reportButton = new wxButton(reportExportPanel, BUTTON_Report, "Export report");
-        reportCheckbox = new wxCheckBox(reportExportPanel, CHECKBOX_Report,"Auto export");
-
-        SetSizerExportSubPanel(reportExportPanel, reportButton, reportCheckbox);
-      }
-      // initTotalMapExportPanel();
-      {
-        totalMapButton = new wxButton(totalMapExportPanel, BUTTON_TotalMap, "Export total surface map");
-        surfaceMapCheckbox = new wxCheckBox(totalMapExportPanel, CHECKBOX_SurfaceMap, "Auto export");
-        
-        SetSizerExportSubPanel(totalMapExportPanel, totalMapButton, surfaceMapCheckbox);
-      }
-      // initCavityMapExportPanel();
-      {
-        cavityMapButton = new wxButton(cavityMapExportPanel, BUTTON_CavityMap, "Export cavity maps");
-        cavityMapsCheckbox = new wxCheckBox(cavityMapExportPanel, CHECKBOX_CavityMaps, "Auto export");
-        
-        SetSizerExportSubPanel(cavityMapExportPanel, cavityMapButton, cavityMapsCheckbox);
-      }
-      // initAutoExportPanel();
-      {
-        // these panels serve to align the widgets with the checkboxes
-        wxPanel* emptyPanel = new wxPanel(autoExportPanel);
-        wxPanel* subPanel = new wxPanel(autoExportPanel);
-      
-        {
-          outputdirText = new wxStaticText(subPanel, TEXT_Outputdir, "Auto save directory:");
-          outputdirPicker = new wxDirPickerCtrl(subPanel, BUTTON_Output, "", _("Select Output Directory"));
-
-          wxBoxSizer *boxSizerH = new wxBoxSizer(wxHORIZONTAL);
-          boxSizerH->Add(outputdirText,0, wxALIGN_CENTRE_VERTICAL);
-          boxSizerH->Add(outputdirPicker,5, wxLEFT, 20);
-          subPanel->SetSizerAndFit(boxSizerH);
-        }
-
-        wxBoxSizer* subSizer = new wxBoxSizer(wxHORIZONTAL);
-        subSizer->Add(emptyPanel,1);
-        subSizer->Add(subPanel,1);
-        autoExportPanel->SetSizerAndFit(subSizer);
-      }
-
-      wxStaticBoxSizer* boxSizerV = new wxStaticBoxSizer(wxVERTICAL,exportPanel);
-      boxSizerV->Add(reportExportPanel, 1, wxBOTTOM | wxEXPAND, 2);
-      boxSizerV->Add(totalMapExportPanel, 1, wxBOTTOM | wxEXPAND, 2);
-      boxSizerV->Add(cavityMapExportPanel, 1, wxBOTTOM | wxEXPAND, 2);
-      boxSizerV->Add(autoExportPanel, 1, wxEXPAND, 2);
-      exportPanel->SetSizerAndFit(boxSizerV);
-    }
+    InitCommunicationPanel();
+    InitExportPanel();
 
     wxBoxSizer *boxSizerV = new wxBoxSizer(wxVERTICAL);
     boxSizerV->Add(communicationPanel, 0, wxEXPAND, 0);
@@ -652,9 +557,115 @@ void MainFrame::InitAtomListPanel(){
   return;
 }
 
+/////////////////////////
+// COMMUNICATION PANEL //
+/////////////////////////
+
+void MainFrame::InitCommunicationPanel(){
+  progressGauge = new wxGauge(communicationPanel,GAUGE_Progress, 100);
+  outputPanel = new wxPanel(communicationPanel,PANEL_Output);
+  InitOutputPanel();
+
+  wxStaticBoxSizer *boxSizerV = new wxStaticBoxSizer(wxVERTICAL,communicationPanel);
+  boxSizerV->Add(progressGauge, 0, wxBOTTOM | wxEXPAND, 5);
+  boxSizerV->Add(outputPanel, 0, wxTOP | wxEXPAND, 5);
+  communicationPanel->SetSizerAndFit(boxSizerV);
+}
+
+void MainFrame::InitOutputPanel(){
+  outputText = new wxTextCtrl(outputPanel, TEXT_Output, _("Output"), wxDefaultPosition, wxSize(-1,100), wxTE_MULTILINE | wxTE_READONLY);
+  outputText->SetBackgroundColour(col_output);
+
+  outputGrid = new wxGrid(outputPanel, GRID_Output);
+  outputGrid->SetRowLabelSize(0);
+  outputGrid->CreateGrid(2, 4, wxGrid::wxGridSelectCells);
+  outputGrid->SetDefaultCellAlignment (wxALIGN_CENTRE, wxALIGN_CENTRE);
+
+  // columns
+  outputGrid->SetColLabelValue(0, "Cavity");
+  outputGrid->SetColFormatNumber(0);
+
+  outputGrid->SetColLabelValue(1, "Volume");
+  outputGrid->SetColFormatFloat(1);
+
+  outputGrid->SetColLabelValue(2, "Core Surface");
+  outputGrid->SetColFormatFloat(2);
+  
+  outputGrid->SetColLabelValue(3, "Core Surface");
+  outputGrid->SetColFormatFloat(3);
+
+  outputGrid->SetColFormatFloat(3, 5, 3); // 2nd argument is width, last argument is precision
+
+  wxBoxSizer *boxSizerH = new wxBoxSizer(wxHORIZONTAL);
+  boxSizerH->Add(outputText, 1, wxRIGHT | wxEXPAND, 2);
+  boxSizerH->Add(outputGrid, 1, wxLEFT | wxEXPAND, 2);
+  outputPanel->SetSizerAndFit(boxSizerH);
+}
+
 //////////////////
 // EXPORT PANEL //
 //////////////////
+
+void MainFrame::InitExportPanel(){
+  reportExportPanel = new wxPanel(exportPanel, PANEL_ReportExport);
+  totalMapExportPanel = new wxPanel(exportPanel, PANEL_TotalMapExport);
+  cavityMapExportPanel = new wxPanel(exportPanel, PANEL_CavityMapExport);
+  autoExportPanel = new wxPanel(exportPanel, PANEL_AutoExport);
+
+  InitReportExportPanel();
+  InitTotalMapExportPanel();
+  InitCavityMapExportPanel();
+  InitAutoExportPanel();
+
+  wxStaticBoxSizer* boxSizerV = new wxStaticBoxSizer(wxVERTICAL,exportPanel);
+  boxSizerV->Add(reportExportPanel, 1, wxBOTTOM | wxEXPAND, 2);
+  boxSizerV->Add(totalMapExportPanel, 1, wxBOTTOM | wxEXPAND, 2);
+  boxSizerV->Add(cavityMapExportPanel, 1, wxBOTTOM | wxEXPAND, 2);
+  boxSizerV->Add(autoExportPanel, 1, wxEXPAND, 2);
+  exportPanel->SetSizerAndFit(boxSizerV);
+}
+
+void MainFrame::InitReportExportPanel(){
+  reportButton = new wxButton(reportExportPanel, BUTTON_Report, "Export report");
+  reportCheckbox = new wxCheckBox(reportExportPanel, CHECKBOX_Report,"Auto export");
+
+  SetSizerExportSubPanel(reportExportPanel, reportButton, reportCheckbox);
+}
+
+void MainFrame::InitTotalMapExportPanel(){
+  totalMapButton = new wxButton(totalMapExportPanel, BUTTON_TotalMap, "Export total surface map");
+  surfaceMapCheckbox = new wxCheckBox(totalMapExportPanel, CHECKBOX_SurfaceMap, "Auto export");
+  
+  SetSizerExportSubPanel(totalMapExportPanel, totalMapButton, surfaceMapCheckbox);
+}
+
+void MainFrame::InitCavityMapExportPanel(){
+  cavityMapButton = new wxButton(cavityMapExportPanel, BUTTON_CavityMap, "Export cavity maps");
+  cavityMapsCheckbox = new wxCheckBox(cavityMapExportPanel, CHECKBOX_CavityMaps, "Auto export");
+  
+  SetSizerExportSubPanel(cavityMapExportPanel, cavityMapButton, cavityMapsCheckbox);
+}
+
+void MainFrame::InitAutoExportPanel(){
+  // these panels serve to align the widgets with the checkboxes
+  wxPanel* emptyPanel = new wxPanel(autoExportPanel);
+  wxPanel* subPanel = new wxPanel(autoExportPanel);
+
+  {
+    outputdirText = new wxStaticText(subPanel, TEXT_Outputdir, "Auto save directory:");
+    outputdirPicker = new wxDirPickerCtrl(subPanel, BUTTON_Output, "", _("Select Output Directory"));
+
+    wxBoxSizer *boxSizerH = new wxBoxSizer(wxHORIZONTAL);
+    boxSizerH->Add(outputdirText,0, wxALIGN_CENTRE_VERTICAL);
+    boxSizerH->Add(outputdirPicker,5, wxLEFT, 20);
+    subPanel->SetSizerAndFit(boxSizerH);
+  }
+
+  wxBoxSizer* subSizer = new wxBoxSizer(wxHORIZONTAL);
+  subSizer->Add(emptyPanel,1);
+  subSizer->Add(subPanel,1);
+  autoExportPanel->SetSizerAndFit(subSizer);
+}
 
 void MainFrame::SetSizerExportSubPanel(wxPanel* parentPanel, wxButton* button, wxCheckBox* checkbox){
   // button panel is used to stop buttons from expanding vertically

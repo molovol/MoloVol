@@ -152,6 +152,13 @@ class MainFrame: public wxFrame
     void InitDepthPanel();
     void InitSandr();
 
+    void InitCommunicationPanel();
+    void InitOutputPanel();
+    void InitExportPanel();
+    void InitReportExportPanel();
+    void InitTotalMapExportPanel();
+    void InitCavityMapExportPanel();
+    void InitAutoExportPanel();
     void SetSizerExportSubPanel(wxPanel*, wxButton*, wxCheckBox*);
 
     // methods to handle events
