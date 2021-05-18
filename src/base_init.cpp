@@ -127,8 +127,8 @@ void MainFrame::InitTopLevel(){
   InitPostCalcPanel();
   
   wxBoxSizer *boxSizerV = new wxBoxSizer(wxVERTICAL);
-  boxSizerV->Add(preCalcPanel, 0, wxBOTTOM | wxEXPAND, 5);
-  boxSizerV->Add(postCalcPanel, 0, wxTOP | wxEXPAND, 5);
+  boxSizerV->Add(preCalcPanel, 0, wxEXPAND);
+  boxSizerV->Add(postCalcPanel, 0, wxEXPAND);
   SetSizerAndFit(boxSizerV);
 
   InitDefaultStates();
@@ -151,8 +151,8 @@ void MainFrame::InitPreCalcPanel(){
   InitRightMainPanel();
 
   wxBoxSizer *topLevelSizerH = new wxBoxSizer(wxHORIZONTAL);
-  topLevelSizerH->Add(leftMainPanel,1,wxRIGHT | wxEXPAND,5);
-  topLevelSizerH->Add(rightMainPanel,1,wxLEFT | wxEXPAND,5);
+  topLevelSizerH->Add(leftMainPanel, 1, wxEXPAND);
+  topLevelSizerH->Add(rightMainPanel, 1, wxEXPAND);
   preCalcPanel->SetSizerAndFit(topLevelSizerH);
 }
 
@@ -180,8 +180,8 @@ void MainFrame::InitLeftMainPanel(){
   InitAtomListPanel();
 
   wxBoxSizer *leftSizerV = new wxBoxSizer(wxVERTICAL);
-  leftSizerV->Add(browsePanel,1,wxEXPAND,20);
-  leftSizerV->Add(atomListPanel,1,wxEXPAND,20);
+  leftSizerV->Add(browsePanel,1,wxEXPAND);
+  leftSizerV->Add(atomListPanel,1,wxEXPAND);
   leftMainPanel->SetSizerAndFit(leftSizerV);
 
 }
@@ -189,29 +189,19 @@ void MainFrame::InitLeftMainPanel(){
 void MainFrame::InitRightMainPanel(){
 
   // contains panels for user input
-  parameterPanel = new wxPanel
-    (rightMainPanel,
-     PANEL_Parameters,
-     wxDefaultPosition,
-     wxDefaultSize,
-     wxTAB_TRAVERSAL);
+  parameterPanel = new wxPanel(rightMainPanel,PANEL_Parameters);
   parameterPanel->SetBackgroundColour(col_panel);
 
-  // contains calculate button and output text control
-  sandrPanel = new wxPanel
-    (rightMainPanel,
-     PANEL_Sandr,
-     wxDefaultPosition,
-     wxDefaultSize,
-     wxTAB_TRAVERSAL);
+  // contains calculate button
+  sandrPanel = new wxPanel(rightMainPanel,PANEL_Sandr);
   sandrPanel->SetBackgroundColour(col_panel);
 
   InitParametersPanel();
   InitSandr();
 
   wxBoxSizer *rightSizerV = new wxBoxSizer(wxVERTICAL);
-  rightSizerV->Add(parameterPanel,0,wxEXPAND,20);
-  rightSizerV->Add(sandrPanel,0,wxEXPAND,20);
+  rightSizerV->Add(parameterPanel, 0, wxEXPAND);
+  rightSizerV->Add(sandrPanel, 0, wxEXPAND);
   rightMainPanel->SetSizerAndFit(rightSizerV);
 
 }
@@ -246,7 +236,7 @@ void MainFrame::InitSandr(){
 	calcButton->Enable(false);
 
   wxStaticBoxSizer *sandrSizer = new wxStaticBoxSizer(wxHORIZONTAL,sandrPanel);
-  sandrSizer->Add(calcButton,1,wxALIGN_CENTRE_VERTICAL | wxALL,10);
+  sandrSizer->Add(calcButton,1,wxALIGN_CENTRE_VERTICAL | wxALL, 6);
   sandrPanel->SetSizerAndFit(sandrSizer);
 
 }
@@ -294,32 +284,12 @@ void MainFrame::InitRadiusfilePanel(){
 /////////////////////////////////////
 
 void MainFrame::InitFileOptionsPanel(){
-  pdbHetatmCheckbox = new wxCheckBox
-    (fileOptionsPanel,
-     CHECKBOX_Hetatm,
-     "Include HETATM (for pdb files)",
-     wxDefaultPosition,
-     wxDefaultSize,
-     0,
-     wxDefaultValidator,
-     "include HETATM"
-    );
-  pdbHetatmCheckbox->Enable(false);
+  pdbHetatmCheckbox = new wxCheckBox(fileOptionsPanel, CHECKBOX_Hetatm, "Include HETATM");
   // Biochemists know what HETATM represent but other chemists might not
   // thus it is better to include HETATM by default as they are mostly useful for non-biochemists
   pdbHetatmCheckbox->SetValue(true);
 
-  loadFilesButton = new wxButton
-    (fileOptionsPanel,
-     BUTTON_LoadFiles,
-     "Reload",
-     wxDefaultPosition,
-     wxDefaultSize,
-     0,
-     wxDefaultValidator,
-     "load input files"
-    );
-  loadFilesButton->Enable(false);
+  loadFilesButton = new wxButton(fileOptionsPanel, BUTTON_LoadFiles, "Reload");
 
   wxBoxSizer *fileOptionsSizer = new wxBoxSizer(wxHORIZONTAL);
   fileOptionsSizer->Add(pdbHetatmCheckbox,1,wxALIGN_LEFT | wxALIGN_CENTRE_VERTICAL | wxALL,10);
