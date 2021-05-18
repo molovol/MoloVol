@@ -216,10 +216,10 @@ void MainFrame::InitTopLevel(){
       {}
 
       wxStaticBoxSizer* boxSizerV = new wxStaticBoxSizer(wxVERTICAL,exportPanel);
-      boxSizerV->Add(reportExportPanel, 1, wxEXPAND);
-      boxSizerV->Add(totalMapExportPanel, 1, wxEXPAND);
-      boxSizerV->Add(cavityMapExportPanel, 1, wxEXPAND);
-      boxSizerV->Add(autoExportPanel, 1, wxEXPAND);
+      boxSizerV->Add(reportExportPanel, 1, wxBOTTOM | wxEXPAND, 2);
+      boxSizerV->Add(totalMapExportPanel, 1, wxBOTTOM | wxEXPAND, 2);
+      boxSizerV->Add(cavityMapExportPanel, 1, wxBOTTOM | wxEXPAND, 2);
+      boxSizerV->Add(autoExportPanel, 1, wxEXPAND, 2);
       exportPanel->SetSizerAndFit(boxSizerV);
     }
 
@@ -659,9 +659,13 @@ void MainFrame::InitAtomListPanel(){
 //////////////////
 
 void MainFrame::SetSizerExportSubPanel(wxPanel* parentPanel, wxButton* button, wxCheckBox* checkbox){
+  // button panel is used to stop buttons from expanding vertically
+  wxPanel* buttonPanel = new wxPanel(parentPanel);
+  button->Reparent(buttonPanel);
+
   wxBoxSizer* boxSizerH = new wxBoxSizer(wxHORIZONTAL);
-  boxSizerH->Add(button, 1, wxEXPAND);
-  boxSizerH->Add(checkbox, 1, wxEXPAND);
+  boxSizerH->Add(buttonPanel, 1);
+  boxSizerH->Add(checkbox, 1);
   parentPanel->SetSizerAndFit(boxSizerH);
 }
 
