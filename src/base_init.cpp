@@ -570,8 +570,8 @@ void MainFrame::InitCommunicationPanel(){
   InitOutputPanel();
 
   wxStaticBoxSizer *boxSizerV = new wxStaticBoxSizer(wxVERTICAL,communicationPanel);
-  boxSizerV->Add(progressGauge, 0, wxBOTTOM | wxEXPAND, 5);
-  boxSizerV->Add(outputPanel, 0, wxTOP | wxEXPAND, 5);
+  boxSizerV->Add(progressGauge, 0, wxBOTTOM | wxLEFT | wxRIGHT | wxEXPAND, 5);
+  boxSizerV->Add(outputPanel, 0, wxTOP | wxLEFT | wxRIGHT | wxEXPAND, 5);
   communicationPanel->SetSizerAndFit(boxSizerV);
 }
 
