@@ -662,6 +662,7 @@ void MainFrame::SetSizerExportSubPanel(wxPanel* parentPanel, wxButton* button, w
   // button panel is used to stop buttons from expanding vertically
   wxPanel* buttonPanel = new wxPanel(parentPanel);
   button->Reparent(buttonPanel);
+  button->SetSize(200,-1);
 
   wxBoxSizer* boxSizerH = new wxBoxSizer(wxHORIZONTAL);
   boxSizerH->Add(buttonPanel, 1);
