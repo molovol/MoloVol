@@ -167,12 +167,7 @@ void MainFrame::InitLeftMainPanel(){
   browsePanel->SetMaxSize(wxSize(-1,160));
 
   // contains a grid widget that displays a table of atoms
-  atomListPanel = new wxPanel
-    (leftMainPanel,
-     PANEL_AtomList,
-     wxDefaultPosition,
-     wxDefaultSize,
-     wxTAB_TRAVERSAL);
+  atomListPanel = new wxPanel(leftMainPanel,PANEL_AtomList);
   atomListPanel->SetBackgroundColour(col_panel);
   atomListPanel->SetMaxSize(wxSize(-1,200));
 
@@ -183,11 +178,9 @@ void MainFrame::InitLeftMainPanel(){
   leftSizerV->Add(browsePanel,1,wxEXPAND);
   leftSizerV->Add(atomListPanel,1,wxEXPAND);
   leftMainPanel->SetSizerAndFit(leftSizerV);
-
 }
 
 void MainFrame::InitRightMainPanel(){
-
   // contains panels for user input
   parameterPanel = new wxPanel(rightMainPanel,PANEL_Parameters);
   parameterPanel->SetBackgroundColour(col_panel);
@@ -203,7 +196,6 @@ void MainFrame::InitRightMainPanel(){
   rightSizerV->Add(parameterPanel, 0, wxEXPAND);
   rightSizerV->Add(sandrPanel, 0, wxEXPAND);
   rightMainPanel->SetSizerAndFit(rightSizerV);
-
 }
 
 //////////////////
@@ -220,7 +212,7 @@ void MainFrame::InitBrowsePanel(){
   InitFileOptionsPanel();
 
   wxStaticBoxSizer *browserSizer = new wxStaticBoxSizer(wxVERTICAL,browsePanel);
-  browserSizer->Add(radiusfilePanel,0,wxEXPAND,0);
+  browserSizer->Add(radiusfilePanel,0,wxEXPAND | wxTOP,6);
   browserSizer->Add(atomfilePanel,0,wxEXPAND,0);
   browserSizer->Add(fileOptionsPanel,0,wxEXPAND,0);
   browsePanel->SetSizerAndFit(browserSizer);
@@ -249,9 +241,9 @@ void MainFrame::InitSandr(){
 void MainFrame::SetSizerFilePanel(wxPanel* panel, wxStaticText* text, wxButton* button, wxTextCtrl* path){
 
   wxBoxSizer *fileSizer = new wxBoxSizer(wxHORIZONTAL);
-  fileSizer->Add(text, 0, wxALIGN_CENTRE_VERTICAL | wxALL, 10);
-  fileSizer->Add(path, 5, wxALL, 10);
-  fileSizer->Add(button, 0, wxALL, 10);
+  fileSizer->Add(text, 0, wxALIGN_CENTRE_VERTICAL | wxRIGHT | wxBOTTOM, 10);
+  fileSizer->Add(path, 5, wxRIGHT | wxLEFT | wxBOTTOM, 10);
+  fileSizer->Add(button, 0, wxLEFT | wxBOTTOM, 10);
   panel->SetSizerAndFit(fileSizer);
 }
 
@@ -292,8 +284,8 @@ void MainFrame::InitFileOptionsPanel(){
   loadFilesButton = new wxButton(fileOptionsPanel, BUTTON_LoadFiles, "Reload");
 
   wxBoxSizer *fileOptionsSizer = new wxBoxSizer(wxHORIZONTAL);
-  fileOptionsSizer->Add(pdbHetatmCheckbox,1,wxALIGN_LEFT | wxALIGN_CENTRE_VERTICAL | wxALL,10);
-  fileOptionsSizer->Add(loadFilesButton,1,wxALIGN_CENTRE_VERTICAL | wxALL,10);
+  fileOptionsSizer->Add(pdbHetatmCheckbox,1,wxALIGN_LEFT | wxALIGN_CENTRE_VERTICAL | wxTOP | wxLEFT | wxRIGHT,10);
+  fileOptionsSizer->Add(loadFilesButton,1,wxALIGN_CENTRE_VERTICAL | wxTOP | wxLEFT,10);
   fileOptionsPanel->SetSizerAndFit(fileOptionsSizer);
 }
 
@@ -302,8 +294,8 @@ void MainFrame::InitFileOptionsPanel(){
 //////////////////////
 
 void MainFrame::InitParametersPanel(){
+  // this panel is used to set a distance between widgets and the border of the static box
   wxPanel *framePanel = new wxPanel(parameterPanel);
-
   {
     unitCellCheckbox = new wxCheckBox(framePanel, CHECKBOX_UnitCell, "Analyze crystal unit cell (.pdb file required)");
     surfaceAreaCheckbox = new wxCheckBox(framePanel, CHECKBOX_SurfaceArea, "Calculate surface areas");
@@ -466,6 +458,7 @@ void MainFrame::InitDepthPanel(){
 
 void MainFrame::InitAtomListPanel(){
   atomListGrid = new wxGrid(atomListPanel, GRID_AtomList, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS);
+  atomListGrid->SetRowLabelSize(30);
   atomListGrid->CreateGrid(0, 4, wxGrid::wxGridSelectCells);
   atomListGrid->SetDefaultCellAlignment (wxALIGN_CENTRE, wxALIGN_CENTRE);
 
@@ -482,7 +475,7 @@ void MainFrame::InitAtomListPanel(){
   atomListGrid->SetColFormatFloat(3, 5, 3); // 2nd argument is width, last argument is precision
 
   wxStaticBoxSizer *atomListSizer = new wxStaticBoxSizer(wxVERTICAL,atomListPanel);
-  atomListSizer->Add(atomListGrid,1,wxEXPAND,20); // proportion factor has to be 1, else atom list does not expand
+  atomListSizer->Add(atomListGrid,1,wxEXPAND); // proportion factor has to be 1, else atom list does not expand
   atomListPanel->SetSizerAndFit(atomListSizer);
   return;
 }
@@ -515,7 +508,7 @@ void MainFrame::InitCommunicationPanel(){
 
   wxStaticBoxSizer *boxSizerV = new wxStaticBoxSizer(wxVERTICAL,communicationPanel);
   boxSizerV->Add(progressGauge, 0, wxBOTTOM | wxLEFT | wxRIGHT | wxEXPAND, 5);
-  boxSizerV->Add(outputPanel, 0, wxTOP | wxLEFT | wxRIGHT | wxEXPAND, 5);
+  boxSizerV->Add(outputPanel, 0, wxTOP | wxEXPAND, 5);
   communicationPanel->SetSizerAndFit(boxSizerV);
 }
 
