@@ -213,7 +213,26 @@ void MainFrame::InitTopLevel(){
         SetSizerExportSubPanel(cavityMapExportPanel, cavityMapButton, cavityMapsCheckbox);
       }
       // initAutoExportPanel();
-      {}
+      {
+        // these panels serve to align the widgets with the checkboxes
+        wxPanel* emptyPanel = new wxPanel(autoExportPanel);
+        wxPanel* subPanel = new wxPanel(autoExportPanel);
+      
+        {
+          outputdirText = new wxStaticText(subPanel, TEXT_Outputdir, "Auto save directory:");
+          outputdirPicker = new wxDirPickerCtrl(subPanel, BUTTON_Output, "", _("Select Output Directory"));
+
+          wxBoxSizer *boxSizerH = new wxBoxSizer(wxHORIZONTAL);
+          boxSizerH->Add(outputdirText,0, wxALIGN_CENTRE_VERTICAL);
+          boxSizerH->Add(outputdirPicker,5, wxLEFT, 20);
+          subPanel->SetSizerAndFit(boxSizerH);
+        }
+
+        wxBoxSizer* subSizer = new wxBoxSizer(wxHORIZONTAL);
+        subSizer->Add(emptyPanel,1);
+        subSizer->Add(subPanel,1);
+        autoExportPanel->SetSizerAndFit(subSizer);
+      }
 
       wxStaticBoxSizer* boxSizerV = new wxStaticBoxSizer(wxVERTICAL,exportPanel);
       boxSizerV->Add(reportExportPanel, 1, wxBOTTOM | wxEXPAND, 2);
@@ -476,13 +495,10 @@ void MainFrame::InitParametersPanel(){
   depthPanel->SetBackgroundColour(col_panel);
 
 
-  outputpathPanel = new wxPanel(parameterPanel, PANEL_Outputpath, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
-
   InitProbe1Panel();
   InitProbe2Panel();
   InitGridPanel();
   InitDepthPanel();
-  InitOutputpathPanel();
 
   wxStaticBoxSizer *parameterSizer = new wxStaticBoxSizer(wxVERTICAL,parameterPanel);
   parameterSizer->Add(unitCellCheckbox,1,wxALIGN_LEFT | wxALL,10);
@@ -492,7 +508,6 @@ void MainFrame::InitParametersPanel(){
   parameterSizer->Add(probe2Panel,0,wxEXPAND,20);
   parameterSizer->Add(gridsizePanel,0,wxEXPAND,20);
   parameterSizer->Add(depthPanel,0,wxEXPAND,20);
-  parameterSizer->Add(outputpathPanel,0,wxEXPAND,20);
   parameterPanel->SetSizerAndFit(parameterSizer);
 
   return;
@@ -608,23 +623,6 @@ void MainFrame::InitDepthPanel(){
   depthSizer->Add(depthInput,0,wxALIGN_CENTRE_VERTICAL | wxALL,10);
   depthPanel->SetSizerAndFit(depthSizer);
   return;
-}
-
-void MainFrame::InitOutputpathPanel(){
-  outputdirText = new wxStaticText(outputpathPanel, TEXT_Outputdir, "Output directory (default, same as the program):");
-  outputdirPicker = new wxDirPickerCtrl(outputpathPanel,
-                                        BUTTON_Output,
-                                        "",
-                                        _("Select Output Directory"),
-                                        wxDefaultPosition,
-                                        wxDefaultSize,
-                                        wxDIRP_DEFAULT_STYLE,
-                                        wxDefaultValidator);
-
-  wxBoxSizer *outputSizer = new wxBoxSizer(wxHORIZONTAL);
-  outputSizer->Add(outputdirText,0, wxALIGN_CENTRE_VERTICAL | wxALL,10);
-  outputSizer->Add(outputdirPicker,5, wxALL,10);
-  outputpathPanel->SetSizerAndFit(outputSizer);
 }
 
 /////////////////////

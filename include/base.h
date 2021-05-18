@@ -102,9 +102,6 @@ class MainFrame: public wxFrame
           wxPanel* depthPanel;
             wxStaticText* depthText;
             wxSpinCtrl* depthInput;
-          wxPanel* outputpathPanel;
-            wxStaticText* outputdirText;
-            wxDirPickerCtrl* outputdirPicker;
         wxPanel* sandrPanel;
           wxButton* calcButton;
     
@@ -125,6 +122,8 @@ class MainFrame: public wxFrame
           wxButton* cavityMapButton;
           wxCheckBox* cavityMapsCheckbox;
         wxPanel* autoExportPanel;
+          wxStaticText* outputdirText;
+          wxDirPickerCtrl* outputdirPicker;
 
     // set and manipulate gui interactivity
     void InitDefaultStates();
@@ -151,7 +150,6 @@ class MainFrame: public wxFrame
     void InitGridPanel();
     void InitGridinputPanel();
     void InitDepthPanel();
-    void InitOutputpathPanel();
     void InitSandr();
 
     void SetSizerExportSubPanel(wxPanel*, wxButton*, wxCheckBox*);
@@ -221,9 +219,6 @@ enum
         PANEL_Depth,
           TEXT_Depth,
           SPIN_Depthinput,
-        PANEL_Outputpath,
-          TEXT_Outputdir,
-          BUTTON_Output,
       PANEL_Sandr,
         BUTTON_Calc,
    
@@ -243,8 +238,9 @@ enum
       PANEL_CavityMapExport,
         BUTTON_CavityMap,
         CHECKBOX_CavityMaps,
-      PANEL_AutoExport
-
+      PANEL_AutoExport,
+        TEXT_Outputdir,
+        BUTTON_Output
 };
 
 //DECLARE_APP(MainApp)
