@@ -228,7 +228,7 @@ void MainFrame::InitSandr(){
 	calcButton->Enable(false);
 
   wxStaticBoxSizer *sandrSizer = new wxStaticBoxSizer(wxHORIZONTAL,sandrPanel);
-  sandrSizer->Add(calcButton,1,wxALIGN_CENTRE_VERTICAL | wxALL, 6);
+  sandrSizer->Add(calcButton,1,wxALIGN_CENTRE_VERTICAL);
   sandrPanel->SetSizerAndFit(sandrSizer);
 
 }
