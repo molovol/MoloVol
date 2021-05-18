@@ -148,7 +148,7 @@ void MainFrame::InitTopLevel(){
     {
       progressGauge = new wxGauge(communicationPanel,GAUGE_Progress, 100);
       outputPanel = new wxPanel(communicationPanel,PANEL_Output);
-
+      // initOutputPanel();
       {
         outputText = new wxTextCtrl(outputPanel, TEXT_Output, _("Output"), wxDefaultPosition, wxSize(-1,100), wxTE_MULTILINE | wxTE_READONLY);
         outputText->SetBackgroundColour(col_output);
@@ -171,7 +171,7 @@ void MainFrame::InitTopLevel(){
         outputGrid->SetColLabelValue(3, "Core Surface");
         outputGrid->SetColFormatFloat(3);
 
-        outputGrid->SetColFormatFloat(3, 5, 3); // 2nd argument is width, last argument is precision      
+        outputGrid->SetColFormatFloat(3, 5, 3); // 2nd argument is width, last argument is precision
 
         wxBoxSizer *boxSizerH = new wxBoxSizer(wxHORIZONTAL);
         boxSizerH->Add(outputText, 1, wxRIGHT | wxEXPAND, 2);
@@ -179,12 +179,49 @@ void MainFrame::InitTopLevel(){
         outputPanel->SetSizerAndFit(boxSizerH);
       }
 
-      wxStaticBoxSizer *boxSizerV = new wxStaticBoxSizer(wxVERTICAL,postCalcPanel);
+      wxStaticBoxSizer *boxSizerV = new wxStaticBoxSizer(wxVERTICAL,communicationPanel);
       boxSizerV->Add(progressGauge, 0, wxBOTTOM | wxEXPAND, 5);
       boxSizerV->Add(outputPanel, 0, wxTOP | wxEXPAND, 5);
       communicationPanel->SetSizerAndFit(boxSizerV);
     }
     //initExportPanel();
+    {
+      reportExportPanel = new wxPanel(exportPanel, PANEL_ReportExport);
+      totalMapExportPanel = new wxPanel(exportPanel, PANEL_TotalMapExport);
+      cavityMapExportPanel = new wxPanel(exportPanel, PANEL_CavityMapExport);
+      autoExportPanel = new wxPanel(exportPanel, PANEL_AutoExport);
+
+      // initReportExportPanel();
+      {
+        reportButton = new wxButton(reportExportPanel, BUTTON_Report, "Export report");
+        reportCheckbox = new wxCheckBox(reportExportPanel, CHECKBOX_Report,"Auto export");
+
+        SetSizerExportSubPanel(reportExportPanel, reportButton, reportCheckbox);
+      }
+      // initTotalMapExportPanel();
+      {
+        totalMapButton = new wxButton(totalMapExportPanel, BUTTON_TotalMap, "Export total surface map");
+        surfaceMapCheckbox = new wxCheckBox(totalMapExportPanel, CHECKBOX_SurfaceMap, "Auto export");
+        
+        SetSizerExportSubPanel(totalMapExportPanel, totalMapButton, surfaceMapCheckbox);
+      }
+      // initCavityMapExportPanel();
+      {
+        cavityMapButton = new wxButton(cavityMapExportPanel, BUTTON_CavityMap, "Export cavity maps");
+        cavityMapsCheckbox = new wxCheckBox(cavityMapExportPanel, CHECKBOX_CavityMaps, "Auto export");
+        
+        SetSizerExportSubPanel(cavityMapExportPanel, cavityMapButton, cavityMapsCheckbox);
+      }
+      // initAutoExportPanel();
+      {}
+
+      wxStaticBoxSizer* boxSizerV = new wxStaticBoxSizer(wxVERTICAL,exportPanel);
+      boxSizerV->Add(reportExportPanel, 1, wxEXPAND);
+      boxSizerV->Add(totalMapExportPanel, 1, wxEXPAND);
+      boxSizerV->Add(cavityMapExportPanel, 1, wxEXPAND);
+      boxSizerV->Add(autoExportPanel, 1, wxEXPAND);
+      exportPanel->SetSizerAndFit(boxSizerV);
+    }
 
     wxBoxSizer *boxSizerV = new wxBoxSizer(wxVERTICAL);
     boxSizerV->Add(communicationPanel, 0, wxEXPAND, 0);
@@ -438,44 +475,6 @@ void MainFrame::InitParametersPanel(){
   depthPanel = new wxPanel(parameterPanel, PANEL_Depth, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
   depthPanel->SetBackgroundColour(col_panel);
 
-  reportCheckbox = new wxCheckBox
-    (parameterPanel,
-     CHECKBOX_Report,
-     "Generate report file",
-     wxDefaultPosition,
-     wxDefaultSize,
-     0,
-     wxDefaultValidator,
-     "Report file"
-    );
-  twoProbesCheckbox->Enable(true);
-  reportCheckbox->SetValue(false);
-
-  surfaceMapCheckbox = new wxCheckBox
-    (parameterPanel,
-     CHECKBOX_SurfaceMap,
-     "Generate a total surface map file (to visualize in PyMOL and Chimera)",
-     wxDefaultPosition,
-     wxDefaultSize,
-     0,
-     wxDefaultValidator,
-     "Surface Map"
-    );
-  surfaceMapCheckbox->Enable(true);
-  surfaceMapCheckbox->SetValue(false);
-
-  cavityMapsCheckbox = new wxCheckBox
-    (parameterPanel,
-     CHECKBOX_CavityMaps,
-     "Generate a surface map file for each cavity/pocket (to visualize in PyMOL and Chimera)",
-     wxDefaultPosition,
-     wxDefaultSize,
-     0,
-     wxDefaultValidator,
-     "Cavity Maps"
-    );
-  cavityMapsCheckbox->Enable(true);
-  cavityMapsCheckbox->SetValue(false);
 
   outputpathPanel = new wxPanel(parameterPanel, PANEL_Outputpath, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
 
@@ -493,9 +492,6 @@ void MainFrame::InitParametersPanel(){
   parameterSizer->Add(probe2Panel,0,wxEXPAND,20);
   parameterSizer->Add(gridsizePanel,0,wxEXPAND,20);
   parameterSizer->Add(depthPanel,0,wxEXPAND,20);
-  parameterSizer->Add(reportCheckbox,1,wxALIGN_LEFT | wxALL,10);
-  parameterSizer->Add(surfaceMapCheckbox,1,wxALIGN_LEFT | wxALL,10);
-  parameterSizer->Add(cavityMapsCheckbox,1,wxALIGN_LEFT | wxALL,10);
   parameterSizer->Add(outputpathPanel,0,wxEXPAND,20);
   parameterPanel->SetSizerAndFit(parameterSizer);
 
@@ -658,4 +654,14 @@ void MainFrame::InitAtomListPanel(){
   return;
 }
 
+//////////////////
+// EXPORT PANEL //
+//////////////////
+
+void MainFrame::SetSizerExportSubPanel(wxPanel* parentPanel, wxButton* button, wxCheckBox* checkbox){
+  wxBoxSizer* boxSizerH = new wxBoxSizer(wxHORIZONTAL);
+  boxSizerH->Add(button, 1, wxEXPAND);
+  boxSizerH->Add(checkbox, 1, wxEXPAND);
+  parentPanel->SetSizerAndFit(boxSizerH);
+}
 

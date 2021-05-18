@@ -102,9 +102,6 @@ class MainFrame: public wxFrame
           wxPanel* depthPanel;
             wxStaticText* depthText;
             wxSpinCtrl* depthInput;
-          wxCheckBox* reportCheckbox;
-          wxCheckBox* surfaceMapCheckbox;
-          wxCheckBox* cavityMapsCheckbox;
           wxPanel* outputpathPanel;
             wxStaticText* outputdirText;
             wxDirPickerCtrl* outputdirPicker;
@@ -119,14 +116,14 @@ class MainFrame: public wxFrame
           wxGrid* outputGrid;
       wxPanel* exportPanel;
         wxPanel* reportExportPanel;
-          //wxButton*
-          //wxCheckBox*
+          wxButton* reportButton;
+          wxCheckBox* reportCheckbox;
         wxPanel* totalMapExportPanel;
-          //wxButton*
-          //wxCheckBox*
+          wxButton* totalMapButton;
+          wxCheckBox* surfaceMapCheckbox;
         wxPanel* cavityMapExportPanel;
-          //wxButton*
-          //wxCheckBox*
+          wxButton* cavityMapButton;
+          wxCheckBox* cavityMapsCheckbox;
         wxPanel* autoExportPanel;
 
     // set and manipulate gui interactivity
@@ -142,7 +139,7 @@ class MainFrame: public wxFrame
     void InitBrowsePanel();
     void InitAtomfilePanel();
     void InitRadiusfilePanel();
-    void SetSizerFilePanel(wxPanel* panel, wxStaticText* text, wxButton* button, wxTextCtrl* path);
+    void SetSizerFilePanel(wxPanel*, wxStaticText*, wxButton*, wxTextCtrl*);
     void InitFileOptionsPanel();
     void InitAtomListPanel();
     void InitRightMainPanel();
@@ -156,6 +153,8 @@ class MainFrame: public wxFrame
     void InitDepthPanel();
     void InitOutputpathPanel();
     void InitSandr();
+
+    void SetSizerExportSubPanel(wxPanel*, wxButton*, wxCheckBox*);
 
     // methods to handle events
     void OnExit(wxCommandEvent& event);
@@ -222,9 +221,6 @@ enum
         PANEL_Depth,
           TEXT_Depth,
           SPIN_Depthinput,
-        CHECKBOX_Report,
-        CHECKBOX_SurfaceMap,
-        CHECKBOX_CavityMaps,
         PANEL_Outputpath,
           TEXT_Outputdir,
           BUTTON_Output,
@@ -239,14 +235,14 @@ enum
         GRID_Output,
     PANEL_Export,
       PANEL_ReportExport,
-        //wxButton*
-        //wxCheckBox*
+        BUTTON_Report,
+        CHECKBOX_Report,
       PANEL_TotalMapExport,
-        //wxButton*
-        //wxCheckBox*
+        BUTTON_TotalMap,
+        CHECKBOX_SurfaceMap,
       PANEL_CavityMapExport,
-        //wxButton*
-        //wxCheckBox*
+        BUTTON_CavityMap,
+        CHECKBOX_CavityMaps,
       PANEL_AutoExport
 
 };
