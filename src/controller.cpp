@@ -177,6 +177,15 @@ void Ctrl::prepareOutput(std::string atomFilePath){
   }
 }
 
+void Ctrl::updateStatus(const std::string str){
+  if (_to_gui) {
+    gui->setStatus(str);
+  }
+  else {
+    std::cout << str << std::endl;
+  }
+}
+
 void Ctrl::exportReport(){
   current_calculation->createReport();
 }

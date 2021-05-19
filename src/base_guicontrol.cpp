@@ -153,3 +153,7 @@ std::vector<std::string> MainFrame::getIncludedElements(){
   }
   return included_elements;
 }
+
+void MainFrame::setStatus(const std::string str){
+  statusBar->SetStatusText(str);
+}

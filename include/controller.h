@@ -16,8 +16,9 @@ class Ctrl{
     bool runCalculation();
     void registerView(MainFrame* inp_gui);
     static Ctrl* getInstance();
-    void notifyUser(std::string str, bool = true);
-    void notifyUser(std::wstring wstr);
+    void notifyUser(std::string, bool = true);
+    void notifyUser(std::wstring);
+    void updateStatus(std::string);
     void prepareOutput(std::string);
     void exportReport();
     void exportSurfaceMap(bool);

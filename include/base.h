@@ -34,6 +34,7 @@ class MainApp: public wxApp
 class MainFrame: public wxFrame
 {
   public:
+    MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
 
     // methods for controller communication
     void clearOutput();
@@ -60,8 +61,7 @@ class MainFrame: public wxFrame
     std::unordered_map<std::string, double> generateRadiusMap();
     double getMaxRad();
     std::vector<std::string> getIncludedElements();
-    MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
-
+    void setStatus(const std::string);
   private:
     wxStatusBar* statusBar;
 

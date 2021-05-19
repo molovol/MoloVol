@@ -4,6 +4,7 @@
 #include "atomtree.h"
 #include "misc.h"
 #include "exception.h"
+#include "controller.h"
 #include <cmath>
 #include <cassert>
 #include <stdexcept>
@@ -110,16 +111,14 @@ void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, co
   if (probe_mode){
     // first run algorithm with the larger probe to exclude most voxels - "masking mode"
     Voxel::storeProbe(r_probe2, true);
-    printf("\nAssigning probe 2 core and atoms:\n");
+    Ctrl::getInstance()->updateStatus("Blocking off cavities with large probe...");
     assignAtomVsCore();
 
     printf("\nAssigning probe 2 shell:\n");
     assignShellVsVoid();
-    printf("\nAssigning probe 1 core:\n");
   }
-  else{
-    printf("\nAssigning probe 1 core and atoms:\n");
-  }
+
+  Ctrl::getInstance()->updateStatus(std::string("Probing space") + (probe_mode? " with small probe..." : "..."));
   Voxel::storeProbe(r_probe1, false);
   assignAtomVsCore();
 
