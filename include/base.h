@@ -187,6 +187,9 @@ class MainFrame: public wxFrame
     wxColour col_grey_cell = wxColour(150,150,150);
     wxColour col_red_cell = wxColour(255,75,75);
     wxColour col_cyan_cell = wxColour(120,255,255);
+    wxColour col_dark_blue = wxColour(35,128,190);
+    wxColour col_light_blue = wxColour(226,255,250);
+    wxColour col_cream = wxColour(255,235,169);
 
     DECLARE_EVENT_TABLE()
 };

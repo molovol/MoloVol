@@ -57,7 +57,7 @@ bool MainApp::OnInit()
   }
   // initialise the GUI
   MainFrame* MainWin = new MainFrame(_("MoloVol " + Ctrl::s_version), wxDefaultPosition, wxDefaultSize);
-  MainWin->SetBackgroundColour(col_win);
+//  MainWin->SetBackgroundColour(col_win);
   MainWin->Show(true);
   SetTopWindow(MainWin);
   return true;
@@ -118,10 +118,10 @@ bool MainApp::isSilent(){return _silent;}
 void MainFrame::InitTopLevel(){
   // contains import panel (left main) and options panel (right main)
   preCalcPanel = new wxPanel(this,PANEL_PreCalc);
-  preCalcPanel->SetBackgroundColour(col_panel);
+//  preCalcPanel->SetBackgroundColour(col_panel);
 
   postCalcPanel = new wxPanel(this,PANEL_PostCalc);
-  postCalcPanel->SetBackgroundColour(col_panel);
+//  postCalcPanel->SetBackgroundColour(col_panel);
 
   InitPreCalcPanel();
   InitPostCalcPanel();
@@ -146,11 +146,11 @@ void MainFrame::InitTopLevel(){
 void MainFrame::InitPreCalcPanel(){
   // contains browse panel and atom list panel
   leftMainPanel = new wxPanel(preCalcPanel,PANEL_LeftMain);
-  leftMainPanel->SetBackgroundColour(col_panel);
+//  leftMainPanel->SetBackgroundColour(col_panel);
 
   // contains parameter panel and send-and-receive panel
   rightMainPanel = new wxPanel(preCalcPanel,PANEL_RightMain);
-  rightMainPanel->SetBackgroundColour(col_panel);
+//  rightMainPanel->SetBackgroundColour(col_panel);
   
   InitLeftMainPanel();
   InitRightMainPanel();
@@ -168,12 +168,12 @@ void MainFrame::InitPreCalcPanel(){
 void MainFrame::InitLeftMainPanel(){
   // contains file panels and load button
   browsePanel = new wxPanel(leftMainPanel, PANEL_Browse);
-  browsePanel->SetBackgroundColour(col_panel);
+//  browsePanel->SetBackgroundColour(col_panel);
   browsePanel->SetMaxSize(wxSize(-1,160));
 
   // contains a grid widget that displays a table of atoms
   atomListPanel = new wxPanel(leftMainPanel,PANEL_AtomList);
-  atomListPanel->SetBackgroundColour(col_panel);
+//  atomListPanel->SetBackgroundColour(col_panel);
 
   InitBrowsePanel();
   InitAtomListPanel();
@@ -187,11 +187,11 @@ void MainFrame::InitLeftMainPanel(){
 void MainFrame::InitRightMainPanel(){
   // contains panels for user input
   parameterPanel = new wxPanel(rightMainPanel,PANEL_Parameters);
-  parameterPanel->SetBackgroundColour(col_panel);
+//  parameterPanel->SetBackgroundColour(col_panel);
 
   // contains calculate button
   sandrPanel = new wxPanel(rightMainPanel,PANEL_Sandr);
-  sandrPanel->SetBackgroundColour(col_panel);
+//  sandrPanel->SetBackgroundColour(col_panel);
 
   InitParametersPanel();
   InitSandr();
@@ -307,19 +307,19 @@ void MainFrame::InitParametersPanel(){
 
     // contains input controls for probe 1 (small) radius
     probe1Panel = new wxPanel(framePanel, PANEL_Probe1);
-    probe1Panel->SetBackgroundColour(col_panel);
+//    probe1Panel->SetBackgroundColour(col_panel);
 
     // contains input controls for probe 2 (large) radius
     probe2Panel = new wxPanel(framePanel, PANEL_Probe2);
-    probe2Panel->SetBackgroundColour(col_panel);
+//    probe2Panel->SetBackgroundColour(col_panel);
 
     // contains input controls for grid size
     gridsizePanel = new wxPanel(framePanel, PANEL_Grid);
-    gridsizePanel->SetBackgroundColour(col_panel);
+//    gridsizePanel->SetBackgroundColour(col_panel);
 
     // contains input controls for tree depth
     depthPanel = new wxPanel(framePanel, PANEL_Depth);
-    depthPanel->SetBackgroundColour(col_panel);
+//    depthPanel->SetBackgroundColour(col_panel);
 
     InitProbe1Panel();
     InitProbe2Panel();
@@ -351,7 +351,7 @@ void MainFrame::InitProbe1Panel(){
 
   // contains input control for probe 1 radius and text field for unit
   probe1InputPanel = new wxPanel(probe1Panel, PANEL_Probe1Input);
-  probe1InputPanel->SetBackgroundColour(col_panel);
+//  probe1InputPanel->SetBackgroundColour(col_panel);
 
   InitProbe1InputPanel();
 
@@ -383,7 +383,7 @@ void MainFrame::InitProbe2Panel(){
 
   // contains input control for probe 2 radius and text field for unit
   probe2InputPanel = new wxPanel(probe2Panel, PANEL_Probe2Input, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
-  probe2InputPanel->SetBackgroundColour(col_panel);
+//  probe2InputPanel->SetBackgroundColour(col_panel);
 
   InitProbe2InputPanel();
 
@@ -417,7 +417,7 @@ void MainFrame::InitGridPanel(){
 
   // contains input control for grid size and text field for unit
   gridsizeInputPanel = new wxPanel(gridsizePanel, PANEL_Gridinput, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
-  gridsizeInputPanel->SetBackgroundColour(col_panel);
+//  gridsizeInputPanel->SetBackgroundColour(col_panel);
 
   InitGridinputPanel();
 
@@ -508,6 +508,7 @@ void MainFrame::InitPostCalcPanel(){
 void MainFrame::InitCommunicationPanel(){
   progressGauge = new wxGauge(communicationPanel,GAUGE_Progress, 100);
   outputPanel = new wxPanel(communicationPanel,PANEL_Output);
+
   InitOutputPanel();
 
   wxStaticBoxSizer *boxSizerV = new wxStaticBoxSizer(wxVERTICAL,communicationPanel);
@@ -518,7 +519,7 @@ void MainFrame::InitCommunicationPanel(){
 
 void MainFrame::InitOutputPanel(){
   outputText = new wxTextCtrl(outputPanel, TEXT_Output, _("Output"), wxDefaultPosition, wxSize(-1,100), wxTE_MULTILINE | wxTE_READONLY);
-  outputText->SetBackgroundColour(col_output);
+//  outputText->SetBackgroundColour(col_output);
 
   outputGrid = new wxGrid(outputPanel, GRID_Output);
   outputGrid->SetRowLabelSize(0);
