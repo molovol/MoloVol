@@ -2,6 +2,7 @@
 
 #define BASE_H
 
+#include "cavity.h"
 #include <wx/filectrl.h>
 #include <wx/filepicker.h>
 #include <wx/wfstream.h>
@@ -57,6 +58,7 @@ class MainFrame: public wxFrame
     std::string getOutputDir();
     void enableGuiElements(bool inp); // method to turn on and off interactable gui elements
 
+    void displayCavityList(const std::vector<Cavity>&);
     void displayAtomList(std::vector<std::tuple<std::string, int, double>> symbol_number_radius);
     std::unordered_map<std::string, double> generateRadiusMap();
     double getMaxRad();

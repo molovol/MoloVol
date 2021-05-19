@@ -5,6 +5,7 @@
 #endif
 
 #include "base.h"
+#include "special_chars.h"
 #include "controller.h"
 #include <cassert>
 
@@ -523,23 +524,26 @@ void MainFrame::InitOutputPanel(){
 
   outputGrid = new wxGrid(outputPanel, GRID_Output);
   outputGrid->SetRowLabelSize(0);
-  outputGrid->CreateGrid(2, 4, wxGrid::wxGridSelectCells);
+  outputGrid->CreateGrid(0, 4, wxGrid::wxGridSelectCells);
   outputGrid->SetDefaultCellAlignment (wxALIGN_CENTRE, wxALIGN_CENTRE);
 
   // columns
-  outputGrid->SetColLabelValue(0, "Cavity");
-  outputGrid->SetColFormatNumber(0);
-
-  outputGrid->SetColLabelValue(1, "Volume");
-  outputGrid->SetColFormatFloat(1);
-
-  outputGrid->SetColLabelValue(2, "Core Surface");
-  outputGrid->SetColFormatFloat(2);
-  
-  outputGrid->SetColLabelValue(3, "Shell Surface");
-  outputGrid->SetColFormatFloat(3);
-
-  outputGrid->SetColFormatFloat(3, 5, 3); // 2nd argument is width, last argument is precision
+//  wxString wxstr = "Volume" + Symbol::angstrom();
+  const std::vector<wxString> col_headers = 
+    {"Cavity ID", 
+      "Volume (" + Symbol::angstrom() + Symbol::cubed() + ")", 
+      "Core Surface\n(" + Symbol::angstrom() + Symbol::squared() + ")", 
+      "Shell Surface\n(" + Symbol::angstrom() + Symbol::squared() + ")"};
+  for (int row = 0; row < col_headers.size(); ++row){
+    outputGrid->SetColLabelValue(row, col_headers[row]);
+    if (row == 0){
+      outputGrid->SetColFormatNumber(row);
+    }
+    else {
+      outputGrid->SetColFormatFloat(row);
+      outputGrid->SetColFormatFloat(row, 5, 3);
+    }
+  }
 
   wxBoxSizer *boxSizerH = new wxBoxSizer(wxHORIZONTAL);
   boxSizerH->Add(outputText, 1, wxRIGHT | wxEXPAND, 2);

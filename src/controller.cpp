@@ -135,19 +135,14 @@ bool Ctrl::runCalculation(){
       notifyUser(Symbol::angstrom() + Symbol::cubed());
     }
     if(!data.cavities.empty()){
+      gui->displayCavityList(data.cavities);
+
       notifyUser("\nList of cavities = probe 1 occupied volumes (cavity center x,y,z coordinates)");
       for (size_t i = 0; i < data.cavities.size(); ++i){
-        notifyUser("\nCav " + std::to_string(i+1) + ": " + std::to_string(data.getCavVolume(i)) + " ");
-        notifyUser(Symbol::angstrom() + Symbol::cubed());
+        notifyUser("\nCav: "); 
         notifyUser(" (" + std::to_string(data.getCavCentre(i)[0]) + ", "
           + std::to_string(data.getCavCentre(i)[1]) + ", "
           + std::to_string(data.getCavCentre(i)[2]) + ")");
-        if (data.calc_surface_areas){
-          notifyUser("\nCore Area: " + std::to_string(data.getCavSurfCore(i)) + " ");
-          notifyUser(Symbol::angstrom() + Symbol::squared());
-          notifyUser(" Shell Area: " + std::to_string(data.getCavSurfShell(i)) + " ");
-          notifyUser(Symbol::angstrom() + Symbol::squared());
-        }
       }
     }
   }

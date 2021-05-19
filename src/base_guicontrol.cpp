@@ -117,6 +117,25 @@ void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>
   }
 }
 
+void MainFrame::displayCavityList(const std::vector<Cavity>& cavities){
+  // delete all rows
+  if (outputGrid->GetNumberRows() > 0){
+    outputGrid->DeleteRows(0, outputGrid->GetNumberRows());
+  }
+  // add appropriate nuber of rows
+  outputGrid->AppendRows(cavities.size());
+  for (int row = 0; row < outputGrid->GetNumberRows(); ++row){
+    outputGrid->SetCellValue(row, 0, std::to_string(cavities[row].id));
+    outputGrid->SetCellValue(row, 1, std::to_string(cavities[row].getVolume()));
+    outputGrid->SetCellValue(row, 2, std::to_string(cavities[row].getSurfCore()));
+    outputGrid->SetCellValue(row, 3, std::to_string(cavities[row].getSurfShell()));
+    // set all cells read only
+    for (int col = 0; col < outputGrid->GetNumberCols(); ++col){
+      outputGrid->SetReadOnly(row,col,true);
+    }
+  }
+}
+
 std::unordered_map<std::string, double> MainFrame::generateRadiusMap(){
   std::unordered_map<std::string, double> radius_map;
   for (int i = 0; i < atomListGrid->GetNumberRows(); i++){
