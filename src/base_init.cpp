@@ -519,12 +519,12 @@ void MainFrame::InitCommunicationPanel(){
 }
 
 void MainFrame::InitOutputPanel(){
-  outputText = new wxTextCtrl(outputPanel, TEXT_Output, _("Output"), wxDefaultPosition, wxSize(-1,100), wxTE_MULTILINE | wxTE_READONLY);
+  outputText = new wxTextCtrl(outputPanel, TEXT_Output, _("Output Dialog"), wxDefaultPosition, wxSize(-1,100), wxTE_MULTILINE | wxTE_READONLY);
 //  outputText->SetBackgroundColour(col_output);
 
   outputGrid = new wxGrid(outputPanel, GRID_Output);
   outputGrid->SetRowLabelSize(0);
-  outputGrid->CreateGrid(0, 4, wxGrid::wxGridSelectCells);
+  outputGrid->CreateGrid(0, 5, wxGrid::wxGridSelectCells);
   outputGrid->SetDefaultCellAlignment (wxALIGN_CENTRE, wxALIGN_CENTRE);
 
   // columns
@@ -533,13 +533,14 @@ void MainFrame::InitOutputPanel(){
     {"Cavity ID", 
       "Volume (" + Symbol::angstrom() + Symbol::cubed() + ")", 
       "Core Surface\n(" + Symbol::angstrom() + Symbol::squared() + ")", 
-      "Shell Surface\n(" + Symbol::angstrom() + Symbol::squared() + ")"};
+      "Shell Surface\n(" + Symbol::angstrom() + Symbol::squared() + ")",
+      "Position\n("+Symbol::angstrom()+","+Symbol::angstrom()+","+Symbol::angstrom()+")"};
   for (int row = 0; row < col_headers.size(); ++row){
     outputGrid->SetColLabelValue(row, col_headers[row]);
     if (row == 0){
       outputGrid->SetColFormatNumber(row);
     }
-    else {
+    else if (row != 4) {
       outputGrid->SetColFormatFloat(row);
       outputGrid->SetColFormatFloat(row, 5, 3);
     }

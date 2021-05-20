@@ -111,14 +111,14 @@ void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, co
   if (probe_mode){
     // first run algorithm with the larger probe to exclude most voxels - "masking mode"
     Voxel::storeProbe(r_probe2, true);
-    Ctrl::getInstance()->updateStatus("Blocking off cavities with large probe...");
+    //Ctrl::getInstance()->updateStatus("Blocking off cavities with large probe...");
     assignAtomVsCore();
 
     printf("\nAssigning probe 2 shell:\n");
     assignShellVsVoid();
   }
 
-  Ctrl::getInstance()->updateStatus(std::string("Probing space") + (probe_mode? " with small probe..." : "..."));
+  //Ctrl::getInstance()->updateStatus(std::string("Probing space") + (probe_mode? " with small probe..." : "..."));
   Voxel::storeProbe(r_probe1, false);
   assignAtomVsCore();
 

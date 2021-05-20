@@ -81,6 +81,7 @@ bool Ctrl::runCalculation(){
     current_calculation = new Model();
   }
 
+  // PARAMETERS
   // save parameters in model
   if(!current_calculation->setParameters(
       gui->getAtomFilepath(),
@@ -102,54 +103,61 @@ bool Ctrl::runCalculation(){
     return false;
   }
 
+  // CALCULATION
   CalcReportBundle data = current_calculation->generateData();
 
+  // OUTPUT
+  clearOutput();
   if(data.success){
-    notifyUser("\nResult for ");
+    if(!data.cavities.empty()){gui->displayCavityList(data.cavities);}
+    std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
+
+    notifyUser("Result for ");
     notifyUser(Symbol::generateChemicalFormulaUnicode(data.chemical_formula));
     notifyUser("\nElapsed time: " + std::to_string(data.getTime()) + " s");
+    
+    notifyUser("\n<VOLUME>");
     notifyUser("\nVan der Waals volume: " + std::to_string(data.volumes[0b00000011]) + " ");
-    notifyUser(Symbol::angstrom() + Symbol::cubed());
-    notifyUser("\nExcluded void volume: " + std::to_string(data.volumes[0b00000101]) + " ");
-    notifyUser(Symbol::angstrom() + Symbol::cubed());
-    notifyUser("\nProbe 1 core volume: " + std::to_string(data.volumes[0b00001001]) + " ");
-    notifyUser(Symbol::angstrom() + Symbol::cubed());
-    notifyUser("\nProbe 1 shell volume: " + std::to_string(data.volumes[0b00010001]) + " ");
-    notifyUser(Symbol::angstrom() + Symbol::cubed());
+    notifyUser(vol_unit);
+    notifyUser("\nProbe inaccessible volume: " + std::to_string(data.volumes[0b00000101]) + " ");
+    notifyUser(vol_unit);
+    std::string prefix = data.probe_mode? "Small p" : "P";
+    notifyUser("\n"+ prefix +"robe core volume: " + std::to_string(data.volumes[0b00001001]) + " ");
+    notifyUser(vol_unit);
+    notifyUser("\n"+ prefix +"robe shell volume: " + std::to_string(data.volumes[0b00010001]) + " ");
+    notifyUser(vol_unit);
+    if(data.probe_mode){
+      notifyUser("\nLarge probe core volume: " + std::to_string(data.volumes[0b00100001]) + " ");
+      notifyUser(vol_unit);
+      notifyUser("\nLarge probe shell volume: " + std::to_string(data.volumes[0b01000001]) + " ");
+      notifyUser(vol_unit);
+    }
     if(data.calc_surface_areas){
+      std::wstring surf_unit = Symbol::angstrom() + Symbol::squared();
+      notifyUser("\n<SURFACE>");
       notifyUser("\nVan der Waals surface: " + std::to_string(data.getSurfVdw()) + " ");
-      notifyUser(Symbol::angstrom() + Symbol::squared());
+      notifyUser(surf_unit);
       if(data.probe_mode){
         notifyUser("\nMolecular surface: " + std::to_string(data.getSurfMolecular()) + " ");
-        notifyUser(Symbol::angstrom() + Symbol::squared());
+        notifyUser(surf_unit);
       }
       notifyUser("\nProbe excluded surface: " + std::to_string(data.getSurfProbeExcluded()) + " ");
-      notifyUser(Symbol::angstrom() + Symbol::squared());
+      notifyUser(surf_unit);
       notifyUser("\nProbe accessible surface: " + std::to_string(data.getSurfProbeAccessible()) + " ");
-      notifyUser(Symbol::angstrom() + Symbol::squared());
-    }
-    if(data.probe_mode){
-      notifyUser("\nProbe 2 core volume: " + std::to_string(data.volumes[0b00100001]) + " ");
-      notifyUser(Symbol::angstrom() + Symbol::cubed());
-      notifyUser("\nProbe 2 shell volume: " + std::to_string(data.volumes[0b01000001]) + " ");
-      notifyUser(Symbol::angstrom() + Symbol::cubed());
-    }
-    if(!data.cavities.empty()){
-      gui->displayCavityList(data.cavities);
-
-      notifyUser("\nList of cavities = probe 1 occupied volumes (cavity center x,y,z coordinates)");
-      for (size_t i = 0; i < data.cavities.size(); ++i){
-        notifyUser("\nCav: "); 
-        notifyUser(" (" + std::to_string(data.getCavCentre(i)[0]) + ", "
-          + std::to_string(data.getCavCentre(i)[1]) + ", "
-          + std::to_string(data.getCavCentre(i)[2]) + ")");
-      }
+      notifyUser(surf_unit);
     }
   }
   else{
     notifyUser("\nCalculation failed!");
   }
   return data.success;
+}
+
+void Ctrl::clearOutput(){
+  if (_to_gui) {
+    gui->clearOutputText();
+    gui->clearOutputGrid();
+  }
 }
 
 void Ctrl::notifyUser(std::string str, bool to_gui){

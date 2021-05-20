@@ -38,7 +38,8 @@ class MainFrame: public wxFrame
     MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
 
     // methods for controller communication
-    void clearOutput();
+    void clearOutputText();
+    void clearOutputGrid();
     void printToOutput(std::string& text);
     void appendOutput(std::string& text);
     void appendOutput(std::wstring& text);

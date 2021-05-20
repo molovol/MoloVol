@@ -5,6 +5,7 @@
 #include <array>
 #include <algorithm>
 #include <vector>
+#include <string>
 
 struct Cavity{
   Cavity() = default;
@@ -24,6 +25,7 @@ struct Cavity{
   double getVolume() const;
   double getSurfCore() const;
   double getSurfShell() const;
+  std::string getPosition() const;
 };
 
 bool compareVolume(const Cavity& a, const Cavity& b);
