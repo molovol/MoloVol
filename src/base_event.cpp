@@ -72,6 +72,7 @@ void MainFrame::OnCalc(wxCommandEvent& event){
   }
 
   wxYield(); // without wxYield, the clicks on disabled buttons are queued
+  setDefaultState(reportButton,true);
   enableGuiElements(true);
 }
 

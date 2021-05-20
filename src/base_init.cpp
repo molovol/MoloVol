@@ -93,7 +93,10 @@ void MainFrame::InitDefaultStates(){
     loadFilesButton,
     unitCellCheckbox,
     probe2InputText,
-    calcButton};
+    calcButton,
+    reportButton,
+    totalMapButton,
+    cavityMapButton};
 
   // initialise map
   for (const auto& widget : widgets_enabled){
@@ -230,7 +233,6 @@ void MainFrame::InitBrowsePanel(){
 void MainFrame::InitSandr(){
 
   calcButton = new wxButton(sandrPanel,BUTTON_Calc,"Calculate");
-	calcButton->Enable(false);
 
   wxStaticBoxSizer *sandrSizer = new wxStaticBoxSizer(wxHORIZONTAL,sandrPanel);
   sandrSizer->Add(calcButton,1,wxALIGN_CENTRE_VERTICAL);
@@ -406,8 +408,6 @@ void MainFrame::InitProbe2InputPanel(){
   probe2Inputsizer->Add(probe2InputText, 1, wxALIGN_CENTRE_VERTICAL);
   probe2Inputsizer->Add(probe2UnitText, 0, wxALIGN_CENTRE_VERTICAL);
   probe2InputPanel->SetSizerAndFit(probe2Inputsizer);
-
-  probe2InputText->Enable(false);
 
   return;
 }
