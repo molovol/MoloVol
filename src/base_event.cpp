@@ -85,7 +85,11 @@ void MainFrame::OnLoadFiles(wxCommandEvent& event){
 
   Ctrl::getInstance()->newCalculation();
 
+  // reset output
+  clearOutputText();
+  clearOutputGrid();
   toggleButtons(); // sets accessibility of buttons
+
   wxYield();
   enableGuiElements(true);
 }
@@ -224,6 +228,7 @@ void MainFrame::toggleOptionsPdb(){
 }
 
 void MainFrame::toggleButtons(){
+  setDefaultState(reportButton,false);
   setDefaultState(loadFilesButton, true);
   setDefaultState(calcButton, atomListGrid->GetNumberRows() != 0);
 }
