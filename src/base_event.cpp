@@ -18,6 +18,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_BUTTON(BUTTON_Browse, MainFrame::OnAtomBrowse)
   EVT_BUTTON(BUTTON_Radius, MainFrame::OnRadiusBrowse)
   EVT_BUTTON(BUTTON_LoadFiles, MainFrame::OnLoadFiles)
+  EVT_BUTTON(BUTTON_Report, MainFrame::OnExportReport)
   EVT_CHECKBOX(CHECKBOX_TwoProbes, MainFrame::ProbeModeChange)
   EVT_GRID_CELL_CHANGING(MainFrame::GridChange)
 END_EVENT_TABLE()
@@ -81,6 +82,8 @@ void MainFrame::OnLoadFiles(wxCommandEvent& event){
   Ctrl::getInstance()->loadRadiusFile();
   Ctrl::getInstance()->loadAtomFile();
 
+  Ctrl::getInstance()->newCalculation();
+
   toggleButtons(); // sets accessibility of buttons
   wxYield();
   enableGuiElements(true);
@@ -115,7 +118,7 @@ void MainFrame::OnBrowse(wxCommandEvent& event, std::string& filetype, wxTextCtr
      "file browser"
     );
 
-  // if user closes dialogue
+  // if user closes dialog
   if (openFileDialog.ShowModal() == wxID_CANCEL)
     return;
 
@@ -165,6 +168,34 @@ void MainFrame::GridChange(wxGridEvent& event){
     }
   }
   atomListGrid->ForceRefresh();
+}
+
+///////////////
+// ON EXPORT //
+///////////////
+
+std::string MainFrame::OpenExportFileDialog(const std::string file_type, const std::string file_extension){
+  // open file dialog
+  wxFileDialog save_dialog(this, _("Export " + file_type + " as..."), "", "", file_extension, wxFD_SAVE);
+
+  // if user closes dialog
+  if (save_dialog.ShowModal() == wxID_CANCEL) {return "";}
+  
+  return save_dialog.GetPath().ToStdString();
+}
+
+void MainFrame::OnExportReport(wxCommandEvent& event){
+  // check whether report can be generated
+  if (!Ctrl::getInstance()->isCalculationDone()){
+    printToOutput("Data missing to generate report!"); 
+    return;
+  }
+
+  std::string path = OpenExportFileDialog("report", "*.txt");
+  if (path.empty()) {return;}
+  
+  // create report
+  Ctrl::getInstance()->exportReport(path);
 }
 
 ////////////////////////////////

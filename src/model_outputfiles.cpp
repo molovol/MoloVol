@@ -30,7 +30,11 @@ bool Model::createOutputFolder(std::string file_name){
 }
 
 void Model::createReport(){
-  std::ofstream output_report(output_folder+"/MoloVol report "+ _time_stamp +".txt");
+  createReport(output_folder+"/MoloVol report " + _time_stamp +".txt");
+}
+
+void Model::createReport(std::string path){
+  std::ofstream output_report(path);
   output_report << "\n";
   output_report << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n";
   output_report << "   MM           MM            LL           VV           VV           LL   \n";

@@ -22,7 +22,12 @@ class Ctrl{
     void updateStatus(std::string);
     void prepareOutput(std::string);
     void exportReport();
+    void exportReport(std::string);
     void exportSurfaceMap(bool);
+
+    void newCalculation();
+    void calculationDone(const bool=true);
+    bool isCalculationDone();
     // unit tests
     bool unittestExcluded();
     bool unittestProtein();
@@ -38,6 +43,7 @@ class Ctrl{
     static Ctrl* instance;
     static MainFrame* gui;
 
+    bool _calculation_finished;
     bool _to_gui = true; // determines whether to print to console or to GUI
 };
 

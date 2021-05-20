@@ -77,6 +77,7 @@ class Model{
     // export
     bool createOutputFolder(std::string);
     void createReport();
+    void createReport(std::string);
     void writeXYZfile(std::vector<std::tuple<std::string, double, double, double>>&, std::string);
     void writeTotalSurfaceMap();
     void writeCavitiesMaps();

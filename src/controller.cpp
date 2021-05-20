@@ -105,6 +105,7 @@ bool Ctrl::runCalculation(){
 
   // CALCULATION
   CalcReportBundle data = current_calculation->generateData();
+  calculationDone(data.success);
 
   // OUTPUT
   clearOutput();
@@ -189,6 +190,10 @@ void Ctrl::updateStatus(const std::string str){
   }
 }
 
+void Ctrl::exportReport(std::string path){
+  current_calculation->createReport(path);
+}
+
 void Ctrl::exportReport(){
   current_calculation->createReport();
 }
@@ -200,4 +205,20 @@ void Ctrl::exportSurfaceMap(bool cavities){
   else{
     current_calculation->writeTotalSurfaceMap();
   }
+}
+
+////////////////////////
+// CALCULATION STATUS //
+////////////////////////
+
+void Ctrl::newCalculation(){
+  _calculation_finished = false;
+}
+
+void Ctrl::calculationDone(const bool state){
+  _calculation_finished = state;
+}
+
+bool Ctrl::isCalculationDone(){
+  return _calculation_finished;
 }

@@ -40,9 +40,9 @@ class MainFrame: public wxFrame
     // methods for controller communication
     void clearOutputText();
     void clearOutputGrid();
-    void printToOutput(std::string& text);
-    void appendOutput(std::string& text);
-    void appendOutput(std::wstring& text);
+    void printToOutput(const std::string text);
+    void appendOutput(const std::string text);
+    void appendOutput(const std::wstring text);
     std::string getAtomFilepath();
     std::string getRadiusFilepath();
     bool getIncludeHetatm();
@@ -180,6 +180,10 @@ class MainFrame: public wxFrame
     void OnRadiusBrowse(wxCommandEvent& event);
     void OnLoadFiles(wxCommandEvent& event);
     void OnBrowse(wxCommandEvent& event, std::string& filetype, wxTextCtrl* textbox);
+
+    std::string OpenExportFileDialog(const std::string, const std::string);
+    void OnExportReport(wxCommandEvent& event);
+
     void ProbeModeChange(wxCommandEvent& event);
     void GridChange(wxGridEvent& event);
 

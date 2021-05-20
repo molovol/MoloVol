@@ -22,15 +22,15 @@ void MainFrame::clearOutputGrid(){
   }
 }
 
-void MainFrame::printToOutput(std::string& text){
+void MainFrame::printToOutput(const std::string text){
   outputText->SetValue(text);
 }
 
-void MainFrame::appendOutput(std::string& text){
+void MainFrame::appendOutput(const std::string text){
   outputText->SetValue(outputText->GetValue() + text);
 }
 
-void MainFrame::appendOutput(std::wstring& text){
+void MainFrame::appendOutput(const std::wstring text){
   outputText->SetValue(outputText->GetValue() + text);
 }
 
