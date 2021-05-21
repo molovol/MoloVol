@@ -19,6 +19,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_BUTTON(BUTTON_Radius, MainFrame::OnRadiusBrowse)
   EVT_BUTTON(BUTTON_LoadFiles, MainFrame::OnLoadFiles)
   EVT_BUTTON(BUTTON_Report, MainFrame::OnExportReport)
+  EVT_BUTTON(BUTTON_TotalMap, MainFrame::OnExportTotalMap)
+  EVT_BUTTON(BUTTON_CavityMap, MainFrame::OnExportCavityMap)
   EVT_CHECKBOX(CHECKBOX_TwoProbes, MainFrame::ProbeModeChange)
   EVT_GRID_CELL_CHANGING(MainFrame::GridChange)
 END_EVENT_TABLE()
@@ -78,7 +80,7 @@ void MainFrame::OnCalc(wxCommandEvent& event){
   wxYield(); // without wxYield, the clicks on disabled buttons are queued
   setDefaultState(reportButton,true);
   setDefaultState(totalMapButton,true);
-  setDefaultState(cavityMapButton,true);
+  setDefaultState(cavityMapButton, outputGrid->GetNumberRows() != 0);
   enableGuiElements(true);
 }
 
@@ -201,12 +203,19 @@ void MainFrame::OnExportReport(wxCommandEvent& event){
     printToOutput("Data missing to generate report!"); 
     return;
   }
-
   std::string path = OpenExportFileDialog("report", "*.txt");
   if (path.empty()) {return;}
   
   // create report
   Ctrl::getInstance()->exportReport(path);
+}
+
+void MainFrame::OnExportTotalMap(wxCommandEvent& event){
+
+}
+
+void MainFrame::OnExportCavityMap(wxCommandEvent& event){
+
 }
 
 ////////////////////////////////

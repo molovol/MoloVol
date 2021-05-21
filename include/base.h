@@ -183,6 +183,8 @@ class MainFrame: public wxFrame
 
     std::string OpenExportFileDialog(const std::string, const std::string);
     void OnExportReport(wxCommandEvent& event);
+    void OnExportTotalMap(wxCommandEvent& event);
+    void OnExportCavityMap(wxCommandEvent& event);
 
     void ProbeModeChange(wxCommandEvent& event);
     void GridChange(wxGridEvent& event);
