@@ -198,12 +198,13 @@ std::string MainFrame::OpenExportFileDialog(const std::string file_type, const s
 }
 
 void MainFrame::OnExportReport(wxCommandEvent& event){
+  const std::string file = "report";
   // check whether report can be generated
   if (!Ctrl::getInstance()->isCalculationDone()){
-    printToOutput("Data missing to generate report!"); 
+    printToOutput("Data missing to generate " + file + "!"); 
     return;
   }
-  std::string path = OpenExportFileDialog("report", "*.txt");
+  std::string path = OpenExportFileDialog(file, "*.txt");
   if (path.empty()) {return;}
   
   // create report
@@ -211,11 +212,29 @@ void MainFrame::OnExportReport(wxCommandEvent& event){
 }
 
 void MainFrame::OnExportTotalMap(wxCommandEvent& event){
-
+  const std::string file = "total surface map";
+  if (!Ctrl::getInstance()->isCalculationDone()){
+    printToOutput("Data missing to generate " + file + "!"); 
+    return;
+  }
+  
+  std::string path = OpenExportFileDialog(file, "*.dx");
+  if (path.empty()) {return;}
+  
+  Ctrl::getInstance()->exportSurfaceMap(path, false);
 }
 
 void MainFrame::OnExportCavityMap(wxCommandEvent& event){
-
+  const std::string file = "cavity surface maps";
+  if (!Ctrl::getInstance()->isCalculationDone() || outputGrid->GetNumberRows() == 0){
+    printToOutput("Data missing to generate " + file + "!"); 
+    return;
+  }
+  
+  std::string path = OpenExportFileDialog(file, "*.dx");
+  if (path.empty()) {return;}
+  
+  Ctrl::getInstance()->exportSurfaceMap(path, true);
 }
 
 ////////////////////////////////

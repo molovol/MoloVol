@@ -24,6 +24,7 @@ class Ctrl{
     void exportReport();
     void exportReport(std::string);
     void exportSurfaceMap(bool);
+    void exportSurfaceMap(const std::string, bool);
 
     void newCalculation();
     void calculationDone(const bool=true);

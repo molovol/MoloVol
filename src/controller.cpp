@@ -198,6 +198,15 @@ void Ctrl::exportReport(){
   current_calculation->createReport();
 }
 
+void Ctrl::exportSurfaceMap(const std::string path, bool cavities){
+  if(cavities){
+    current_calculation->writeCavitiesMaps(path);
+  }
+  else{
+    current_calculation->writeTotalSurfaceMap(path);
+  }
+}
+
 void Ctrl::exportSurfaceMap(bool cavities){
   if(cavities){
     current_calculation->writeCavitiesMaps();

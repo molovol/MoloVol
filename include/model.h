@@ -80,8 +80,10 @@ class Model{
     void createReport(std::string);
     void writeXYZfile(std::vector<std::tuple<std::string, double, double, double>>&, std::string);
     void writeTotalSurfaceMap();
+    void writeTotalSurfaceMap(const std::string);
     void writeCavitiesMaps();
-    void writeSurfaceMap(std::string, double, std::array<unsigned long int,3>, std::array<double,3>, std::array<unsigned int,3>, std::array<unsigned int,3>, const bool=false, const unsigned char=0);
+    void writeCavitiesMaps(const std::string);
+    void writeSurfaceMap(const std::string, double, std::array<unsigned long int,3>, std::array<double,3>, std::array<unsigned int,3>, std::array<unsigned int,3>, const bool=false, const unsigned char=0);
 
     std::vector<std::string> listElementsInStructure();
 
