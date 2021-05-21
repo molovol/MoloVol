@@ -42,9 +42,13 @@ void MainFrame::OnPrint(wxCommandEvent& event){
 // begin calculation
 void MainFrame::OnCalc(wxCommandEvent& event){
   enableGuiElements(false);
+  // saving locally, to avoid issues if user changes the tickbox during calculation (shouldn't be possible,
+  // but this way it's double proofed)
+  const bool probe_mode = getProbeMode();
+  const bool surface_option = getCalcSurfaceAreas(); 
 
   // stop calculation if probe 2 radius is too small in two probes mode
-  if(getProbeMode() && getProbe1Radius() > getProbe2Radius()){
+  if(probe_mode && getProbe1Radius() > getProbe2Radius()){
     Ctrl::getInstance()->notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.");
     wxYield(); // without wxYield, the clicks on disabled buttons are queued
     enableGuiElements(true);
@@ -73,6 +77,8 @@ void MainFrame::OnCalc(wxCommandEvent& event){
 
   wxYield(); // without wxYield, the clicks on disabled buttons are queued
   setDefaultState(reportButton,true);
+  setDefaultState(totalMapButton,true);
+  setDefaultState(cavityMapButton,true);
   enableGuiElements(true);
 }
 
@@ -229,6 +235,8 @@ void MainFrame::toggleOptionsPdb(){
 
 void MainFrame::toggleButtons(){
   setDefaultState(reportButton,false);
+  setDefaultState(totalMapButton,false);
+  setDefaultState(cavityMapButton,false);
   setDefaultState(loadFilesButton, true);
   setDefaultState(calcButton, atomListGrid->GetNumberRows() != 0);
 }
