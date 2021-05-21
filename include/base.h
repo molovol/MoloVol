@@ -180,6 +180,7 @@ class MainFrame: public wxFrame
     void OnRadiusBrowse(wxCommandEvent& event);
     void OnLoadFiles(wxCommandEvent& event);
     void OnBrowse(wxCommandEvent& event, std::string& filetype, wxTextCtrl* textbox);
+    void OnTextInput(wxCommandEvent&);
 
     std::string OpenExportFileDialog(const std::string, const std::string);
     void OnExportReport(wxCommandEvent& event);

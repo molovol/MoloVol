@@ -21,6 +21,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_BUTTON(BUTTON_Report, MainFrame::OnExportReport)
   EVT_BUTTON(BUTTON_TotalMap, MainFrame::OnExportTotalMap)
   EVT_BUTTON(BUTTON_CavityMap, MainFrame::OnExportCavityMap)
+  EVT_TEXT(wxID_ANY, MainFrame::OnTextInput)
   EVT_CHECKBOX(CHECKBOX_TwoProbes, MainFrame::ProbeModeChange)
   EVT_GRID_CELL_CHANGING(MainFrame::GridChange)
 END_EVENT_TABLE()
@@ -181,6 +182,15 @@ void MainFrame::GridChange(wxGridEvent& event){
     }
   }
   atomListGrid->ForceRefresh();
+}
+
+void MainFrame::OnTextInput(wxCommandEvent& event){
+  filepathText->ChangeValue(filepathText->GetValue());
+  radiuspathText->ChangeValue(radiuspathText->GetValue());
+  
+  probe1InputText->ChangeValue(probe1InputText->GetValue());
+  probe2InputText->ChangeValue(probe2InputText->GetValue());
+  gridsizeInputText->ChangeValue(gridsizeInputText->GetValue());
 }
 
 ///////////////
