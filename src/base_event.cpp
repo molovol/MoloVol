@@ -242,22 +242,21 @@ void MainFrame::OnExportCavityMap(wxCommandEvent& event){
 }
 
 void MainFrame::OnToggleAutoExport(wxCommandEvent& event){
-  /*
   if(dirpickerText->GetValue().IsNull()){
     const int checkbox_id = event.GetId();
     switch(checkbox_id){
-      case BUTTON_Report:
+      case CHECKBOX_Report:
         if (!getMakeReport()){return;}
-      case BUTTON_TotalMap:
+        break;
+      case CHECKBOX_SurfaceMap:
         if (!getMakeSurfaceMap()){return;}
-        std::cout << "=" << std::endl;
-      case BUTTON_CavityMap:
+        break;
+      case CHECKBOX_CavityMaps:
         if (!getMakeCavityMaps()){return;}
+        break;
     }
-
     OnBrowseOutput(event);
   }
-  */
 }
 
 void MainFrame::OnBrowseOutput(wxCommandEvent& event){
