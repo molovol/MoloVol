@@ -221,7 +221,7 @@ void MainFrame::InitBrowsePanel(){
 
   wxStaticBoxSizer *browserSizer = new wxStaticBoxSizer(wxVERTICAL,browsePanel);
   browserSizer->Add(radiusfilePanel,0,wxEXPAND | wxTOP,6);
-  browserSizer->Add(atomfilePanel,0,wxEXPAND,0);
+  browserSizer->Add(atomfilePanel,0,wxEXPAND | wxTOP,10);
   browserSizer->Add(fileOptionsPanel,0,wxEXPAND,0);
   browsePanel->SetSizerAndFit(browserSizer);
 
@@ -248,9 +248,9 @@ void MainFrame::InitSandr(){
 void MainFrame::SetSizerFilePanel(wxPanel* panel, wxStaticText* text, wxButton* button, wxTextCtrl* path){
 
   wxBoxSizer *fileSizer = new wxBoxSizer(wxHORIZONTAL);
-  fileSizer->Add(text, 0, wxALIGN_CENTRE_VERTICAL | wxRIGHT | wxBOTTOM, 10);
-  fileSizer->Add(path, 1, wxRIGHT | wxBOTTOM, 10);
-  fileSizer->Add(button, 0, wxBOTTOM, 10);
+  fileSizer->Add(text, 0, wxALIGN_CENTRE_VERTICAL | wxRIGHT, 5);
+  fileSizer->Add(path, 1, wxRIGHT, 5);
+  fileSizer->Add(button, 0,0);
   panel->SetSizerAndFit(fileSizer);
 }
 
