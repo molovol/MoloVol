@@ -87,7 +87,7 @@ bool MainFrame::getMakeCavityMaps(){
 }
 
 std::string MainFrame::getOutputDir(){
-  return outputdirPicker->GetPath().ToStdString();
+  return dirpickerText->GetValue().ToStdString();
 }
 
 void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>> symbol_number_radius){

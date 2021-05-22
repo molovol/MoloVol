@@ -129,7 +129,8 @@ class MainFrame: public wxFrame
           wxCheckBox* cavityMapsCheckbox;
         wxPanel* autoExportPanel;
           wxStaticText* outputdirText;
-          wxDirPickerCtrl* outputdirPicker;
+          wxTextCtrl* dirpickerText;
+          wxButton* dirpickerButton;
 
     // set and manipulate gui interactivity
     void InitDefaultStates();
@@ -181,11 +182,13 @@ class MainFrame: public wxFrame
     void OnLoadFiles(wxCommandEvent& event);
     void OnBrowse(wxCommandEvent& event, std::string& filetype, wxTextCtrl* textbox);
     void OnTextInput(wxCommandEvent&);
+    void OnBrowseOutput(wxCommandEvent&);
 
     std::string OpenExportFileDialog(const std::string, const std::string);
     void OnExportReport(wxCommandEvent& event);
     void OnExportTotalMap(wxCommandEvent& event);
     void OnExportCavityMap(wxCommandEvent& event);
+    void OnToggleAutoExport(wxCommandEvent& event);
 
     void ProbeModeChange(wxCommandEvent& event);
     void GridChange(wxGridEvent& event);
@@ -270,7 +273,8 @@ enum
         CHECKBOX_CavityMaps,
       PANEL_AutoExport,
         TEXT_Outputdir,
-        BUTTON_Output
+        TEXT_Dirpicker,
+        BUTTON_Dirpicker
 };
 
 //DECLARE_APP(MainApp)

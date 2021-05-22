@@ -249,8 +249,8 @@ void MainFrame::SetSizerFilePanel(wxPanel* panel, wxStaticText* text, wxButton* 
 
   wxBoxSizer *fileSizer = new wxBoxSizer(wxHORIZONTAL);
   fileSizer->Add(text, 0, wxALIGN_CENTRE_VERTICAL | wxRIGHT | wxBOTTOM, 10);
-  fileSizer->Add(path, 5, wxRIGHT | wxLEFT | wxBOTTOM, 10);
-  fileSizer->Add(button, 0, wxLEFT | wxBOTTOM, 10);
+  fileSizer->Add(path, 1, wxRIGHT | wxBOTTOM, 10);
+  fileSizer->Add(button, 0, wxBOTTOM, 10);
   panel->SetSizerAndFit(fileSizer);
 }
 
@@ -603,12 +603,10 @@ void MainFrame::InitAutoExportPanel(){
 
   {
     outputdirText = new wxStaticText(subPanel, TEXT_Outputdir, "Auto save directory:");
-    outputdirPicker = new wxDirPickerCtrl(subPanel, BUTTON_Output, "", _("Select Output Directory"));
+    dirpickerText = new wxTextCtrl(subPanel, TEXT_Dirpicker);
+    dirpickerButton = new wxButton(subPanel, BUTTON_Dirpicker, "Browse");
 
-    wxBoxSizer *boxSizerH = new wxBoxSizer(wxHORIZONTAL);
-    boxSizerH->Add(outputdirText,0, wxALIGN_CENTRE_VERTICAL);
-    boxSizerH->Add(outputdirPicker,5, wxLEFT, 20);
-    subPanel->SetSizerAndFit(boxSizerH);
+    SetSizerFilePanel(subPanel, outputdirText, dirpickerButton, dirpickerText);
   }
 
   wxBoxSizer* subSizer = new wxBoxSizer(wxHORIZONTAL);

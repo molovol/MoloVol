@@ -21,8 +21,12 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_BUTTON(BUTTON_Report, MainFrame::OnExportReport)
   EVT_BUTTON(BUTTON_TotalMap, MainFrame::OnExportTotalMap)
   EVT_BUTTON(BUTTON_CavityMap, MainFrame::OnExportCavityMap)
+  EVT_BUTTON(BUTTON_Dirpicker, MainFrame::OnBrowseOutput)
   EVT_TEXT(wxID_ANY, MainFrame::OnTextInput)
   EVT_CHECKBOX(CHECKBOX_TwoProbes, MainFrame::ProbeModeChange)
+  EVT_CHECKBOX(CHECKBOX_Report, MainFrame::OnToggleAutoExport)
+  EVT_CHECKBOX(CHECKBOX_SurfaceMap, MainFrame::OnToggleAutoExport)
+  EVT_CHECKBOX(CHECKBOX_CavityMaps, MainFrame::OnToggleAutoExport)
   EVT_GRID_CELL_CHANGING(MainFrame::GridChange)
 END_EVENT_TABLE()
 
@@ -120,17 +124,7 @@ void MainFrame::OnRadiusBrowse(wxCommandEvent& event){
 
 // browse (can only be called by another method function)
 void MainFrame::OnBrowse(wxCommandEvent& event, std::string& filetype, wxTextCtrl* textbox){
-  wxFileDialog openFileDialog
-    (this,
-     _("Select File"),
-     "",
-     "",
-     filetype,
-     wxFD_OPEN|wxFD_FILE_MUST_EXIST,
-     wxDefaultPosition,
-     wxDefaultSize,
-     "file browser"
-    );
+  wxFileDialog openFileDialog(this,_("Select file"),"","",filetype,wxFD_OPEN|wxFD_FILE_MUST_EXIST);
 
   // if user closes dialog
   if (openFileDialog.ShowModal() == wxID_CANCEL)
@@ -245,6 +239,36 @@ void MainFrame::OnExportCavityMap(wxCommandEvent& event){
   if (path.empty()) {return;}
   
   Ctrl::getInstance()->exportSurfaceMap(path, true);
+}
+
+void MainFrame::OnToggleAutoExport(wxCommandEvent& event){
+  /*
+  if(dirpickerText->GetValue().IsNull()){
+    const int checkbox_id = event.GetId();
+    switch(checkbox_id){
+      case BUTTON_Report:
+        if (!getMakeReport()){return;}
+      case BUTTON_TotalMap:
+        if (!getMakeSurfaceMap()){return;}
+        std::cout << "=" << std::endl;
+      case BUTTON_CavityMap:
+        if (!getMakeCavityMaps()){return;}
+    }
+
+    OnBrowseOutput(event);
+  }
+  */
+}
+
+void MainFrame::OnBrowseOutput(wxCommandEvent& event){
+  wxDirDialog openDirDialog(this, _("Select output directory"), "", wxDD_DIR_MUST_EXIST | wxDD_DEFAULT_STYLE);
+  
+  // if user closes dialog
+  if (openDirDialog.ShowModal() == wxID_CANCEL){
+    return;
+  }
+
+  dirpickerText->SetValue(openDirDialog.GetPath());
 }
 
 ////////////////////////////////
