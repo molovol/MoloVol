@@ -264,6 +264,10 @@ void MainFrame::OnBrowseOutput(wxCommandEvent& event){
   
   // if user closes dialog
   if (openDirDialog.ShowModal() == wxID_CANCEL){
+    // if directory textbox is empty then uncheck all auto export tick boxes
+    if (dirpickerText->GetValue().IsNull()){
+      for (wxCheckBox* cb : getAutoExportCheckBoxes()){cb->SetValue(false);}
+    }
     return;
   }
 

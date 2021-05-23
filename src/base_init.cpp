@@ -577,21 +577,21 @@ void MainFrame::InitExportPanel(){
 
 void MainFrame::InitReportExportPanel(){
   reportButton = new wxButton(reportExportPanel, BUTTON_Report, "Export report");
-  reportCheckbox = new wxCheckBox(reportExportPanel, CHECKBOX_Report,"Auto export");
+  reportCheckbox = new wxCheckBox(reportExportPanel, CHECKBOX_Report,"Auto export report");
 
   SetSizerExportSubPanel(reportExportPanel, reportButton, reportCheckbox);
 }
 
 void MainFrame::InitTotalMapExportPanel(){
   totalMapButton = new wxButton(totalMapExportPanel, BUTTON_TotalMap, "Export total surface map");
-  surfaceMapCheckbox = new wxCheckBox(totalMapExportPanel, CHECKBOX_SurfaceMap, "Auto export");
+  surfaceMapCheckbox = new wxCheckBox(totalMapExportPanel, CHECKBOX_SurfaceMap, "Auto export total surface map");
   
   SetSizerExportSubPanel(totalMapExportPanel, totalMapButton, surfaceMapCheckbox);
 }
 
 void MainFrame::InitCavityMapExportPanel(){
   cavityMapButton = new wxButton(cavityMapExportPanel, BUTTON_CavityMap, "Export cavity maps");
-  cavityMapsCheckbox = new wxCheckBox(cavityMapExportPanel, CHECKBOX_CavityMaps, "Auto export");
+  cavityMapsCheckbox = new wxCheckBox(cavityMapExportPanel, CHECKBOX_CavityMaps, "Auto export cavity maps");
   
   SetSizerExportSubPanel(cavityMapExportPanel, cavityMapButton, cavityMapsCheckbox);
 }

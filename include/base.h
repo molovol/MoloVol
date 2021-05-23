@@ -193,6 +193,9 @@ class MainFrame: public wxFrame
     void ProbeModeChange(wxCommandEvent& event);
     void GridChange(wxGridEvent& event);
 
+    // access functions
+    std::vector<wxCheckBox*> getAutoExportCheckBoxes(){return {reportCheckbox, surfaceMapCheckbox, cavityMapsCheckbox};}
+
     // colours
     wxColour col_panel = wxColour(160,160,160);
     wxColour col_output = wxColour(192,192,192);
