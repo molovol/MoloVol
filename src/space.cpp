@@ -358,7 +358,7 @@ void Space::setUnitCellIndexes(){
     // +0.5 to avoid rounding errors
     _unit_cell_start_index[i] = int(0.5 - _cart_min[i]/_grid_size);
     // no rounding because _unit_cell_mod_index will correct any rounding error in _unit_cell_end_index
-    _unit_cell_end_index[i] = _unit_cell_start_index[i] + (_unit_cell_limits[i]/_grid_size);
+    _unit_cell_end_index[i] = _unit_cell_start_index[i] + int(_unit_cell_limits[i]/_grid_size);
     // warning: std::fmod() provided a wrong value in some cases so the fmod calculation is done manually
     _unit_cell_mod_index[i] = custom_fmod(_unit_cell_limits[i],_grid_size) / _grid_size;
    }
