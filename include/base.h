@@ -64,7 +64,7 @@ class MainFrame: public wxFrame
     double getMaxRad();
     std::vector<std::string> getIncludedElements();
     void setStatus(const std::string);
-    void openErrorDialog();
+    void openErrorDialog(const int, const std::string&);
   private:
     wxStatusBar* statusBar;
 

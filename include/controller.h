@@ -33,8 +33,9 @@ class Ctrl{
     void calculationDone(const bool=true);
     bool isCalculationDone();
 
-    void displayErrorMessage();
-    void printErrorMessage();
+    void displayErrorMessage(const int);
+    void printErrorMessage(const int);
+    std::string getErrorMessage(const int);
     // unit tests
     bool unittestExcluded();
     bool unittestProtein();

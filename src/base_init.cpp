@@ -32,8 +32,7 @@ bool MainApp::OnInit()
   assert(parser.Parse()==0);
   wxString unittest_id;
   if (parser.Found("u",&unittest_id)){
-    _silent = true;
-    silenceGUI(true); // not really needed but doesn't hurt
+    silenceGUI(true);
     std::cout << "Selected unit test: " << unittest_id << std::endl;
     if (unittest_id=="excluded"){
       Ctrl::getInstance()->unittestExcluded();

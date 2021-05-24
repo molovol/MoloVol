@@ -4,6 +4,7 @@
 #include "atom.h" // i don't know why
 #include "model.h"
 #include "misc.h"
+#include "exception.h"
 #include "special_chars.h"
 #include <chrono>
 #include <utility>
@@ -252,14 +253,23 @@ bool Ctrl::isCalculationDone(){
 // ERROR MESSAGES //
 ////////////////////
 
-void Ctrl::displayErrorMessage(){
+static const std::map<int, std::string> s_error_codes = {
+  {101, "Total number of cavities (255) exceeded. Consider changing the probe size. Calculation will proceed."}
+};
+
+void Ctrl::displayErrorMessage(const int error_code){
   if (_to_gui){
-    gui->openErrorDialog();
+    gui->openErrorDialog(error_code, getErrorMessage(error_code));
   }
   else{
-    printErrorMessage();
+    printErrorMessage(101);
   }
 }
 
-void Ctrl::printErrorMessage(){
+void Ctrl::printErrorMessage(const int error_code){
+  std::cout << getErrorMessage(error_code) << std::endl;
+}
+
+std::string Ctrl::getErrorMessage(const int error_code){
+  return s_error_codes.find(error_code)->second;
 }

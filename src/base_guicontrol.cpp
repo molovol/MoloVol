@@ -187,7 +187,7 @@ void MainFrame::setStatus(const std::string str){
 // DIALOG POP UPS //
 ////////////////////
 
-void MainFrame::openErrorDialog(){
-  wxMessageDialog error_dialog(this, "Message", "Error", wxICON_ERROR | wxOK | wxCENTRE);
+void MainFrame::openErrorDialog(const int error_code, const std::string& error_message){
+  wxMessageDialog error_dialog(this, error_message, "Error Code " + std::to_string(error_code), wxICON_ERROR | wxOK | wxCENTRE);
   error_dialog.ShowModal();
 }
