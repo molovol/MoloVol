@@ -32,6 +32,7 @@ bool MainApp::OnInit()
   assert(parser.Parse()==0);
   wxString unittest_id;
   if (parser.Found("u",&unittest_id)){
+    _silent = true;
     silenceGUI(true); // not really needed but doesn't hurt
     std::cout << "Selected unit test: " << unittest_id << std::endl;
     if (unittest_id=="excluded"){
@@ -65,7 +66,7 @@ bool MainApp::OnInit()
 };
 
 // OnRun() is called after OnInit() returns true. In order to suppress the GUI, the attribute "silent" has to
-// be toggled. this can be done through the command line
+// be toggled. this can be done by opening the app from the command line
 int MainApp::OnRun(){
   if (isSilent()){return 0;} // end application if GUI is silenced
   else {return wxApp::OnRun();} // proceed normally
@@ -109,8 +110,8 @@ void MainFrame::InitDefaultStates(){
   }
 }
 
-void MainApp::silenceGUI(bool set){_silent = set;}
-bool MainApp::isSilent(){return _silent;}
+void MainApp::silenceGUI(bool set){Ctrl::getInstance()->disableGUI();}
+bool MainApp::isSilent(){return !Ctrl::getInstance()->isGUIEnabled();}
 
 ////////////////////////////////////
 // INITIALISATION OF GUI ELEMENTS //

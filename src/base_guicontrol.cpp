@@ -7,6 +7,7 @@
 #include "base.h"
 #include "special_chars.h"
 #include <string>
+#include <wx/msgdlg.h>
 
 //////////////////////////////////
 // METHODS FOR MANIPULATING GUI //
@@ -180,4 +181,13 @@ std::vector<std::string> MainFrame::getIncludedElements(){
 
 void MainFrame::setStatus(const std::string str){
   statusBar->SetStatusText(str);
+}
+
+////////////////////
+// DIALOG POP UPS //
+////////////////////
+
+void MainFrame::openErrorDialog(){
+  wxMessageDialog error_dialog(this, "Message", "Error", wxICON_ERROR | wxOK | wxCENTRE);
+  error_dialog.ShowModal();
 }

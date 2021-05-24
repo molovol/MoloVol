@@ -27,7 +27,6 @@ class MainApp: public wxApp
   private:
     void silenceGUI(bool);
     bool isSilent();
-    bool _silent = false;
     // colours
     wxColour col_win = wxColour(160,160,160);
 };
@@ -65,6 +64,7 @@ class MainFrame: public wxFrame
     double getMaxRad();
     std::vector<std::string> getIncludedElements();
     void setStatus(const std::string);
+    void openErrorDialog();
   private:
     wxStatusBar* statusBar;
 

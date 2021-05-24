@@ -16,6 +16,22 @@
 Ctrl* Ctrl::instance = NULL;
 MainFrame* Ctrl::gui = NULL;
 
+////////////////
+// TOGGLE GUI //
+////////////////
+
+void Ctrl::disableGUI(){
+  _to_gui = false;
+}
+
+void Ctrl::enableGUI(){
+  _to_gui = true;
+}
+
+bool Ctrl::isGUIEnabled(){
+  return _to_gui;
+}
+
 /////////////
 // METHODS //
 /////////////
@@ -230,4 +246,20 @@ void Ctrl::calculationDone(const bool state){
 
 bool Ctrl::isCalculationDone(){
   return _calculation_finished;
+}
+
+////////////////////
+// ERROR MESSAGES //
+////////////////////
+
+void Ctrl::displayErrorMessage(){
+  if (_to_gui){
+    gui->openErrorDialog();
+  }
+  else{
+    printErrorMessage();
+  }
+}
+
+void Ctrl::printErrorMessage(){
 }

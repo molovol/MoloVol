@@ -251,12 +251,11 @@ CalcReportBundle Model::calcVolume(){
   _data.success = true;
 
   auto start = std::chrono::steady_clock::now();
-  // TODO make a better error reporting system
-  bool error_cav = false;
-  _cell.assignTypeInGrid(atomtree, getProbeRad1(), getProbeRad2(), optionProbeMode(), error_cav); // assign each voxel in grid a type
-  if(error_cav){
-    Ctrl::getInstance()->notifyUser("\n\nWARNING: Maximum number of cavities reached. Not all cavities are reported.");
-    Ctrl::getInstance()->notifyUser("\nTo solve this, change probe radius (e.g. smaller probe 2 and/or larger probe 1).\n");
+  bool cavities_exceeded = false;
+  _cell.assignTypeInGrid(atomtree, getProbeRad1(), getProbeRad2(), optionProbeMode(), cavities_exceeded); // assign each voxel in grid a type
+  Ctrl::getInstance()->displayErrorMessage();
+  if(cavities_exceeded){
+    Ctrl::getInstance()->displayErrorMessage();
   }
   auto end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());

@@ -10,7 +10,10 @@ class Model;
 class MainFrame;
 class Ctrl{
   public:
-    inline static const std::string s_version = "alpha";
+    void enableGUI();
+    void disableGUI();
+    bool isGUIEnabled();
+
     bool loadRadiusFile();
     bool loadAtomFile();
     bool runCalculation();
@@ -29,6 +32,9 @@ class Ctrl{
     void newCalculation();
     void calculationDone(const bool=true);
     bool isCalculationDone();
+
+    void displayErrorMessage();
+    void printErrorMessage();
     // unit tests
     bool unittestExcluded();
     bool unittestProtein();
@@ -37,6 +43,7 @@ class Ctrl{
     bool unittestSurface();
     bool unittestFloodfill();
 
+    inline static const std::string s_version = "alpha";
   private:
     // consider making static pointer for model
     Model* current_calculation;
