@@ -39,6 +39,11 @@ void MainFrame::extDisplayCavityList(const std::vector<Cavity>& cavities){
   GetEventHandler()->CallAfter(&MainFrame::displayCavityList, cavities);
 }
 
+void MainFrame::extOpenErrorDialog(const int error_code, const std::string& error_message){
+  const std::pair<int, std::string> code_message = std::make_pair(error_code, error_message);
+  GetEventHandler()->CallAfter(&MainFrame::openErrorDialog, code_message); 
+}
+
 // NOT THREAD SAFE
 
 void MainFrame::clearOutputText(){
@@ -215,7 +220,9 @@ void MainFrame::setStatus(const std::string str){
 // DIALOG POP UPS //
 ////////////////////
 
-void MainFrame::openErrorDialog(const int error_code, const std::string& error_message){
+void MainFrame::openErrorDialog(const std::pair<int,std::string>& code_message){
+  const int error_code = code_message.first;
+  const std::string error_message = code_message.second;
   wxMessageDialog error_dialog(this, error_message, "Error Code " + std::to_string(error_code), wxICON_ERROR | wxOK | wxCENTRE);
   error_dialog.ShowModal();
 }

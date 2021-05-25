@@ -279,7 +279,7 @@ static const std::map<int, std::string> s_error_codes = {
 
 void Ctrl::displayErrorMessage(const int error_code){
   if (_to_gui){
-    gui->openErrorDialog(error_code, getErrorMessage(error_code));
+    gui->extOpenErrorDialog(error_code, getErrorMessage(error_code));
   }
   else{
     printErrorMessage(error_code);

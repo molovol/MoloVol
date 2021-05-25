@@ -18,6 +18,7 @@
 #include <tuple>
 #include <unordered_map>
 #include <map>
+#include <utility>
 
 class MainApp: public wxApp
 {
@@ -49,6 +50,8 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void extSetStatus(const std::string);
     void extDisplayCavityList(const std::vector<Cavity>&);
 
+    void extOpenErrorDialog(const int, const std::string&);
+    
     void printToOutput(const std::string text);
     std::string getAtomFilepath();
     std::string getRadiusFilepath();
@@ -70,7 +73,6 @@ class MainFrame: public wxFrame, public wxThreadHelper
     std::unordered_map<std::string, double> generateRadiusMap();
     double getMaxRad();
     std::vector<std::string> getIncludedElements();
-    void openErrorDialog(const int, const std::string&);
   protected:
     virtual wxThread::ExitCode Entry();
     bool m_data;
@@ -85,6 +87,8 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void setStatus(const std::string);
     void displayCavityList(const std::vector<Cavity>&);
     
+    void openErrorDialog(const std::pair<int,std::string>&);
+
     wxStatusBar* statusBar;
 
     wxPanel* preCalcPanel;
