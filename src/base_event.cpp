@@ -39,13 +39,6 @@ void MainFrame::OnExit(wxCommandEvent& event){
   this->Close(TRUE);
 }
 
-// TODO remove obsolete debugging functions
-// display text in output, used for debugging
-void MainFrame::OnPrint(wxCommandEvent& event){
-  std::string text = "treat yourself well";
-  printToOutput(text);
-}
-
 // begin calculation
 void MainFrame::OnCalc(wxCommandEvent& event){
   enableGuiElements(false);
@@ -56,7 +49,7 @@ void MainFrame::OnCalc(wxCommandEvent& event){
 
   // stop calculation if probe 2 radius is too small in two probes mode
   if(probe_mode && getProbe1Radius() > getProbe2Radius()){
-    Ctrl::getInstance()->notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.");
+    Ctrl::getInstance()->displayErrorMessage(104);
     wxYield(); // without wxYield, the clicks on disabled buttons are queued
     enableGuiElements(true);
     return;
@@ -158,7 +151,7 @@ void MainFrame::GridChange(wxGridEvent& event){
   int row = event.GetRow();
   wxString value = event.GetString();
   if (col == 0){
-    if (value == "1"){ //
+    if (value == "1"){
       atomListGrid->SetCellBackgroundColour(row,1,col_white);
       atomListGrid->SetCellBackgroundColour(row,2,col_white);
     }
@@ -205,7 +198,7 @@ void MainFrame::OnExportReport(wxCommandEvent& event){
   const std::string file = "report";
   // check whether report can be generated
   if (!Ctrl::getInstance()->isCalculationDone()){
-    printToOutput("Data missing to generate " + file + "!"); 
+    Ctrl::getInstance()->displayErrorMessage(302);
     return;
   }
   std::string path = OpenExportFileDialog(file, "*.txt");
@@ -218,7 +211,7 @@ void MainFrame::OnExportReport(wxCommandEvent& event){
 void MainFrame::OnExportTotalMap(wxCommandEvent& event){
   const std::string file = "total surface map";
   if (!Ctrl::getInstance()->isCalculationDone()){
-    printToOutput("Data missing to generate " + file + "!"); 
+    Ctrl::getInstance()->displayErrorMessage(302);
     return;
   }
   
@@ -231,7 +224,7 @@ void MainFrame::OnExportTotalMap(wxCommandEvent& event){
 void MainFrame::OnExportCavityMap(wxCommandEvent& event){
   const std::string file = "cavity surface maps";
   if (!Ctrl::getInstance()->isCalculationDone() || outputGrid->GetNumberRows() == 0){
-    printToOutput("Data missing to generate " + file + "!"); 
+    Ctrl::getInstance()->displayErrorMessage(302);
     return;
   }
   
@@ -305,4 +298,3 @@ void MainFrame::toggleButtons(){
   setDefaultState(loadFilesButton, true);
   setDefaultState(calcButton, atomListGrid->GetNumberRows() != 0);
 }
-

@@ -81,7 +81,7 @@ bool Model::setProbeRadii(const double r_1, const double r_2, const bool probe_m
     // This second check would be unnecessary when using the GUI but
     // adding it here makes the back engine Model error-proof independently from the GUI
     if (r_1 > r_2){
-      Ctrl::getInstance()->notifyUser("\nProbes radii invalid!\nSet probe 2 radius > probe 1 radius.");
+      Ctrl::getInstance()->displayErrorMessage(104);
       return false;
     }
     else{
@@ -301,12 +301,12 @@ bool Model::processUnitCell(){
   */
   double radius_limit = _data.grid_step + _max_atom_radius + 2*( (_data.probe_mode) ? getProbeRad2() : getProbeRad1() );
   if(space_group == ""){
-    Ctrl::getInstance()->notifyUser("\nSpace group not found!\nCheck the structure file\nor untick the unit cell analysis checkbox.");
+    Ctrl::getInstance()->displayErrorMessage(111);
     return false;
   }
   for(int i = 0; i < 6; i++){
     if(_cell_param[i] == 0){
-      Ctrl::getInstance()->notifyUser("\nUnit cell parameters invalid!\nCheck the structure file\nor untick the unit cell analysis checkbox.");
+      Ctrl::getInstance()->displayErrorMessage(112);
       return false;
     }
   }
@@ -388,7 +388,7 @@ bool Model::symmetrizeUnitCell(){
   std::vector<int> sym_matrix_XYZ;
   std::vector<double> sym_matrix_fraction;
   if(!getSymmetryElements(space_group, sym_matrix_XYZ, sym_matrix_fraction)){
-    Ctrl::getInstance()->notifyUser("\nSpace group or symmetry not found!\nCheck the structure and space group files\nor untick the unit cell analysis checkbox.");
+    Ctrl::getInstance()->displayErrorMessage(113);
     return false;
   }
   /* To convert cartesian coordinates x y z in unit cell coordinates a b c:

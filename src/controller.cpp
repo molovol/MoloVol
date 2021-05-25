@@ -165,7 +165,7 @@ bool Ctrl::runCalculation(){
     }
   }
   else{
-    displayErrorMessage(299);
+    displayErrorMessage(200);
   }
   return data.success;
 }
@@ -253,15 +253,22 @@ bool Ctrl::isCalculationDone(){
 ////////////////////
 
 static const std::map<int, std::string> s_error_codes = {
+  {0, "Unidentified error code."}, // no user should ever see this
   // 1xx: Invalid Input
   {101, "Invalid radius definition file. Please select a valid file or set radii manually."},
   {102, "Invalid structure file. Please select a valid file."},
   {103, "Invalid file format. Please make sure that the input files have the correct file extensions."},
+  {104, "Invalid probe radius input. The large probe must have a larger radius than the small probe."},
+  // 11x: unit cell files
+  {111, "Space group not found. Check the structure file, or untick the Unit Cell Analysis tickbox."},
+  {112, "Invalid unit cell parameters. Check the structure file, or untick the Unit Cell Analysis tickbox."},
+  {113, "Space group or symmetry not found. Check the structure and space group files or untick the Unit Cell Analysis tickbox"},
   // 2xx: Issue during Calculation
+  {200, "Calculation failed!"}, // unspecific error
   {201, "Total number of cavities (255) exceeded. Consider changing the probe size. Calculation will proceed."},
-  {299, "Calculation failed!"}, // unspecific error
   // 3xx: Issue with Output
-  {301, "New output folder could not be created. The output file(s) will be created in the program folder."}
+  {301, "New output folder could not be created. The output file(s) will be created in the program folder."},
+  {302, "Data missing to export file. Calculation may be still running or has not been started."}
 };
 
 void Ctrl::displayErrorMessage(const int error_code){
@@ -269,7 +276,7 @@ void Ctrl::displayErrorMessage(const int error_code){
     gui->openErrorDialog(error_code, getErrorMessage(error_code));
   }
   else{
-    printErrorMessage(101);
+    printErrorMessage(error_code);
   }
 }
 
@@ -278,5 +285,10 @@ void Ctrl::printErrorMessage(const int error_code){
 }
 
 std::string Ctrl::getErrorMessage(const int error_code){
-  return s_error_codes.find(error_code)->second;
+  if (s_error_codes.find(error_code) == s_error_codes.end()) {
+    return s_error_codes.find(0)->second;
+  }
+  else {
+    return s_error_codes.find(error_code)->second;
+  }
 }
