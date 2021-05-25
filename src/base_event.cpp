@@ -8,10 +8,14 @@
 #include "controller.h"
 #include "misc.h"
 #include <vector>
+#include <chrono>
+#include <thread>
 
 /////////////////
 // EVENT TABLE //
 /////////////////
+
+wxDEFINE_EVENT(wxEVT_COMMAND_MYTHREAD_COMPLETED, wxThreadEvent);
 
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_BUTTON(BUTTON_Calc, MainFrame::OnCalc)
@@ -28,6 +32,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_CHECKBOX(CHECKBOX_SurfaceMap, MainFrame::OnToggleAutoExport)
   EVT_CHECKBOX(CHECKBOX_CavityMaps, MainFrame::OnToggleAutoExport)
   EVT_GRID_CELL_CHANGING(MainFrame::GridChange)
+  EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_MYTHREAD_COMPLETED, MainFrame::OnCalculationFinished)
 END_EVENT_TABLE()
 
 ////////////////////////////////
@@ -36,31 +41,55 @@ END_EVENT_TABLE()
 
 // exit program
 void MainFrame::OnExit(wxCommandEvent& event){
+  if (GetThread() && GetThread()->IsRunning()){
+    GetThread()->Wait();
+  }
   this->Close(TRUE);
 }
 
 // begin calculation
 void MainFrame::OnCalc(wxCommandEvent& event){
-  enableGuiElements(false);
-  // saving locally, to avoid issues if user changes the tickbox during calculation (shouldn't be possible,
-  // but this way it's double proofed)
-  const bool probe_mode = getProbeMode();
-  const bool surface_option = getCalcSurfaceAreas(); 
-
+  std::cout << "?" << std::endl;
   // stop calculation if probe 2 radius is too small in two probes mode
-  if(probe_mode && getProbe1Radius() > getProbe2Radius()){
+  if(getProbeMode() && getProbe1Radius() > getProbe2Radius()){
     Ctrl::getInstance()->displayErrorMessage(104);
     wxYield(); // without wxYield, the clicks on disabled buttons are queued
     enableGuiElements(true);
     return;
   }
-
+ 
+  enableGuiElements(false);
+  wxYield(); // without wxYield, the clicks on disabled buttons are queued
+  // start calculation in worker thread
+  if (CreateThread(wxTHREAD_JOINABLE) != wxTHREAD_NO_ERROR){
+    wxLogError("Could not create worker thread!");
+    return;
+  }
+  if (GetThread()->Run() != wxTHREAD_NO_ERROR){
+    wxLogError("Could not run worker thread!");
+  }
+/*
   if(!Ctrl::getInstance()->runCalculation()){
     wxYield(); // without wxYield, the clicks on disabled buttons are queued
     enableGuiElements(true);
     return;
   }
+  */
+}
 
+wxThread::ExitCode MainFrame::Entry(){
+  int i = 1;
+  while (!GetThread()->TestDestroy()){
+    wxQueueEvent(this, new wxThreadEvent(wxEVT_COMMAND_MYTHREAD_COMPLETED));
+    std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+    std::cout << i << std::endl;
+  }
+//  wxQueueEvent(this, new wxThreadEvent(wxEVT_COMMAND_MYTHREAD_COMPLETED));
+  return (wxThread::ExitCode)0;
+}
+
+void MainFrame::OnCalculationFinished(wxCommandEvent& event){
+  /*
   // write report file if option is toggled
   if(getMakeReport()){
     Ctrl::getInstance()->exportReport();
@@ -74,13 +103,18 @@ void MainFrame::OnCalc(wxCommandEvent& event){
   if(getMakeCavityMaps()){
     Ctrl::getInstance()->exportSurfaceMap(true);
   }
-
+*/
+  
+  if (GetThread() && GetThread()->IsRunning()){
+    GetThread()->Delete();
+  }
   wxYield(); // without wxYield, the clicks on disabled buttons are queued
   setDefaultState(reportButton,true);
   setDefaultState(totalMapButton,true);
   setDefaultState(cavityMapButton, outputGrid->GetNumberRows() != 0);
   enableGuiElements(true);
 }
+
 
 // load input files to display radii list
 void MainFrame::OnLoadFiles(wxCommandEvent& event){

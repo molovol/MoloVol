@@ -10,6 +10,7 @@
 #include <wx/grid.h>
 #include <wx/cmdline.h>
 #include <wx/statusbr.h>
+#include <wx/thread.h>
 #include <wchar.h>
 #include <string>
 #include <iostream>
@@ -31,7 +32,9 @@ class MainApp: public wxApp
     wxColour col_win = wxColour(160,160,160);
 };
 
-class MainFrame: public wxFrame
+wxDECLARE_EVENT(wxEVT_COMMAND_MYTHREAD_COMPLETED, wxThreadEvent);
+
+class MainFrame: public wxFrame, public wxThreadHelper
 {
   public:
     MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
@@ -65,6 +68,10 @@ class MainFrame: public wxFrame
     std::vector<std::string> getIncludedElements();
     void setStatus(const std::string);
     void openErrorDialog(const int, const std::string&);
+  protected:
+    virtual wxThread::ExitCode Entry();
+    bool m_data;
+    wxCriticalSection m_dataCS;
   private:
     wxStatusBar* statusBar;
 
@@ -176,6 +183,7 @@ class MainFrame: public wxFrame
     // methods to handle events
     void OnExit(wxCommandEvent& event);
     void OnCalc(wxCommandEvent& event);
+    void OnCalculationFinished(wxCommandEvent& event);
     void OnAtomBrowse(wxCommandEvent& event);
     void OnRadiusBrowse(wxCommandEvent& event);
     void OnLoadFiles(wxCommandEvent& event);
