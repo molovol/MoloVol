@@ -18,6 +18,7 @@
 wxDEFINE_EVENT(wxEVT_COMMAND_WORKERTHREAD_COMPLETED, wxThreadEvent);
 
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
+  EVT_CLOSE(MainFrame::OnClose)
   EVT_BUTTON(BUTTON_Calc, MainFrame::OnCalc)
   EVT_BUTTON(BUTTON_Abort, MainFrame::OnAbort)
   EVT_BUTTON(BUTTON_Browse, MainFrame::OnAtomBrowse)
@@ -40,11 +41,15 @@ END_EVENT_TABLE()
 // METHODS FOR EVENT HANDLING //
 ////////////////////////////////
 
-void MainFrame::OnExit(wxCommandEvent& event){
+int MainApp::OnExit(){
+  return 0;
+}
+
+void MainFrame::OnClose(wxCloseEvent& event){
   if (GetThread() && GetThread()->IsRunning()){
-    GetThread()->Delete();
+    GetThread()->Kill();
   }
-  this->Close(TRUE);
+  event.Skip();
 }
 
 // begin calculation
@@ -62,7 +67,7 @@ void MainFrame::OnCalc(wxCommandEvent& event){
   wxYield(); // without wxYield, the clicks on disabled buttons are queued
   
   // create worker thread
-  if (CreateThread(wxTHREAD_DETACHED) != wxTHREAD_NO_ERROR){
+  if (CreateThread(wxTHREAD_JOINABLE) != wxTHREAD_NO_ERROR){
     wxLogError("Could not create worker thread!");
     return;
   }
@@ -73,20 +78,13 @@ void MainFrame::OnCalc(wxCommandEvent& event){
 }
 
 wxThread::ExitCode MainFrame::Entry(){
-  // worker thread loop. when TestDestroy() is called, the thread checks whether is has
-  // received the signal from the main thread to be joined with it
-  bool finished = false;
-  while (!GetThread()->TestDestroy()){
-    if (!finished){
-      Ctrl::getInstance()->runCalculation();
-    }
-    finished = true; // makes sure calculation is never run twice, just in case something goes wrong
-    // after the calculation is finished, this event tells the main thread to give the stop signal
-    // and reenable the GUI
-    wxQueueEvent(this, new wxThreadEvent(wxEVT_COMMAND_WORKERTHREAD_COMPLETED));
-    // give main thread a millisecond to give stop signal. this avoids starting the while loop again
-    GetThread()->Sleep(1);
-  }
+  // worker thread
+  Ctrl::getInstance()->runCalculation();
+  // after the calculation is finished, this event tells the main thread to give the stop signal
+  // and reenable the GUI
+  wxQueueEvent(this, new wxThreadEvent(wxEVT_COMMAND_WORKERTHREAD_COMPLETED));
+  // give main thread a millisecond to give stop signal. this avoids starting the while loop again
+  GetThread()->Sleep(1);
   return (wxThread::ExitCode)0;
 }
 
@@ -96,7 +94,7 @@ void MainFrame::OnAbort(wxCommandEvent& event){
 void MainFrame::OnCalculationFinished(wxCommandEvent& event){
   // main thread will wait for the thread to finish its work
   if (GetThread() && GetThread()->IsRunning()){
-    GetThread()->Delete();
+    GetThread()->Wait();
   }
 
   wxYield(); // without wxYield, the clicks on disabled buttons are queued

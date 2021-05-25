@@ -25,6 +25,7 @@ class MainApp: public wxApp
   public:
     virtual bool OnInit();
     virtual int OnRun();
+    virtual int OnExit();
 
   private:
     void silenceGUI(bool);
@@ -200,7 +201,8 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void SetSizerExportSubPanel(wxPanel*, wxButton*, wxCheckBox*);
 
     // methods to handle events
-    void OnExit(wxCommandEvent& event);
+    //virtual void OnExit(wxCommandEvent& event);
+    void OnClose(wxCloseEvent& event);
     void OnCalc(wxCommandEvent& event);
     void OnAbort(wxCommandEvent& event);
     void OnCalculationFinished(wxCommandEvent& event);
