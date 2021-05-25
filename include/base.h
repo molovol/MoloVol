@@ -32,7 +32,7 @@ class MainApp: public wxApp
     wxColour col_win = wxColour(160,160,160);
 };
 
-wxDECLARE_EVENT(wxEVT_COMMAND_MYTHREAD_COMPLETED, wxThreadEvent);
+wxDECLARE_EVENT(wxEVT_COMMAND_WORKERTHREAD_COMPLETED, wxThreadEvent);
 
 class MainFrame: public wxFrame, public wxThreadHelper
 {

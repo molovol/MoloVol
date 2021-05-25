@@ -15,7 +15,7 @@
 // EVENT TABLE //
 /////////////////
 
-wxDEFINE_EVENT(wxEVT_COMMAND_MYTHREAD_COMPLETED, wxThreadEvent);
+wxDEFINE_EVENT(wxEVT_COMMAND_WORKERTHREAD_COMPLETED, wxThreadEvent);
 
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_BUTTON(BUTTON_Calc, MainFrame::OnCalc)
@@ -32,7 +32,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_CHECKBOX(CHECKBOX_SurfaceMap, MainFrame::OnToggleAutoExport)
   EVT_CHECKBOX(CHECKBOX_CavityMaps, MainFrame::OnToggleAutoExport)
   EVT_GRID_CELL_CHANGING(MainFrame::GridChange)
-  EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_MYTHREAD_COMPLETED, MainFrame::OnCalculationFinished)
+  EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_WORKERTHREAD_COMPLETED, MainFrame::OnCalculationFinished)
 END_EVENT_TABLE()
 
 ////////////////////////////////
@@ -49,7 +49,6 @@ void MainFrame::OnExit(wxCommandEvent& event){
 
 // begin calculation
 void MainFrame::OnCalc(wxCommandEvent& event){
-  std::cout << "?" << std::endl;
   // stop calculation if probe 2 radius is too small in two probes mode
   if(getProbeMode() && getProbe1Radius() > getProbe2Radius()){
     Ctrl::getInstance()->displayErrorMessage(104);
@@ -60,31 +59,33 @@ void MainFrame::OnCalc(wxCommandEvent& event){
  
   enableGuiElements(false);
   wxYield(); // without wxYield, the clicks on disabled buttons are queued
-  // start calculation in worker thread
+  
+  // create worker thread
   if (CreateThread(wxTHREAD_JOINABLE) != wxTHREAD_NO_ERROR){
     wxLogError("Could not create worker thread!");
     return;
   }
+  // start calculation in worker thread
   if (GetThread()->Run() != wxTHREAD_NO_ERROR){
     wxLogError("Could not run worker thread!");
   }
-/*
-  if(!Ctrl::getInstance()->runCalculation()){
-    wxYield(); // without wxYield, the clicks on disabled buttons are queued
-    enableGuiElements(true);
-    return;
-  }
-  */
 }
 
 wxThread::ExitCode MainFrame::Entry(){
-  int i = 1;
+  // worker thread loop. when TestDestroy() is called, the thread checks whether is has
+  // received the signal from the main thread to be joined with it
+  bool finished = false;
   while (!GetThread()->TestDestroy()){
-    wxQueueEvent(this, new wxThreadEvent(wxEVT_COMMAND_MYTHREAD_COMPLETED));
-    std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-    std::cout << i << std::endl;
+    if (!finished){
+      Ctrl::getInstance()->runCalculation();
+    }
+    finished = true; // makes sure calculation is never run twice, just in case something goes wrong
+    // after the calculation is finished, this event tells the main thread to give the stop signal
+    // and reenable the GUI
+    wxQueueEvent(this, new wxThreadEvent(wxEVT_COMMAND_WORKERTHREAD_COMPLETED));
+    // give main thread a millisecond to give stop signal. this avoids starting the while loop again
+    GetThread()->Sleep(1);
   }
-//  wxQueueEvent(this, new wxThreadEvent(wxEVT_COMMAND_MYTHREAD_COMPLETED));
   return (wxThread::ExitCode)0;
 }
 
@@ -104,14 +105,16 @@ void MainFrame::OnCalculationFinished(wxCommandEvent& event){
     Ctrl::getInstance()->exportSurfaceMap(true);
   }
 */
-  
+  // main thread will wait for the thread to finish its work
   if (GetThread() && GetThread()->IsRunning()){
     GetThread()->Delete();
   }
+
   wxYield(); // without wxYield, the clicks on disabled buttons are queued
   setDefaultState(reportButton,true);
   setDefaultState(totalMapButton,true);
   setDefaultState(cavityMapButton, outputGrid->GetNumberRows() != 0);
+  // reenable GUI
   enableGuiElements(true);
 }
 
