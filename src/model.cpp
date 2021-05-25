@@ -254,7 +254,7 @@ CalcReportBundle Model::calcVolume(){
   // assign each voxel in grid a type
   bool cavities_exceeded = false;
   _cell.assignTypeInGrid(atomtree, getProbeRad1(), getProbeRad2(), optionProbeMode(), cavities_exceeded);
-  if(cavities_exceeded){Ctrl::getInstance()->displayErrorMessage(101);}
+  if(cavities_exceeded){Ctrl::getInstance()->displayErrorMessage(201);}
   auto end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
 

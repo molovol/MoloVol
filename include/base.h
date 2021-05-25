@@ -175,7 +175,6 @@ class MainFrame: public wxFrame
 
     // methods to handle events
     void OnExit(wxCommandEvent& event);
-    void OnPrint(wxCommandEvent& event);
     void OnCalc(wxCommandEvent& event);
     void OnAtomBrowse(wxCommandEvent& event);
     void OnRadiusBrowse(wxCommandEvent& event);

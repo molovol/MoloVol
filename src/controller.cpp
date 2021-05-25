@@ -58,8 +58,7 @@ bool Ctrl::loadRadiusFile(){
   std::string radius_filepath = gui->getRadiusFilepath();
   // even if there is no valid radii file, the program can be used by manually setting radii in the GUI after loading a structure
   if(!current_calculation->readRadiusFileSetMaps(radius_filepath)){
-    notifyUser("\nInvalid radii definition file!");
-    notifyUser("\nPlease select a valid file or set radii manually.");
+    displayErrorMessage(101);
   }
   // refresh atom list using new radius map
   gui->displayAtomList(current_calculation->generateAtomList());
@@ -77,11 +76,11 @@ bool Ctrl::loadAtomFile(){
   try{successful_import = current_calculation->readAtomsFromFile(gui->getAtomFilepath(), gui->getIncludeHetatm());}
 
   catch (const ExceptIllegalFileExtension& e){
-    notifyUser("\nInvalid structure file format!");
+    displayErrorMessage(103);
     successful_import = false;
   }
   catch (const ExceptInvalidInputFile& e){
-    notifyUser("\nInvalid structure file!");
+    displayErrorMessage(102);
     successful_import = false;
   }
 
@@ -166,7 +165,7 @@ bool Ctrl::runCalculation(){
     }
   }
   else{
-    notifyUser("\nCalculation failed!");
+    displayErrorMessage(299);
   }
   return data.success;
 }
@@ -194,7 +193,7 @@ void Ctrl::notifyUser(std::wstring wstr){
 // TODO remove if obselete
 void Ctrl::prepareOutput(std::string atomFilePath){
   if(!current_calculation->createOutputFolder(fileName(atomFilePath))){
-      notifyUser("\nNew output folder could not be created.\nThe output file(s) will be created in the program folder.");
+    displayErrorMessage(301);  
   }
 }
 
@@ -254,7 +253,15 @@ bool Ctrl::isCalculationDone(){
 ////////////////////
 
 static const std::map<int, std::string> s_error_codes = {
-  {101, "Total number of cavities (255) exceeded. Consider changing the probe size. Calculation will proceed."}
+  // 1xx: Invalid Input
+  {101, "Invalid radius definition file. Please select a valid file or set radii manually."},
+  {102, "Invalid structure file. Please select a valid file."},
+  {103, "Invalid file format. Please make sure that the input files have the correct file extensions."},
+  // 2xx: Issue during Calculation
+  {201, "Total number of cavities (255) exceeded. Consider changing the probe size. Calculation will proceed."},
+  {299, "Calculation failed!"}, // unspecific error
+  // 3xx: Issue with Output
+  {301, "New output folder could not be created. The output file(s) will be created in the program folder."}
 };
 
 void Ctrl::displayErrorMessage(const int error_code){
