@@ -40,11 +40,13 @@ class MainFrame: public wxFrame, public wxThreadHelper
     MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
 
     // methods for controller communication (thread safe)
+    void extClearOutputText();
+    void extClearOutputGrid();
     void extAppendOutput(const std::string text);
     void extAppendOutputW(const std::wstring wtext);
+    
+    void extDisplayCavityList(const std::vector<Cavity>&);
 
-    void clearOutputText();
-    void clearOutputGrid();
     void printToOutput(const std::string text);
     std::string getAtomFilepath();
     std::string getRadiusFilepath();
@@ -62,7 +64,6 @@ class MainFrame: public wxFrame, public wxThreadHelper
     std::string getOutputDir();
     void enableGuiElements(bool inp); // method to turn on and off interactable gui elements
 
-    void displayCavityList(const std::vector<Cavity>&);
     void displayAtomList(std::vector<std::tuple<std::string, int, double>> symbol_number_radius);
     std::unordered_map<std::string, double> generateRadiusMap();
     double getMaxRad();
@@ -75,8 +76,12 @@ class MainFrame: public wxFrame, public wxThreadHelper
     wxCriticalSection m_dataCS;
   private:
     // gui control methods
+    void clearOutputText();
+    void clearOutputGrid();
     void appendOutput(const std::string text);
     void appendOutputW(const std::wstring text);
+    
+    void displayCavityList(const std::vector<Cavity>&);
     
     wxStatusBar* statusBar;
 

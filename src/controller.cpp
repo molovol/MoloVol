@@ -126,7 +126,7 @@ bool Ctrl::runCalculation(){
   // OUTPUT
   clearOutput();
   if(data.success){
-    if(!data.cavities.empty()){gui->displayCavityList(data.cavities);}
+    if(!data.cavities.empty()){gui->extDisplayCavityList(data.cavities);}
     std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
 
     notifyUser("Result for ");
@@ -172,14 +172,14 @@ bool Ctrl::runCalculation(){
 
 void Ctrl::clearOutput(){
   if (_to_gui) {
-    gui->clearOutputText();
-    gui->clearOutputGrid();
+    gui->extClearOutputText();
+    gui->extClearOutputGrid();
   }
 }
 
 void Ctrl::notifyUser(std::string str){
   if (_to_gui){
-    gui->interThreadAppendOutput(str);
+    gui->extAppendOutput(str);
   }
   else {
     std::cout << str;
@@ -188,7 +188,7 @@ void Ctrl::notifyUser(std::string str){
 
 void Ctrl::notifyUser(std::wstring wstr){
   if (_to_gui){
-    gui->interThreadAppendOutputW(wstr);
+    gui->extAppendOutputW(wstr);
   }
   else {
     std::cout << wstr;

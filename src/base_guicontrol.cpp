@@ -13,15 +13,29 @@
 // METHODS FOR MANIPULATING GUI //
 //////////////////////////////////
 
-void MainFrame::interThreadAppendOutput(const std::string text){
+// THREAD SAFE
+
+void MainFrame::extClearOutputText(){
+  GetEventHandler()->CallAfter(&MainFrame::clearOutputText);
+}
+
+void MainFrame::extClearOutputGrid(){
+  GetEventHandler()->CallAfter(&MainFrame::clearOutputGrid);
+}
+
+void MainFrame::extAppendOutput(const std::string text){
   GetEventHandler()->CallAfter(&MainFrame::appendOutput, text);
 }
 
-void MainFrame::interThreadAppendOutputW(const std::wstring wtext){
+void MainFrame::extAppendOutputW(const std::wstring wtext){
   GetEventHandler()->CallAfter(&MainFrame::appendOutputW, wtext);
 }
 
-// the following functions should not be called by the worker thread
+void MainFrame::extDisplayCavityList(const std::vector<Cavity>& cavities){
+  GetEventHandler()->CallAfter(&MainFrame::displayCavityList, cavities);
+}
+
+// NOT THREAD SAFE
 
 void MainFrame::clearOutputText(){
   outputText->SetValue("");
