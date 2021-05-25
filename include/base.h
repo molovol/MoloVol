@@ -135,6 +135,7 @@ class MainFrame: public wxFrame, public wxThreadHelper
             wxSpinCtrl* depthInput;
         wxPanel* sandrPanel;
           wxButton* calcButton;
+          wxButton* abortButton;
     
     wxPanel* postCalcPanel;
       wxPanel* communicationPanel;
@@ -201,6 +202,7 @@ class MainFrame: public wxFrame, public wxThreadHelper
     // methods to handle events
     void OnExit(wxCommandEvent& event);
     void OnCalc(wxCommandEvent& event);
+    void OnAbort(wxCommandEvent& event);
     void OnCalculationFinished(wxCommandEvent& event);
     void OnAtomBrowse(wxCommandEvent& event);
     void OnRadiusBrowse(wxCommandEvent& event);
@@ -282,6 +284,7 @@ enum
           SPIN_Depthinput,
       PANEL_Sandr,
         BUTTON_Calc,
+        BUTTON_Abort,
    
   PANEL_PostCalc,
     PANEL_Communication,

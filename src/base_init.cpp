@@ -87,7 +87,9 @@ void MainFrame::InitDefaultStates(){
     depthInput,
     reportCheckbox,
     surfaceMapCheckbox,
-    cavityMapsCheckbox};
+    cavityMapsCheckbox,
+    dirpickerButton,
+    dirpickerText};
   wxWindow* widgets_disabled[] = {
     pdbHetatmCheckbox,
     loadFilesButton,
@@ -96,7 +98,8 @@ void MainFrame::InitDefaultStates(){
     calcButton,
     reportButton,
     totalMapButton,
-    cavityMapButton};
+    cavityMapButton,
+    abortButton};
 
   // initialise map
   for (const auto& widget : widgets_enabled){
@@ -233,9 +236,11 @@ void MainFrame::InitBrowsePanel(){
 void MainFrame::InitSandr(){
 
   calcButton = new wxButton(sandrPanel,BUTTON_Calc,"Calculate");
+  abortButton = new wxButton(sandrPanel,BUTTON_Abort,"Abort");
 
   wxStaticBoxSizer *sandrSizer = new wxStaticBoxSizer(wxHORIZONTAL,sandrPanel);
-  sandrSizer->Add(calcButton,1,wxALIGN_CENTRE_VERTICAL);
+  sandrSizer->Add(calcButton,3,wxALIGN_CENTRE_VERTICAL);
+  sandrSizer->Add(abortButton,1,wxALIGN_CENTRE_VERTICAL);
   sandrPanel->SetSizerAndFit(sandrSizer);
 
 }

@@ -168,6 +168,14 @@ bool Ctrl::runCalculation(){
     displayErrorMessage(200);
   }
   updateStatus("Calculation done.");
+
+  if (data.success){
+    // export if appropriate option is toggled
+    if(data.make_report){exportReport();}
+    if(data.make_full_map){exportSurfaceMap(false);}
+    if(data.make_cav_maps){exportSurfaceMap(true);}
+  }
+
   return data.success;
 }
 

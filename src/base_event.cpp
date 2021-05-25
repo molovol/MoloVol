@@ -19,6 +19,7 @@ wxDEFINE_EVENT(wxEVT_COMMAND_WORKERTHREAD_COMPLETED, wxThreadEvent);
 
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_BUTTON(BUTTON_Calc, MainFrame::OnCalc)
+  EVT_BUTTON(BUTTON_Abort, MainFrame::OnAbort)
   EVT_BUTTON(BUTTON_Browse, MainFrame::OnAtomBrowse)
   EVT_BUTTON(BUTTON_Radius, MainFrame::OnRadiusBrowse)
   EVT_BUTTON(BUTTON_LoadFiles, MainFrame::OnLoadFiles)
@@ -39,10 +40,9 @@ END_EVENT_TABLE()
 // METHODS FOR EVENT HANDLING //
 ////////////////////////////////
 
-// exit program
 void MainFrame::OnExit(wxCommandEvent& event){
   if (GetThread() && GetThread()->IsRunning()){
-    GetThread()->Wait();
+    GetThread()->Delete();
   }
   this->Close(TRUE);
 }
@@ -58,10 +58,11 @@ void MainFrame::OnCalc(wxCommandEvent& event){
   }
  
   enableGuiElements(false);
+  abortButton->Enable(true);
   wxYield(); // without wxYield, the clicks on disabled buttons are queued
   
   // create worker thread
-  if (CreateThread(wxTHREAD_JOINABLE) != wxTHREAD_NO_ERROR){
+  if (CreateThread(wxTHREAD_DETACHED) != wxTHREAD_NO_ERROR){
     wxLogError("Could not create worker thread!");
     return;
   }
@@ -89,22 +90,10 @@ wxThread::ExitCode MainFrame::Entry(){
   return (wxThread::ExitCode)0;
 }
 
+void MainFrame::OnAbort(wxCommandEvent& event){
+}
+
 void MainFrame::OnCalculationFinished(wxCommandEvent& event){
-  /*
-  // write report file if option is toggled
-  if(getMakeReport()){
-    Ctrl::getInstance()->exportReport();
-  }
-
-  // write total surface map file if option is toggled
-  if(getMakeSurfaceMap()){
-    Ctrl::getInstance()->exportSurfaceMap(false);
-  }
-
-  if(getMakeCavityMaps()){
-    Ctrl::getInstance()->exportSurfaceMap(true);
-  }
-*/
   // main thread will wait for the thread to finish its work
   if (GetThread() && GetThread()->IsRunning()){
     GetThread()->Delete();
