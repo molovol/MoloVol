@@ -13,6 +13,16 @@
 // METHODS FOR MANIPULATING GUI //
 //////////////////////////////////
 
+void MainFrame::interThreadAppendOutput(const std::string text){
+  GetEventHandler()->CallAfter(&MainFrame::appendOutput, text);
+}
+
+void MainFrame::interThreadAppendOutputW(const std::wstring wtext){
+  GetEventHandler()->CallAfter(&MainFrame::appendOutputW, wtext);
+}
+
+// the following functions should not be called by the worker thread
+
 void MainFrame::clearOutputText(){
   outputText->SetValue("");
 }
@@ -31,7 +41,7 @@ void MainFrame::appendOutput(const std::string text){
   outputText->SetValue(outputText->GetValue() + text);
 }
 
-void MainFrame::appendOutput(const std::wstring text){
+void MainFrame::appendOutputW(const std::wstring text){
   outputText->SetValue(outputText->GetValue() + text);
 }
 

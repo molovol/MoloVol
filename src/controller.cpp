@@ -177,9 +177,9 @@ void Ctrl::clearOutput(){
   }
 }
 
-void Ctrl::notifyUser(std::string str, bool to_gui){
-  if (to_gui){
-    gui->appendOutput(str);
+void Ctrl::notifyUser(std::string str){
+  if (_to_gui){
+    gui->interThreadAppendOutput(str);
   }
   else {
     std::cout << str;
@@ -187,7 +187,12 @@ void Ctrl::notifyUser(std::string str, bool to_gui){
 }
 
 void Ctrl::notifyUser(std::wstring wstr){
-  gui->appendOutput(wstr);
+  if (_to_gui){
+    gui->interThreadAppendOutputW(wstr);
+  }
+  else {
+    std::cout << wstr;
+  }
 }
 
 // TODO remove if obselete

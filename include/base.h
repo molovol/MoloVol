@@ -39,12 +39,13 @@ class MainFrame: public wxFrame, public wxThreadHelper
   public:
     MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
 
-    // methods for controller communication
+    // methods for controller communication (thread safe)
+    void extAppendOutput(const std::string text);
+    void extAppendOutputW(const std::wstring wtext);
+
     void clearOutputText();
     void clearOutputGrid();
     void printToOutput(const std::string text);
-    void appendOutput(const std::string text);
-    void appendOutput(const std::wstring text);
     std::string getAtomFilepath();
     std::string getRadiusFilepath();
     bool getIncludeHetatm();
@@ -73,6 +74,10 @@ class MainFrame: public wxFrame, public wxThreadHelper
     bool m_data;
     wxCriticalSection m_dataCS;
   private:
+    // gui control methods
+    void appendOutput(const std::string text);
+    void appendOutputW(const std::wstring text);
+    
     wxStatusBar* statusBar;
 
     wxPanel* preCalcPanel;

@@ -20,7 +20,7 @@ class Ctrl{
     void registerView(MainFrame* inp_gui);
     static Ctrl* getInstance();
     void clearOutput();
-    void notifyUser(std::string, bool = true);
+    void notifyUser(std::string);
     void notifyUser(std::wstring);
     void updateStatus(std::string);
     void prepareOutput(std::string);
