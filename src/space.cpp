@@ -144,7 +144,7 @@ void Space::assignAtomVsCore(){
         getTopVxl(top_lvl_index).evalRelationToAtoms(top_lvl_index, vxl_pos, _max_depth);
       }
     }
-    printf("%i%% done\n", int(100*(double(top_lvl_index[0])+1)/double(_n_gridsteps[0])));
+    Ctrl::getInstance()->updateProgressBar(int(100*(double(top_lvl_index[0])+1)/double(_n_gridsteps[0])));
   }
 }
 
@@ -162,7 +162,7 @@ void Space::identifyCavities(){
         }
       }
     }
-    printf("%i%% done\n", int(100*(double(vxl_index[0])+1)/double(_n_gridsteps[0])));
+    Ctrl::getInstance()->updateProgressBar(int(100*(double(vxl_index[0])+1)/double(_n_gridsteps[0])));
   }
 }
 
@@ -201,7 +201,7 @@ void Space::assignShellVsVoid(){
         getTopVxl(vxl_index).evalRelationToVoxels(vxl_index, _max_depth);
       }
     }
-    printf("%i%% done\n", int(100*(double(vxl_index[0])+1)/double(_n_gridsteps[0])));
+    Ctrl::getInstance()->updateProgressBar(int(100*(double(vxl_index[0])+1)/double(_n_gridsteps[0])));
   }
 }
 

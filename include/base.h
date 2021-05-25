@@ -48,6 +48,7 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void extAppendOutputW(const std::wstring);
     
     void extSetStatus(const std::string);
+    void extSetProgressBar(const int);
     void extDisplayCavityList(const std::vector<Cavity>&);
 
     void extOpenErrorDialog(const int, const std::string&);
@@ -85,6 +86,7 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void appendOutputW(const std::wstring text);
     
     void setStatus(const std::string);
+    void setProgressBar(const int);
     void displayCavityList(const std::vector<Cavity>&);
     
     void openErrorDialog(const std::pair<int,std::string>&);

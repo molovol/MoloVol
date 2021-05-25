@@ -35,6 +35,10 @@ void MainFrame::extSetStatus(const std::string status){
   GetEventHandler()->CallAfter(&MainFrame::setStatus, status);
 }
 
+void MainFrame::extSetProgressBar(const int percentage){
+  GetEventHandler()->CallAfter(&MainFrame::setProgressBar, percentage);
+}
+
 void MainFrame::extDisplayCavityList(const std::vector<Cavity>& cavities){
   GetEventHandler()->CallAfter(&MainFrame::displayCavityList, cavities);
 }
@@ -214,6 +218,10 @@ std::vector<std::string> MainFrame::getIncludedElements(){
 
 void MainFrame::setStatus(const std::string str){
   statusBar->SetStatusText(str);
+}
+  
+void MainFrame::setProgressBar(const int percentage){
+  progressGauge->SetValue(percentage);
 }
 
 ////////////////////

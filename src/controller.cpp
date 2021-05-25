@@ -212,6 +212,16 @@ void Ctrl::updateStatus(const std::string str){
   }
 }
 
+void Ctrl::updateProgressBar(const int percentage){
+  assert (percentage <= 100);
+  if (_to_gui) {
+    gui->extSetProgressBar(percentage);
+  }
+  else {
+    std::cout << std::to_string(percentage) + "\%"  << std::endl;
+  }
+}
+
 void Ctrl::exportReport(std::string path){
   current_calculation->createReport(path);
 }

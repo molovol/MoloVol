@@ -10,6 +10,8 @@ class Model;
 class MainFrame;
 class Ctrl{
   public:
+    static Ctrl* getInstance();
+
     void enableGUI();
     void disableGUI();
     bool isGUIEnabled();
@@ -18,11 +20,11 @@ class Ctrl{
     bool loadAtomFile();
     bool runCalculation();
     void registerView(MainFrame* inp_gui);
-    static Ctrl* getInstance();
     void clearOutput();
     void notifyUser(std::string);
     void notifyUser(std::wstring);
     void updateStatus(std::string);
+    void updateProgressBar(const int);
     void prepareOutput(std::string);
     void exportReport();
     void exportReport(std::string);
@@ -35,7 +37,6 @@ class Ctrl{
 
     void displayErrorMessage(const int);
     void printErrorMessage(const int);
-    std::string getErrorMessage(const int);
     // unit tests
     bool unittestExcluded();
     bool unittestProtein();
@@ -54,6 +55,8 @@ class Ctrl{
 
     bool _calculation_finished;
     bool _to_gui = true; // determines whether to print to console or to GUI
+    
+    std::string getErrorMessage(const int);
 };
 
 
