@@ -39,12 +39,14 @@ class MainFrame: public wxFrame, public wxThreadHelper
   public:
     MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
 
-    // methods for controller communication (thread safe)
+    // use these functions when changing the GUI externally, for instance from Ctrl
+    // these methods are thread safe
     void extClearOutputText();
     void extClearOutputGrid();
-    void extAppendOutput(const std::string text);
-    void extAppendOutputW(const std::wstring wtext);
+    void extAppendOutput(const std::string);
+    void extAppendOutputW(const std::wstring);
     
+    void extSetStatus(const std::string);
     void extDisplayCavityList(const std::vector<Cavity>&);
 
     void printToOutput(const std::string text);
@@ -68,19 +70,19 @@ class MainFrame: public wxFrame, public wxThreadHelper
     std::unordered_map<std::string, double> generateRadiusMap();
     double getMaxRad();
     std::vector<std::string> getIncludedElements();
-    void setStatus(const std::string);
     void openErrorDialog(const int, const std::string&);
   protected:
     virtual wxThread::ExitCode Entry();
     bool m_data;
     wxCriticalSection m_dataCS;
   private:
-    // gui control methods
+    // gui control methods that may be called directly from the main thread
     void clearOutputText();
     void clearOutputGrid();
     void appendOutput(const std::string text);
     void appendOutputW(const std::wstring text);
     
+    void setStatus(const std::string);
     void displayCavityList(const std::vector<Cavity>&);
     
     wxStatusBar* statusBar;

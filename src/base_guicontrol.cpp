@@ -31,6 +31,10 @@ void MainFrame::extAppendOutputW(const std::wstring wtext){
   GetEventHandler()->CallAfter(&MainFrame::appendOutputW, wtext);
 }
 
+void MainFrame::extSetStatus(const std::string status){
+  GetEventHandler()->CallAfter(&MainFrame::setStatus, status);
+}
+
 void MainFrame::extDisplayCavityList(const std::vector<Cavity>& cavities){
   GetEventHandler()->CallAfter(&MainFrame::displayCavityList, cavities);
 }

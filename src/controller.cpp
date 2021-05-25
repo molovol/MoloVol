@@ -167,6 +167,7 @@ bool Ctrl::runCalculation(){
   else{
     displayErrorMessage(200);
   }
+  updateStatus("Calculation done.");
   return data.success;
 }
 
@@ -204,7 +205,7 @@ void Ctrl::prepareOutput(std::string atomFilePath){
 
 void Ctrl::updateStatus(const std::string str){
   if (_to_gui) {
-    gui->setStatus(str);
+    gui->extSetStatus(str);
   }
   else {
     std::cout << str << std::endl;
