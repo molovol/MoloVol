@@ -2,6 +2,7 @@
 #include "space.h"
 #include "misc.h"
 #include "atom.h"
+#include "controller.h"
 #include <cmath> // abs, pow
 #include <algorithm> // max_element, swap
 #include <cassert>
@@ -209,7 +210,12 @@ char Voxel::evalRelationToAtoms(const std::array<unsigned,3>& index_vxl, Vector 
   if (hasSubvoxel()) {
     splitVoxel(index_vxl, pos_vxl, lvl);
   }
-  else {passTypeToChildren(index_vxl, lvl);}
+  else {
+    // voxel has been processed
+    try{Ctrl::getInstance()->updateCalculationStatus();}
+    catch(const ExceptAbortCalculation& e){throw;}
+    passTypeToChildren(index_vxl, lvl);
+  }
   return _type;
 }
 

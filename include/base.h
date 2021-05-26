@@ -11,6 +11,7 @@
 #include <wx/cmdline.h>
 #include <wx/statusbr.h>
 #include <wx/thread.h>
+#include <wx/msgqueue.h>
 #include <wchar.h>
 #include <string>
 #include <iostream>
@@ -51,6 +52,7 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void extSetStatus(const std::string);
     void extSetProgressBar(const int);
     void extDisplayCavityList(const std::vector<Cavity>&);
+    bool receivedAbortCommand();
 
     void extOpenErrorDialog(const int, const std::string&);
     
@@ -92,6 +94,7 @@ class MainFrame: public wxFrame, public wxThreadHelper
     
     void openErrorDialog(const std::pair<int,std::string>&);
 
+    wxMessageQueue<bool>* _abort_q;
     wxStatusBar* statusBar;
 
     wxPanel* preCalcPanel;

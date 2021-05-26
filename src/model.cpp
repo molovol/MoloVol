@@ -3,6 +3,7 @@
 #include "atom.h"
 #include "misc.h"
 #include "special_chars.h"
+#include "exception.h"
 #include <chrono>
 #include <array>
 #include <string>
@@ -91,9 +92,20 @@ bool Model::setProbeRadii(const double r_1, const double r_2, const bool probe_m
   return true;
 }
 
+///////////////////////
+// CALCULATION ENTRY //
+///////////////////////
+
 // TODO: consider making return value const, in order to prevent controller from messing with this
 CalcReportBundle Model::generateData(){
-  CalcReportBundle data = generateVolumeData();
+  // save the date and time of calculation for output files
+  _time_stamp = timeNow();
+  CalcReportBundle data;
+  try {data = generateVolumeData();}
+  catch(const ExceptAbortCalculation& e){
+    data.success = false;
+    return data;
+  }
   // surface calculation requires running the volume calculation first, but shouldn't be inside the volume calc function
   if (optionCalcSurfaceAreas() && data.success){
     data = generateSurfaceData();
@@ -102,9 +114,7 @@ CalcReportBundle Model::generateData(){
 }
 
 CalcReportBundle Model::generateVolumeData(){
-  // save the date and time of calculation for output files
-  _time_stamp = timeNow();
-
+  // PREPARATION
   // clear calculation times from previous runs
   _data.elapsed_seconds.clear();
 
@@ -127,8 +137,10 @@ CalcReportBundle Model::generateVolumeData(){
   generateChemicalFormula();
   auto end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
-
-  return calcVolume();
+  // START CALCULATION
+  try {calcVolume();}
+  catch(const ExceptAbortCalculation& e){throw;}
+  return _data;
 }
 
 CalcReportBundle Model::generateSurfaceData(){
@@ -250,29 +262,32 @@ CalcReportBundle Model::calcVolume(){
   // set back the default value of success to true to avoid lingering errors from previous failed calculations
   _data.success = true;
 
-  auto start = std::chrono::steady_clock::now();
-  // assign each voxel in grid a type
-  bool cavities_exceeded = false;
-  _cell.assignTypeInGrid(atomtree, getProbeRad1(), getProbeRad2(), optionProbeMode(), cavities_exceeded);
-  if(cavities_exceeded){Ctrl::getInstance()->displayErrorMessage(201);}
-  auto end = std::chrono::steady_clock::now();
-  _data.addTime(std::chrono::duration<double>(end-start).count());
-
-  // TODO remove when unnecessary
-  // _cell.printGrid(); // for testing
-
-  start = std::chrono::steady_clock::now();
-  if(_data.analyze_unit_cell){
-    _cell.getUnitCellVolume(_data.volumes, _data.cavities);
+  { // assign each voxel in grid a type
+    auto start = std::chrono::steady_clock::now();
+    bool cavities_exceeded = false;
+    try{_cell.assignTypeInGrid(atomtree, getProbeRad1(), getProbeRad2(), optionProbeMode(), cavities_exceeded);}
+    catch(const ExceptAbortCalculation& e){throw;}
+    if(cavities_exceeded){Ctrl::getInstance()->displayErrorMessage(201);}
+    auto end = std::chrono::steady_clock::now();
+    _data.addTime(std::chrono::duration<double>(end-start).count());
   }
-  else{
-    _cell.getVolume(_data.volumes, _data.cavities);
-  }
-  end = std::chrono::steady_clock::now();
-  _data.addTime(std::chrono::duration<double>(end-start).count());
 
+  // debugging tool
+  // _cell.printGrid();
+
+  { // sum total volume
+    auto start = std::chrono::steady_clock::now();
+    if(_data.analyze_unit_cell){
+      _cell.getUnitCellVolume(_data.volumes, _data.cavities);
+    }
+    else{
+      _cell.getVolume(_data.volumes, _data.cavities);
+    }
+    auto end = std::chrono::steady_clock::now();
+    _data.addTime(std::chrono::duration<double>(end-start).count());
+  }
+  // sort cavities by volume from largest to smallest
   inverseSort(_data.cavities);
-
   return _data;
 }
 

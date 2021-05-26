@@ -34,6 +34,7 @@ class Ctrl{
     void newCalculation();
     void calculationDone(const bool=true);
     bool isCalculationDone();
+    void updateCalculationStatus();
 
     void displayErrorMessage(const int);
     void printErrorMessage(const int);

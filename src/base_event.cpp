@@ -89,6 +89,16 @@ wxThread::ExitCode MainFrame::Entry(){
 }
 
 void MainFrame::OnAbort(wxCommandEvent& event){
+  if (_abort_q->IsOk()){
+    _abort_q->Post(true);
+  }
+//  Ctrl::getInstance()->setAbortFlag(true);  
+}
+
+bool MainFrame::receivedAbortCommand(){
+  bool abort;
+  _abort_q->ReceiveTimeout(0,abort);
+  return abort;
 }
 
 void MainFrame::OnCalculationFinished(wxCommandEvent& event){

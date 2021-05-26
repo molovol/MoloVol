@@ -111,13 +111,15 @@ void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, co
     // first run algorithm with the larger probe to exclude most voxels - "masking mode"
     Voxel::storeProbe(r_probe2, true);
     Ctrl::getInstance()->updateStatus("Blocking off cavities with large probe...");
-    assignAtomVsCore();
+    try{assignAtomVsCore();}
+    catch(const ExceptAbortCalculation& e){throw;}
     assignShellVsVoid();
   }
 
   Ctrl::getInstance()->updateStatus(std::string("Probing space") + (probe_mode? " with small probe..." : "..."));
   Voxel::storeProbe(r_probe1, false);
-  assignAtomVsCore();
+  try{assignAtomVsCore();}
+  catch(const ExceptAbortCalculation& e){throw;}
 
   Ctrl::getInstance()->updateStatus("Identifying cavities...");
   try{identifyCavities();}
@@ -141,7 +143,8 @@ void Space::assignAtomVsCore(){
       for(top_lvl_index[2] = 0; top_lvl_index[2] < _n_gridsteps[2]; top_lvl_index[2]++){
         vxl_pos[2] = vxl_origin[2] + vxl_dist * (0.5 + top_lvl_index[2]);
         // voxel position is deliberately not stored in voxel object to reduce memory cost
-        getTopVxl(top_lvl_index).evalRelationToAtoms(top_lvl_index, vxl_pos, _max_depth);
+        try{getTopVxl(top_lvl_index).evalRelationToAtoms(top_lvl_index, vxl_pos, _max_depth);}
+        catch(const ExceptAbortCalculation& e){throw;}
       }
     }
     Ctrl::getInstance()->updateProgressBar(int(100*(double(top_lvl_index[0])+1)/double(_n_gridsteps[0])));

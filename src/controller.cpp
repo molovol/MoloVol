@@ -272,6 +272,14 @@ bool Ctrl::isCalculationDone(){
   return _calculation_finished;
 }
 
+// checks whether worker thread has received a signal to stop the calculation and
+// updates the progress of the calculation
+void Ctrl::updateCalculationStatus(){
+  if (gui->receivedAbortCommand()){
+    throw ExceptAbortCalculation();
+  }
+}
+
 ////////////////////
 // ERROR MESSAGES //
 ////////////////////
