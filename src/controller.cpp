@@ -91,6 +91,9 @@ bool Ctrl::loadAtomFile(){
 
 // default function call: transfer data from GUI to Model
 bool Ctrl::runCalculation(){
+  // reset abort flag
+  setAbortFlag(false);
+  gui->extSetProgressBar(0);
   // create an instance of the model class
   // ensures, that there is only ever one instance of the model class
   if(current_calculation == NULL){
@@ -165,7 +168,7 @@ bool Ctrl::runCalculation(){
     }
   }
   else{
-    displayErrorMessage(200);
+    if(!getAbortFlag()){displayErrorMessage(200);}
   }
   updateStatus("Calculation done.");
 
@@ -272,11 +275,19 @@ bool Ctrl::isCalculationDone(){
   return _calculation_finished;
 }
 
+void Ctrl::setAbortFlag(const bool state){
+  _abort_calculation = state;
+}
+
+bool Ctrl::getAbortFlag(){
+  return _abort_calculation;
+}
+
 // checks whether worker thread has received a signal to stop the calculation and
 // updates the progress of the calculation
 void Ctrl::updateCalculationStatus(){
-  if (gui->receivedAbortCommand()){
-    throw ExceptAbortCalculation();
+  if (_to_gui){
+    setAbortFlag(gui->receivedAbortCommand());
   }
 }
 

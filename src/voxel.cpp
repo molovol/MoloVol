@@ -201,6 +201,7 @@ void Voxel::storeProbe(const double r_probe, const bool masking_mode){
 // part of the type assigment routine. first evaluation is only concerned with the relation between
 // voxels and atoms
 char Voxel::evalRelationToAtoms(const std::array<unsigned,3>& index_vxl, Vector pos_vxl, const int lvl){
+  if(Ctrl::getInstance()->getAbortFlag()){return 0;}
   if (isAssigned()) {return _type;}
   if (!hasSubvoxel()) {
     double rad_vxl = calcRadiusOfInfluence(lvl); // calculated every time, since max_depth may change (not expensive)
@@ -212,8 +213,7 @@ char Voxel::evalRelationToAtoms(const std::array<unsigned,3>& index_vxl, Vector 
   }
   else {
     // voxel has been processed
-    try{Ctrl::getInstance()->updateCalculationStatus();}
-    catch(const ExceptAbortCalculation& e){throw;}
+    Ctrl::getInstance()->updateCalculationStatus();
     passTypeToChildren(index_vxl, lvl);
   }
   return _type;

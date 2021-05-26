@@ -34,6 +34,8 @@ class Ctrl{
     void newCalculation();
     void calculationDone(const bool=true);
     bool isCalculationDone();
+    void setAbortFlag(const bool=true);
+    bool getAbortFlag();
     void updateCalculationStatus();
 
     void displayErrorMessage(const int);
@@ -54,6 +56,7 @@ class Ctrl{
     static Ctrl* instance;
     static MainFrame* gui;
 
+    bool _abort_calculation; // variable for main thread to signal stopping the calculation
     bool _calculation_finished;
     bool _to_gui = true; // determines whether to print to console or to GUI
     

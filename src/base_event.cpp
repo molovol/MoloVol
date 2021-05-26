@@ -91,17 +91,24 @@ wxThread::ExitCode MainFrame::Entry(){
 void MainFrame::OnAbort(wxCommandEvent& event){
   if (_abort_q->IsOk()){
     _abort_q->Post(true);
+    std::cout << "sent" << std::endl;
   }
-//  Ctrl::getInstance()->setAbortFlag(true);  
+  /*if (GetThread() && GetThread()->IsRunning()){
+    GetThread()->Wait();
+  }*/
 }
 
 bool MainFrame::receivedAbortCommand(){
-  bool abort;
+  bool abort = false;
   _abort_q->ReceiveTimeout(0,abort);
+  if (abort){
+    std::cout << "received" << std::endl;
+  }
   return abort;
 }
 
 void MainFrame::OnCalculationFinished(wxCommandEvent& event){
+  _abort_q->Clear();
   // main thread will wait for the thread to finish its work
   if (GetThread() && GetThread()->IsRunning()){
     GetThread()->Wait();
@@ -114,7 +121,6 @@ void MainFrame::OnCalculationFinished(wxCommandEvent& event){
   // reenable GUI
   enableGuiElements(true);
 }
-
 
 // load input files to display radii list
 void MainFrame::OnLoadFiles(wxCommandEvent& event){

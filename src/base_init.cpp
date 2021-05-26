@@ -115,6 +115,11 @@ void MainFrame::InitDefaultStates(){
 void MainApp::silenceGUI(bool set){Ctrl::getInstance()->disableGUI();}
 bool MainApp::isSilent(){return !Ctrl::getInstance()->isGUIEnabled();}
 
+void MainFrame::InitMessageQueue(){
+  _abort_q = new wxMessageQueue<bool>();
+  _abort_q->Clear();
+}
+
 ////////////////////////////////////
 // INITIALISATION OF GUI ELEMENTS //
 ////////////////////////////////////

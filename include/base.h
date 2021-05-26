@@ -77,6 +77,7 @@ class MainFrame: public wxFrame, public wxThreadHelper
     std::unordered_map<std::string, double> generateRadiusMap();
     double getMaxRad();
     std::vector<std::string> getIncludedElements();
+
   protected:
     virtual wxThread::ExitCode Entry();
     bool m_data;
@@ -162,6 +163,7 @@ class MainFrame: public wxFrame, public wxThreadHelper
           wxTextCtrl* dirpickerText;
           wxButton* dirpickerButton;
 
+    void InitMessageQueue();
     // set and manipulate gui interactivity
     void InitDefaultStates();
     std::map<wxWindow*, bool> default_states;

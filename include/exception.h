@@ -26,11 +26,4 @@ struct ExceptInvalidInputFile : public std::exception
     }
 };
 
-struct ExceptAbortCalculation : public std::exception
-{
-	const char * what () const throw () {
-    	return "Ex: Requested calculation abort";
-    }
-};
-
 #endif

@@ -101,8 +101,8 @@ CalcReportBundle Model::generateData(){
   // save the date and time of calculation for output files
   _time_stamp = timeNow();
   CalcReportBundle data;
-  try {data = generateVolumeData();}
-  catch(const ExceptAbortCalculation& e){
+  data = generateVolumeData();
+  if(Ctrl::getInstance()->getAbortFlag()){
     data.success = false;
     return data;
   }
@@ -138,9 +138,7 @@ CalcReportBundle Model::generateVolumeData(){
   auto end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
   // START CALCULATION
-  try {calcVolume();}
-  catch(const ExceptAbortCalculation& e){throw;}
-  return _data;
+  return calcVolume();
 }
 
 CalcReportBundle Model::generateSurfaceData(){
@@ -265,8 +263,11 @@ CalcReportBundle Model::calcVolume(){
   { // assign each voxel in grid a type
     auto start = std::chrono::steady_clock::now();
     bool cavities_exceeded = false;
-    try{_cell.assignTypeInGrid(atomtree, getProbeRad1(), getProbeRad2(), optionProbeMode(), cavities_exceeded);}
-    catch(const ExceptAbortCalculation& e){throw;}
+    _cell.assignTypeInGrid(atomtree, getProbeRad1(), getProbeRad2(), optionProbeMode(), cavities_exceeded);
+    if(Ctrl::getInstance()->getAbortFlag()){
+      _data.success = false;
+      return _data;
+    }
     if(cavities_exceeded){Ctrl::getInstance()->displayErrorMessage(201);}
     auto end = std::chrono::steady_clock::now();
     _data.addTime(std::chrono::duration<double>(end-start).count());
