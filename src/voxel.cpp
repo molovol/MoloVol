@@ -393,6 +393,8 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
 
   // adds neighbours to the stack, IDs are assigned before adding to the stack
   while (flood_stack.size() > 0){
+    if (Ctrl::getInstance()->getAbortFlag()){return false;}
+    Ctrl::getInstance()->updateCalculationStatus();
     VoxelLoc vxl = flood_stack.back();
     flood_stack.pop_back();
 
@@ -550,6 +552,7 @@ bool Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
             setType(0b10000000);
           }
           else {
+            // voxel evaluation successful
             Ctrl::getInstance()->updateCalculationStatus();
             setID(nb_vxl.getID());
             passIDtoChildren(index, lvl);

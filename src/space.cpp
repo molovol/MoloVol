@@ -125,6 +125,7 @@ void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, co
   Ctrl::getInstance()->updateStatus("Identifying cavities...");
   try{identifyCavities();}
   catch (const std::overflow_error& e){cavities_exceeded = true;}
+  if (Ctrl::getInstance()->getAbortFlag()){return;}
 
   Ctrl::getInstance()->updateStatus("Searching inaccessible areas...");
   assignShellVsVoid();
@@ -159,6 +160,7 @@ void Space::identifyCavities(){
   for(vxl_index[0] = 0; vxl_index[0] < _n_gridsteps[0]; vxl_index[0]++){
     for(vxl_index[1] = 0; vxl_index[1] < _n_gridsteps[1]; vxl_index[1]++){
       for(vxl_index[2] = 0; vxl_index[2] < _n_gridsteps[2]; vxl_index[2]++){
+        if (Ctrl::getInstance()->getAbortFlag()){return;}
         try{
           descendToCore(id,vxl_index,getMaxDepth()); // id gets iterated inside this function
         }
@@ -190,6 +192,7 @@ void Space::descendToCore(unsigned char& id, const std::array<unsigned,3> index,
         subindex[1] = index[1]*2 + j;
         for (char k = 0; k < 2; ++k){
           subindex[2] = index[2]*2 + k;
+          if (Ctrl::getInstance()->getAbortFlag()){return;}
           try {descendToCore(id, subindex, lvl-1);}
           catch (const std::overflow_error& e){throw;}
         }
