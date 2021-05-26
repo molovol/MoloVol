@@ -203,10 +203,10 @@ void Space::assignShellVsVoid(){
   if (Ctrl::getInstance()->getAbortFlag()){return;}
   std::array<unsigned int,3> vxl_index;
   for(vxl_index[0] = 0; vxl_index[0] < _n_gridsteps[0]; vxl_index[0]++){
+    Ctrl::getInstance()->updateCalculationStatus();
     for(vxl_index[1] = 0; vxl_index[1] < _n_gridsteps[1]; vxl_index[1]++){
       for(vxl_index[2] = 0; vxl_index[2] < _n_gridsteps[2]; vxl_index[2]++){
         if (Ctrl::getInstance()->getAbortFlag()){return;}
-        Ctrl::getInstance()->updateCalculationStatus();
         getTopVxl(vxl_index).evalRelationToVoxels(vxl_index, _max_depth);
       }
     }
@@ -361,7 +361,7 @@ void Space::setUnitCellIndexes(){
     // +0.5 to avoid rounding errors
     _unit_cell_start_index[i] = int(0.5 - _cart_min[i]/_grid_size);
     // no rounding because _unit_cell_mod_index will correct any rounding error in _unit_cell_end_index
-    _unit_cell_end_index[i] = _unit_cell_start_index[i] + (_unit_cell_limits[i]/_grid_size);
+    _unit_cell_end_index[i] = _unit_cell_start_index[i] + int(_unit_cell_limits[i]/_grid_size);
     // warning: std::fmod() provided a wrong value in some cases so the fmod calculation is done manually
     _unit_cell_mod_index[i] = custom_fmod(_unit_cell_limits[i],_grid_size) / _grid_size;
    }
@@ -447,8 +447,8 @@ double Space::tallySurface(const std::vector<char>& types, std::array<unsigned i
 
   // loop over all voxels within range minus one in each direction because the +1 neighbors will be checked at the same time
   std::array<unsigned int,3> index;
+  Ctrl::getInstance()->updateCalculationStatus();
   for(index[2] = start_index[2]; index[2] < end_index[2]-1; index[2]++){
-    Ctrl::getInstance()->updateCalculationStatus();
     for(index[1] = start_index[1]; index[1] < end_index[1]-1; index[1]++){
       if(Ctrl::getInstance()->getAbortFlag()){return 0;}
       for(index[0] = start_index[0]; index[0] < end_index[0]-1; index[0]++){

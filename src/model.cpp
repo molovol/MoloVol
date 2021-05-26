@@ -139,6 +139,9 @@ CalcReportBundle Model::generateVolumeData(){
 }
 
 CalcReportBundle Model::generateSurfaceData(){
+  Ctrl::getInstance()->updateStatus("Calculating surface areas...");
+  Ctrl::getInstance()->updateProgressBar(0);
+
   // TODO: add way for this function to tell whether volume calculation has been conducted before
   auto start = std::chrono::steady_clock::now();
 
@@ -151,17 +154,47 @@ CalcReportBundle Model::generateSurfaceData(){
 
   // full structure surfaces
   _data.surf_vdw = _cell.calcSurfArea(solid_types[0]);
+  Ctrl::getInstance()->updateProgressBar(int(100*(double(1)/double(4+2*_data.cavities.size()))));
+  if(Ctrl::getInstance()->getAbortFlag()){
+    _data.success = false;
+    return _data;
+  }
+
   _data.surf_molecular = _cell.calcSurfArea(solid_types[1]);
+  Ctrl::getInstance()->updateProgressBar(int(100*(double(2)/double(4+2*_data.cavities.size()))));
+  if(Ctrl::getInstance()->getAbortFlag()){
+    _data.success = false;
+    return _data;
+  }
 
   _data.surf_probe_excluded
     = optionProbeMode()? _cell.calcSurfArea(solid_types[2]) : _data.surf_molecular;
+  Ctrl::getInstance()->updateProgressBar(int(100*(double(3)/double(4+2*_data.cavities.size()))));
+  if(Ctrl::getInstance()->getAbortFlag()){
+    _data.success = false;
+    return _data;
+  }
 
   _data.surf_probe_accessible = _cell.calcSurfArea(solid_types[3]);
+  Ctrl::getInstance()->updateProgressBar(int(100*(double(4)/double(4+2*_data.cavities.size()))));
+  if(Ctrl::getInstance()->getAbortFlag()){
+    _data.success = false;
+    return _data;
+  }
 
   // cavity surfaces
+  int progress = 0;
   for (Cavity& cav : _data.cavities){
+    progress++;
     cav.surf_shell = _cell.calcSurfArea(solid_types[2], cav.id, cav.min_index, cav.max_index);
+    Ctrl::getInstance()->updateProgressBar(int(100*(double(4+progress)/double(4+2*_data.cavities.size()))));
+    progress++;
     cav.surf_core = _cell.calcSurfArea(solid_types[3], cav.id, cav.min_index, cav.max_index);
+    Ctrl::getInstance()->updateProgressBar(int(100*(double(4+progress)/double(4+2*_data.cavities.size()))));
+    if(Ctrl::getInstance()->getAbortFlag()){
+      _data.success = false;
+      return _data;
+    }
   }
 
   auto end = std::chrono::steady_clock::now();
