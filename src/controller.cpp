@@ -152,7 +152,7 @@ bool Ctrl::runCalculation(){
       notifyUser("\nLarge probe shell volume: " + std::to_string(data.volumes[0b01000001]) + " ");
       notifyUser(vol_unit);
     }
-    if(data.calc_surface_areas){
+    if(data.calc_surface_areas && !Ctrl::getInstance()->getAbortFlag()){
       std::wstring surf_unit = Symbol::angstrom() + Symbol::squared();
       notifyUser("\n<SURFACE>");
       notifyUser("\nVan der Waals surface: " + std::to_string(data.getSurfVdw()) + " ");
@@ -170,7 +170,7 @@ bool Ctrl::runCalculation(){
   else{
     if(!getAbortFlag()){displayErrorMessage(200);}
   }
-  updateStatus(data.success? "Calculation done." : "Calculation aborted.");
+  updateStatus((data.success && Ctrl::getInstance()->getAbortFlag())? "Calculation done." : "Calculation aborted.");
 
   if (data.success){
     // export if appropriate option is toggled

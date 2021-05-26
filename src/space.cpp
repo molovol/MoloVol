@@ -112,24 +112,19 @@ void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, co
     Voxel::storeProbe(r_probe2, true);
     Ctrl::getInstance()->updateStatus("Blocking off cavities with large probe...");
     assignAtomVsCore();
-    if (Ctrl::getInstance()->getAbortFlag()){return;}
     assignShellVsVoid();
-    if (Ctrl::getInstance()->getAbortFlag()){return;}
   }
 
   Ctrl::getInstance()->updateStatus(std::string("Probing space") + (probe_mode? " with small probe..." : "..."));
   Voxel::storeProbe(r_probe1, false);
   assignAtomVsCore();
-  if (Ctrl::getInstance()->getAbortFlag()){return;}
 
   Ctrl::getInstance()->updateStatus("Identifying cavities...");
   try{identifyCavities();}
   catch (const std::overflow_error& e){cavities_exceeded = true;}
-  if (Ctrl::getInstance()->getAbortFlag()){return;}
 
   Ctrl::getInstance()->updateStatus("Searching inaccessible areas...");
   assignShellVsVoid();
-  if (Ctrl::getInstance()->getAbortFlag()){return;}
 }
 
 void Space::assignAtomVsCore(){
@@ -146,8 +141,8 @@ void Space::assignAtomVsCore(){
       for(top_lvl_index[2] = 0; top_lvl_index[2] < _n_gridsteps[2]; top_lvl_index[2]++){
         vxl_pos[2] = vxl_origin[2] + vxl_dist * (0.5 + top_lvl_index[2]);
         // voxel position is deliberately not stored in voxel object to reduce memory cost
-        getTopVxl(top_lvl_index).evalRelationToAtoms(top_lvl_index, vxl_pos, _max_depth);
         if (Ctrl::getInstance()->getAbortFlag()){return;}
+        getTopVxl(top_lvl_index).evalRelationToAtoms(top_lvl_index, vxl_pos, _max_depth);
       }
     }
     Ctrl::getInstance()->updateProgressBar(int(100*(double(top_lvl_index[0])+1)/double(_n_gridsteps[0])));
@@ -206,8 +201,8 @@ void Space::assignShellVsVoid(){
   for(vxl_index[0] = 0; vxl_index[0] < _n_gridsteps[0]; vxl_index[0]++){
     for(vxl_index[1] = 0; vxl_index[1] < _n_gridsteps[1]; vxl_index[1]++){
       for(vxl_index[2] = 0; vxl_index[2] < _n_gridsteps[2]; vxl_index[2]++){
-        getTopVxl(vxl_index).evalRelationToVoxels(vxl_index, _max_depth);
         if (Ctrl::getInstance()->getAbortFlag()){return;}
+        getTopVxl(vxl_index).evalRelationToVoxels(vxl_index, _max_depth);
       }
     }
     Ctrl::getInstance()->updateProgressBar(int(100*(double(vxl_index[0])+1)/double(_n_gridsteps[0])));
@@ -417,6 +412,7 @@ double Space::calcSurfArea(const std::vector<char>& types){
 // overload for cavity surfaces
 // solid types MUST also have appropriate ID!
 double Space::calcSurfArea(const std::vector<char>& types, const unsigned char id, std::array<unsigned int,3> start_index, std::array<unsigned int,3> end_index){
+  if(Ctrl::getInstance()->getAbortFlag()){return 0;}
   // the surface area is counted between voxels, thus we need to check voxels around the limits of the cavity
   if(!_unit_cell){
     for(char i = 0; i < 3; i++){
@@ -448,6 +444,8 @@ double Space::tallySurface(const std::vector<char>& types, std::array<unsigned i
   std::array<unsigned int,3> index;
   for(index[2] = start_index[2]; index[2] < end_index[2]-1; index[2]++){
     for(index[1] = start_index[1]; index[1] < end_index[1]-1; index[1]++){
+      if(Ctrl::getInstance()->getAbortFlag()){return 0;}
+      Ctrl::getInstance()->updateCalculationStatus();
       for(index[0] = start_index[0]; index[0] < end_index[0]-1; index[0]++){
         surface += SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity));
       }

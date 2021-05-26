@@ -166,6 +166,7 @@ CalcReportBundle Model::generateSurfaceData(){
 
   auto end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
+
   return _data;
 }
 
