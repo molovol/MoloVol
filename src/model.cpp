@@ -102,10 +102,7 @@ CalcReportBundle Model::generateData(){
   _time_stamp = timeNow();
   CalcReportBundle data;
   data = generateVolumeData();
-  if(Ctrl::getInstance()->getAbortFlag()){
-    data.success = false;
-    return data;
-  }
+  if(Ctrl::getInstance()->getAbortFlag()){return data;}
   // surface calculation requires running the volume calculation first, but shouldn't be inside the volume calc function
   if (optionCalcSurfaceAreas() && data.success){
     data = generateSurfaceData();

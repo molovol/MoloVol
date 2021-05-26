@@ -114,6 +114,7 @@ void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, co
     assignAtomVsCore();
     if (Ctrl::getInstance()->getAbortFlag()){return;}
     assignShellVsVoid();
+    if (Ctrl::getInstance()->getAbortFlag()){return;}
   }
 
   Ctrl::getInstance()->updateStatus(std::string("Probing space") + (probe_mode? " with small probe..." : "..."));
@@ -127,6 +128,7 @@ void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, co
 
   Ctrl::getInstance()->updateStatus("Searching inaccessible areas...");
   assignShellVsVoid();
+  if (Ctrl::getInstance()->getAbortFlag()){return;}
 }
 
 void Space::assignAtomVsCore(){
@@ -202,6 +204,7 @@ void Space::assignShellVsVoid(){
     for(vxl_index[1] = 0; vxl_index[1] < _n_gridsteps[1]; vxl_index[1]++){
       for(vxl_index[2] = 0; vxl_index[2] < _n_gridsteps[2]; vxl_index[2]++){
         getTopVxl(vxl_index).evalRelationToVoxels(vxl_index, _max_depth);
+        if (Ctrl::getInstance()->getAbortFlag()){return;}
       }
     }
     Ctrl::getInstance()->updateProgressBar(int(100*(double(vxl_index[0])+1)/double(_n_gridsteps[0])));

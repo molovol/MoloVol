@@ -498,6 +498,7 @@ void Voxel::ascend(std::vector<VoxelLoc>& stack, const unsigned char id, const s
 
 char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const unsigned lvl, bool split){
   // if voxel (including all subvoxels) have been assigned, then return immediately
+  if (Ctrl::getInstance()->getAbortFlag()){return 0;}
   if (isAssigned()){return _type;}
   else if (!hasSubvoxel()){ // vxl has no children
     split = !searchForCore(index, lvl, split);
@@ -549,6 +550,7 @@ bool Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
             setType(0b10000000);
           }
           else {
+            Ctrl::getInstance()->updateCalculationStatus();
             setID(nb_vxl.getID());
             passIDtoChildren(index, lvl);
           }

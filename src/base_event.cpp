@@ -91,7 +91,6 @@ wxThread::ExitCode MainFrame::Entry(){
 void MainFrame::OnAbort(wxCommandEvent& event){
   if (_abort_q->IsOk()){
     _abort_q->Post(true);
-    std::cout << "sent" << std::endl;
   }
   /*if (GetThread() && GetThread()->IsRunning()){
     GetThread()->Wait();
@@ -101,9 +100,6 @@ void MainFrame::OnAbort(wxCommandEvent& event){
 bool MainFrame::receivedAbortCommand(){
   bool abort = false;
   _abort_q->ReceiveTimeout(0,abort);
-  if (abort){
-    std::cout << "received" << std::endl;
-  }
   return abort;
 }
 
