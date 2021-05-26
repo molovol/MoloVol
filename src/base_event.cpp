@@ -46,8 +46,11 @@ int MainApp::OnExit(){
 }
 
 void MainFrame::OnClose(wxCloseEvent& event){
+  if (_abort_q->IsOk()){
+    _abort_q->Post(true);
+  }
   if (GetThread() && GetThread()->IsRunning()){
-    GetThread()->Kill();
+    GetThread()->Wait();
   }
   event.Skip();
 }
@@ -92,9 +95,9 @@ void MainFrame::OnAbort(wxCommandEvent& event){
   if (_abort_q->IsOk()){
     _abort_q->Post(true);
   }
-  /*if (GetThread() && GetThread()->IsRunning()){
+  if (GetThread() && GetThread()->IsRunning()){
     GetThread()->Wait();
-  }*/
+  }
 }
 
 bool MainFrame::receivedAbortCommand(){
@@ -110,7 +113,6 @@ void MainFrame::OnCalculationFinished(wxCommandEvent& event){
     GetThread()->Wait();
   }
 
-  wxYield(); // without wxYield, the clicks on disabled buttons are queued
   setDefaultState(reportButton,true);
   setDefaultState(totalMapButton,true);
   setDefaultState(cavityMapButton, outputGrid->GetNumberRows() != 0);
