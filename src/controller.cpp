@@ -170,7 +170,7 @@ bool Ctrl::runCalculation(){
   else{
     if(!getAbortFlag()){displayErrorMessage(200);}
   }
-  updateStatus((data.success && Ctrl::getInstance()->getAbortFlag())? "Calculation done." : "Calculation aborted.");
+  updateStatus((data.success && !Ctrl::getInstance()->getAbortFlag())? "Calculation done." : "Calculation aborted.");
 
   if (data.success){
     // export if appropriate option is toggled

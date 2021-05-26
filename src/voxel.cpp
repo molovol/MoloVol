@@ -213,7 +213,6 @@ char Voxel::evalRelationToAtoms(const std::array<unsigned,3>& index_vxl, Vector 
   }
   else {
     // voxel has been processed
-    Ctrl::getInstance()->updateCalculationStatus();
     passTypeToChildren(index_vxl, lvl);
   }
   return _type;
@@ -553,7 +552,6 @@ bool Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
           }
           else {
             // voxel evaluation successful
-            Ctrl::getInstance()->updateCalculationStatus();
             setID(nb_vxl.getID());
             passIDtoChildren(index, lvl);
           }

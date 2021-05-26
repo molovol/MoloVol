@@ -128,6 +128,7 @@ void Space::assignTypeInGrid(const AtomTree& atomtree, const double r_probe1, co
 }
 
 void Space::assignAtomVsCore(){
+  if (Ctrl::getInstance()->getAbortFlag()){return;}
   // calculate position of first voxel
   const std::array<double,3> vxl_origin = getOrigin();
   // calculate side length of top level voxel
@@ -135,6 +136,7 @@ void Space::assignAtomVsCore(){
   std::array<double,3> vxl_pos;
   std::array<unsigned,3> top_lvl_index;
   for(top_lvl_index[0] = 0; top_lvl_index[0] < _n_gridsteps[0]; top_lvl_index[0]++){
+    Ctrl::getInstance()->updateCalculationStatus();
     vxl_pos[0] = vxl_origin[0] + vxl_dist * (0.5 + top_lvl_index[0]);
     for(top_lvl_index[1] = 0; top_lvl_index[1] < _n_gridsteps[1]; top_lvl_index[1]++){
       vxl_pos[1] = vxl_origin[1] + vxl_dist * (0.5 + top_lvl_index[1]);
@@ -150,6 +152,7 @@ void Space::assignAtomVsCore(){
 }
 
 void Space::identifyCavities(){
+  if (Ctrl::getInstance()->getAbortFlag()){return;}
   std::array<unsigned int,3> vxl_index;
   unsigned char id = 1;
   for(vxl_index[0] = 0; vxl_index[0] < _n_gridsteps[0]; vxl_index[0]++){
@@ -197,11 +200,13 @@ void Space::descendToCore(unsigned char& id, const std::array<unsigned,3> index,
 }
 
 void Space::assignShellVsVoid(){
+  if (Ctrl::getInstance()->getAbortFlag()){return;}
   std::array<unsigned int,3> vxl_index;
   for(vxl_index[0] = 0; vxl_index[0] < _n_gridsteps[0]; vxl_index[0]++){
     for(vxl_index[1] = 0; vxl_index[1] < _n_gridsteps[1]; vxl_index[1]++){
       for(vxl_index[2] = 0; vxl_index[2] < _n_gridsteps[2]; vxl_index[2]++){
         if (Ctrl::getInstance()->getAbortFlag()){return;}
+        Ctrl::getInstance()->updateCalculationStatus();
         getTopVxl(vxl_index).evalRelationToVoxels(vxl_index, _max_depth);
       }
     }
@@ -443,9 +448,9 @@ double Space::tallySurface(const std::vector<char>& types, std::array<unsigned i
   // loop over all voxels within range minus one in each direction because the +1 neighbors will be checked at the same time
   std::array<unsigned int,3> index;
   for(index[2] = start_index[2]; index[2] < end_index[2]-1; index[2]++){
+    Ctrl::getInstance()->updateCalculationStatus();
     for(index[1] = start_index[1]; index[1] < end_index[1]-1; index[1]++){
       if(Ctrl::getInstance()->getAbortFlag()){return 0;}
-      Ctrl::getInstance()->updateCalculationStatus();
       for(index[0] = start_index[0]; index[0] < end_index[0]-1; index[0]++){
         surface += SurfaceLUT::configToArea(evalMarchingCubeConfig(index, types, id, cavity));
       }
