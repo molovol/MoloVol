@@ -135,7 +135,7 @@ bool Ctrl::runCalculation(){
     notifyUser("Result for ");
     notifyUser(Symbol::generateChemicalFormulaUnicode(data.chemical_formula));
     notifyUser("\nElapsed time: " + std::to_string(data.getTime()) + " s");
-    
+
     notifyUser("\n<VOLUME>");
     notifyUser("\nVan der Waals volume: " + std::to_string(data.volumes[0b00000011]) + " ");
     notifyUser(vol_unit);
@@ -204,13 +204,6 @@ void Ctrl::notifyUser(std::wstring wstr){
   }
   else {
     std::cout << wstr;
-  }
-}
-
-// TODO remove if obselete
-void Ctrl::prepareOutput(std::string atomFilePath){
-  if(!current_calculation->createOutputFolder(fileName(atomFilePath))){
-    displayErrorMessage(301);  
   }
 }
 
@@ -310,8 +303,7 @@ static const std::map<int, std::string> s_error_codes = {
   {200, "Calculation failed!"}, // unspecific error
   {201, "Total number of cavities (255) exceeded. Consider changing the probe size. Calculation will proceed."},
   // 3xx: Issue with Output
-  {301, "New output folder could not be created. The output file(s) will be created in the program folder."},
-  {302, "Data missing to export file. Calculation may be still running or has not been started."}
+  {301, "Data missing to export file. Calculation may be still running or has not been started."}
 };
 
 void Ctrl::displayErrorMessage(const int error_code){

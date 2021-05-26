@@ -64,11 +64,11 @@ void MainFrame::OnCalc(wxCommandEvent& event){
     enableGuiElements(true);
     return;
   }
- 
+
   enableGuiElements(false);
   abortButton->Enable(true);
   wxYield(); // without wxYield, the clicks on disabled buttons are queued
-  
+
   // create worker thread
   if (CreateThread(wxTHREAD_JOINABLE) != wxTHREAD_NO_ERROR){
     wxLogError("Could not create worker thread!");
@@ -212,7 +212,7 @@ void MainFrame::GridChange(wxGridEvent& event){
 void MainFrame::OnTextInput(wxCommandEvent& event){
   filepathText->ChangeValue(filepathText->GetValue());
   radiuspathText->ChangeValue(radiuspathText->GetValue());
-  
+
   probe1InputText->ChangeValue(probe1InputText->GetValue());
   probe2InputText->ChangeValue(probe2InputText->GetValue());
   gridsizeInputText->ChangeValue(gridsizeInputText->GetValue());
@@ -228,7 +228,7 @@ std::string MainFrame::OpenExportFileDialog(const std::string file_type, const s
 
   // if user closes dialog
   if (save_dialog.ShowModal() == wxID_CANCEL) {return "";}
-  
+
   return save_dialog.GetPath().ToStdString();
 }
 
@@ -236,12 +236,12 @@ void MainFrame::OnExportReport(wxCommandEvent& event){
   const std::string file = "report";
   // check whether report can be generated
   if (!Ctrl::getInstance()->isCalculationDone()){
-    Ctrl::getInstance()->displayErrorMessage(302);
+    Ctrl::getInstance()->displayErrorMessage(301);
     return;
   }
   std::string path = OpenExportFileDialog(file, "*.txt");
   if (path.empty()) {return;}
-  
+
   // create report
   Ctrl::getInstance()->exportReport(path);
 }
@@ -249,26 +249,26 @@ void MainFrame::OnExportReport(wxCommandEvent& event){
 void MainFrame::OnExportTotalMap(wxCommandEvent& event){
   const std::string file = "total surface map";
   if (!Ctrl::getInstance()->isCalculationDone()){
-    Ctrl::getInstance()->displayErrorMessage(302);
+    Ctrl::getInstance()->displayErrorMessage(301);
     return;
   }
-  
+
   std::string path = OpenExportFileDialog(file, "*.dx");
   if (path.empty()) {return;}
-  
+
   Ctrl::getInstance()->exportSurfaceMap(path, false);
 }
 
 void MainFrame::OnExportCavityMap(wxCommandEvent& event){
   const std::string file = "cavity surface maps";
   if (!Ctrl::getInstance()->isCalculationDone() || outputGrid->GetNumberRows() == 0){
-    Ctrl::getInstance()->displayErrorMessage(302);
+    Ctrl::getInstance()->displayErrorMessage(301);
     return;
   }
-  
+
   std::string path = OpenExportFileDialog(file, "*.dx");
   if (path.empty()) {return;}
-  
+
   Ctrl::getInstance()->exportSurfaceMap(path, true);
 }
 
@@ -292,7 +292,7 @@ void MainFrame::OnToggleAutoExport(wxCommandEvent& event){
 
 void MainFrame::OnBrowseOutput(wxCommandEvent& event){
   wxDirDialog openDirDialog(this, _("Select output directory"), "", wxDD_DIR_MUST_EXIST | wxDD_DEFAULT_STYLE);
-  
+
   // if user closes dialog
   if (openDirDialog.ShowModal() == wxID_CANCEL){
     // if directory textbox is empty then uncheck all auto export tick boxes

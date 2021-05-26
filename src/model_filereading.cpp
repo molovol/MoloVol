@@ -30,11 +30,6 @@ RadiusFileBundle importDataFromRadiusFile(const std::string& radius_path);
 // RADIUS FILE IMPORT //
 ////////////////////////
 
-// TODO: remove eventually
-bool Model::readRadiiAndAtomNumFromFile(std::string& radius_path){
-  return readRadiusFileSetMaps(radius_path);
-}
-
 // generates two two maps for assigning a radius/ atomic number respectively, to a element symbol
 // sets the maps to members of the model class
 bool Model::readRadiusFileSetMaps(std::string& radius_path){
@@ -169,8 +164,7 @@ void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
   inp_file.close();
 }
 
-
-// TODO only used in unittest, could be removed after deleting unittest
+// used in unittest
 std::vector<std::string> Model::listElementsInStructure(){
   std::vector<std::string> list;
   for (auto elem : atom_amounts){

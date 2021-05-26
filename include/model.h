@@ -64,7 +64,6 @@ class Space;
 class Model{
   public:
     // radius file import
-    bool readRadiiAndAtomNumFromFile(std::string&); // depreciated, use readRadiusFileSetMaps() instead
     bool readRadiusFileSetMaps(std::string&);
     std::unordered_map<std::string, double> importRadiusMap(const std::string&);
     // atom file import
@@ -75,7 +74,6 @@ class Model{
     void readFilePDB(const std::string&, bool);
 
     // export
-    bool createOutputFolder(std::string);
     void createReport();
     void createReport(std::string);
     void writeXYZfile(std::vector<std::tuple<std::string, double, double, double>>&, std::string);
@@ -113,7 +111,6 @@ class Model{
     void linkToAdjacentAtoms(const double&, Atom&);
     CalcReportBundle calcVolume();
     bool setParameters(std::string, std::string, bool, bool, bool, bool, double, double, double, int, bool, bool, bool, std::unordered_map<std::string, double>, std::vector<std::string>, double);
-    CalcReportBundle getBundle(); // TODO remove if unused
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void setRadiusMap(std::unordered_map<std::string, double> map);
     bool setProbeRadii(const double, const double, const bool);

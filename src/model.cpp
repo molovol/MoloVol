@@ -232,11 +232,6 @@ void Model::generateChemicalFormula(){
   _data.chemical_formula = chemical_formula_prefix + chemical_formula_suffix;
 }
 
-// TODO remove is unused
-CalcReportBundle Model::getBundle(){
-  return _data;
-}
-
 ///////////////////////////
 // CALCULATION FUNCTIONS //
 ///////////////////////////

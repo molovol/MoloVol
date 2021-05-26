@@ -137,7 +137,7 @@ void MainFrame::InitTopLevel(){
 
   InitPreCalcPanel();
   InitPostCalcPanel();
-  
+
   statusBar = new wxStatusBar(this, STATUSBAR);
   statusBar->SetFieldsCount(1);
   statusBar->SetStatusText("Welcome!");
@@ -163,7 +163,7 @@ void MainFrame::InitPreCalcPanel(){
   // contains parameter panel and send-and-receive panel
   rightMainPanel = new wxPanel(preCalcPanel,PANEL_RightMain);
 //  rightMainPanel->SetBackgroundColour(col_panel);
-  
+
   InitLeftMainPanel();
   InitRightMainPanel();
 
@@ -538,14 +538,13 @@ void MainFrame::InitOutputPanel(){
   outputGrid->SetDefaultCellAlignment (wxALIGN_CENTRE, wxALIGN_CENTRE);
 
   // columns
-//  wxString wxstr = "Volume" + Symbol::angstrom();
-  const std::vector<wxString> col_headers = 
-    {"Cavity ID", 
-      "Volume (" + Symbol::angstrom() + Symbol::cubed() + ")", 
-      "Core Surface\n(" + Symbol::angstrom() + Symbol::squared() + ")", 
+  const std::vector<wxString> col_headers =
+    {"Cavity ID",
+      "Volume (" + Symbol::angstrom() + Symbol::cubed() + ")",
+      "Core Surface\n(" + Symbol::angstrom() + Symbol::squared() + ")",
       "Shell Surface\n(" + Symbol::angstrom() + Symbol::squared() + ")",
       "Position\n("+Symbol::angstrom()+","+Symbol::angstrom()+","+Symbol::angstrom()+")"};
-  for (int row = 0; row < col_headers.size(); ++row){
+  for (size_t row = 0; row < col_headers.size(); ++row){
     outputGrid->SetColLabelValue(row, col_headers[row]);
     if (row == 0){
       outputGrid->SetColFormatNumber(row);
@@ -595,14 +594,14 @@ void MainFrame::InitReportExportPanel(){
 void MainFrame::InitTotalMapExportPanel(){
   totalMapButton = new wxButton(totalMapExportPanel, BUTTON_TotalMap, "Export total surface map");
   surfaceMapCheckbox = new wxCheckBox(totalMapExportPanel, CHECKBOX_SurfaceMap, "Auto export total surface map");
-  
+
   SetSizerExportSubPanel(totalMapExportPanel, totalMapButton, surfaceMapCheckbox);
 }
 
 void MainFrame::InitCavityMapExportPanel(){
   cavityMapButton = new wxButton(cavityMapExportPanel, BUTTON_CavityMap, "Export cavity maps");
   cavityMapsCheckbox = new wxCheckBox(cavityMapExportPanel, CHECKBOX_CavityMaps, "Auto export cavity maps");
-  
+
   SetSizerExportSubPanel(cavityMapExportPanel, cavityMapButton, cavityMapsCheckbox);
 }
 

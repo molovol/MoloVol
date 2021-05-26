@@ -13,22 +13,6 @@
 // RESULT REPORT //
 ///////////////////
 
-// TODO remove if completely obselete
-bool Model::createOutputFolder(std::string file_name){
-  // folder name based on current time to avoid overwriting output files with successive calculations
-  _time_stamp = timeNow();
-  output_folder = "./output/" + file_name + " MoloVol/" + _time_stamp + "/";
-  // TODO create directories didn't seem to work on MacOS, need to fix this issue later
-  if(std::filesystem::create_directories(output_folder)){
-    return true;
-  }
-  else{
-    output_folder = "./";
-    return false;
-  }
-  return true;
-}
-
 void Model::createReport(){
   createReport(output_folder+"/MoloVol report " + _time_stamp +".txt");
 }
@@ -140,7 +124,7 @@ void Model::createReport(std::string path){
     for(unsigned int i = 0; i < _data.cavities.size(); i++){
       std::array<double,3> cav_center = _data.getCavCenter(i);
       // default precision is 6, which means that double values will take less than a tab space
-      output_report << i+1 << "\t"
+      output_report << int(_data.cavities[i].id) << "\t"
                     << _data.cavities[i].getVolume() << "\t\t"
                     << _data.cavities[i].core_vol << "\t\t";
       if(_data.calc_surface_areas){
@@ -277,7 +261,7 @@ void Model::writeCavitiesMaps(const std::string file_path){
       origin[i] = cell_min[i] + ((double(start_index[i]) + 0.5) * vxl_length);
     }
     size_t path_end = file_path.find_last_of("\\/");
-    std::string cavity_file_name = file_path.substr(0,path_end+1) + "cav" + std::to_string(id+1) + "_" 
+    std::string cavity_file_name = file_path.substr(0,path_end+1) + "cav" + std::to_string(id+1) + "_"
       + file_path.substr(path_end+1,file_path.length()-path_end+1);
     writeSurfaceMap(cavity_file_name, vxl_length, n_elements, origin, start_index, end_index, true, id);
   }
