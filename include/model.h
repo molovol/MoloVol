@@ -33,6 +33,9 @@ struct CalcReportBundle{
   bool make_report;
   bool make_full_map;
   bool make_cav_maps;
+  // crystallographic structures
+  std::vector<std::tuple<std::string, double, double, double>> orth_cell;
+  std::vector<std::tuple<std::string, double, double, double>> supercell;
   // volumes
   std::map<char,double> volumes;
   // surfaces
@@ -76,7 +79,9 @@ class Model{
     // export
     void createReport();
     void createReport(std::string);
-    void writeXYZfile(std::vector<std::tuple<std::string, double, double, double>>&, std::string);
+    void writeCrystStruct();
+    void writeCrystStruct(std::string);
+    void writeXYZfile(const std::vector<std::tuple<std::string, double, double, double>>&, const std::string, const std::string);
     void writeTotalSurfaceMap();
     void writeTotalSurfaceMap(const std::string);
     void writeCavitiesMaps();

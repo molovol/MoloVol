@@ -161,9 +161,9 @@ bool Ctrl::runCalculation(){
         notifyUser("\nMolecular surface: " + std::to_string(data.getSurfMolecular()) + " ");
         notifyUser(surf_unit);
       }
-      notifyUser("\nProbe excluded surface: " + std::to_string(data.getSurfProbeExcluded()) + " ");
+      notifyUser("\n"+prefix+"robe excluded surface: " + std::to_string(data.getSurfProbeExcluded()) + " ");
       notifyUser(surf_unit);
-      notifyUser("\nProbe accessible surface: " + std::to_string(data.getSurfProbeAccessible()) + " ");
+      notifyUser("\n"+prefix+"robe accessible surface: " + std::to_string(data.getSurfProbeAccessible()) + " ");
       notifyUser(surf_unit);
     }
   }
@@ -228,10 +228,16 @@ void Ctrl::updateProgressBar(const int percentage){
 
 void Ctrl::exportReport(std::string path){
   current_calculation->createReport(path);
+  if(gui->getAnalyzeUnitCell()){
+    current_calculation->writeCrystStruct(path);
+  }
 }
 
 void Ctrl::exportReport(){
   current_calculation->createReport();
+  if(gui->getAnalyzeUnitCell()){
+    current_calculation->writeCrystStruct();
+  }
 }
 
 void Ctrl::exportSurfaceMap(const std::string path, bool cavities){

@@ -18,6 +18,7 @@ void Model::createReport(){
 }
 
 void Model::createReport(std::string path){
+  std::string small_p = (_data.probe_mode)? "Small probe" : "Probe";
   std::ofstream output_report(path);
   output_report << "\n";
   output_report << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n";
@@ -50,8 +51,8 @@ void Model::createReport(std::string path){
   }
   if(_data.probe_mode){
     output_report << "Probe mode: two probes\n";
-    output_report << "Probe 1 radius: " << getProbeRad1() << " Å\n";
-    output_report << "Probe 2 radius: " << getProbeRad2() << " Å\n";
+    output_report << "Small probe radius: " << getProbeRad1() << " Å\n";
+    output_report << "Large probe radius: " << getProbeRad2() << " Å\n";
   }
   else{
     output_report << "Probe mode: one probe\n";
@@ -78,12 +79,12 @@ void Model::createReport(std::string path){
   output_report << "Van der Waals volume: " << _data.volumes[0b00000011] << " Å^3\n";
   output_report << "Excluded void volume: " << _data.volumes[0b00000101] << " Å^3\n";
   output_report << "Molecular volume (vdw + excluded void): " << _data.volumes[0b00000011] + _data.volumes[0b00000101] << " Å^3\n";
-  output_report << "Probe 1 core volume: " << _data.volumes[0b00001001] << " Å^3\n";
-  output_report << "Probe 1 shell volume: " << _data.volumes[0b00010001] << " Å^3\n";
+  output_report << small_p << " core volume: " << _data.volumes[0b00001001] << " Å^3\n";
+  output_report << small_p << " shell volume: " << _data.volumes[0b00010001] << " Å^3\n";
   if(_data.probe_mode){
     output_report << "Internal cavities and pockets volume (probe 1 core + shell): " << _data.volumes[0b00001001] + _data.volumes[0b00010001] << " Å^3\n";
-    output_report << "Probe 2 core volume: " << _data.volumes[0b00100001] << " Å^3\n";
-    output_report << "Probe 2 shell volume: " << _data.volumes[0b01000001] << " Å^3\n";
+    output_report << "Large probe core volume: " << _data.volumes[0b00100001] << " Å^3\n";
+    output_report << "Large probe shell volume: " << _data.volumes[0b01000001] << " Å^3\n";
   }
 
   if(_data.calc_surface_areas){
@@ -92,10 +93,10 @@ void Model::createReport(std::string path){
     output_report << "\t////////////////////////////////////\n\n";
     output_report << "Van der Waals surface: " << _data.surf_vdw << " Å^2\n";
     if(_data.probe_mode){
-      output_report << "Molecular surface: " << _data.surf_molecular << " Å^2 (probes 1 and 2 excluded surface, similar to the Connolly surface)\n";
+      output_report << "Molecular surface: " << _data.surf_molecular << " Å^2 (both probes excluded surface, similar to the Connolly surface)\n";
     }
-    output_report << "Probe 1 excluded surface: " << _data.surf_probe_excluded << " Å^2 (similar to the Connolly surface)\n";
-    output_report << "Probe 1 accessible surface: " << _data.surf_probe_accessible << " Å^2 (similar to the Lee-Richards surface)\n";
+    output_report << small_p << " excluded surface: " << _data.surf_probe_excluded << " Å^2 (similar to the Connolly surface)\n";
+    output_report << small_p << " accessible surface: " << _data.surf_probe_accessible << " Å^2 (similar to the Lee-Richards surface)\n";
   }
 
   if(!_data.cavities.empty()){
@@ -106,14 +107,14 @@ void Model::createReport(std::string path){
     if(_data.cavities.size() >= 255){
       output_report << "!!! WARNING !!!\n";
       output_report << "Maximum number of cavities reached. Some cavities might be missing.\n";
-      output_report << "To solve this issue, change probe radii (e.g. smaller probe 2 and/or larger probe 1).\n\n";
+      output_report << "To solve this issue, change probe radii (e.g. smaller large probe and/or larger small probe).\n\n";
     }
     output_report << "Note 1:\tPockets and isolated cavities are not differentiated yet.\n";
     output_report << "\tThis feature might be added in future versions if requested by the community.\n";
     output_report << "Note 2:\tSeparate cavities are defined by space accessible to the core of probe 1.\n";
     output_report << "\tTwo cavities can be in contact but if a probe cannot pass from one to the other, they are considered separated.\n";
     output_report << "Note 3:\tIn single probe mode, the first 'cavity' consists of the outside space and pockets.\n";
-    output_report << "Note 4:\tSome very small isolated chunks of probe 1 cores can be detected and lead to small cavities.\n";
+    output_report << "Note 4:\tSome very small isolated chunks of small probe cores can be detected and lead to small cavities.\n";
     output_report << "Note 5:\tProbe occupied volume correspond to empty space as defined by the molecular surface (similar to the Connolly surface).\n";
     output_report << "Note 6:\tProbe accessible volume correspond to empty space as defined\n";
     output_report << "\tby the surface accessible to its core (similar to the Lee-Richards surface).\n";
@@ -124,7 +125,7 @@ void Model::createReport(std::string path){
     for(unsigned int i = 0; i < _data.cavities.size(); i++){
       std::array<double,3> cav_center = _data.getCavCenter(i);
       // default precision is 6, which means that double values will take less than a tab space
-      output_report << int(_data.cavities[i].id) << "\t"
+      output_report << i+1 << "\t"
                     << _data.cavities[i].getVolume() << "\t\t"
                     << _data.cavities[i].core_vol << "\t\t";
       if(_data.calc_surface_areas){
@@ -134,40 +135,38 @@ void Model::createReport(std::string path){
       output_report << cav_center[0] << "\t" << cav_center[1] << "\t" << cav_center[2] << "\n";
     }
   }
-
-  if(_data.make_full_map || _data.make_cav_maps){
-    output_report << "\n\n\t/////////////////////////////\n";
-    output_report << "\t// Surface map information //\n";
-    output_report << "\t/////////////////////////////\n\n";
-    output_report << "The surface map files generated (.dx, OpenDX format) can be opened with\n";
-    output_report << "PyMOL, USCF Chimera or USCF ChimeraX.\n\n";
-    output_report << "Use the following isosurface levels to visualize the desired surface:\n";
-    output_report << "Level 0.5 : Van der Waals surface\n";
-    if(_data.probe_mode){
-      output_report << "Level 1.5 : Molecular surface (probes 1 and 2 excluded, similar to the Connolly surface)\n";
-      output_report << "Level 3 : Internal cavities and pockets (probe 1 excluded, similar to the Connolly surface but only 'inside')\n";
-      output_report << "Level 5 : Probe 1 accessible surface (similar to Lee-Richards molecular surface but only 'inside')\n";
-    }
-    else{
-      output_report << "Level 2 : Molecular surface (probe 1 excluded, similar to the Connolly surface)\n";
-      output_report << "Level 5 : Probe 1 accessible surface (similar to the Lee-Richards molecular surface)\n";
-    }
-    output_report << "\nFor help on how to vizualize maps:\n";
-    output_report << " - in PyMOL, simply open the map file then click 'A' in the right panel, choose mesh or surface and select the level.\n";
-    output_report << "   For more information, check https://pymolwiki.org/index.php/Isomesh and https://pymolwiki.org/index.php/Isosurface \n";
-    output_report << " - in USCF Chimera, check https://www.cgl.ucsf.edu/chimera/docs/ContributedSoftware/volumeviewer/volumeviewer.html \n";
-    output_report << " - in USCF ChimeraX, check https://www.cgl.ucsf.edu/chimerax/docs/user/tools/volumeviewer.html \n";
-
-    output_report << "\nIf you wish to visualize the structure file in PyMOL with the same element radii as in the MoloVol calculation,\n";
-    output_report << "paste the following command lines (all at once) in the command prompt of PyMOL after opening the structure file.\n\n";
-
-    for(std::unordered_map<std::string, double>::iterator it = radius_map.begin(); it != radius_map.end(); it++){
-      if(isIncluded(it->first, _data.included_elements)){
-      output_report << "alter (elem " << it->first << "),vdw=" << it->second << "\n";
-      }
-    }
-    output_report << "rebuild\n\n";
+  output_report << "\n\n\t/////////////////////////////\n";
+  output_report << "\t// Surface map information //\n";
+  output_report << "\t/////////////////////////////\n\n";
+  output_report << "The surface map files generated (.dx, OpenDX format) can be opened with\n";
+  output_report << "PyMOL, USCF Chimera or USCF ChimeraX.\n\n";
+  output_report << "Use the following isosurface levels to visualize the desired surface:\n";
+  output_report << "Level 0.5 : Van der Waals surface\n";
+  if(_data.probe_mode){
+    output_report << "Level 1.5 : Molecular surface (both probes excluded, similar to the Connolly surface)\n";
+    output_report << "Level 3.0 : Internal cavities and pockets (small probe excluded, similar to the Connolly surface but only 'inside')\n";
+    output_report << "Level 5.0 : Small probe accessible surface (similar to Lee-Richards molecular surface but only 'inside')\n";
   }
+  else{
+    output_report << "Level 2.0 : Molecular surface (probe excluded, similar to the Connolly surface)\n";
+    output_report << "Level 5.0 : Probe accessible surface (similar to the Lee-Richards molecular surface)\n";
+  }
+  output_report << "\nFor help on how to vizualize maps check the user manual or:\n";
+  output_report << " - in PyMOL, simply open the map file then click 'A' in the right panel, choose mesh or surface and select the level.\n";
+  output_report << "   For more information, check https://pymolwiki.org/index.php/Isomesh and https://pymolwiki.org/index.php/Isosurface \n";
+  output_report << " - in USCF Chimera, check https://www.cgl.ucsf.edu/chimera/docs/ContributedSoftware/volumeviewer/volumeviewer.html \n";
+  output_report << " - in USCF ChimeraX, check https://www.cgl.ucsf.edu/chimerax/docs/user/tools/volumeviewer.html \n";
+
+  output_report << "\nIf you wish to visualize the structure file in PyMOL with the same element radii as in the MoloVol calculation,\n";
+  output_report << "paste the following command lines (all at once) in the command prompt of PyMOL after opening the structure file.\n\n";
+
+  for(std::unordered_map<std::string, double>::iterator it = radius_map.begin(); it != radius_map.end(); it++){
+    if(isIncluded(it->first, _data.included_elements)){
+      output_report << "alter (elem " << it->first << "),vdw=" << it->second << "\n";
+    }
+  }
+  output_report << "rebuild\n\n";
+
   output_report.close();
 }
 
@@ -175,8 +174,22 @@ void Model::createReport(std::string path){
 // STRUCTURE OUTPUT //
 //////////////////////
 
-void Model::writeXYZfile(std::vector<std::tuple<std::string, double, double, double>> &atom_coordinates, std::string output_type){
-  std::ofstream output_structure(output_folder+"/structure_"+output_type+"_"+ _time_stamp +".xyz");
+
+void Model::writeCrystStruct(std::string path){
+  path.erase(path.end()-4, path.end());
+  writeXYZfile(_data.orth_cell, path+"_struct_orthogonal_cell.xyz", "Orthogonal cell");
+  writeXYZfile(_data.supercell, path+"_struct_partial_supercel.xyz", "Partial supercell");
+}
+
+void Model::writeCrystStruct(){
+  std::string path = output_folder+"/struct_orthogonal_cell_"+ _time_stamp +".xyz";
+  writeXYZfile(_data.orth_cell, path, "Orthogonal cell");
+  path = output_folder+"/struct_partial_supercell_"+ _time_stamp +".xyz";
+  writeXYZfile(_data.supercell, path, "Partial supercell");
+}
+
+void Model::writeXYZfile(const std::vector<std::tuple<std::string, double, double, double>> &atom_coordinates, const std::string path, const std::string output_type){
+  std::ofstream output_structure(path);
   output_structure << output_type << "\nStructure generated with MoloVol\n\n";
   for(size_t i = 0; i < atom_coordinates.size(); i++){
     output_structure << std::get<0>(atom_coordinates[i]) << " ";
@@ -260,9 +273,15 @@ void Model::writeCavitiesMaps(const std::string file_path){
       n_elements[i] = end_index[i] - start_index[i];
       origin[i] = cell_min[i] + ((double(start_index[i]) + 0.5) * vxl_length);
     }
+    std::string cavity_file_name = file_path;
+    cavity_file_name.insert(file_path.length() - 3, "_cav_" + std::to_string(id+1));
+    /*
+    // alternative with cav id + name of file
     size_t path_end = file_path.find_last_of("\\/");
     std::string cavity_file_name = file_path.substr(0,path_end+1) + "cav" + std::to_string(id+1) + "_"
       + file_path.substr(path_end+1,file_path.length()-path_end+1);
+    */
+
     writeSurfaceMap(cavity_file_name, vxl_length, n_elements, origin, start_index, end_index, true, id);
   }
 }
@@ -293,9 +312,9 @@ void Model::writeSurfaceMap(const std::string file_path,
   output_file.open(file_path);
   // comments
   output_file << "# OpenDX density file generated by MoloVol\n";
-  output_file << "# Contains 3D surface map data to read in PyMOL or Chimera\n";
-  output_file << "# Data is written in C array order: In grid[x,y,z] the axis x is fastest\n";
-  output_file << "# varying, then y, then finally z.\n";
+  output_file << "# Contains 3D surface map data to read in PyMOL, Chimera or ChimeraX\n";
+  output_file << "# Data is written in C array order: In grid[x,y,z] the axis z is fastest\n";
+  output_file << "# varying, then y, then finally x.\n";
   // line
   output_file << "object 1 class gridpositions counts";
   for (char i = 0; i < 3; i++){

@@ -45,7 +45,7 @@ void MainFrame::extDisplayCavityList(const std::vector<Cavity>& cavities){
 
 void MainFrame::extOpenErrorDialog(const int error_code, const std::string& error_message){
   const std::pair<int, std::string> code_message = std::make_pair(error_code, error_message);
-  GetEventHandler()->CallAfter(&MainFrame::openErrorDialog, code_message); 
+  GetEventHandler()->CallAfter(&MainFrame::openErrorDialog, code_message);
 }
 
 // NOT THREAD SAFE
@@ -167,10 +167,12 @@ void MainFrame::displayCavityList(const std::vector<Cavity>& cavities){
   // add appropriate nuber of rows
   outputGrid->AppendRows(cavities.size());
   for (int row = 0; row < outputGrid->GetNumberRows(); ++row){
-    outputGrid->SetCellValue(row, 0, std::to_string(cavities[row].id));
+    outputGrid->SetCellValue(row, 0, std::to_string(row+1));
     outputGrid->SetCellValue(row, 1, std::to_string(cavities[row].getVolume()));
-    outputGrid->SetCellValue(row, 2, std::to_string(cavities[row].getSurfCore()));
-    outputGrid->SetCellValue(row, 3, std::to_string(cavities[row].getSurfShell()));
+    if(getCalcSurfaceAreas()){
+      outputGrid->SetCellValue(row, 2, std::to_string(cavities[row].getSurfCore()));
+      outputGrid->SetCellValue(row, 3, std::to_string(cavities[row].getSurfShell()));
+    }
     outputGrid->SetCellValue(row, 4, cavities[row].getPosition());
     // set all cells read only
     for (int col = 0; col < outputGrid->GetNumberCols(); ++col){
@@ -219,7 +221,7 @@ std::vector<std::string> MainFrame::getIncludedElements(){
 void MainFrame::setStatus(const std::string str){
   statusBar->SetStatusText(str);
 }
-  
+
 void MainFrame::setProgressBar(const int percentage){
   progressGauge->SetValue(percentage);
 }

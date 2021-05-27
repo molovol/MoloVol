@@ -158,7 +158,7 @@ CalcReportBundle Model::generateSurfaceData(){
   // full structure surfaces
   {
     std::vector<double> surfaces; // temporary
-    for(int i = 0; i < solid_types.size(); ++i){
+    for(size_t i = 0; i < solid_types.size(); ++i){
       // special case for this set of types, to avoid recalculation
       if (i == 2 && !optionProbeMode()){
         surfaces.push_back(surfaces[1]);
@@ -181,15 +181,15 @@ CalcReportBundle Model::generateSurfaceData(){
   }
 
   // cavity surfaces
-  for (int i = 0; i < _data.cavities.size(); ++i){
+  for (size_t i = 0; i < _data.cavities.size(); ++i){
     Cavity& cav = _data.cavities[i];
-    
+
     cav.surf_shell = _cell.calcSurfArea(solid_types[2], cav.id, cav.min_index, cav.max_index);
-    Ctrl::getInstance()->updateProgressBar(percentageDone(solid_types.size() + i*2,total_surfaces));
-    
-    cav.surf_core = _cell.calcSurfArea(solid_types[3], cav.id, cav.min_index, cav.max_index);
     Ctrl::getInstance()->updateProgressBar(percentageDone(solid_types.size() + i*2 + 1,total_surfaces));
-    
+
+    cav.surf_core = _cell.calcSurfArea(solid_types[3], cav.id, cav.min_index, cav.max_index);
+    Ctrl::getInstance()->updateProgressBar(percentageDone(solid_types.size() + i*2 + 2,total_surfaces));
+
     if(Ctrl::getInstance()->getAbortFlag()){
       _data.success = false;
       return _data;
@@ -360,14 +360,10 @@ bool Model::processUnitCell(){
   moveAtomsInsideCell();
   removeDuplicateAtoms();
   countAtomsInUnitCell(); // for report
-  if(_data.make_report){
-    writeXYZfile(processed_atom_coordinates, "orthogonal_cell");
-  }
+  _data.orth_cell = processed_atom_coordinates;
   generateSupercell(radius_limit);
   generateUsefulAtomMapFromSupercell(radius_limit);
-  if(_data.make_report){
-    writeXYZfile(processed_atom_coordinates, "orthogonal_cell_with_neighboring_atoms");
-  }
+  _data.supercell = processed_atom_coordinates;
   return true;
 }
 
