@@ -152,45 +152,44 @@ CalcReportBundle Model::generateSurfaceData(){
     {0b00001001, 0b00010001},
     {0b00001001} };
 
+  const int total_surfaces = solid_types.size() + 2*_data.cavities.size();
+  auto percentageDone = [](double num, double denom){return int(100*num/denom);};
+
   // full structure surfaces
-  _data.surf_vdw = _cell.calcSurfArea(solid_types[0]);
-  Ctrl::getInstance()->updateProgressBar(int(100*(double(1)/double(4+2*_data.cavities.size()))));
-  if(Ctrl::getInstance()->getAbortFlag()){
-    _data.success = false;
-    return _data;
-  }
-
-  _data.surf_molecular = _cell.calcSurfArea(solid_types[1]);
-  Ctrl::getInstance()->updateProgressBar(int(100*(double(2)/double(4+2*_data.cavities.size()))));
-  if(Ctrl::getInstance()->getAbortFlag()){
-    _data.success = false;
-    return _data;
-  }
-
-  _data.surf_probe_excluded
-    = optionProbeMode()? _cell.calcSurfArea(solid_types[2]) : _data.surf_molecular;
-  Ctrl::getInstance()->updateProgressBar(int(100*(double(3)/double(4+2*_data.cavities.size()))));
-  if(Ctrl::getInstance()->getAbortFlag()){
-    _data.success = false;
-    return _data;
-  }
-
-  _data.surf_probe_accessible = _cell.calcSurfArea(solid_types[3]);
-  Ctrl::getInstance()->updateProgressBar(int(100*(double(4)/double(4+2*_data.cavities.size()))));
-  if(Ctrl::getInstance()->getAbortFlag()){
-    _data.success = false;
-    return _data;
+  {
+    std::vector<double> surfaces; // temporary
+    for(int i = 0; i < solid_types.size(); ++i){
+      // special case for this set of types, to avoid recalculation
+      if (i == 2 && !optionProbeMode()){
+        surfaces.push_back(surfaces[1]);
+      }
+      else {
+        surfaces.push_back(_cell.calcSurfArea(solid_types[i]));
+      }
+      Ctrl::getInstance()->updateProgressBar(percentageDone(i+1,total_surfaces));
+      // check abort flag
+      if(Ctrl::getInstance()->getAbortFlag()){
+        _data.success = false;
+        return _data;
+      }
+    }
+    // from temporary container to _data
+    _data.surf_vdw = surfaces[0];
+    _data.surf_molecular = surfaces[1];
+    _data.surf_probe_excluded = surfaces[2];
+    _data.surf_probe_accessible = surfaces[3];
   }
 
   // cavity surfaces
-  int progress = 0;
-  for (Cavity& cav : _data.cavities){
-    progress++;
+  for (int i = 0; i < _data.cavities.size(); ++i){
+    Cavity& cav = _data.cavities[i];
+    
     cav.surf_shell = _cell.calcSurfArea(solid_types[2], cav.id, cav.min_index, cav.max_index);
-    Ctrl::getInstance()->updateProgressBar(int(100*(double(4+progress)/double(4+2*_data.cavities.size()))));
-    progress++;
+    Ctrl::getInstance()->updateProgressBar(percentageDone(solid_types.size() + i*2,total_surfaces));
+    
     cav.surf_core = _cell.calcSurfArea(solid_types[3], cav.id, cav.min_index, cav.max_index);
-    Ctrl::getInstance()->updateProgressBar(int(100*(double(4+progress)/double(4+2*_data.cavities.size()))));
+    Ctrl::getInstance()->updateProgressBar(percentageDone(solid_types.size() + i*2 + 1,total_surfaces));
+    
     if(Ctrl::getInstance()->getAbortFlag()){
       _data.success = false;
       return _data;
