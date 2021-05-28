@@ -3,6 +3,7 @@
 #include "atom.h"
 #include "misc.h"
 #include "special_chars.h"
+#include "exception.h"
 #include <chrono>
 #include <array>
 #include <string>
@@ -81,7 +82,7 @@ bool Model::setProbeRadii(const double r_1, const double r_2, const bool probe_m
     // This second check would be unnecessary when using the GUI but
     // adding it here makes the back engine Model error-proof independently from the GUI
     if (r_1 > r_2){
-      Ctrl::getInstance()->notifyUser("\nProbes radii invalid!\nSet probe 2 radius > probe 1 radius.");
+      Ctrl::getInstance()->displayErrorMessage(104);
       return false;
     }
     else{
@@ -91,9 +92,17 @@ bool Model::setProbeRadii(const double r_1, const double r_2, const bool probe_m
   return true;
 }
 
+///////////////////////
+// CALCULATION ENTRY //
+///////////////////////
+
 // TODO: consider making return value const, in order to prevent controller from messing with this
 CalcReportBundle Model::generateData(){
-  CalcReportBundle data = generateVolumeData();
+  // save the date and time of calculation for output files
+  _time_stamp = timeNow();
+  CalcReportBundle data;
+  data = generateVolumeData();
+  if(Ctrl::getInstance()->getAbortFlag()){return data;}
   // surface calculation requires running the volume calculation first, but shouldn't be inside the volume calc function
   if (optionCalcSurfaceAreas() && data.success){
     data = generateSurfaceData();
@@ -102,9 +111,7 @@ CalcReportBundle Model::generateData(){
 }
 
 CalcReportBundle Model::generateVolumeData(){
-  // save the date and time of calculation for output files
-  _time_stamp = timeNow();
-
+  // PREPARATION
   // clear calculation times from previous runs
   _data.elapsed_seconds.clear();
 
@@ -127,11 +134,14 @@ CalcReportBundle Model::generateVolumeData(){
   generateChemicalFormula();
   auto end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
-
+  // START CALCULATION
   return calcVolume();
 }
 
 CalcReportBundle Model::generateSurfaceData(){
+  Ctrl::getInstance()->updateStatus("Calculating surface areas...");
+  Ctrl::getInstance()->updateProgressBar(0);
+
   // TODO: add way for this function to tell whether volume calculation has been conducted before
   auto start = std::chrono::steady_clock::now();
 
@@ -142,23 +152,53 @@ CalcReportBundle Model::generateSurfaceData(){
     {0b00001001, 0b00010001},
     {0b00001001} };
 
+  const int total_surfaces = solid_types.size() + 2*_data.cavities.size();
+  auto percentageDone = [](double num, double denom){return int(100*num/denom);};
+
   // full structure surfaces
-  _data.surf_vdw = _cell.calcSurfArea(solid_types[0]);
-  _data.surf_molecular = _cell.calcSurfArea(solid_types[1]);
-
-  _data.surf_probe_excluded
-    = optionProbeMode()? _cell.calcSurfArea(solid_types[2]) : _data.surf_molecular;
-
-  _data.surf_probe_accessible = _cell.calcSurfArea(solid_types[3]);
+  {
+    std::vector<double> surfaces; // temporary
+    for(size_t i = 0; i < solid_types.size(); ++i){
+      // special case for this set of types, to avoid recalculation
+      if (i == 2 && !optionProbeMode()){
+        surfaces.push_back(surfaces[1]);
+      }
+      else {
+        surfaces.push_back(_cell.calcSurfArea(solid_types[i]));
+      }
+      Ctrl::getInstance()->updateProgressBar(percentageDone(i+1,total_surfaces));
+      // check abort flag
+      if(Ctrl::getInstance()->getAbortFlag()){
+        _data.success = false;
+        return _data;
+      }
+    }
+    // from temporary container to _data
+    _data.surf_vdw = surfaces[0];
+    _data.surf_molecular = surfaces[1];
+    _data.surf_probe_excluded = surfaces[2];
+    _data.surf_probe_accessible = surfaces[3];
+  }
 
   // cavity surfaces
-  for (Cavity& cav : _data.cavities){
+  for (size_t i = 0; i < _data.cavities.size(); ++i){
+    Cavity& cav = _data.cavities[i];
+
     cav.surf_shell = _cell.calcSurfArea(solid_types[2], cav.id, cav.min_index, cav.max_index);
+    Ctrl::getInstance()->updateProgressBar(percentageDone(solid_types.size() + i*2 + 1,total_surfaces));
+
     cav.surf_core = _cell.calcSurfArea(solid_types[3], cav.id, cav.min_index, cav.max_index);
+    Ctrl::getInstance()->updateProgressBar(percentageDone(solid_types.size() + i*2 + 2,total_surfaces));
+
+    if(Ctrl::getInstance()->getAbortFlag()){
+      _data.success = false;
+      return _data;
+    }
   }
 
   auto end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
+
   return _data;
 }
 
@@ -224,11 +264,6 @@ void Model::generateChemicalFormula(){
   _data.chemical_formula = chemical_formula_prefix + chemical_formula_suffix;
 }
 
-// TODO remove is unused
-CalcReportBundle Model::getBundle(){
-  return _data;
-}
-
 ///////////////////////////
 // CALCULATION FUNCTIONS //
 ///////////////////////////
@@ -250,32 +285,35 @@ CalcReportBundle Model::calcVolume(){
   // set back the default value of success to true to avoid lingering errors from previous failed calculations
   _data.success = true;
 
-  auto start = std::chrono::steady_clock::now();
-  // TODO make a better error reporting system
-  bool error_cav = false;
-  _cell.assignTypeInGrid(atomtree, getProbeRad1(), getProbeRad2(), optionProbeMode(), error_cav); // assign each voxel in grid a type
-  if(error_cav){
-    Ctrl::getInstance()->notifyUser("\n\nWARNING: Maximum number of cavities reached. Not all cavities are reported.");
-    Ctrl::getInstance()->notifyUser("\nTo solve this, change probe radius (e.g. smaller probe 2 and/or larger probe 1).\n");
+  { // assign each voxel in grid a type
+    auto start = std::chrono::steady_clock::now();
+    bool cavities_exceeded = false;
+    _cell.assignTypeInGrid(atomtree, getProbeRad1(), getProbeRad2(), optionProbeMode(), cavities_exceeded);
+    if(Ctrl::getInstance()->getAbortFlag()){
+      _data.success = false;
+      return _data;
+    }
+    if(cavities_exceeded){Ctrl::getInstance()->displayErrorMessage(201);}
+    auto end = std::chrono::steady_clock::now();
+    _data.addTime(std::chrono::duration<double>(end-start).count());
   }
-  auto end = std::chrono::steady_clock::now();
-  _data.addTime(std::chrono::duration<double>(end-start).count());
 
-  // TODO remove when unnecessary
-  // _cell.printGrid(); // for testing
+  // debugging tool
+  // _cell.printGrid();
 
-  start = std::chrono::steady_clock::now();
-  if(_data.analyze_unit_cell){
-    _cell.getUnitCellVolume(_data.volumes, _data.cavities);
+  { // sum total volume
+    auto start = std::chrono::steady_clock::now();
+    if(_data.analyze_unit_cell){
+      _cell.getUnitCellVolume(_data.volumes, _data.cavities);
+    }
+    else{
+      _cell.getVolume(_data.volumes, _data.cavities);
+    }
+    auto end = std::chrono::steady_clock::now();
+    _data.addTime(std::chrono::duration<double>(end-start).count());
   }
-  else{
-    _cell.getVolume(_data.volumes, _data.cavities);
-  }
-  end = std::chrono::steady_clock::now();
-  _data.addTime(std::chrono::duration<double>(end-start).count());
-
+  // sort cavities by volume from largest to smallest
   inverseSort(_data.cavities);
-
   return _data;
 }
 
@@ -304,12 +342,12 @@ bool Model::processUnitCell(){
   */
   double radius_limit = _data.grid_step + _max_atom_radius + 2*( (_data.probe_mode) ? getProbeRad2() : getProbeRad1() );
   if(space_group == ""){
-    Ctrl::getInstance()->notifyUser("\nSpace group not found!\nCheck the structure file\nor untick the unit cell analysis checkbox.");
+    Ctrl::getInstance()->displayErrorMessage(111);
     return false;
   }
   for(int i = 0; i < 6; i++){
     if(_cell_param[i] == 0){
-      Ctrl::getInstance()->notifyUser("\nUnit cell parameters invalid!\nCheck the structure file\nor untick the unit cell analysis checkbox.");
+      Ctrl::getInstance()->displayErrorMessage(112);
       return false;
     }
   }
@@ -322,14 +360,10 @@ bool Model::processUnitCell(){
   moveAtomsInsideCell();
   removeDuplicateAtoms();
   countAtomsInUnitCell(); // for report
-  if(_data.make_report){
-    writeXYZfile(processed_atom_coordinates, "orthogonal_cell");
-  }
+  _data.orth_cell = processed_atom_coordinates;
   generateSupercell(radius_limit);
   generateUsefulAtomMapFromSupercell(radius_limit);
-  if(_data.make_report){
-    writeXYZfile(processed_atom_coordinates, "orthogonal_cell_with_neighboring_atoms");
-  }
+  _data.supercell = processed_atom_coordinates;
   return true;
 }
 
@@ -391,7 +425,7 @@ bool Model::symmetrizeUnitCell(){
   std::vector<int> sym_matrix_XYZ;
   std::vector<double> sym_matrix_fraction;
   if(!getSymmetryElements(space_group, sym_matrix_XYZ, sym_matrix_fraction)){
-    Ctrl::getInstance()->notifyUser("\nSpace group or symmetry not found!\nCheck the structure and space group files\nor untick the unit cell analysis checkbox.");
+    Ctrl::getInstance()->displayErrorMessage(113);
     return false;
   }
   /* To convert cartesian coordinates x y z in unit cell coordinates a b c:

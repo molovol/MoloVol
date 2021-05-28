@@ -2,6 +2,7 @@
 #include "space.h"
 #include "misc.h"
 #include "atom.h"
+#include "controller.h"
 #include <cmath> // abs, pow
 #include <algorithm> // max_element, swap
 #include <cassert>
@@ -200,6 +201,7 @@ void Voxel::storeProbe(const double r_probe, const bool masking_mode){
 // part of the type assigment routine. first evaluation is only concerned with the relation between
 // voxels and atoms
 char Voxel::evalRelationToAtoms(const std::array<unsigned,3>& index_vxl, Vector pos_vxl, const int lvl){
+  if(Ctrl::getInstance()->getAbortFlag()){return 0;}
   if (isAssigned()) {return _type;}
   if (!hasSubvoxel()) {
     double rad_vxl = calcRadiusOfInfluence(lvl); // calculated every time, since max_depth may change (not expensive)
@@ -209,7 +211,10 @@ char Voxel::evalRelationToAtoms(const std::array<unsigned,3>& index_vxl, Vector 
   if (hasSubvoxel()) {
     splitVoxel(index_vxl, pos_vxl, lvl);
   }
-  else {passTypeToChildren(index_vxl, lvl);}
+  else {
+    // voxel has been processed
+    passTypeToChildren(index_vxl, lvl);
+  }
   return _type;
 }
 
@@ -387,6 +392,8 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
 
   // adds neighbours to the stack, IDs are assigned before adding to the stack
   while (flood_stack.size() > 0){
+    if (Ctrl::getInstance()->getAbortFlag()){return false;}
+    Ctrl::getInstance()->updateCalculationStatus();
     VoxelLoc vxl = flood_stack.back();
     flood_stack.pop_back();
 
@@ -492,6 +499,7 @@ void Voxel::ascend(std::vector<VoxelLoc>& stack, const unsigned char id, const s
 
 char Voxel::evalRelationToVoxels(const std::array<unsigned int,3>& index, const unsigned lvl, bool split){
   // if voxel (including all subvoxels) have been assigned, then return immediately
+  if (Ctrl::getInstance()->getAbortFlag()){return 0;}
   if (isAssigned()){return _type;}
   else if (!hasSubvoxel()){ // vxl has no children
     split = !searchForCore(index, lvl, split);
@@ -543,6 +551,7 @@ bool Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
             setType(0b10000000);
           }
           else {
+            // voxel evaluation successful
             setID(nb_vxl.getID());
             passIDtoChildren(index, lvl);
           }

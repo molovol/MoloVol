@@ -1,3 +1,7 @@
+List of element radii used by MoloVol program.
+https://github.com/jmaglic/MoloVol
+Version: 2021-05-27
+
 Reference:
 S. Alvarez, Dalton Trans. 2013, 42, 8617-8636. 
 https://doi.org/10.1039/C3DT50599E

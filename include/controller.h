@@ -10,17 +10,36 @@ class Model;
 class MainFrame;
 class Ctrl{
   public:
-    inline static const std::string s_version = "alpha";
+    static Ctrl* getInstance();
+
+    void enableGUI();
+    void disableGUI();
+    bool isGUIEnabled();
+
     bool loadRadiusFile();
     bool loadAtomFile();
     bool runCalculation();
     void registerView(MainFrame* inp_gui);
-    static Ctrl* getInstance();
-    void notifyUser(std::string str, bool = true);
-    void notifyUser(std::wstring wstr);
+    void clearOutput();
+    void notifyUser(std::string);
+    void notifyUser(std::wstring);
+    void updateStatus(std::string);
+    void updateProgressBar(const int);
     void prepareOutput(std::string);
     void exportReport();
+    void exportReport(std::string);
     void exportSurfaceMap(bool);
+    void exportSurfaceMap(const std::string, bool);
+
+    void newCalculation();
+    void calculationDone(const bool=true);
+    bool isCalculationDone();
+    void setAbortFlag(const bool=true);
+    bool getAbortFlag();
+    void updateCalculationStatus();
+
+    void displayErrorMessage(const int);
+    void printErrorMessage(const int);
     // unit tests
     bool unittestExcluded();
     bool unittestProtein();
@@ -29,6 +48,7 @@ class Ctrl{
     bool unittestSurface();
     bool unittestFloodfill();
 
+    inline static const std::string s_version = "alpha";
   private:
     // consider making static pointer for model
     Model* current_calculation;
@@ -36,7 +56,11 @@ class Ctrl{
     static Ctrl* instance;
     static MainFrame* gui;
 
+    bool _abort_calculation; // variable for main thread to signal stopping the calculation
+    bool _calculation_finished;
     bool _to_gui = true; // determines whether to print to console or to GUI
+    
+    std::string getErrorMessage(const int);
 };
 
 

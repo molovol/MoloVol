@@ -7,24 +7,68 @@
 #include "base.h"
 #include "special_chars.h"
 #include <string>
+#include <wx/msgdlg.h>
 
 //////////////////////////////////
 // METHODS FOR MANIPULATING GUI //
 //////////////////////////////////
 
-void MainFrame::clearOutput(){
+// THREAD SAFE
+
+void MainFrame::extClearOutputText(){
+  GetEventHandler()->CallAfter(&MainFrame::clearOutputText);
+}
+
+void MainFrame::extClearOutputGrid(){
+  GetEventHandler()->CallAfter(&MainFrame::clearOutputGrid);
+}
+
+void MainFrame::extAppendOutput(const std::string text){
+  GetEventHandler()->CallAfter(&MainFrame::appendOutput, text);
+}
+
+void MainFrame::extAppendOutputW(const std::wstring wtext){
+  GetEventHandler()->CallAfter(&MainFrame::appendOutputW, wtext);
+}
+
+void MainFrame::extSetStatus(const std::string status){
+  GetEventHandler()->CallAfter(&MainFrame::setStatus, status);
+}
+
+void MainFrame::extSetProgressBar(const int percentage){
+  GetEventHandler()->CallAfter(&MainFrame::setProgressBar, percentage);
+}
+
+void MainFrame::extDisplayCavityList(const std::vector<Cavity>& cavities){
+  GetEventHandler()->CallAfter(&MainFrame::displayCavityList, cavities);
+}
+
+void MainFrame::extOpenErrorDialog(const int error_code, const std::string& error_message){
+  const std::pair<int, std::string> code_message = std::make_pair(error_code, error_message);
+  GetEventHandler()->CallAfter(&MainFrame::openErrorDialog, code_message);
+}
+
+// NOT THREAD SAFE
+
+void MainFrame::clearOutputText(){
   outputText->SetValue("");
 }
 
-void MainFrame::printToOutput(std::string& text){
+void MainFrame::clearOutputGrid(){
+  if (outputGrid->GetNumberRows() > 0){
+    outputGrid->DeleteRows(0, outputGrid->GetNumberRows());
+  }
+}
+
+void MainFrame::printToOutput(const std::string text){
   outputText->SetValue(text);
 }
 
-void MainFrame::appendOutput(std::string& text){
+void MainFrame::appendOutput(const std::string text){
   outputText->SetValue(outputText->GetValue() + text);
 }
 
-void MainFrame::appendOutput(std::wstring& text){
+void MainFrame::appendOutputW(const std::wstring text){
   outputText->SetValue(outputText->GetValue() + text);
 }
 
@@ -81,7 +125,7 @@ bool MainFrame::getMakeCavityMaps(){
 }
 
 std::string MainFrame::getOutputDir(){
-  return outputdirPicker->GetPath().ToStdString();
+  return dirpickerText->GetValue().ToStdString();
 }
 
 void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>> symbol_number_radius){
@@ -114,6 +158,26 @@ void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>
     // refresh the grid to enforce the update of cell values and parameters
     // without this, it was sometimes observed that the last cell was not updated properly
     atomListGrid->ForceRefresh();
+  }
+}
+
+void MainFrame::displayCavityList(const std::vector<Cavity>& cavities){
+  // delete all rows
+  clearOutputGrid();
+  // add appropriate nuber of rows
+  outputGrid->AppendRows(cavities.size());
+  for (int row = 0; row < outputGrid->GetNumberRows(); ++row){
+    outputGrid->SetCellValue(row, 0, std::to_string(row+1));
+    outputGrid->SetCellValue(row, 1, std::to_string(cavities[row].getVolume()));
+    if(getCalcSurfaceAreas()){
+      outputGrid->SetCellValue(row, 2, std::to_string(cavities[row].getSurfCore()));
+      outputGrid->SetCellValue(row, 3, std::to_string(cavities[row].getSurfShell()));
+    }
+    outputGrid->SetCellValue(row, 4, cavities[row].getPosition());
+    // set all cells read only
+    for (int col = 0; col < outputGrid->GetNumberCols(); ++col){
+      outputGrid->SetReadOnly(row,col,true);
+    }
   }
 }
 
@@ -152,4 +216,23 @@ std::vector<std::string> MainFrame::getIncludedElements(){
     }
   }
   return included_elements;
+}
+
+void MainFrame::setStatus(const std::string str){
+  statusBar->SetStatusText(str);
+}
+
+void MainFrame::setProgressBar(const int percentage){
+  progressGauge->SetValue(percentage);
+}
+
+////////////////////
+// DIALOG POP UPS //
+////////////////////
+
+void MainFrame::openErrorDialog(const std::pair<int,std::string>& code_message){
+  const int error_code = code_message.first;
+  const std::string error_message = code_message.second;
+  wxMessageDialog error_dialog(this, error_message, "Error Code " + std::to_string(error_code), wxICON_ERROR | wxOK | wxCENTRE);
+  error_dialog.ShowModal();
 }

@@ -8,69 +8,115 @@
 #include "controller.h"
 #include "misc.h"
 #include <vector>
+#include <chrono>
+#include <thread>
 
 /////////////////
 // EVENT TABLE //
 /////////////////
 
+wxDEFINE_EVENT(wxEVT_COMMAND_WORKERTHREAD_COMPLETED, wxThreadEvent);
+
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
+  EVT_CLOSE(MainFrame::OnClose)
   EVT_BUTTON(BUTTON_Calc, MainFrame::OnCalc)
+  EVT_BUTTON(BUTTON_Abort, MainFrame::OnAbort)
   EVT_BUTTON(BUTTON_Browse, MainFrame::OnAtomBrowse)
   EVT_BUTTON(BUTTON_Radius, MainFrame::OnRadiusBrowse)
   EVT_BUTTON(BUTTON_LoadFiles, MainFrame::OnLoadFiles)
+  EVT_BUTTON(BUTTON_Report, MainFrame::OnExportReport)
+  EVT_BUTTON(BUTTON_TotalMap, MainFrame::OnExportTotalMap)
+  EVT_BUTTON(BUTTON_CavityMap, MainFrame::OnExportCavityMap)
+  EVT_BUTTON(BUTTON_Dirpicker, MainFrame::OnBrowseOutput)
+  EVT_TEXT(wxID_ANY, MainFrame::OnTextInput)
   EVT_CHECKBOX(CHECKBOX_TwoProbes, MainFrame::ProbeModeChange)
+  EVT_CHECKBOX(CHECKBOX_Report, MainFrame::OnToggleAutoExport)
+  EVT_CHECKBOX(CHECKBOX_SurfaceMap, MainFrame::OnToggleAutoExport)
+  EVT_CHECKBOX(CHECKBOX_CavityMaps, MainFrame::OnToggleAutoExport)
   EVT_GRID_CELL_CHANGING(MainFrame::GridChange)
+  EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_WORKERTHREAD_COMPLETED, MainFrame::OnCalculationFinished)
 END_EVENT_TABLE()
 
 ////////////////////////////////
 // METHODS FOR EVENT HANDLING //
 ////////////////////////////////
 
-// exit program
-void MainFrame::OnExit(wxCommandEvent& event){
-  this->Close(TRUE);
+int MainApp::OnExit(){
+  return 0;
 }
 
-// TODO remove obsolete debugging functions
-// display text in output, used for debugging
-void MainFrame::OnPrint(wxCommandEvent& event){
-  std::string text = "treat yourself well";
-  printToOutput(text);
+void MainFrame::OnClose(wxCloseEvent& event){
+  if (_abort_q->IsOk()){
+    _abort_q->Post(true);
+  }
+  if (GetThread() && GetThread()->IsRunning()){
+    GetThread()->Wait();
+  }
+  event.Skip();
 }
 
 // begin calculation
 void MainFrame::OnCalc(wxCommandEvent& event){
-  enableGuiElements(false);
-
   // stop calculation if probe 2 radius is too small in two probes mode
   if(getProbeMode() && getProbe1Radius() > getProbe2Radius()){
-    Ctrl::getInstance()->notifyUser("Probes radii invalid!\nSet probe 2 radius > probe 1 radius.");
+    Ctrl::getInstance()->displayErrorMessage(104);
     wxYield(); // without wxYield, the clicks on disabled buttons are queued
     enableGuiElements(true);
     return;
   }
 
-  if(!Ctrl::getInstance()->runCalculation()){
-    wxYield(); // without wxYield, the clicks on disabled buttons are queued
-    enableGuiElements(true);
-    return;
-  }
-
-  // write report file if option is toggled
-  if(getMakeReport()){
-    Ctrl::getInstance()->exportReport();
-  }
-
-  // write total surface map file if option is toggled
-  if(getMakeSurfaceMap()){
-    Ctrl::getInstance()->exportSurfaceMap(false);
-  }
-
-  if(getMakeCavityMaps()){
-    Ctrl::getInstance()->exportSurfaceMap(true);
-  }
-
+  enableGuiElements(false);
+  abortButton->Enable(true);
   wxYield(); // without wxYield, the clicks on disabled buttons are queued
+
+  // create worker thread
+  if (CreateThread(wxTHREAD_JOINABLE) != wxTHREAD_NO_ERROR){
+    wxLogError("Could not create worker thread!");
+    return;
+  }
+  // start calculation in worker thread
+  if (GetThread()->Run() != wxTHREAD_NO_ERROR){
+    wxLogError("Could not run worker thread!");
+  }
+}
+
+wxThread::ExitCode MainFrame::Entry(){
+  // worker thread
+  Ctrl::getInstance()->runCalculation();
+  // after the calculation is finished, this event tells the main thread to give the stop signal
+  // and reenable the GUI
+  wxQueueEvent(this, new wxThreadEvent(wxEVT_COMMAND_WORKERTHREAD_COMPLETED));
+  // give main thread a millisecond to give stop signal. this avoids starting the while loop again
+  GetThread()->Sleep(1);
+  return (wxThread::ExitCode)0;
+}
+
+void MainFrame::OnAbort(wxCommandEvent& event){
+  if (_abort_q->IsOk()){
+    _abort_q->Post(true);
+  }
+  if (GetThread() && GetThread()->IsRunning()){
+    GetThread()->Wait();
+  }
+}
+
+bool MainFrame::receivedAbortCommand(){
+  bool abort = false;
+  _abort_q->ReceiveTimeout(0,abort);
+  return abort;
+}
+
+void MainFrame::OnCalculationFinished(wxCommandEvent& event){
+  _abort_q->Clear();
+  // main thread will wait for the thread to finish its work
+  if (GetThread() && GetThread()->IsRunning()){
+    GetThread()->Wait();
+  }
+
+  setDefaultState(reportButton,true);
+  setDefaultState(totalMapButton,true);
+  setDefaultState(cavityMapButton, outputGrid->GetNumberRows() != 0);
+  // reenable GUI
   enableGuiElements(true);
 }
 
@@ -81,7 +127,13 @@ void MainFrame::OnLoadFiles(wxCommandEvent& event){
   Ctrl::getInstance()->loadRadiusFile();
   Ctrl::getInstance()->loadAtomFile();
 
+  Ctrl::getInstance()->newCalculation();
+
+  // reset output
+  clearOutputText();
+  clearOutputGrid();
   toggleButtons(); // sets accessibility of buttons
+
   wxYield();
   enableGuiElements(true);
 }
@@ -103,19 +155,9 @@ void MainFrame::OnRadiusBrowse(wxCommandEvent& event){
 
 // browse (can only be called by another method function)
 void MainFrame::OnBrowse(wxCommandEvent& event, std::string& filetype, wxTextCtrl* textbox){
-  wxFileDialog openFileDialog
-    (this,
-     _("Select File"),
-     "",
-     "",
-     filetype,
-     wxFD_OPEN|wxFD_FILE_MUST_EXIST,
-     wxDefaultPosition,
-     wxDefaultSize,
-     "file browser"
-    );
+  wxFileDialog openFileDialog(this,_("Select file"),"","",filetype,wxFD_OPEN|wxFD_FILE_MUST_EXIST);
 
-  // if user closes dialogue
+  // if user closes dialog
   if (openFileDialog.ShowModal() == wxID_CANCEL)
     return;
 
@@ -147,7 +189,7 @@ void MainFrame::GridChange(wxGridEvent& event){
   int row = event.GetRow();
   wxString value = event.GetString();
   if (col == 0){
-    if (value == "1"){ //
+    if (value == "1"){
       atomListGrid->SetCellBackgroundColour(row,1,col_white);
       atomListGrid->SetCellBackgroundColour(row,2,col_white);
     }
@@ -165,6 +207,102 @@ void MainFrame::GridChange(wxGridEvent& event){
     }
   }
   atomListGrid->ForceRefresh();
+}
+
+void MainFrame::OnTextInput(wxCommandEvent& event){
+  filepathText->ChangeValue(filepathText->GetValue());
+  radiuspathText->ChangeValue(radiuspathText->GetValue());
+
+  probe1InputText->ChangeValue(probe1InputText->GetValue());
+  probe2InputText->ChangeValue(probe2InputText->GetValue());
+  gridsizeInputText->ChangeValue(gridsizeInputText->GetValue());
+}
+
+///////////////
+// ON EXPORT //
+///////////////
+
+std::string MainFrame::OpenExportFileDialog(const std::string file_type, const std::string file_extension){
+  // open file dialog
+  wxFileDialog save_dialog(this, _("Export " + file_type + " as..."), "", "", file_extension, wxFD_SAVE);
+
+  // if user closes dialog
+  if (save_dialog.ShowModal() == wxID_CANCEL) {return "";}
+
+  return save_dialog.GetPath().ToStdString();
+}
+
+void MainFrame::OnExportReport(wxCommandEvent& event){
+  const std::string file = "report";
+  // check whether report can be generated
+  if (!Ctrl::getInstance()->isCalculationDone()){
+    Ctrl::getInstance()->displayErrorMessage(301);
+    return;
+  }
+  std::string path = OpenExportFileDialog(file, "*.txt");
+  if (path.empty()) {return;}
+
+  // create report
+  Ctrl::getInstance()->exportReport(path);
+}
+
+void MainFrame::OnExportTotalMap(wxCommandEvent& event){
+  const std::string file = "total surface map";
+  if (!Ctrl::getInstance()->isCalculationDone()){
+    Ctrl::getInstance()->displayErrorMessage(301);
+    return;
+  }
+
+  std::string path = OpenExportFileDialog(file, "*.dx");
+  if (path.empty()) {return;}
+
+  Ctrl::getInstance()->exportSurfaceMap(path, false);
+}
+
+void MainFrame::OnExportCavityMap(wxCommandEvent& event){
+  const std::string file = "cavity surface maps";
+  if (!Ctrl::getInstance()->isCalculationDone() || outputGrid->GetNumberRows() == 0){
+    Ctrl::getInstance()->displayErrorMessage(301);
+    return;
+  }
+
+  std::string path = OpenExportFileDialog(file, "*.dx");
+  if (path.empty()) {return;}
+
+  Ctrl::getInstance()->exportSurfaceMap(path, true);
+}
+
+void MainFrame::OnToggleAutoExport(wxCommandEvent& event){
+  if(dirpickerText->GetValue().IsNull()){
+    const int checkbox_id = event.GetId();
+    switch(checkbox_id){
+      case CHECKBOX_Report:
+        if (!getMakeReport()){return;}
+        break;
+      case CHECKBOX_SurfaceMap:
+        if (!getMakeSurfaceMap()){return;}
+        break;
+      case CHECKBOX_CavityMaps:
+        if (!getMakeCavityMaps()){return;}
+        break;
+    }
+    OnBrowseOutput(event);
+  }
+}
+
+void MainFrame::OnBrowseOutput(wxCommandEvent& event){
+  wxDirDialog openDirDialog(this, _("Select output directory"), "", wxDD_DIR_MUST_EXIST | wxDD_DEFAULT_STYLE);
+
+  // if user closes dialog
+  if (openDirDialog.ShowModal() == wxID_CANCEL){
+    // if directory textbox is empty then uncheck all auto export tick boxes
+    if (dirpickerText->GetValue().IsNull()){
+      for (wxCheckBox* cb : getAutoExportCheckBoxes()){cb->SetValue(false);}
+    }
+    return;
+  }
+
+  dirpickerText->SetValue(openDirDialog.GetPath());
 }
 
 ////////////////////////////////
@@ -192,7 +330,9 @@ void MainFrame::toggleOptionsPdb(){
 }
 
 void MainFrame::toggleButtons(){
+  setDefaultState(reportButton,false);
+  setDefaultState(totalMapButton,false);
+  setDefaultState(cavityMapButton,false);
   setDefaultState(loadFilesButton, true);
   setDefaultState(calcButton, atomListGrid->GetNumberRows() != 0);
 }
-
