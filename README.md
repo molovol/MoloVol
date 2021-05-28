@@ -10,7 +10,7 @@ The MoloVol software, along with many of its features, is currently in early dev
 ## Getting Started
 
 Dependencies:
-- wxWidgets 3.1.4 (https://www.wxwidgets.org)
+- wxWidgets 3.1.5 (https://www.wxwidgets.org)
 
 ### On macOS
 
@@ -22,11 +22,11 @@ Afterwards you should have gcc installed. You can check whether gcc is installed
 
 `$ gcc -v`
 
-#### Installing wxWidgets 3.1.4
+#### Installing wxWidgets 3.1.5
 
 To install wxWidgets visit https://www.wxwidgets.org and download the source files for Mac. Unzip the download file and place it in a directory of your choice, such as your user directory `Users/myname/wx`. Then enter that directory.
 
-`$ cd wx/wxWidgets-3.1.4`
+`$ cd wx/wxWidgets-3.1.5`
 
 In order to compile wxWidgets and not risk overwriting it upon recompilation, create a new directory and enter it.
 
