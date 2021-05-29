@@ -33,9 +33,9 @@ In order to compile wxWidgets and not risk overwriting it upon recompilation, cr
 `$ mkdir build-debug`
 `$ cd build-debug`
 
-Afterwards run the configuration executable in the parent folder with the following flags: Enable building for debugging, disable shared to obtain a static library, and enable unicode support.
+Afterwards run the configuration executable in the parent folder with the following flags: Enable building for debugging, disable shared to obtain a static library, enable unicode support, and build a universal library for 64 bit and ARM architectures. The latter flag has become necessary due to the introduction of Apple Silicon.
 
-`$ ../configure --enable-debug --disable-shared --enable-unicode`
+`$ ../configure --enable-debug --disable-shared --enable-unicode --enable-universal_binary=arm64,x86_64 `
 
 Now you're ready to compile. Simply run:
 
