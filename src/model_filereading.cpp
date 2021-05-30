@@ -299,7 +299,7 @@ std::string strToValidSymbol(std::string str){
       str[i] = tolower(str[i]);
     }
     // allow underscores inside element symbols for custom symbols
-    else if (str[i] == '_') {}
+    //else if (str[i] == '_') {}
     else { // Remove number or charges from atoms so that "Pd2+" becomes "Pd"
       str.erase(i, str.size());
     }
