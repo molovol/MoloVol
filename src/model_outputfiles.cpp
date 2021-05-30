@@ -51,19 +51,19 @@ void Model::createReport(std::string path){
   }
   if(_data.probe_mode){
     output_report << "Probe mode: two probes\n";
-    output_report << "Small probe radius: " << getProbeRad1() << " Å\n";
-    output_report << "Large probe radius: " << getProbeRad2() << " Å\n";
+    output_report << "Small probe radius: " << getProbeRad1() << " A\n";
+    output_report << "Large probe radius: " << getProbeRad2() << " A\n";
   }
   else{
     output_report << "Probe mode: one probe\n";
-    output_report << "Probe radius: " << getProbeRad1() << " Å\n";
+    output_report << "Probe radius: " << getProbeRad1() << " A\n";
   }
-  output_report << "Grid step size (resolution): " << _data.grid_step << " Å\n";
+  output_report << "Grid step size (resolution): " << _data.grid_step << " A\n";
   output_report << "Maximum tree depth (algorithm acceleration): " << _data.max_depth << "\n";
   output_report << "Elements radii:\n";
   for(std::unordered_map<std::string, double>::iterator it = radius_map.begin(); it != radius_map.end(); it++){
     if(isIncluded(it->first, _data.included_elements)){
-      output_report << it->first << " : " << it->second << " Å\n";
+      output_report << it->first << " : " << it->second << " A\n";
     }
   }
 
@@ -73,30 +73,30 @@ void Model::createReport(std::string path){
   output_report << "\t// Total Volumes calculated //\n";
   output_report << "\t//////////////////////////////\n\n";
   if(_data.analyze_unit_cell){
-    output_report << "Orthogonal(ized) unit cell axes: " << _cart_matrix[0][0] << " Å, " << _cart_matrix[1][1] << " Å, " << _cart_matrix[2][2] << " Å\n";
-    output_report << "Total unit cell volume: " << _cart_matrix[0][0]*_cart_matrix[1][1]*_cart_matrix[2][2] << " Å^3\n";
+    output_report << "Orthogonal(ized) unit cell axes: " << _cart_matrix[0][0] << " A, " << _cart_matrix[1][1] << " A, " << _cart_matrix[2][2] << " A\n";
+    output_report << "Total unit cell volume: " << _cart_matrix[0][0]*_cart_matrix[1][1]*_cart_matrix[2][2] << " A^3\n";
   }
-  output_report << "Van der Waals volume: " << _data.volumes[0b00000011] << " Å^3\n";
-  output_report << "Excluded void volume: " << _data.volumes[0b00000101] << " Å^3\n";
-  output_report << "Molecular volume (vdw + excluded void): " << _data.volumes[0b00000011] + _data.volumes[0b00000101] << " Å^3\n";
-  output_report << small_p << " core volume: " << _data.volumes[0b00001001] << " Å^3\n";
-  output_report << small_p << " shell volume: " << _data.volumes[0b00010001] << " Å^3\n";
+  output_report << "Van der Waals volume: " << _data.volumes[0b00000011] << " A^3\n";
+  output_report << "Excluded void volume: " << _data.volumes[0b00000101] << " A^3\n";
+  output_report << "Molecular volume (vdw + excluded void): " << _data.volumes[0b00000011] + _data.volumes[0b00000101] << " A^3\n";
+  output_report << small_p << " core volume: " << _data.volumes[0b00001001] << " A^3\n";
+  output_report << small_p << " shell volume: " << _data.volumes[0b00010001] << " A^3\n";
   if(_data.probe_mode){
-    output_report << "Internal cavities and pockets volume (probe 1 core + shell): " << _data.volumes[0b00001001] + _data.volumes[0b00010001] << " Å^3\n";
-    output_report << "Large probe core volume: " << _data.volumes[0b00100001] << " Å^3\n";
-    output_report << "Large probe shell volume: " << _data.volumes[0b01000001] << " Å^3\n";
+    output_report << "Internal cavities and pockets volume (probe 1 core + shell): " << _data.volumes[0b00001001] + _data.volumes[0b00010001] << " A^3\n";
+    output_report << "Large probe core volume: " << _data.volumes[0b00100001] << " A^3\n";
+    output_report << "Large probe shell volume: " << _data.volumes[0b01000001] << " A^3\n";
   }
 
   if(_data.calc_surface_areas){
     output_report << "\n\n\t////////////////////////////////////\n";
     output_report << "\t// Total Surface Areas calculated //\n";
     output_report << "\t////////////////////////////////////\n\n";
-    output_report << "Van der Waals surface: " << _data.surf_vdw << " Å^2\n";
+    output_report << "Van der Waals surface: " << _data.surf_vdw << " A^2\n";
     if(_data.probe_mode){
-      output_report << "Molecular surface: " << _data.surf_molecular << " Å^2 (both probes excluded surface, similar to the Connolly surface)\n";
+      output_report << "Molecular surface: " << _data.surf_molecular << " A^2 (both probes excluded surface, similar to the Connolly surface)\n";
     }
-    output_report << small_p << " excluded surface: " << _data.surf_probe_excluded << " Å^2 (similar to the Connolly surface)\n";
-    output_report << small_p << " accessible surface: " << _data.surf_probe_accessible << " Å^2 (similar to the Lee-Richards surface)\n";
+    output_report << small_p << " excluded surface: " << _data.surf_probe_excluded << " A^2 (similar to the Connolly surface)\n";
+    output_report << small_p << " accessible surface: " << _data.surf_probe_accessible << " A^2 (similar to the Lee-Richards surface)\n";
   }
 
   if(!_data.cavities.empty()){
@@ -120,8 +120,8 @@ void Model::createReport(std::string path){
     output_report << "\tby the surface accessible to its core (similar to the Lee-Richards surface).\n";
     output_report << "Note 7:\tFor a detailed shape of each cavity, check the surface maps.\n\n";
 
-    output_report << "Cavity\tOccupied\tAccessible\t" << (_data.calc_surface_areas ? "Excluded\tAccessible\t" : "") << "Cavity center coordinates (Å)\n";
-    output_report << "ID\tVolume (Å^3)\tVolume (Å^3)\t" << (_data.calc_surface_areas ? "Surface (Å^2)\tSurface (Å^2)\t" : "") << "x\ty\tz\n";
+    output_report << "Cavity\tOccupied\tAccessible\t" << (_data.calc_surface_areas ? "Excluded\tAccessible\t" : "") << "Cavity center coordinates (A)\n";
+    output_report << "ID\tVolume (A^3)\tVolume (A^3)\t" << (_data.calc_surface_areas ? "Surface (A^2)\tSurface (A^2)\t" : "") << "x\ty\tz\n";
     for(unsigned int i = 0; i < _data.cavities.size(); i++){
       std::array<double,3> cav_center = _data.getCavCenter(i);
       // default precision is 6, which means that double values will take less than a tab space
