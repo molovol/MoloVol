@@ -313,6 +313,7 @@ RadiusFileBundle importDataFromRadiusFile(const std::string& radius_path){
   std::string line;
   std::ifstream inp_file(radius_path);
   bool invalid_symbol_detected = false;
+  bool invalid_radius_value = false;
   while(getline(inp_file,line)){
     std::vector<std::string> substrings = splitLine(line);
     // substings[0]: Atomic Number
@@ -325,12 +326,17 @@ RadiusFileBundle importDataFromRadiusFile(const std::string& radius_path){
         invalid_symbol_detected = true;
       }
       else {
-        data.rad_map[substrings[1]] = std::stod(substrings[2]);
+        try{data.rad_map[substrings[1]] = std::stod(substrings[2]);}
+        catch (const std::invalid_argument& e){
+          data.rad_map[substrings[1]] = 0;
+          invalid_radius_value = true;
+        }
         data.atomic_num_map[substrings[1]] = std::stoi(substrings[0]);
       }
     }
   }
   if (invalid_symbol_detected) {Ctrl::getInstance()->displayErrorMessage(106);}
+  if (invalid_radius_value) {Ctrl::getInstance()->displayErrorMessage(107);}
   return data;
 }
 
