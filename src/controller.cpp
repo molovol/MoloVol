@@ -301,6 +301,8 @@ static const std::map<int, std::string> s_error_codes = {
   {102, "Invalid structure file. Please select a valid file."},
   {103, "Invalid file format. Please make sure that the input files have the correct file extensions."},
   {104, "Invalid probe radius input. The large probe must have a larger radius than the small probe."},
+  {105, "Invalid element symbol(s) in structure file detected. Some atoms have not been imported. Please make sure that all element symbols begin with an alphabetic character."},
+  {106, "Invalid element symbol(s) in radius file detected. Some radii may be assigned incorrectly. Please make sure that all element symbols begin with an alphabetic character."},
   // 11x: unit cell files
   {111, "Space group not found. Check the structure file, or untick the Unit Cell Analysis tickbox."},
   {112, "Invalid unit cell parameters. Check the structure file, or untick the Unit Cell Analysis tickbox."},

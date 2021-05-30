@@ -93,11 +93,10 @@ bool Model::readAtomFile(const std::string& filepath, bool include_hetatm){
 }
 
 void Model::readFileXYZ(const std::string& filepath){
-
-//if (inp_file.is_open()){  //TODO consider adding an exception, for when file in not valid
   std::string line;
   std::ifstream inp_file(filepath);
 
+  bool invalid_symbol_detected = false;
   while(getline(inp_file,line)){
     std::vector<std::string> substrings = splitLine(line);
     // substrings[0]: Element Symbol
@@ -106,10 +105,14 @@ void Model::readFileXYZ(const std::string& filepath){
     if (isAtomLine(substrings)) {
 
       std::string valid_symbol = strToValidSymbol(substrings[0]);
+      if (valid_symbol.empty()) {
+        invalid_symbol_detected = true;
+        break;
+      }
       atom_amounts[valid_symbol]++; // adds one to counter for this symbol
 
       // as a safety mechanism, if an element symbol is assigned two atomic numbers, default to 0
-      // so it becomes apparent laster on that something is wrong
+      // so it becomes apparent later on that something is wrong
       if (elem_Z.count(valid_symbol) > 0){
         elem_Z[valid_symbol] = 0;
       }
@@ -119,6 +122,7 @@ void Model::readFileXYZ(const std::string& filepath){
     }
   }
   inp_file.close();
+  if (invalid_symbol_detected){Ctrl::getInstance()->displayErrorMessage(105);}
 }
 
 void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
@@ -274,23 +278,25 @@ bool isAtomLine(const std::vector<std::string>& substrings) {
 
 // reads a string and converts it to valid atom symbol: first character uppercase followed by lowercase characters
 std::string strToValidSymbol(std::string str){
+  // return empty if str is empty
+  if (str.size() == 0){return "";}
+  else{
+    // return empty if str begins with non-alphabetic character
+    if (!isalpha(str[0])){return "";}
+    // only for first character in sequence, convert to uppercase
+    else {str[0] = toupper(str[0]);}
+  }
   // iterate over all characters in string
-  for (size_t i = 0; i<str.size(); i++) {
-// TODO: decide whether non-alphabetic characters should be erased or not
-//    if (isalpha(str[i])){
-      // only for first character in sequence, convert to uppercase
-      if (i==0) {
-        str[i] = toupper(str[i]);
-      }
-      // for all other characters, convert to lowercase
-      else {
-        str[i] = tolower(str[i]);
-      }
-// TODO bis
-//    }
-//    else { // Remove number or charges from atoms so that "Pd2+" becomes "Pd"
-//      str.erase(i, str.size());
-//    }
+  for (size_t i = 1; i < str.size(); i++) {
+    // convert to lowercase
+    if (isalpha(str[i])) {
+      str[i] = tolower(str[i]);
+    }
+    // allow underscores inside element symbols for custom symbols
+    else if (str[i] == '_') {}
+    else { // Remove number or charges from atoms so that "Pd2+" becomes "Pd"
+      str.erase(i, str.size());
+    }
   }
   return str;
 }
@@ -300,17 +306,25 @@ RadiusFileBundle importDataFromRadiusFile(const std::string& radius_path){
 
   std::string line;
   std::ifstream inp_file(radius_path);
+  bool invalid_symbol_detected = false;
   while(getline(inp_file,line)){
     std::vector<std::string> substrings = splitLine(line);
     // substings[0]: Atomic Number
     // substings[1]: Element Symbol
     // substings[2]: Radius
     if(substrings.size() == 3){
-      // TODO: make sure substrings[1] is converted to valid symbol
-      data.rad_map[substrings[1]] = std::stod(substrings[2]);
-      data.atomic_num_map[substrings[1]] = std::stoi(substrings[0]);
+      substrings[1] = strToValidSymbol(substrings[1]);
+      // skip entry if element symbol invalid
+      if (substrings[1].empty()){
+        invalid_symbol_detected = true;
+      }
+      else {
+        data.rad_map[substrings[1]] = std::stod(substrings[2]);
+        data.atomic_num_map[substrings[1]] = std::stoi(substrings[0]);
+      }
     }
   }
+  if (invalid_symbol_detected) {Ctrl::getInstance()->displayErrorMessage(106);}
   return data;
 }
 
