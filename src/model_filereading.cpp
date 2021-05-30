@@ -107,7 +107,7 @@ void Model::readFileXYZ(const std::string& filepath){
       std::string valid_symbol = strToValidSymbol(substrings[0]);
       if (valid_symbol.empty()) {
         invalid_symbol_detected = true;
-        break;
+        continue;
       }
       atom_amounts[valid_symbol]++; // adds one to counter for this symbol
 
@@ -131,6 +131,7 @@ void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
   std::string line;
   std::ifstream inp_file(filepath);
 
+  bool invalid_symbol_detected = false;
   // iterate through lines
   while(getline(inp_file,line)){
     if (line.substr(0,6) == "ATOM  " || (include_hetatm == true && line.substr(0,6) == "HETATM")){
@@ -140,6 +141,10 @@ void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
       // Therefore, it is better to check both characters and erase any white space
       symbol.erase(std::remove(symbol.begin(), symbol.end(), ' '), symbol.end());
       symbol = strToValidSymbol(symbol);
+      if (symbol.empty()) {
+        invalid_symbol_detected = true;
+        continue;
+      }
       atom_amounts[symbol]++; // adds one to counter for this symbol
 
       // if a key leads to multiple z-values, set z-value to 0 (?)
@@ -166,6 +171,7 @@ void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
   }
   // file has been read
   inp_file.close();
+  if (invalid_symbol_detected){Ctrl::getInstance()->displayErrorMessage(105);}
 }
 
 // used in unittest
