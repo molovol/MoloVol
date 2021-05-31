@@ -129,8 +129,7 @@ void MainFrame::InitMessageQueue(){
 void MainFrame::InitTopLevel(){
   // contains import panel (left main) and options panel (right main)
   preCalcPanel = new wxPanel(this,PANEL_PreCalc);
-
-  postCalcPanel = new wxPanel(this,PANEL_PostCalc);
+  postCalcPanel = new wxPanel(this,PANEL_PostCalc, wxDefaultPosition, wxDefaultSize, 0);
 
   InitPreCalcPanel();
   InitPostCalcPanel();
@@ -155,7 +154,6 @@ void MainFrame::InitTopLevel(){
 void MainFrame::InitPreCalcPanel(){
   // contains browse panel and atom list panel
   leftMainPanel = new wxPanel(preCalcPanel,PANEL_LeftMain);
-
   // contains parameter panel and send-and-receive panel
   rightMainPanel = new wxPanel(preCalcPanel,PANEL_RightMain);
 
@@ -178,7 +176,7 @@ void MainFrame::InitLeftMainPanel(){
   browsePanel->SetMaxSize(wxSize(-1,160));
 
   // contains a grid widget that displays a table of atoms
-  atomListPanel = new wxPanel(leftMainPanel,PANEL_AtomList);
+  atomListPanel = new wxPanel(leftMainPanel,PANEL_AtomList, wxDefaultPosition, wxDefaultSize, 0);
 
   InitBrowsePanel();
   InitAtomListPanel();
@@ -194,7 +192,7 @@ void MainFrame::InitRightMainPanel(){
   parameterPanel = new wxPanel(rightMainPanel,PANEL_Parameters);
 
   // contains calculate button
-  sandrPanel = new wxPanel(rightMainPanel,PANEL_Sandr);
+  sandrPanel = new wxPanel(rightMainPanel,PANEL_Sandr, wxDefaultPosition, wxDefaultSize, 0);
 
   InitParametersPanel();
   InitSandr();
@@ -210,12 +208,12 @@ void MainFrame::InitRightMainPanel(){
 //////////////////
 void MainFrame::InitBrowsePanel(){
 
-  atomfilePanel = new wxPanel(browsePanel, PANEL_Atomfile, wxDefaultPosition, wxDefaultSize, 0);
-  radiusfilePanel = new wxPanel(browsePanel, PANEL_Radiusfile, wxDefaultPosition, wxDefaultSize, 0);
+  radiusfilePanel = new wxPanel(browsePanel, PANEL_Radiusfile);
+  atomfilePanel = new wxPanel(browsePanel, PANEL_Atomfile);
   fileOptionsPanel = new wxPanel(browsePanel, PANEL_FileOptions, wxDefaultPosition, wxDefaultSize, 0);
 
-  InitAtomfilePanel();
   InitRadiusfilePanel();
+  InitAtomfilePanel();
   InitFileOptionsPanel();
 
   wxStaticBoxSizer *browserSizer = new wxStaticBoxSizer(wxVERTICAL,browsePanel);
@@ -223,7 +221,6 @@ void MainFrame::InitBrowsePanel(){
   browserSizer->Add(atomfilePanel,0,wxEXPAND | wxTOP,10);
   browserSizer->Add(fileOptionsPanel,0,wxEXPAND,0);
   browsePanel->SetSizerAndFit(browserSizer);
-
 }
 
 ////////////////////////////
@@ -238,7 +235,6 @@ void MainFrame::InitSandr(){
   sandrSizer->Add(calcButton,3,wxALIGN_CENTRE_VERTICAL);
   sandrSizer->Add(abortButton,1,wxALIGN_CENTRE_VERTICAL);
   sandrPanel->SetSizerAndFit(sandrSizer);
-
 }
 
 ////////////////////
@@ -257,24 +253,16 @@ void MainFrame::SetSizerFilePanel(wxPanel* panel, wxStaticText* text, wxButton* 
 
 void MainFrame::InitAtomfilePanel(){
   atomText = new wxStaticText(atomfilePanel, TEXT_Atom, "Structure file:");
-  browseButton = new wxButton
-    (atomfilePanel, BUTTON_Browse, "Browse", wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator);
-
-  filepathText = new wxTextCtrl(atomfilePanel,
-								TEXT_Filename,
-								wxEmptyString);
+  browseButton = new wxButton(atomfilePanel, BUTTON_Browse, "Browse");
+  filepathText = new wxTextCtrl(atomfilePanel, TEXT_Filename, wxEmptyString);
 
   SetSizerFilePanel(atomfilePanel, atomText, browseButton, filepathText);
 }
 
 void MainFrame::InitRadiusfilePanel(){
   radiusText = new wxStaticText(radiusfilePanel, TEXT_Radius, "Elements radii:");
-  radiusButton = new wxButton
-    (radiusfilePanel, BUTTON_Radius, "Browse");
-
-  radiuspathText = new wxTextCtrl(radiusfilePanel,
-								  TEXT_Radiuspath,
-								  "./inputfile/radii.txt");
+  radiusButton = new wxButton(radiusfilePanel, BUTTON_Radius, "Browse");
+  radiuspathText = new wxTextCtrl(radiusfilePanel, TEXT_Radiuspath, "./inputfile/radii.txt");
 
   SetSizerFilePanel(radiusfilePanel, radiusText, radiusButton, radiuspathText);
 }
@@ -311,13 +299,10 @@ void MainFrame::InitParametersPanel(){
 
     // contains input controls for probe 1 (small) radius
     probe1Panel = new wxPanel(framePanel, PANEL_Probe1);
-
     // contains input controls for probe 2 (large) radius
     probe2Panel = new wxPanel(framePanel, PANEL_Probe2);
-
     // contains input controls for grid size
     gridsizePanel = new wxPanel(framePanel, PANEL_Grid);
-
     // contains input controls for tree depth
     depthPanel = new wxPanel(framePanel, PANEL_Depth);
 
@@ -348,9 +333,7 @@ void MainFrame::InitParametersPanel(){
 void MainFrame::InitProbe1Panel(){
 
   probe1Text = new wxStaticText(probe1Panel, TEXT_Probe1, "Small Probe radius:");
-
   probe1InputText = new wxTextCtrl(probe1Panel, TEXT_Probe1Input, "1.2");
-
   probe1UnitText = new wxStaticText(probe1Panel, TEXT_Probe1Unit, L" \u212B"); // unicode for angstrom
 
   wxBoxSizer *probe1Sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -365,9 +348,7 @@ void MainFrame::InitProbe1Panel(){
 void MainFrame::InitProbe2Panel(){
 
   probe2Text = new wxStaticText(probe2Panel, TEXT_Probe2, "Large Probe radius:");
-
   probe2InputText = new wxTextCtrl(probe2Panel, TEXT_Probe2Input, "3");
-
   probe2UnitText = new wxStaticText(probe2Panel, TEXT_Probe2Unit, L" \u212B"); // unicode for angstrom
 
   wxBoxSizer *probe2Sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -382,9 +363,7 @@ void MainFrame::InitProbe2Panel(){
 void MainFrame::InitGridPanel(){
 
   gridsizeText = new wxStaticText(gridsizePanel, TEXT_Grid, "Grid resolution:");
-
   gridsizeInputText = new wxTextCtrl(gridsizePanel, TEXT_Gridinput, "0.1");
-
   gridsizeUnitText = new wxStaticText(gridsizePanel, TEXT_Gridunit, L" \u212B"); // unicode for angstrom
 
   wxBoxSizer *gridsizeSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -399,9 +378,8 @@ void MainFrame::InitGridPanel(){
 void MainFrame::InitDepthPanel(){
 
   depthText = new wxStaticText(depthPanel, TEXT_Depth, "Optimization depth:");
-  depthInput = new wxSpinCtrl
-    (depthPanel, SPIN_Depthinput, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 20, 4);
-  depthDummyPanel = new wxPanel(depthPanel, PANEL_DepthDummy, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL); // to align with above panels
+  depthInput = new wxSpinCtrl(depthPanel, SPIN_Depthinput, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS | wxTAB_TRAVERSAL, 0, 20, 4);
+  depthDummyPanel = new wxPanel(depthPanel, PANEL_DepthDummy, wxDefaultPosition, wxDefaultSize, 0); // to align with above panels
 
   wxBoxSizer *depthSizer = new wxBoxSizer(wxHORIZONTAL);
   depthSizer->Add(depthText,1,wxALIGN_CENTRE_VERTICAL);
