@@ -103,7 +103,8 @@ void Model::readFileXYZ(const std::string& filepath){
     // substrings[0]: Element Symbol
     // substrings[1,2,3]: Coordinates
     // create new atom and add to storage vector if line format corresponds to Element_Symbol x y z
-    if (isAtomLine(substrings)) {
+    if (substrings.empty()){} // skip blank lines
+    else if (isAtomLine(substrings)) {
       first_atom_line_encountered = true;
 
       const std::string valid_symbol = strToValidSymbol(substrings[0]);
@@ -189,9 +190,10 @@ void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
       raw_atom_coordinates.emplace_back(symbol, atom_line.ortho_coord[0], atom_line.ortho_coord[1], atom_line.ortho_coord[2]);
     }
     else if (record_name == "CRYST1"){
+      // for the last substring (space group) mercury recognizes only 10 chars but official PDB format is 11 chars
       std::vector<std::string> substrings = {line.substr(6,9), line.substr(15,9), line.substr(24,9), line.substr(33,7), line.substr(40,7), line.substr(47,7), line.substr(55,11)};
-      removeEOL(substrings[6]); // note: mercury recognizes only 10 chars but official PDB format is 11 chars
-      for (int i = 0; i < substrings.size()-1; ++i){
+      removeEOL(substrings[6]);
+      for (size_t i = 0; i < substrings.size()-1; ++i){
         try{_cell_param[i] = std::stod(substrings[i]);}
         catch (const std::invalid_argument& e){invalid_cell_params = true;}
       }
