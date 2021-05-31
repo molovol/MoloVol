@@ -58,7 +58,6 @@ bool MainApp::OnInit()
   }
   // initialise the GUI
   MainFrame* MainWin = new MainFrame(_("MoloVol " + Ctrl::s_version), wxDefaultPosition, wxDefaultSize);
-//  MainWin->SetBackgroundColour(col_win);
   MainWin->Show(true);
   SetTopWindow(MainWin);
   return true;
@@ -130,10 +129,7 @@ void MainFrame::InitMessageQueue(){
 void MainFrame::InitTopLevel(){
   // contains import panel (left main) and options panel (right main)
   preCalcPanel = new wxPanel(this,PANEL_PreCalc);
-//  preCalcPanel->SetBackgroundColour(col_panel);
-
-  postCalcPanel = new wxPanel(this,PANEL_PostCalc);
-//  postCalcPanel->SetBackgroundColour(col_panel);
+  postCalcPanel = new wxPanel(this,PANEL_PostCalc, wxDefaultPosition, wxDefaultSize, 0);
 
   InitPreCalcPanel();
   InitPostCalcPanel();
@@ -158,11 +154,8 @@ void MainFrame::InitTopLevel(){
 void MainFrame::InitPreCalcPanel(){
   // contains browse panel and atom list panel
   leftMainPanel = new wxPanel(preCalcPanel,PANEL_LeftMain);
-//  leftMainPanel->SetBackgroundColour(col_panel);
-
   // contains parameter panel and send-and-receive panel
   rightMainPanel = new wxPanel(preCalcPanel,PANEL_RightMain);
-//  rightMainPanel->SetBackgroundColour(col_panel);
 
   InitLeftMainPanel();
   InitRightMainPanel();
@@ -180,12 +173,10 @@ void MainFrame::InitPreCalcPanel(){
 void MainFrame::InitLeftMainPanel(){
   // contains file panels and load button
   browsePanel = new wxPanel(leftMainPanel, PANEL_Browse);
-//  browsePanel->SetBackgroundColour(col_panel);
   browsePanel->SetMaxSize(wxSize(-1,160));
 
   // contains a grid widget that displays a table of atoms
-  atomListPanel = new wxPanel(leftMainPanel,PANEL_AtomList);
-//  atomListPanel->SetBackgroundColour(col_panel);
+  atomListPanel = new wxPanel(leftMainPanel,PANEL_AtomList, wxDefaultPosition, wxDefaultSize, 0);
 
   InitBrowsePanel();
   InitAtomListPanel();
@@ -199,11 +190,9 @@ void MainFrame::InitLeftMainPanel(){
 void MainFrame::InitRightMainPanel(){
   // contains panels for user input
   parameterPanel = new wxPanel(rightMainPanel,PANEL_Parameters);
-//  parameterPanel->SetBackgroundColour(col_panel);
 
   // contains calculate button
-  sandrPanel = new wxPanel(rightMainPanel,PANEL_Sandr);
-//  sandrPanel->SetBackgroundColour(col_panel);
+  sandrPanel = new wxPanel(rightMainPanel,PANEL_Sandr, wxDefaultPosition, wxDefaultSize, 0);
 
   InitParametersPanel();
   InitSandr();
@@ -219,12 +208,12 @@ void MainFrame::InitRightMainPanel(){
 //////////////////
 void MainFrame::InitBrowsePanel(){
 
-  atomfilePanel = new wxPanel(browsePanel, PANEL_Atomfile, wxDefaultPosition, wxDefaultSize, 0);
-  radiusfilePanel = new wxPanel(browsePanel, PANEL_Radiusfile, wxDefaultPosition, wxDefaultSize, 0);
+  radiusfilePanel = new wxPanel(browsePanel, PANEL_Radiusfile);
+  atomfilePanel = new wxPanel(browsePanel, PANEL_Atomfile);
   fileOptionsPanel = new wxPanel(browsePanel, PANEL_FileOptions, wxDefaultPosition, wxDefaultSize, 0);
 
-  InitAtomfilePanel();
   InitRadiusfilePanel();
+  InitAtomfilePanel();
   InitFileOptionsPanel();
 
   wxStaticBoxSizer *browserSizer = new wxStaticBoxSizer(wxVERTICAL,browsePanel);
@@ -232,7 +221,6 @@ void MainFrame::InitBrowsePanel(){
   browserSizer->Add(atomfilePanel,0,wxEXPAND | wxTOP,10);
   browserSizer->Add(fileOptionsPanel,0,wxEXPAND,0);
   browsePanel->SetSizerAndFit(browserSizer);
-
 }
 
 ////////////////////////////
@@ -247,7 +235,6 @@ void MainFrame::InitSandr(){
   sandrSizer->Add(calcButton,3,wxALIGN_CENTRE_VERTICAL);
   sandrSizer->Add(abortButton,1,wxALIGN_CENTRE_VERTICAL);
   sandrPanel->SetSizerAndFit(sandrSizer);
-
 }
 
 ////////////////////
@@ -266,24 +253,16 @@ void MainFrame::SetSizerFilePanel(wxPanel* panel, wxStaticText* text, wxButton* 
 
 void MainFrame::InitAtomfilePanel(){
   atomText = new wxStaticText(atomfilePanel, TEXT_Atom, "Structure file:");
-  browseButton = new wxButton
-    (atomfilePanel, BUTTON_Browse, "Browse", wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator);
-
-  filepathText = new wxTextCtrl(atomfilePanel,
-								TEXT_Filename,
-								wxEmptyString);
+  browseButton = new wxButton(atomfilePanel, BUTTON_Browse, "Browse");
+  filepathText = new wxTextCtrl(atomfilePanel, TEXT_Filename, wxEmptyString);
 
   SetSizerFilePanel(atomfilePanel, atomText, browseButton, filepathText);
 }
 
 void MainFrame::InitRadiusfilePanel(){
   radiusText = new wxStaticText(radiusfilePanel, TEXT_Radius, "Elements radii:");
-  radiusButton = new wxButton
-    (radiusfilePanel, BUTTON_Radius, "Browse");
-
-  radiuspathText = new wxTextCtrl(radiusfilePanel,
-								  TEXT_Radiuspath,
-								  "./inputfile/radii.txt");
+  radiusButton = new wxButton(radiusfilePanel, BUTTON_Radius, "Browse");
+  radiuspathText = new wxTextCtrl(radiusfilePanel, TEXT_Radiuspath, "./inputfile/radii.txt");
 
   SetSizerFilePanel(radiusfilePanel, radiusText, radiusButton, radiuspathText);
 }
@@ -320,19 +299,12 @@ void MainFrame::InitParametersPanel(){
 
     // contains input controls for probe 1 (small) radius
     probe1Panel = new wxPanel(framePanel, PANEL_Probe1);
-//    probe1Panel->SetBackgroundColour(col_panel);
-
     // contains input controls for probe 2 (large) radius
     probe2Panel = new wxPanel(framePanel, PANEL_Probe2);
-//    probe2Panel->SetBackgroundColour(col_panel);
-
     // contains input controls for grid size
     gridsizePanel = new wxPanel(framePanel, PANEL_Grid);
-//    gridsizePanel->SetBackgroundColour(col_panel);
-
     // contains input controls for tree depth
     depthPanel = new wxPanel(framePanel, PANEL_Depth);
-//    depthPanel->SetBackgroundColour(col_panel);
 
     InitProbe1Panel();
     InitProbe2Panel();
@@ -340,12 +312,12 @@ void MainFrame::InitParametersPanel(){
     InitDepthPanel();
 
     wxBoxSizer* boxSizer = new wxBoxSizer(wxVERTICAL);
-    int dist_inbetween = 6;
+    int dist_inbetween = 4;
     boxSizer->Add(unitCellCheckbox, -1, wxALIGN_LEFT | wxBOTTOM, dist_inbetween);
     boxSizer->Add(surfaceAreaCheckbox, -1, wxALIGN_LEFT | wxTOP | wxBOTTOM, dist_inbetween);
     boxSizer->Add(twoProbesCheckbox, -1, wxALIGN_LEFT | wxTOP | wxBOTTOM, dist_inbetween);
-    boxSizer->Add(probe1Panel, -1, wxEXPAND | wxBOTTOM, dist_inbetween);
-    boxSizer->Add(probe2Panel, -1, wxEXPAND | wxBOTTOM, dist_inbetween);
+    boxSizer->Add(probe1Panel, -1, wxEXPAND | wxTOP | wxBOTTOM, dist_inbetween);
+    boxSizer->Add(probe2Panel, -1, wxEXPAND | wxTOP | wxBOTTOM, dist_inbetween);
     boxSizer->Add(gridsizePanel, -1, wxEXPAND | wxTOP | wxBOTTOM, dist_inbetween);
     boxSizer->Add(depthPanel, -1, wxEXPAND | wxTOP, dist_inbetween);
     framePanel->SetSizerAndFit(boxSizer);
@@ -361,31 +333,14 @@ void MainFrame::InitParametersPanel(){
 void MainFrame::InitProbe1Panel(){
 
   probe1Text = new wxStaticText(probe1Panel, TEXT_Probe1, "Small Probe radius:");
-
-  // contains input control for probe 1 radius and text field for unit
-  probe1InputPanel = new wxPanel(probe1Panel, PANEL_Probe1Input);
-//  probe1InputPanel->SetBackgroundColour(col_panel);
-
-  InitProbe1InputPanel();
+  probe1InputText = new wxTextCtrl(probe1Panel, TEXT_Probe1Input, "1.2");
+  probe1UnitText = new wxStaticText(probe1Panel, TEXT_Probe1Unit, L" \u212B"); // unicode for angstrom
 
   wxBoxSizer *probe1Sizer = new wxBoxSizer(wxHORIZONTAL);
   probe1Sizer->Add(probe1Text,1,wxALIGN_CENTRE_VERTICAL);
-  probe1Sizer->Add(probe1InputPanel,2);
+  probe1Sizer->Add(probe1InputText, 1, wxALIGN_CENTRE_VERTICAL);
+  probe1Sizer->Add(probe1UnitText, 1, wxALIGN_CENTRE_VERTICAL);
   probe1Panel->SetSizerAndFit(probe1Sizer);
-
-  return;
-}
-
-void MainFrame::InitProbe1InputPanel(){
-
-  probe1InputText = new wxTextCtrl(probe1InputPanel, TEXT_Probe1Input, "1.2");
-
-  probe1UnitText = new wxStaticText(probe1InputPanel, TEXT_Probe1Unit, L" \u212B");//  (note: approximate H\u2082O radius = 1.4 \u212B)  "); // unicode for angstrom, biochemists often use a probe corresponding to a molecule of water
-
-  wxBoxSizer *probe1Inputsizer = new wxBoxSizer(wxHORIZONTAL);
-  probe1Inputsizer->Add(probe1InputText, 1, wxALIGN_CENTRE_VERTICAL);
-  probe1Inputsizer->Add(probe1UnitText, 0, wxALIGN_CENTRE_VERTICAL);
-  probe1InputPanel->SetSizerAndFit(probe1Inputsizer);
 
   return;
 }
@@ -393,31 +348,14 @@ void MainFrame::InitProbe1InputPanel(){
 void MainFrame::InitProbe2Panel(){
 
   probe2Text = new wxStaticText(probe2Panel, TEXT_Probe2, "Large Probe radius:");
-
-  // contains input control for probe 2 radius and text field for unit
-  probe2InputPanel = new wxPanel(probe2Panel, PANEL_Probe2Input, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
-//  probe2InputPanel->SetBackgroundColour(col_panel);
-
-  InitProbe2InputPanel();
+  probe2InputText = new wxTextCtrl(probe2Panel, TEXT_Probe2Input, "3");
+  probe2UnitText = new wxStaticText(probe2Panel, TEXT_Probe2Unit, L" \u212B"); // unicode for angstrom
 
   wxBoxSizer *probe2Sizer = new wxBoxSizer(wxHORIZONTAL);
   probe2Sizer->Add(probe2Text, 1, wxALIGN_CENTRE_VERTICAL);
-  probe2Sizer->Add(probe2InputPanel, 2);
+  probe2Sizer->Add(probe2InputText, 1, wxALIGN_CENTRE_VERTICAL);
+  probe2Sizer->Add(probe2UnitText, 1, wxALIGN_CENTRE_VERTICAL);
   probe2Panel->SetSizerAndFit(probe2Sizer);
-
-  return;
-}
-
-void MainFrame::InitProbe2InputPanel(){
-
-  probe2InputText = new wxTextCtrl(probe2InputPanel, TEXT_Probe2Input, "5");
-
-  probe2UnitText = new wxStaticText(probe2InputPanel, TEXT_Probe2Unit, L" \u212B"); // unicode for angstrom
-
-  wxBoxSizer *probe2Inputsizer = new wxBoxSizer(wxHORIZONTAL);
-  probe2Inputsizer->Add(probe2InputText, 1, wxALIGN_CENTRE_VERTICAL);
-  probe2Inputsizer->Add(probe2UnitText, 0, wxALIGN_CENTRE_VERTICAL);
-  probe2InputPanel->SetSizerAndFit(probe2Inputsizer);
 
   return;
 }
@@ -425,31 +363,14 @@ void MainFrame::InitProbe2InputPanel(){
 void MainFrame::InitGridPanel(){
 
   gridsizeText = new wxStaticText(gridsizePanel, TEXT_Grid, "Grid resolution:");
-
-  // contains input control for grid size and text field for unit
-  gridsizeInputPanel = new wxPanel(gridsizePanel, PANEL_Gridinput, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
-//  gridsizeInputPanel->SetBackgroundColour(col_panel);
-
-  InitGridinputPanel();
+  gridsizeInputText = new wxTextCtrl(gridsizePanel, TEXT_Gridinput, "0.1");
+  gridsizeUnitText = new wxStaticText(gridsizePanel, TEXT_Gridunit, L" \u212B"); // unicode for angstrom
 
   wxBoxSizer *gridsizeSizer = new wxBoxSizer(wxHORIZONTAL);
   gridsizeSizer->Add(gridsizeText, 1, wxALIGN_CENTRE_VERTICAL);
-  gridsizeSizer->Add(gridsizeInputPanel, 2);
+  gridsizeSizer->Add(gridsizeInputText, 1, wxALIGN_CENTRE_VERTICAL);
+  gridsizeSizer->Add(gridsizeUnitText, 1, wxALIGN_CENTRE_VERTICAL);
   gridsizePanel->SetSizerAndFit(gridsizeSizer);
-
-  return;
-}
-
-void MainFrame::InitGridinputPanel(){
-
-  gridsizeInputText = new wxTextCtrl(gridsizeInputPanel, TEXT_Gridinput, "0.1");
-
-  gridsizeUnitText = new wxStaticText(gridsizeInputPanel, TEXT_Gridunit, L" \u212B"); // unicode for angstrom
-
-  wxBoxSizer *gridsizeInputsizer = new wxBoxSizer(wxHORIZONTAL);
-  gridsizeInputsizer->Add(gridsizeInputText, 1, wxALIGN_CENTRE_VERTICAL);
-  gridsizeInputsizer->Add(gridsizeUnitText, 0, wxALIGN_CENTRE_VERTICAL);
-  gridsizeInputPanel->SetSizerAndFit(gridsizeInputsizer);
 
   return;
 }
@@ -457,12 +378,13 @@ void MainFrame::InitGridinputPanel(){
 void MainFrame::InitDepthPanel(){
 
   depthText = new wxStaticText(depthPanel, TEXT_Depth, "Optimization depth:");
-  depthInput = new wxSpinCtrl
-    (depthPanel, SPIN_Depthinput, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 20, 4);
+  depthInput = new wxSpinCtrl(depthPanel, SPIN_Depthinput, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS | wxTAB_TRAVERSAL, 0, 20, 4);
+  depthDummyPanel = new wxPanel(depthPanel, PANEL_DepthDummy, wxDefaultPosition, wxDefaultSize, 0); // to align with above panels
 
   wxBoxSizer *depthSizer = new wxBoxSizer(wxHORIZONTAL);
   depthSizer->Add(depthText,1,wxALIGN_CENTRE_VERTICAL);
-  depthSizer->Add(depthInput,2,wxALIGN_CENTRE_VERTICAL);
+  depthSizer->Add(depthInput,1,wxALIGN_CENTRE_VERTICAL);
+  depthSizer->Add(depthDummyPanel,1,wxALIGN_CENTRE_VERTICAL);
   depthPanel->SetSizerAndFit(depthSizer);
   return;
 }
@@ -530,7 +452,6 @@ void MainFrame::InitCommunicationPanel(){
 
 void MainFrame::InitOutputPanel(){
   outputText = new wxTextCtrl(outputPanel, TEXT_Output, _("Output Dialog"), wxDefaultPosition, wxSize(-1,100), wxTE_MULTILINE | wxTE_READONLY);
-//  outputText->SetBackgroundColour(col_output);
 
   outputGrid = new wxGrid(outputPanel, GRID_Output);
   outputGrid->SetRowLabelSize(0);

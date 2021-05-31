@@ -48,14 +48,14 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void extClearOutputGrid();
     void extAppendOutput(const std::string);
     void extAppendOutputW(const std::wstring);
-    
+
     void extSetStatus(const std::string);
     void extSetProgressBar(const int);
     void extDisplayCavityList(const std::vector<Cavity>&);
     bool receivedAbortCommand();
 
     void extOpenErrorDialog(const int, const std::string&);
-    
+
     void printToOutput(const std::string text);
     std::string getAtomFilepath();
     std::string getRadiusFilepath();
@@ -88,11 +88,11 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void clearOutputGrid();
     void appendOutput(const std::string text);
     void appendOutputW(const std::wstring text);
-    
+
     void setStatus(const std::string);
     void setProgressBar(const int);
     void displayCavityList(const std::vector<Cavity>&);
-    
+
     void openErrorDialog(const std::pair<int,std::string>&);
 
     wxMessageQueue<bool>* _abort_q;
@@ -122,26 +122,24 @@ class MainFrame: public wxFrame, public wxThreadHelper
           wxCheckBox* twoProbesCheckbox;
           wxPanel* probe1Panel;
             wxStaticText* probe1Text;
-            wxPanel* probe1InputPanel;
-              wxTextCtrl* probe1InputText;
-              wxStaticText* probe1UnitText; // possibly usable universally?
+            wxTextCtrl* probe1InputText;
+            wxStaticText* probe1UnitText; // possibly usable universally?
           wxPanel* probe2Panel;
             wxStaticText* probe2Text;
-            wxPanel* probe2InputPanel;
-              wxTextCtrl* probe2InputText;
-              wxStaticText* probe2UnitText; // possibly usable universally?
+            wxTextCtrl* probe2InputText;
+            wxStaticText* probe2UnitText; // possibly usable universally?
           wxPanel* gridsizePanel;
             wxStaticText* gridsizeText;
-            wxPanel* gridsizeInputPanel;
-              wxTextCtrl* gridsizeInputText;
-              wxStaticText* gridsizeUnitText; // possibly usable universally?
+            wxTextCtrl* gridsizeInputText;
+            wxStaticText* gridsizeUnitText; // possibly usable universally?
           wxPanel* depthPanel;
             wxStaticText* depthText;
             wxSpinCtrl* depthInput;
+            wxPanel* depthDummyPanel;
         wxPanel* sandrPanel;
           wxButton* calcButton;
           wxButton* abortButton;
-    
+
     wxPanel* postCalcPanel;
       wxPanel* communicationPanel;
         wxGauge* progressGauge;
@@ -173,7 +171,7 @@ class MainFrame: public wxFrame, public wxThreadHelper
 
     // methods to initialise gui
     void InitTopLevel();
-    
+
     void InitPreCalcPanel();
     void InitLeftMainPanel();
     void InitBrowsePanel();
@@ -186,14 +184,11 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void InitRightMainPanel();
     void InitParametersPanel();
     void InitProbe1Panel();
-    void InitProbe1InputPanel();
     void InitProbe2Panel();
-    void InitProbe2InputPanel();
     void InitGridPanel();
-    void InitGridinputPanel();
     void InitDepthPanel();
     void InitSandr();
-    
+
     void InitPostCalcPanel();
     void InitCommunicationPanel();
     void InitOutputPanel();
@@ -265,7 +260,7 @@ enum
           BUTTON_LoadFiles,
       PANEL_AtomList,
         GRID_AtomList,
-  
+
     PANEL_RightMain,
       PANEL_Parameters,
         CHECKBOX_UnitCell,
@@ -273,26 +268,24 @@ enum
         CHECKBOX_TwoProbes,
         PANEL_Probe1,
           TEXT_Probe1,
-          PANEL_Probe1Input,
-            TEXT_Probe1Input,
-            TEXT_Probe1Unit,
+          TEXT_Probe1Input,
+          TEXT_Probe1Unit,
         PANEL_Probe2,
           TEXT_Probe2,
-          PANEL_Probe2Input,
-            TEXT_Probe2Input,
-            TEXT_Probe2Unit,
+          TEXT_Probe2Input,
+          TEXT_Probe2Unit,
         PANEL_Grid,
           TEXT_Grid,
-          PANEL_Gridinput,
-            TEXT_Gridinput,
-            TEXT_Gridunit,
+          TEXT_Gridinput,
+          TEXT_Gridunit,
         PANEL_Depth,
           TEXT_Depth,
           SPIN_Depthinput,
+          PANEL_DepthDummy,
       PANEL_Sandr,
         BUTTON_Calc,
         BUTTON_Abort,
-   
+
   PANEL_PostCalc,
     PANEL_Communication,
       GAUGE_Progress,
