@@ -231,11 +231,6 @@ bool Model::getSymmetryElements(std::string group, std::vector<int> &sym_matrix_
 
 // returns the radius of an atom with a given symbol
 inline double Model::findRadiusOfAtom(const std::string& symbol){
-  //TODO add exception handling for when no radius was found:
-  //if(radius_map[symbol == 0]){
-  //  throw ...;
-  //}
-  //else{ return...;}
   return radius_map[symbol];
 }
 
