@@ -106,7 +106,8 @@ void Model::readFileXYZ(const std::string& filepath){
     if (isAtomLine(substrings)) {
       first_atom_line_encountered = true;
 
-      atom_amounts[strToValidSymbol(substrings[0])]++; // adds one to counter for this symbol
+      const std::string valid_symbol = strToValidSymbol(substrings[0]);
+      atom_amounts[valid_symbol]++; // adds one to counter for this symbol
 
       // as a safety mechanism, if an element symbol is assigned two atomic numbers, default to 0
       // so it becomes apparent later on that something is wrong
