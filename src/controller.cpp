@@ -301,10 +301,14 @@ static const std::map<int, std::string> s_error_codes = {
   {102, "Invalid structure file. Please select a valid file."},
   {103, "Invalid file format. Please make sure that the input files have the correct file extensions."},
   {104, "Invalid probe radius input. The large probe must have a larger radius than the small probe."},
+  {105, "Invalid entry in structure file encountered. Some atoms have not been imported. Please check the format of the input file."},
+  {106, "Invalid element symbol(s) in radius file detected. Some radii may be assigned incorrectly. Please make sure that all element symbols begin with an alphabetic character."},
+  {107, "Invalid radius value in radius file detected. Some radii may be set to 0. Please make sure that all radii are numeric."},
   // 11x: unit cell files
   {111, "Space group not found. Check the structure file, or untick the Unit Cell Analysis tickbox."},
   {112, "Invalid unit cell parameters. Check the structure file, or untick the Unit Cell Analysis tickbox."},
   {113, "Space group or symmetry not found. Check the structure and space group files or untick the Unit Cell Analysis tickbox"},
+  {114, "Invalid ATOM or HETATM line encountered. Import may be incomplete. Check the structure file."},
   // 2xx: Issue during Calculation
   {200, "Calculation failed!"}, // unspecific error
   {201, "Total number of cavities (255) exceeded. Consider changing the probe size. Calculation will proceed."},

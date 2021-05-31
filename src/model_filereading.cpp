@@ -93,75 +93,119 @@ bool Model::readAtomFile(const std::string& filepath, bool include_hetatm){
 }
 
 void Model::readFileXYZ(const std::string& filepath){
-
-//if (inp_file.is_open()){  //TODO consider adding an exception, for when file in not valid
   std::string line;
   std::ifstream inp_file(filepath);
 
+  bool invalid_entry_encountered = false;
+  bool first_atom_line_encountered = false;
   while(getline(inp_file,line)){
     std::vector<std::string> substrings = splitLine(line);
     // substrings[0]: Element Symbol
     // substrings[1,2,3]: Coordinates
     // create new atom and add to storage vector if line format corresponds to Element_Symbol x y z
-    if (isAtomLine(substrings)) {
+    if (substrings.empty()){} // skip blank lines
+    else if (isAtomLine(substrings)) {
+      first_atom_line_encountered = true;
 
-      std::string valid_symbol = strToValidSymbol(substrings[0]);
+      const std::string valid_symbol = strToValidSymbol(substrings[0]);
       atom_amounts[valid_symbol]++; // adds one to counter for this symbol
 
-      // as a safety mechanism, if an element symbol is assigned two atomic numbers, default to 0
-      // so it becomes apparent laster on that something is wrong
-      if (elem_Z.count(valid_symbol) > 0){
-        elem_Z[valid_symbol] = 0;
-      }
       // Stores the full list of atom coordinates from the input file
-      raw_atom_coordinates.push_back(std::make_tuple(
-            valid_symbol, std::stod(substrings[1]), std::stod(substrings[2]), std::stod(substrings[3])));
+      raw_atom_coordinates.push_back(std::make_tuple(valid_symbol, std::stod(substrings[1]), std::stod(substrings[2]), std::stod(substrings[3])));
+    }
+    else {
+      // due to the .xyz format the first few lines may not be atom entries. an error should only be detected,
+      // after the first valid atom entry has been encountered
+      if (first_atom_line_encountered){invalid_entry_encountered = true;}
     }
   }
   inp_file.close();
+  if (invalid_entry_encountered){Ctrl::getInstance()->displayErrorMessage(105);}
 }
 
 void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
+  // struct for extracting data from lines. defined here, because it is only needed here
+  struct AtomLinePDB {
+    AtomLinePDB() = default;
+    AtomLinePDB(const std::string& line){
+      record_name = line.substr(0,6);
+      assert (record_name == "ATOM  " || record_name == "HETATM");
+      serial_no = std::stoi(line.substr(6,5));
+      name = line.substr(12,4);
+      alt_loc = line[16];
+      res_name = line.substr(17,3);
+      chain_id = line[21];
+      res_seq = std::stoi(line.substr(22,4));
+      insert_code = line[26];
+      for (int i = 0; i < 3; ++i){
+        ortho_coord[i] = std::stod(line.substr(30+i*8,8));
+      }
+      occupancy = std::stod(line.substr(54,6));
+      temp_factor = std::stod(line.substr(60,6));
+      element_symbol = line.substr(76,2);
+      // some software generate pdb files with symbol left-justified instead of right-justified
+      // therefore, it is better to check both characters and erase any white space
+      removeWhiteSpaces(element_symbol);
+      charge = line.substr(78,2);
+      removeEOL(charge);
+    }
+    std::string record_name;
+    int serial_no;
+    std::string name;
+    char alt_loc;
+    std::string res_name;
+    char chain_id;
+    int res_seq;
+    char insert_code;
+    std::array<double,3> ortho_coord;
+    double occupancy;
+    double temp_factor;
+    std::string element_symbol;
+    std::string charge;
+  };
 
-//if (inp_file.is_open()){  //TODO consider adding an exception, for when file in not valid
   std::string line;
   std::ifstream inp_file(filepath);
-
+  bool invalid_symbol_detected = false;
+  bool invalid_cell_params = false;
+  bool invalid_atom_line = false;
   // iterate through lines
   while(getline(inp_file,line)){
-    if (line.substr(0,6) == "ATOM  " || (include_hetatm == true && line.substr(0,6) == "HETATM")){
-      // Element symbol is located at characters 77 and 78, right-justified in the official pdb format
-      std::string symbol = line.substr(76,2);
-      // Some software generate pdb files with symbol left-justified instead of right-justified
-      // Therefore, it is better to check both characters and erase any white space
-      symbol.erase(std::remove(symbol.begin(), symbol.end(), ' '), symbol.end());
-      symbol = strToValidSymbol(symbol);
+    const std::string record_name = line.substr(0,6);
+    if (record_name == "ATOM  " || (include_hetatm && record_name == "HETATM")){
+      AtomLinePDB atom_line;
+      try {atom_line = AtomLinePDB(line);} // extract all information from line
+      catch (const std::invalid_argument& e){ // detect invalid line
+        invalid_atom_line = true;
+        continue;
+      }
+      std::string symbol = strToValidSymbol(atom_line.element_symbol);
+      if (symbol.empty()) {
+        invalid_symbol_detected = true;
+        continue;
+      }
       atom_amounts[symbol]++; // adds one to counter for this symbol
 
-      // if a key leads to multiple z-values, set z-value to 0 (?)
-      if (elem_Z.count(symbol) > 0){
-        elem_Z[symbol] = 0;
-      }
-      // Stores the full list of atom coordinates from the input file
-      raw_atom_coordinates.emplace_back(symbol,
-                                        std::stod(line.substr(30,8)),
-                                        std::stod(line.substr(38,8)),
-                                        std::stod(line.substr(46,8)));
+      // stores the full list of atom coordinates from the input file
+      raw_atom_coordinates.emplace_back(symbol, atom_line.ortho_coord[0], atom_line.ortho_coord[1], atom_line.ortho_coord[2]);
     }
-    else if (line.substr(0,6) == "CRYST1"){
-      _cell_param[0] = std::stod(line.substr(6,9));
-      _cell_param[1] = std::stod(line.substr(15,9));
-      _cell_param[2] = std::stod(line.substr(24,9));
-      _cell_param[3] = std::stod(line.substr(33,7));
-      _cell_param[4] = std::stod(line.substr(40,7));
-      _cell_param[5] = std::stod(line.substr(47,7));
-      space_group = line.substr(55,11); // note: mercury recognizes only 10 chars but official PDB format is 11 chars
-      space_group.erase(std::remove(space_group.begin(), space_group.end(), ' '), space_group.end()); // remove white spaces
-      removeEOL(space_group);
+    else if (record_name == "CRYST1"){
+      // for the last substring (space group) mercury recognizes only 10 chars but official PDB format is 11 chars
+      std::vector<std::string> substrings = {line.substr(6,9), line.substr(15,9), line.substr(24,9), line.substr(33,7), line.substr(40,7), line.substr(47,7), line.substr(55,11)};
+      removeEOL(substrings[6]);
+      for (size_t i = 0; i < substrings.size()-1; ++i){
+        try{_cell_param[i] = std::stod(substrings[i]);}
+        catch (const std::invalid_argument& e){invalid_cell_params = true;}
+      }
+      space_group = substrings[6];
+      removeWhiteSpaces(space_group);
     }
   }
   // file has been read
   inp_file.close();
+  if (invalid_symbol_detected){Ctrl::getInstance()->displayErrorMessage(105);}
+  if (invalid_cell_params){Ctrl::getInstance()->displayErrorMessage(112);}
+  if (invalid_atom_line){Ctrl::getInstance()->displayErrorMessage(114);}
 }
 
 // used in unittest
@@ -222,11 +266,6 @@ bool Model::getSymmetryElements(std::string group, std::vector<int> &sym_matrix_
 
 // returns the radius of an atom with a given symbol
 inline double Model::findRadiusOfAtom(const std::string& symbol){
-  //TODO add exception handling for when no radius was found:
-  //if(radius_map[symbol == 0]){
-  //  throw ...;
-  //}
-  //else{ return...;}
   return radius_map[symbol];
 }
 
@@ -245,52 +284,45 @@ static inline std::vector<std::string> splitLine(std::string& line){
   return substrings;
 }
 
+// check if a vector of substrings has the format of an atom line
 bool isAtomLine(const std::vector<std::string>& substrings) {
-  if (substrings.size() == 4) {
-// TODO: decide whether element symbol substring should be checked as starting with a letter
-//  if (isalpha(substrings[0][0])){
-    for (char i=1; i<4; i++){
-      // using a try-block feels hacky, but the alternative using strtod does as well
-      try {
-        size_t str_pos = 0; // will contain the last position in the string that was successfully evaluated by std::stod()
-        std::stod(substrings[i], &str_pos);
-        if (substrings[i].size() != str_pos) {
-          return false;
-        }
-      }
-      catch (const std::invalid_argument& ia) {
-        return false;
-      }
+  // atom lines must have four items
+  if (substrings.size() != 4) {return false;}
+  // if first item cannot be converted to a valid element symbol return false
+  if (strToValidSymbol(substrings[0]).empty()){return false;}
+  for (char i=1; i<4; i++){
+    // check whether subsequent items can be converted to a number
+    try {
+      size_t str_pos = 0; // will contain the last position in the string that was successfully evaluated by std::stod()
+      std::stod(substrings[i], &str_pos);
+      if (substrings[i].size() != str_pos) {return false;}
     }
-/* TODO bis
+    catch (const std::invalid_argument& e) {return false;}
   }
-  else {
-  	return false;
-  }*/
-    return true;
-  }
-  return false;
+  return true;
 }
 
 // reads a string and converts it to valid atom symbol: first character uppercase followed by lowercase characters
 std::string strToValidSymbol(std::string str){
+  // return empty if str is empty
+  if (str.size() == 0){return "";}
+  else{
+    // return empty if str begins with non-alphabetic character
+    if (!isalpha(str[0])){return "";}
+    // only for first character in sequence, convert to uppercase
+    else {str[0] = toupper(str[0]);}
+  }
   // iterate over all characters in string
-  for (size_t i = 0; i<str.size(); i++) {
-// TODO: decide whether non-alphabetic characters should be erased or not
-//    if (isalpha(str[i])){
-      // only for first character in sequence, convert to uppercase
-      if (i==0) {
-        str[i] = toupper(str[i]);
-      }
-      // for all other characters, convert to lowercase
-      else {
-        str[i] = tolower(str[i]);
-      }
-// TODO bis
-//    }
-//    else { // Remove number or charges from atoms so that "Pd2+" becomes "Pd"
-//      str.erase(i, str.size());
-//    }
+  for (size_t i = 1; i < str.size(); i++) {
+    // convert to lowercase
+    if (isalpha(str[i])) {
+      str[i] = tolower(str[i]);
+    }
+    // allow underscores inside element symbols for custom symbols
+    //else if (str[i] == '_') {}
+    else { // Remove number or charges from atoms so that "Pd2+" becomes "Pd"
+      str.erase(i, str.size());
+    }
   }
   return str;
 }
@@ -300,17 +332,31 @@ RadiusFileBundle importDataFromRadiusFile(const std::string& radius_path){
 
   std::string line;
   std::ifstream inp_file(radius_path);
+  bool invalid_symbol_detected = false;
+  bool invalid_radius_value = false;
   while(getline(inp_file,line)){
     std::vector<std::string> substrings = splitLine(line);
     // substings[0]: Atomic Number
     // substings[1]: Element Symbol
     // substings[2]: Radius
     if(substrings.size() == 3){
-      // TODO: make sure substrings[1] is converted to valid symbol
-      data.rad_map[substrings[1]] = std::stod(substrings[2]);
-      data.atomic_num_map[substrings[1]] = std::stoi(substrings[0]);
+      substrings[1] = strToValidSymbol(substrings[1]);
+      // skip entry if element symbol invalid
+      if (substrings[1].empty()){
+        invalid_symbol_detected = true;
+      }
+      else {
+        try{data.rad_map[substrings[1]] = std::stod(substrings[2]);}
+        catch (const std::invalid_argument& e){
+          data.rad_map[substrings[1]] = 0;
+          invalid_radius_value = true;
+        }
+        data.atomic_num_map[substrings[1]] = std::stoi(substrings[0]);
+      }
     }
   }
+  if (invalid_symbol_detected) {Ctrl::getInstance()->displayErrorMessage(106);}
+  if (invalid_radius_value) {Ctrl::getInstance()->displayErrorMessage(107);}
   return data;
 }
 
