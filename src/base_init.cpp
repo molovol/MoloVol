@@ -58,7 +58,6 @@ bool MainApp::OnInit()
   }
   // initialise the GUI
   MainFrame* MainWin = new MainFrame(_("MoloVol " + Ctrl::s_version), wxDefaultPosition, wxDefaultSize);
-//  MainWin->SetBackgroundColour(col_win);
   MainWin->Show(true);
   SetTopWindow(MainWin);
   return true;
@@ -130,10 +129,8 @@ void MainFrame::InitMessageQueue(){
 void MainFrame::InitTopLevel(){
   // contains import panel (left main) and options panel (right main)
   preCalcPanel = new wxPanel(this,PANEL_PreCalc);
-//  preCalcPanel->SetBackgroundColour(col_panel);
 
   postCalcPanel = new wxPanel(this,PANEL_PostCalc);
-//  postCalcPanel->SetBackgroundColour(col_panel);
 
   InitPreCalcPanel();
   InitPostCalcPanel();
@@ -158,11 +155,9 @@ void MainFrame::InitTopLevel(){
 void MainFrame::InitPreCalcPanel(){
   // contains browse panel and atom list panel
   leftMainPanel = new wxPanel(preCalcPanel,PANEL_LeftMain);
-//  leftMainPanel->SetBackgroundColour(col_panel);
 
   // contains parameter panel and send-and-receive panel
   rightMainPanel = new wxPanel(preCalcPanel,PANEL_RightMain);
-//  rightMainPanel->SetBackgroundColour(col_panel);
 
   InitLeftMainPanel();
   InitRightMainPanel();
@@ -180,12 +175,10 @@ void MainFrame::InitPreCalcPanel(){
 void MainFrame::InitLeftMainPanel(){
   // contains file panels and load button
   browsePanel = new wxPanel(leftMainPanel, PANEL_Browse);
-//  browsePanel->SetBackgroundColour(col_panel);
   browsePanel->SetMaxSize(wxSize(-1,160));
 
   // contains a grid widget that displays a table of atoms
   atomListPanel = new wxPanel(leftMainPanel,PANEL_AtomList);
-//  atomListPanel->SetBackgroundColour(col_panel);
 
   InitBrowsePanel();
   InitAtomListPanel();
@@ -199,11 +192,9 @@ void MainFrame::InitLeftMainPanel(){
 void MainFrame::InitRightMainPanel(){
   // contains panels for user input
   parameterPanel = new wxPanel(rightMainPanel,PANEL_Parameters);
-//  parameterPanel->SetBackgroundColour(col_panel);
 
   // contains calculate button
   sandrPanel = new wxPanel(rightMainPanel,PANEL_Sandr);
-//  sandrPanel->SetBackgroundColour(col_panel);
 
   InitParametersPanel();
   InitSandr();
@@ -320,19 +311,15 @@ void MainFrame::InitParametersPanel(){
 
     // contains input controls for probe 1 (small) radius
     probe1Panel = new wxPanel(framePanel, PANEL_Probe1);
-//    probe1Panel->SetBackgroundColour(col_panel);
 
     // contains input controls for probe 2 (large) radius
     probe2Panel = new wxPanel(framePanel, PANEL_Probe2);
-//    probe2Panel->SetBackgroundColour(col_panel);
 
     // contains input controls for grid size
     gridsizePanel = new wxPanel(framePanel, PANEL_Grid);
-//    gridsizePanel->SetBackgroundColour(col_panel);
 
     // contains input controls for tree depth
     depthPanel = new wxPanel(framePanel, PANEL_Depth);
-//    depthPanel->SetBackgroundColour(col_panel);
 
     InitProbe1Panel();
     InitProbe2Panel();
@@ -340,12 +327,12 @@ void MainFrame::InitParametersPanel(){
     InitDepthPanel();
 
     wxBoxSizer* boxSizer = new wxBoxSizer(wxVERTICAL);
-    int dist_inbetween = 6;
+    int dist_inbetween = 4;
     boxSizer->Add(unitCellCheckbox, -1, wxALIGN_LEFT | wxBOTTOM, dist_inbetween);
     boxSizer->Add(surfaceAreaCheckbox, -1, wxALIGN_LEFT | wxTOP | wxBOTTOM, dist_inbetween);
     boxSizer->Add(twoProbesCheckbox, -1, wxALIGN_LEFT | wxTOP | wxBOTTOM, dist_inbetween);
-    boxSizer->Add(probe1Panel, -1, wxEXPAND | wxBOTTOM, dist_inbetween);
-    boxSizer->Add(probe2Panel, -1, wxEXPAND | wxBOTTOM, dist_inbetween);
+    boxSizer->Add(probe1Panel, -1, wxEXPAND | wxTOP | wxBOTTOM, dist_inbetween);
+    boxSizer->Add(probe2Panel, -1, wxEXPAND | wxTOP | wxBOTTOM, dist_inbetween);
     boxSizer->Add(gridsizePanel, -1, wxEXPAND | wxTOP | wxBOTTOM, dist_inbetween);
     boxSizer->Add(depthPanel, -1, wxEXPAND | wxTOP, dist_inbetween);
     framePanel->SetSizerAndFit(boxSizer);
@@ -364,7 +351,6 @@ void MainFrame::InitProbe1Panel(){
 
   // contains input control for probe 1 radius and text field for unit
   probe1InputPanel = new wxPanel(probe1Panel, PANEL_Probe1Input);
-//  probe1InputPanel->SetBackgroundColour(col_panel);
 
   InitProbe1InputPanel();
 
@@ -384,7 +370,7 @@ void MainFrame::InitProbe1InputPanel(){
 
   wxBoxSizer *probe1Inputsizer = new wxBoxSizer(wxHORIZONTAL);
   probe1Inputsizer->Add(probe1InputText, 1, wxALIGN_CENTRE_VERTICAL);
-  probe1Inputsizer->Add(probe1UnitText, 0, wxALIGN_CENTRE_VERTICAL);
+  probe1Inputsizer->Add(probe1UnitText, 1, wxALIGN_CENTRE_VERTICAL);
   probe1InputPanel->SetSizerAndFit(probe1Inputsizer);
 
   return;
@@ -396,7 +382,6 @@ void MainFrame::InitProbe2Panel(){
 
   // contains input control for probe 2 radius and text field for unit
   probe2InputPanel = new wxPanel(probe2Panel, PANEL_Probe2Input, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
-//  probe2InputPanel->SetBackgroundColour(col_panel);
 
   InitProbe2InputPanel();
 
@@ -416,7 +401,7 @@ void MainFrame::InitProbe2InputPanel(){
 
   wxBoxSizer *probe2Inputsizer = new wxBoxSizer(wxHORIZONTAL);
   probe2Inputsizer->Add(probe2InputText, 1, wxALIGN_CENTRE_VERTICAL);
-  probe2Inputsizer->Add(probe2UnitText, 0, wxALIGN_CENTRE_VERTICAL);
+  probe2Inputsizer->Add(probe2UnitText, 1, wxALIGN_CENTRE_VERTICAL);
   probe2InputPanel->SetSizerAndFit(probe2Inputsizer);
 
   return;
@@ -428,7 +413,6 @@ void MainFrame::InitGridPanel(){
 
   // contains input control for grid size and text field for unit
   gridsizeInputPanel = new wxPanel(gridsizePanel, PANEL_Gridinput, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
-//  gridsizeInputPanel->SetBackgroundColour(col_panel);
 
   InitGridinputPanel();
 
@@ -448,7 +432,7 @@ void MainFrame::InitGridinputPanel(){
 
   wxBoxSizer *gridsizeInputsizer = new wxBoxSizer(wxHORIZONTAL);
   gridsizeInputsizer->Add(gridsizeInputText, 1, wxALIGN_CENTRE_VERTICAL);
-  gridsizeInputsizer->Add(gridsizeUnitText, 0, wxALIGN_CENTRE_VERTICAL);
+  gridsizeInputsizer->Add(gridsizeUnitText, 1, wxALIGN_CENTRE_VERTICAL);
   gridsizeInputPanel->SetSizerAndFit(gridsizeInputsizer);
 
   return;
@@ -459,10 +443,12 @@ void MainFrame::InitDepthPanel(){
   depthText = new wxStaticText(depthPanel, TEXT_Depth, "Optimization depth:");
   depthInput = new wxSpinCtrl
     (depthPanel, SPIN_Depthinput, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 20, 4);
+  depthDummyPanel = new wxPanel(depthPanel, PANEL_DepthDummy, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL); // to align with above panels
 
   wxBoxSizer *depthSizer = new wxBoxSizer(wxHORIZONTAL);
   depthSizer->Add(depthText,1,wxALIGN_CENTRE_VERTICAL);
-  depthSizer->Add(depthInput,2,wxALIGN_CENTRE_VERTICAL);
+  depthSizer->Add(depthInput,1,wxALIGN_CENTRE_VERTICAL);
+  depthSizer->Add(depthDummyPanel,1,wxALIGN_CENTRE_VERTICAL);
   depthPanel->SetSizerAndFit(depthSizer);
   return;
 }
@@ -530,7 +516,6 @@ void MainFrame::InitCommunicationPanel(){
 
 void MainFrame::InitOutputPanel(){
   outputText = new wxTextCtrl(outputPanel, TEXT_Output, _("Output Dialog"), wxDefaultPosition, wxSize(-1,100), wxTE_MULTILINE | wxTE_READONLY);
-//  outputText->SetBackgroundColour(col_output);
 
   outputGrid = new wxGrid(outputPanel, GRID_Output);
   outputGrid->SetRowLabelSize(0);

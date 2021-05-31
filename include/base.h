@@ -48,14 +48,14 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void extClearOutputGrid();
     void extAppendOutput(const std::string);
     void extAppendOutputW(const std::wstring);
-    
+
     void extSetStatus(const std::string);
     void extSetProgressBar(const int);
     void extDisplayCavityList(const std::vector<Cavity>&);
     bool receivedAbortCommand();
 
     void extOpenErrorDialog(const int, const std::string&);
-    
+
     void printToOutput(const std::string text);
     std::string getAtomFilepath();
     std::string getRadiusFilepath();
@@ -88,11 +88,11 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void clearOutputGrid();
     void appendOutput(const std::string text);
     void appendOutputW(const std::wstring text);
-    
+
     void setStatus(const std::string);
     void setProgressBar(const int);
     void displayCavityList(const std::vector<Cavity>&);
-    
+
     void openErrorDialog(const std::pair<int,std::string>&);
 
     wxMessageQueue<bool>* _abort_q;
@@ -138,10 +138,11 @@ class MainFrame: public wxFrame, public wxThreadHelper
           wxPanel* depthPanel;
             wxStaticText* depthText;
             wxSpinCtrl* depthInput;
+            wxPanel* depthDummyPanel;
         wxPanel* sandrPanel;
           wxButton* calcButton;
           wxButton* abortButton;
-    
+
     wxPanel* postCalcPanel;
       wxPanel* communicationPanel;
         wxGauge* progressGauge;
@@ -173,7 +174,7 @@ class MainFrame: public wxFrame, public wxThreadHelper
 
     // methods to initialise gui
     void InitTopLevel();
-    
+
     void InitPreCalcPanel();
     void InitLeftMainPanel();
     void InitBrowsePanel();
@@ -193,7 +194,7 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void InitGridinputPanel();
     void InitDepthPanel();
     void InitSandr();
-    
+
     void InitPostCalcPanel();
     void InitCommunicationPanel();
     void InitOutputPanel();
@@ -265,7 +266,7 @@ enum
           BUTTON_LoadFiles,
       PANEL_AtomList,
         GRID_AtomList,
-  
+
     PANEL_RightMain,
       PANEL_Parameters,
         CHECKBOX_UnitCell,
@@ -289,10 +290,11 @@ enum
         PANEL_Depth,
           TEXT_Depth,
           SPIN_Depthinput,
+          PANEL_DepthDummy,
       PANEL_Sandr,
         BUTTON_Calc,
         BUTTON_Abort,
-   
+
   PANEL_PostCalc,
     PANEL_Communication,
       GAUGE_Progress,
