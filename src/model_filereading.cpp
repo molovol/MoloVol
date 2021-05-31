@@ -96,20 +96,17 @@ void Model::readFileXYZ(const std::string& filepath){
   std::string line;
   std::ifstream inp_file(filepath);
 
-  bool invalid_symbol_detected = false;
+  bool invalid_entry_encountered = false;
+  bool first_atom_line_encountered = false;
   while(getline(inp_file,line)){
     std::vector<std::string> substrings = splitLine(line);
     // substrings[0]: Element Symbol
     // substrings[1,2,3]: Coordinates
     // create new atom and add to storage vector if line format corresponds to Element_Symbol x y z
     if (isAtomLine(substrings)) {
+      first_atom_line_encountered = true;
 
-      std::string valid_symbol = strToValidSymbol(substrings[0]);
-      if (valid_symbol.empty()) {
-        invalid_symbol_detected = true;
-        continue;
-      }
-      atom_amounts[valid_symbol]++; // adds one to counter for this symbol
+      atom_amounts[strToValidSymbol(substrings[0])]++; // adds one to counter for this symbol
 
       // as a safety mechanism, if an element symbol is assigned two atomic numbers, default to 0
       // so it becomes apparent later on that something is wrong
@@ -117,17 +114,19 @@ void Model::readFileXYZ(const std::string& filepath){
         elem_Z[valid_symbol] = 0;
       }
       // Stores the full list of atom coordinates from the input file
-      raw_atom_coordinates.push_back(std::make_tuple(
-            valid_symbol, std::stod(substrings[1]), std::stod(substrings[2]), std::stod(substrings[3])));
+      raw_atom_coordinates.push_back(std::make_tuple(valid_symbol, std::stod(substrings[1]), std::stod(substrings[2]), std::stod(substrings[3])));
+    }
+    else {
+      // due to the .xyz format the first few lines may not be atom entries. an error should only be detected,
+      // after the first valid atom entry has been encountered
+      if (first_atom_line_encountered){invalid_entry_encountered = true;}
     }
   }
   inp_file.close();
-  if (invalid_symbol_detected){Ctrl::getInstance()->displayErrorMessage(105);}
+  if (invalid_entry_encountered){Ctrl::getInstance()->displayErrorMessage(105);}
 }
 
 void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
-
-//if (inp_file.is_open()){  //TODO consider adding an exception, for when file in not valid
   std::string line;
   std::ifstream inp_file(filepath);
 
@@ -255,31 +254,22 @@ static inline std::vector<std::string> splitLine(std::string& line){
   return substrings;
 }
 
+// check if a vector of substrings has the format of an atom line
 bool isAtomLine(const std::vector<std::string>& substrings) {
-  if (substrings.size() == 4) {
-// TODO: decide whether element symbol substring should be checked as starting with a letter
-//  if (isalpha(substrings[0][0])){
-    for (char i=1; i<4; i++){
-      // using a try-block feels hacky, but the alternative using strtod does as well
-      try {
-        size_t str_pos = 0; // will contain the last position in the string that was successfully evaluated by std::stod()
-        std::stod(substrings[i], &str_pos);
-        if (substrings[i].size() != str_pos) {
-          return false;
-        }
-      }
-      catch (const std::invalid_argument& ia) {
-        return false;
-      }
+  // atom lines must have four items
+  if (substrings.size() != 4) {return false;}
+  // if first item cannot be converted to a valid element symbol return false
+  if (strToValidSymbol(substrings[0]).empty()){return false;}
+  for (char i=1; i<4; i++){
+    // check whether subsequent items can be converted to a number
+    try {
+      size_t str_pos = 0; // will contain the last position in the string that was successfully evaluated by std::stod()
+      std::stod(substrings[i], &str_pos);
+      if (substrings[i].size() != str_pos) {return false;}
     }
-/* TODO bis
+    catch (const std::invalid_argument& e) {return false;}
   }
-  else {
-  	return false;
-  }*/
-    return true;
-  }
-  return false;
+  return true;
 }
 
 // reads a string and converts it to valid atom symbol: first character uppercase followed by lowercase characters
