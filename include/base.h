@@ -122,19 +122,16 @@ class MainFrame: public wxFrame, public wxThreadHelper
           wxCheckBox* twoProbesCheckbox;
           wxPanel* probe1Panel;
             wxStaticText* probe1Text;
-            wxPanel* probe1InputPanel;
-              wxTextCtrl* probe1InputText;
-              wxStaticText* probe1UnitText; // possibly usable universally?
+            wxTextCtrl* probe1InputText;
+            wxStaticText* probe1UnitText; // possibly usable universally?
           wxPanel* probe2Panel;
             wxStaticText* probe2Text;
-            wxPanel* probe2InputPanel;
-              wxTextCtrl* probe2InputText;
-              wxStaticText* probe2UnitText; // possibly usable universally?
+            wxTextCtrl* probe2InputText;
+            wxStaticText* probe2UnitText; // possibly usable universally?
           wxPanel* gridsizePanel;
             wxStaticText* gridsizeText;
-            wxPanel* gridsizeInputPanel;
-              wxTextCtrl* gridsizeInputText;
-              wxStaticText* gridsizeUnitText; // possibly usable universally?
+            wxTextCtrl* gridsizeInputText;
+            wxStaticText* gridsizeUnitText; // possibly usable universally?
           wxPanel* depthPanel;
             wxStaticText* depthText;
             wxSpinCtrl* depthInput;
@@ -187,11 +184,8 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void InitRightMainPanel();
     void InitParametersPanel();
     void InitProbe1Panel();
-    void InitProbe1InputPanel();
     void InitProbe2Panel();
-    void InitProbe2InputPanel();
     void InitGridPanel();
-    void InitGridinputPanel();
     void InitDepthPanel();
     void InitSandr();
 
@@ -274,19 +268,16 @@ enum
         CHECKBOX_TwoProbes,
         PANEL_Probe1,
           TEXT_Probe1,
-          PANEL_Probe1Input,
-            TEXT_Probe1Input,
-            TEXT_Probe1Unit,
+          TEXT_Probe1Input,
+          TEXT_Probe1Unit,
         PANEL_Probe2,
           TEXT_Probe2,
-          PANEL_Probe2Input,
-            TEXT_Probe2Input,
-            TEXT_Probe2Unit,
+          TEXT_Probe2Input,
+          TEXT_Probe2Unit,
         PANEL_Grid,
           TEXT_Grid,
-          PANEL_Gridinput,
-            TEXT_Gridinput,
-            TEXT_Gridunit,
+          TEXT_Gridinput,
+          TEXT_Gridunit,
         PANEL_Depth,
           TEXT_Depth,
           SPIN_Depthinput,
