@@ -308,6 +308,7 @@ static const std::map<int, std::string> s_error_codes = {
   {111, "Space group not found. Check the structure file, or untick the Unit Cell Analysis tickbox."},
   {112, "Invalid unit cell parameters. Check the structure file, or untick the Unit Cell Analysis tickbox."},
   {113, "Space group or symmetry not found. Check the structure and space group files or untick the Unit Cell Analysis tickbox"},
+  {114, "Invalid ATOM or HETATM line encountered. Import may be incomplete. Check the structure file."},
   // 2xx: Issue during Calculation
   {200, "Calculation failed!"}, // unspecific error
   {201, "Total number of cavities (255) exceeded. Consider changing the probe size. Calculation will proceed."},

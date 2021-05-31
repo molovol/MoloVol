@@ -109,11 +109,6 @@ void Model::readFileXYZ(const std::string& filepath){
       const std::string valid_symbol = strToValidSymbol(substrings[0]);
       atom_amounts[valid_symbol]++; // adds one to counter for this symbol
 
-      // as a safety mechanism, if an element symbol is assigned two atomic numbers, default to 0
-      // so it becomes apparent later on that something is wrong
-      if (elem_Z.count(valid_symbol) > 0){
-        elem_Z[valid_symbol] = 0;
-      }
       // Stores the full list of atom coordinates from the input file
       raw_atom_coordinates.push_back(std::make_tuple(valid_symbol, std::stod(substrings[1]), std::stod(substrings[2]), std::stod(substrings[3])));
     }
@@ -128,52 +123,87 @@ void Model::readFileXYZ(const std::string& filepath){
 }
 
 void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
+  // struct for extracting data from lines. defined here, because it is only needed here
+  struct AtomLinePDB {
+    AtomLinePDB() = default;
+    AtomLinePDB(const std::string& line){
+      record_name = line.substr(0,6);
+      assert (record_name == "ATOM  " || record_name == "HETATM");
+      serial_no = std::stoi(line.substr(6,5));
+      name = line.substr(12,4);
+      alt_loc = line[16];
+      res_name = line.substr(17,3);
+      chain_id = line[21];
+      res_seq = std::stoi(line.substr(22,4));
+      insert_code = line[26];
+      for (int i = 0; i < 3; ++i){
+        ortho_coord[i] = std::stod(line.substr(30+i*8,8));
+      }
+      occupancy = std::stod(line.substr(54,6));
+      temp_factor = std::stod(line.substr(60,6));
+      element_symbol = line.substr(76,2);
+      // some software generate pdb files with symbol left-justified instead of right-justified
+      // therefore, it is better to check both characters and erase any white space
+      removeWhiteSpaces(element_symbol);
+      charge = line.substr(78,2);
+      removeEOL(charge);
+    }
+    std::string record_name;
+    int serial_no;
+    std::string name;
+    char alt_loc;
+    std::string res_name;
+    char chain_id;
+    int res_seq;
+    char insert_code;
+    std::array<double,3> ortho_coord;
+    double occupancy;
+    double temp_factor;
+    std::string element_symbol;
+    std::string charge;
+  };
+
   std::string line;
   std::ifstream inp_file(filepath);
-
   bool invalid_symbol_detected = false;
   bool invalid_cell_params = false;
+  bool invalid_atom_line = false;
   // iterate through lines
   while(getline(inp_file,line)){
-
     const std::string record_name = line.substr(0,6);
     if (record_name == "ATOM  " || (include_hetatm && record_name == "HETATM")){
-      // Element symbol is located at characters 77 and 78, right-justified in the official pdb format
-      std::string symbol = line.substr(76,2);
-      // Some software generate pdb files with symbol left-justified instead of right-justified
-      // Therefore, it is better to check both characters and erase any white space
-      symbol.erase(std::remove(symbol.begin(), symbol.end(), ' '), symbol.end());
-      symbol = strToValidSymbol(symbol);
+      AtomLinePDB atom_line;
+      try {atom_line = AtomLinePDB(line);} // extract all information from line
+      catch (const std::invalid_argument& e){ // detect invalid line
+        invalid_atom_line = true;
+        continue;
+      }
+      std::string symbol = strToValidSymbol(atom_line.element_symbol);
       if (symbol.empty()) {
         invalid_symbol_detected = true;
         continue;
       }
       atom_amounts[symbol]++; // adds one to counter for this symbol
 
-      // if a key leads to multiple z-values, set z-value to 0 (?)
-      if (elem_Z.count(symbol) > 0){
-        elem_Z[symbol] = 0;
-      }
-      // Stores the full list of atom coordinates from the input file
-      raw_atom_coordinates.emplace_back(symbol,
-                                        std::stod(line.substr(30,8)),
-                                        std::stod(line.substr(38,8)),
-                                        std::stod(line.substr(46,8)));
+      // stores the full list of atom coordinates from the input file
+      raw_atom_coordinates.emplace_back(symbol, atom_line.ortho_coord[0], atom_line.ortho_coord[1], atom_line.ortho_coord[2]);
     }
     else if (record_name == "CRYST1"){
-      std::vector<std:.string>> substrings = {line.substr(6,9), line.substr(15,9), line.substr(24,9), line.substr(33,7), line.substr(40,7), line.substr(47.7), line.substr(55,11)};
+      std::vector<std::string> substrings = {line.substr(6,9), line.substr(15,9), line.substr(24,9), line.substr(33,7), line.substr(40,7), line.substr(47,7), line.substr(55,11)};
+      removeEOL(substrings[6]); // note: mercury recognizes only 10 chars but official PDB format is 11 chars
       for (int i = 0; i < substrings.size()-1; ++i){
         try{_cell_param[i] = std::stod(substrings[i]);}
         catch (const std::invalid_argument& e){invalid_cell_params = true;}
-      space_group = substrings[6]; // note: mercury recognizes only 10 chars but official PDB format is 11 chars
-      space_group.erase(std::remove(space_group.begin(), space_group.end(), ' '), space_group.end()); // remove white spaces
-      removeEOL(space_group);
+      }
+      space_group = substrings[6];
+      removeWhiteSpaces(space_group);
     }
   }
   // file has been read
   inp_file.close();
   if (invalid_symbol_detected){Ctrl::getInstance()->displayErrorMessage(105);}
   if (invalid_cell_params){Ctrl::getInstance()->displayErrorMessage(112);}
+  if (invalid_atom_line){Ctrl::getInstance()->displayErrorMessage(114);}
 }
 
 // used in unittest

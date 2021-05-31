@@ -43,3 +43,7 @@ void removeEOL(std::string& str){
   str.erase(std::remove(str.begin(), str.end(), '\r'), str.end());
   str.erase(std::remove(str.begin(), str.end(), '\n'), str.end());
 }
+
+void removeWhiteSpaces(std::string& str){
+  str.erase(std::remove(str.begin(), str.end(), ' '), str.end());
+}
