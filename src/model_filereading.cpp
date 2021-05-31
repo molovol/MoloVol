@@ -132,9 +132,12 @@ void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
   std::ifstream inp_file(filepath);
 
   bool invalid_symbol_detected = false;
+  bool invalid_cell_params = false;
   // iterate through lines
   while(getline(inp_file,line)){
-    if (line.substr(0,6) == "ATOM  " || (include_hetatm == true && line.substr(0,6) == "HETATM")){
+
+    const std::string record_name = line.substr(0,6);
+    if (record_name == "ATOM  " || (include_hetatm && record_name == "HETATM")){
       // Element symbol is located at characters 77 and 78, right-justified in the official pdb format
       std::string symbol = line.substr(76,2);
       // Some software generate pdb files with symbol left-justified instead of right-justified
@@ -157,14 +160,12 @@ void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
                                         std::stod(line.substr(38,8)),
                                         std::stod(line.substr(46,8)));
     }
-    else if (line.substr(0,6) == "CRYST1"){
-      _cell_param[0] = std::stod(line.substr(6,9));
-      _cell_param[1] = std::stod(line.substr(15,9));
-      _cell_param[2] = std::stod(line.substr(24,9));
-      _cell_param[3] = std::stod(line.substr(33,7));
-      _cell_param[4] = std::stod(line.substr(40,7));
-      _cell_param[5] = std::stod(line.substr(47,7));
-      space_group = line.substr(55,11); // note: mercury recognizes only 10 chars but official PDB format is 11 chars
+    else if (record_name == "CRYST1"){
+      std::vector<std:.string>> substrings = {line.substr(6,9), line.substr(15,9), line.substr(24,9), line.substr(33,7), line.substr(40,7), line.substr(47.7), line.substr(55,11)};
+      for (int i = 0; i < substrings.size()-1; ++i){
+        try{_cell_param[i] = std::stod(substrings[i]);}
+        catch (const std::invalid_argument& e){invalid_cell_params = true;}
+      space_group = substrings[6]; // note: mercury recognizes only 10 chars but official PDB format is 11 chars
       space_group.erase(std::remove(space_group.begin(), space_group.end(), ' '), space_group.end()); // remove white spaces
       removeEOL(space_group);
     }
@@ -172,6 +173,7 @@ void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
   // file has been read
   inp_file.close();
   if (invalid_symbol_detected){Ctrl::getInstance()->displayErrorMessage(105);}
+  if (invalid_cell_params){Ctrl::getInstance()->displayErrorMessage(112);}
 }
 
 // used in unittest
