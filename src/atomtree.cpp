@@ -97,6 +97,12 @@ AtomTree::AtomTree(std::vector<Atom>& list_of_atoms){
   _max_rad = findMaxRad(list_of_atoms);
 }
 
+// DESTRUCTOR
+
+AtomTree::~AtomTree(){
+  delete _root;
+}
+
 // FUNCTIONS USED BY CONSTRUCTOR
 
 // recursive function to generate a 3-d tree from a list of atoms
@@ -120,7 +126,6 @@ AtomNode* AtomTree::buildTree(
     quicksort(AtomNode::getAtomList(), vec_first, vec_end, dim);
     int median = vec_first + (vec_end-vec_first)/2; // operation rounds down
     return new AtomNode(
-//        AtomNode::getAtomList()[median],
         median,
         buildTree(vec_first, median, (dim+1)%3),
         buildTree(median+1, vec_end, (dim+1)%3));

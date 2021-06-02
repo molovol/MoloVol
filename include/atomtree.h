@@ -33,6 +33,7 @@ class AtomTree{
   public:
     AtomTree();
     AtomTree(std::vector<Atom>& list_of_atoms);
+    ~AtomTree();
     
     const AtomNode* getRoot() const;
     const double getMaxRad() const;
