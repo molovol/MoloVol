@@ -61,7 +61,7 @@ void Model::createReport(std::string path){
   output_report << "Grid step size (resolution): " << _data.grid_step << " A\n";
   output_report << "Maximum tree depth (algorithm acceleration): " << _data.max_depth << "\n";
   output_report << "Elements radii:\n";
-  for(std::unordered_map<std::string, double>::iterator it = radius_map.begin(); it != radius_map.end(); it++){
+  for(std::unordered_map<std::string, double>::iterator it = _radius_map.begin(); it != _radius_map.end(); it++){
     if(isIncluded(it->first, _data.included_elements)){
       output_report << it->first << " : " << it->second << " A\n";
     }
@@ -160,7 +160,7 @@ void Model::createReport(std::string path){
   output_report << "\nIf you wish to visualize the structure file in PyMOL with the same element radii as in the MoloVol calculation,\n";
   output_report << "paste the following command lines (all at once) in the command prompt of PyMOL after opening the structure file.\n\n";
 
-  for(std::unordered_map<std::string, double>::iterator it = radius_map.begin(); it != radius_map.end(); it++){
+  for(std::unordered_map<std::string, double>::iterator it = _radius_map.begin(); it != _radius_map.end(); it++){
     if(isIncluded(it->first, _data.included_elements)){
       output_report << "alter (elem " << it->first << "),vdw=" << it->second << "\n";
     }
