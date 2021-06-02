@@ -19,6 +19,13 @@ void findAdjacentRecursive(std::vector<Atom*>&, const Atom&, const double& shell
 
 AtomNode::AtomNode(int atom_id, AtomNode* left_node, AtomNode* right_node) : _left_child(left_node), _right_child(right_node), _atom_id(atom_id) {}
 
+// DESTRUCTOR
+
+AtomNode::~AtomNode(){
+  delete _left_child;
+  delete _right_child;
+}
+
 // ACCESS
 
 AtomNode* AtomNode::getLeftChild() const {

@@ -9,6 +9,7 @@ class AtomTree;
 class AtomNode{
   public:
     AtomNode(int, AtomNode* left_node, AtomNode* right_node);
+    ~AtomNode();
  
     AtomNode* getLeftChild() const;
     AtomNode* getRightChild() const;
