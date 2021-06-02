@@ -65,16 +65,6 @@ class Voxel{
     // shell vs void
     char evalRelationToVoxels(const std::array<unsigned int,3>&, const unsigned, bool=false);
 
-    // unused
-    static void listFromTree(
-        std::vector<int>&,
-        const AtomNode*,
-        const Vector&,
-        const double&,
-        const double&,
-        const double&,
-        const char=0);
-
     // volume
     void tallyVoxelsOfType(std::map<char,unsigned>&,
         std::map<unsigned char,unsigned>&,
@@ -84,6 +74,8 @@ class Voxel{
         const std::array<unsigned,3>&,
         const int);
 
+    // unused but could become usefil
+    static void listFromTree(std::vector<int>&, const AtomNode*, const Vector&, const double&, const double&, const double&, const char=0);
   private:
     char _type;
     unsigned char _identity;

@@ -335,7 +335,6 @@ bool Voxel::isAtom(const Atom& atom, const Vector& pos_vxl, const double rad_vxl
   return false;
 }
 
-// not currently in use
 // go through a tree, starting from node. return a list of atoms that are a specified max distance
 // from a point with radius rad_point.
 void Voxel::listFromTree(
