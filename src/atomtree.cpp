@@ -37,11 +37,11 @@ AtomNode* AtomNode::getRightChild() const {
 }
 
 void AtomNode::setAtomList(const std::vector<Atom>& atom_list){
-  AtomNode::_atom_list = atom_list;
+  AtomNode::s_atom_list = atom_list;
 }
 
 std::vector<Atom>& AtomNode::getAtomList(){
-  return _atom_list;
+  return s_atom_list;
 }
 
 Atom& AtomNode::getAtom() const {
@@ -49,7 +49,7 @@ Atom& AtomNode::getAtom() const {
 }
 
 Atom& AtomNode::getAtom(const int atom_id){
-  return _atom_list[atom_id];
+  return s_atom_list[atom_id];
 }
 
 int AtomNode::getAtomId() const {

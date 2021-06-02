@@ -14,17 +14,17 @@ class AtomNode{
     AtomNode* getLeftChild() const;
     AtomNode* getRightChild() const;
     Atom& getAtom() const;
-    static Atom& getAtom(const int);
     int getAtomId() const;
     void print();
 
+    static Atom& getAtom(const int);
     static void setAtomList(const std::vector<Atom>&);
     static std::vector<Atom>& getAtomList();
   private:
     AtomNode* _left_child;
     AtomNode* _right_child;
     int _atom_id;
-    static inline std::vector<Atom> _atom_list;
+    static inline std::vector<Atom> s_atom_list;
 };
 
 struct Atom;
