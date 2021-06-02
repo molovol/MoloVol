@@ -190,8 +190,8 @@ void MainFrame::GridChange(wxGridEvent& event){
   wxString value = event.GetString();
   if (col == 0){
     if (value == "1"){
-      atomListGrid->SetCellBackgroundColour(row,1,_col_white);
-      atomListGrid->SetCellBackgroundColour(row,2,_col_white);
+      atomListGrid->SetCellBackgroundColour(row,1,wxNullColour);
+      atomListGrid->SetCellBackgroundColour(row,2,wxNullColour);
     }
     else {
       atomListGrid->SetCellBackgroundColour(row,1,_col_grey_cell);
