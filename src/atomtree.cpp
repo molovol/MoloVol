@@ -57,7 +57,6 @@ int AtomNode::getAtomId() const {
 }
 
 // OTHER
-// for testing
 void AtomNode::print(){
   std::cout << getAtom().symbol << "("
     << getAtom().getCoordinate(0) << ","
@@ -194,52 +193,3 @@ const double AtomTree::getMaxRad() const {
 const AtomNode* AtomTree::getRoot() const {
   return _root;
 }
-
-// NEIGHBOUR LIST
-
-// changes to AtomNode and AtomTree neccessitate a reevaluation of this function
-std::vector<Atom*> AtomTree::findAdjacent(const Atom& at, const double& shell_to_shell_dist){
-  std::vector<Atom*> list_of_adjacent;
-  int dim = 0;
-  double min_distance = at.rad + _max_rad + shell_to_shell_dist;
-
-  findAdjacentRecursive(list_of_adjacent, at, shell_to_shell_dist, min_distance, _root, dim);
-
-  return list_of_adjacent;
-}
-
-// changes to AtomNode and AtomTree neccessitate a reevaluation of this function
-void findAdjacentRecursive(
-    std::vector<Atom*>& list_of_adjacent,
-    const Atom& atom,
-    const double& shell_to_shell_dist,
-    const double& min_distance,
-    const AtomNode* node,
-    int dim){
-
-  if (node == NULL) {return;}
-  Atom* test_atom = &node->getAtom(); // for easier access
-  double dist1D = distance(test_atom->getPos(), atom.getPos(), dim);
-
-  if (abs(dist1D) > min_distance){ // if atom is very far from test atom
-    findAdjacentRecursive(
-        list_of_adjacent,
-        atom,
-        shell_to_shell_dist,
-        min_distance,
-        dist1D < 0 ? node->getLeftChild() : node->getRightChild(),
-        (dim+1)%3);
-  }
-  else{ // if atom is close enough to test atom that is could be adjacent
-    double dist_at_at = distance(atom.getPos(), test_atom->getPos());
-    if (dist_at_at < (atom.rad + test_atom->rad + shell_to_shell_dist)){ // if test atom is adjacent
-      if (&atom != test_atom){ // if its not the same atom
-        list_of_adjacent.push_back(test_atom);
-      }
-    }
-    for (AtomNode* child : {node->getLeftChild(), node->getRightChild()}){
-      findAdjacentRecursive(list_of_adjacent, atom, shell_to_shell_dist, min_distance, child, (dim+1)%3);
-    }
-  }
-}
-

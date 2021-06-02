@@ -16,7 +16,7 @@ class AtomNode{
     Atom& getAtom() const;
     static Atom& getAtom(const int);
     int getAtomId() const;
-    void print(); // used for testing
+    void print();
 
     static void setAtomList(const std::vector<Atom>&);
     static std::vector<Atom>& getAtomList();
@@ -38,8 +38,6 @@ class AtomTree{
     const AtomNode* getRoot() const;
     const double getMaxRad() const;
     void print() const;
-
-    std::vector<Atom*> findAdjacent(const Atom&, const double&); // may not be needed
   private:
     AtomNode* _root;
     double _max_rad;
