@@ -31,8 +31,6 @@ class MainApp: public wxApp
   private:
     void silenceGUI(bool);
     bool isSilent();
-    // colours
-    wxColour col_win = wxColour(160,160,160);
 };
 
 wxDECLARE_EVENT(wxEVT_COMMAND_WORKERTHREAD_COMPLETED, wxThreadEvent);
@@ -226,15 +224,15 @@ class MainFrame: public wxFrame, public wxThreadHelper
     std::vector<wxCheckBox*> getAutoExportCheckBoxes(){return {reportCheckbox, surfaceMapCheckbox, cavityMapsCheckbox};}
 
     // colours
-    wxColour col_panel = wxColour(160,160,160);
-    wxColour col_output = wxColour(192,192,192);
-    wxColour col_white = wxColour(255,255,255);
-    wxColour col_grey_cell = wxColour(150,150,150);
-    wxColour col_red_cell = wxColour(255,75,75);
-    wxColour col_cyan_cell = wxColour(120,255,255);
-    wxColour col_dark_blue = wxColour(35,128,190);
-    wxColour col_light_blue = wxColour(226,255,250);
-    wxColour col_cream = wxColour(255,235,169);
+    wxColour _col_panel = wxColour(160,160,160);
+    wxColour _col_output = wxColour(192,192,192);
+    wxColour _col_white = wxColour(255,255,255);
+    wxColour _col_grey_cell = wxColour(150,150,150);
+    wxColour _col_red_cell = wxColour(255,75,75);
+    wxColour _col_cyan_cell = wxColour(120,255,255);
+    wxColour _col_dark_blue = wxColour(35,128,190);
+    wxColour _col_light_blue = wxColour(226,255,250);
+    wxColour _col_cream = wxColour(255,235,169);
 
     DECLARE_EVENT_TABLE()
 };

@@ -190,20 +190,20 @@ void MainFrame::GridChange(wxGridEvent& event){
   wxString value = event.GetString();
   if (col == 0){
     if (value == "1"){
-      atomListGrid->SetCellBackgroundColour(row,1,col_white);
-      atomListGrid->SetCellBackgroundColour(row,2,col_white);
+      atomListGrid->SetCellBackgroundColour(row,1,_col_white);
+      atomListGrid->SetCellBackgroundColour(row,2,_col_white);
     }
     else {
-      atomListGrid->SetCellBackgroundColour(row,1,col_grey_cell);
-      atomListGrid->SetCellBackgroundColour(row,2,col_grey_cell);
+      atomListGrid->SetCellBackgroundColour(row,1,_col_grey_cell);
+      atomListGrid->SetCellBackgroundColour(row,2,_col_grey_cell);
     }
   }
   else if (col == 3){
     if (wcstod(value,NULL) == 0){
-      atomListGrid->SetCellBackgroundColour(row,3,col_red_cell);
+      atomListGrid->SetCellBackgroundColour(row,3,_col_red_cell);
     }
     else {
-      atomListGrid->SetCellBackgroundColour(row,3,col_cyan_cell);
+      atomListGrid->SetCellBackgroundColour(row,3,_col_cyan_cell);
     }
   }
   atomListGrid->ForceRefresh();

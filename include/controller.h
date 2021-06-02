@@ -51,10 +51,10 @@ class Ctrl{
     inline static const std::string s_version = "alpha";
   private:
     // consider making static pointer for model
-    Model* current_calculation;
+    Model* _current_calculation;
     // static attributes to ensure there is only one of each
-    static Ctrl* instance;
-    static MainFrame* gui;
+    static Ctrl* s_instance;
+    static MainFrame* s_gui;
 
     bool _abort_calculation; // variable for main thread to signal stopping the calculation
     bool _calculation_finished;
