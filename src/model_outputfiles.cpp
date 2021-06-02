@@ -14,7 +14,7 @@
 ///////////////////
 
 void Model::createReport(){
-  createReport(output_folder+"/MoloVol report " + _time_stamp +".txt");
+  createReport(_output_folder+"/MoloVol report " + _time_stamp +".txt");
 }
 
 void Model::createReport(std::string path){
@@ -182,9 +182,9 @@ void Model::writeCrystStruct(std::string path){
 }
 
 void Model::writeCrystStruct(){
-  std::string path = output_folder+"/struct_orthogonal_cell_"+ _time_stamp +".xyz";
+  std::string path = _output_folder+"/struct_orthogonal_cell_"+ _time_stamp +".xyz";
   writeXYZfile(_data.orth_cell, path, "Orthogonal cell");
-  path = output_folder+"/struct_partial_supercell_"+ _time_stamp +".xyz";
+  path = _output_folder+"/struct_partial_supercell_"+ _time_stamp +".xyz";
   writeXYZfile(_data.supercell, path, "Partial supercell");
 }
 
@@ -205,7 +205,7 @@ void Model::writeXYZfile(const std::vector<std::tuple<std::string, double, doubl
 ////////////////////////
 
 void Model::writeTotalSurfaceMap(){
-  writeTotalSurfaceMap(output_folder + "/full_surface_map_" + _time_stamp + ".dx");
+  writeTotalSurfaceMap(_output_folder + "/full_surface_map_" + _time_stamp + ".dx");
 }
 
 void Model::writeTotalSurfaceMap(const std::string file_path){
@@ -248,7 +248,7 @@ void Model::writeTotalSurfaceMap(const std::string file_path){
 }
 
 void Model::writeCavitiesMaps(){
-  writeCavitiesMaps(output_folder + "/surface_map_" + _time_stamp + ".dx");
+  writeCavitiesMaps(_output_folder + "/surface_map_" + _time_stamp + ".dx");
 }
 
 void Model::writeCavitiesMaps(const std::string file_path){
