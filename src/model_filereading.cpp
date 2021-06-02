@@ -2,6 +2,7 @@
 #include "atom.h"
 #include "controller.h"
 #include "misc.h"
+#include "exception.h"
 #include <string>
 #include <vector>
 #include <iostream>
