@@ -187,6 +187,7 @@ unsigned char Voxel::getID() const {return _identity;}
 // function to call before beginning the type assignment routine in order to prepare static variables
 void Voxel::prepareTypeAssignment(Space* cell, std::vector<Atom>& atoms){
   s_cell = cell;
+  delete s_atomtree;
   s_atomtree = new AtomTree(atoms);
 }
 
