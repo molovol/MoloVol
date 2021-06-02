@@ -12,7 +12,7 @@
 // AUX FUNCTIONS //
 ///////////////////
 
-inline double Voxel::calcRadiusOfInfluence(const double& max_depth){
+inline double Voxel::calcVxlRadius(const double& max_depth){
   return max_depth != 0 ? 0.86602540378 * s_cell->getVxlSize() * (pow(2,max_depth) - 1) : 0;
 }
 char mergeTypes(std::vector<Voxel*>&);
@@ -204,7 +204,7 @@ char Voxel::evalRelationToAtoms(const std::array<unsigned,3>& index_vxl, Vector 
   if(Ctrl::getInstance()->getAbortFlag()){return 0;}
   if (isAssigned()) {return _type;}
   if (!hasSubvoxel()) {
-    double rad_vxl = calcRadiusOfInfluence(lvl); // calculated every time, since max_depth may change (not expensive)
+    double rad_vxl = calcVxlRadius(lvl); // calculated every time, since max_depth may change (not expensive)
     traverseTree(s_atomtree.getRoot(), s_atomtree.getMaxRad(), pos_vxl, rad_vxl, s_r_probe, lvl);
     if (_type == 0){_type = s_masking_mode? 0b00100001 : 0b00001001;}
   }

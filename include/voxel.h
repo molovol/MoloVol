@@ -88,7 +88,7 @@ class Voxel{
     char _type;
     unsigned char _identity;
 
-    static inline Space* s_cell;
+    static inline Space* s_cell; // gets destroyed by Model
     // atom vs core
     static inline AtomTree s_atomtree;
     // shell vs void
@@ -96,7 +96,7 @@ class Voxel{
     static inline bool s_masking_mode;
     static inline SearchIndex s_search_indices;
 
-    static inline double calcRadiusOfInfluence(const double& max_depth);
+    static inline double calcVxlRadius(const double& max_depth);
 
     // atom vs core
     bool isAtom(const Atom&, const Vector&, const double, const double);
