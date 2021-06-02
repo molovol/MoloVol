@@ -185,9 +185,9 @@ unsigned char Voxel::getID() const {return _identity;}
 /////////////////////////////////
 
 // function to call before beginning the type assignment routine in order to prepare static variables
-void Voxel::prepareTypeAssignment(Space* cell, AtomTree atomtree){
+void Voxel::prepareTypeAssignment(Space* cell, std::vector<Atom>& atoms){
   s_cell = cell;
-  s_atomtree = atomtree;
+  s_atomtree = new AtomTree(atoms);
 }
 
 void Voxel::storeProbe(const double r_probe, const bool masking_mode){
@@ -205,7 +205,7 @@ char Voxel::evalRelationToAtoms(const std::array<unsigned,3>& index_vxl, Vector 
   if (isAssigned()) {return _type;}
   if (!hasSubvoxel()) {
     double rad_vxl = calcVxlRadius(lvl); // calculated every time, since max_depth may change (not expensive)
-    traverseTree(s_atomtree.getRoot(), s_atomtree.getMaxRad(), pos_vxl, rad_vxl, s_r_probe, lvl);
+    traverseTree(s_atomtree->getRoot(), s_atomtree->getMaxRad(), pos_vxl, rad_vxl, s_r_probe, lvl);
     if (_type == 0){_type = s_masking_mode? 0b00100001 : 0b00001001;}
   }
   if (hasSubvoxel()) {

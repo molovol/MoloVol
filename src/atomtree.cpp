@@ -86,14 +86,14 @@ AtomTree::AtomTree(){
   _max_rad = 0;
 }
 
-AtomTree::AtomTree(std::vector<Atom>& list_of_atoms){
+AtomTree::AtomTree(const std::vector<Atom>& list_of_atoms){
   AtomNode::setAtomList(list_of_atoms);
-  _root = buildTree(0, list_of_atoms.size(), 0);
+  _root = buildTree(0, AtomNode::getAtomList().size(), 0);
   // ideally, the maximum radius would be the largest radius among all children of a node.
   // this, however, may require running an algorithm for every tree node, increasing the
   // complexity of the operation. it is much simpler to use the maximum radius among all
   // atoms instead, sacrificing optimisation.
-  _max_rad = findMaxRad(list_of_atoms);
+  _max_rad = findMaxRad(AtomNode::getAtomList());
 }
 
 // DESTRUCTOR
@@ -124,10 +124,7 @@ AtomNode* AtomTree::buildTree(
   else{
     quicksort(AtomNode::getAtomList(), vec_first, vec_end, dim);
     int median = vec_first + (vec_end-vec_first)/2; // operation rounds down
-    return new AtomNode(
-        median,
-        buildTree(vec_first, median, (dim+1)%3),
-        buildTree(median+1, vec_end, (dim+1)%3));
+    return new AtomNode(median, buildTree(vec_first, median, (dim+1)%3), buildTree(median+1, vec_end, (dim+1)%3));
   }
 }
 

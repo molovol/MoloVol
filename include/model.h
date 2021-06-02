@@ -111,7 +111,6 @@ class Model{
     // calls the Space constructor and creates a cell containing all atoms. Cell size is defined by atom positions
     void defineCell();
     void setAtomListForCalculation();
-    void storeAtomsInTree();
     void linkAtomsToAdjacentAtoms(const double&);
     void linkToAdjacentAtoms(const double&, Atom&);
     CalcReportBundle calcVolume();
@@ -135,7 +134,6 @@ class Model{
     std::map<std::string, int> atom_amounts;
     std::map<std::string, int> unit_cell_atom_amounts; // stores atoms of unit cell to generate chemical formula
     std::vector<Atom> atoms;
-    AtomTree atomtree;
     Space _cell;
     double _max_atom_radius = 0;
 

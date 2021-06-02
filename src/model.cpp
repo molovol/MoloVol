@@ -122,8 +122,6 @@ CalcReportBundle Model::generateVolumeData(){
 
   // determine which atoms will be taken into account
   setAtomListForCalculation();
-  // place atoms in a binary tree for faster access
-  storeAtomsInTree();
   // set size of the box containing all atoms
   defineCell();
 
@@ -273,10 +271,6 @@ void Model::defineCell(){
   return;
 }
 
-void Model::storeAtomsInTree(){
-  atomtree = AtomTree(atoms);
-}
-
 CalcReportBundle Model::calcVolume(){
   // set back the default value of success to true to avoid lingering errors from previous failed calculations
   _data.success = true;
@@ -284,7 +278,7 @@ CalcReportBundle Model::calcVolume(){
   { // assign each voxel in grid a type
     auto start = std::chrono::steady_clock::now();
     bool cavities_exceeded = false;
-    _cell.assignTypeInGrid(atomtree, getProbeRad1(), getProbeRad2(), optionProbeMode(), cavities_exceeded);
+    _cell.assignTypeInGrid(atoms, getProbeRad1(), getProbeRad2(), optionProbeMode(), cavities_exceeded);
     if(Ctrl::getInstance()->getAbortFlag()){
       _data.success = false;
       return _data;
