@@ -74,7 +74,7 @@ class Voxel{
         const std::array<unsigned,3>&,
         const int);
 
-    // unused but could become usefil
+    // unused but could become useful
     static void listFromTree(std::vector<int>&, const AtomNode*, const Vector&, const double&, const double&, const double&, const char=0);
   private:
     char _type;
