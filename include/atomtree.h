@@ -9,18 +9,19 @@ class AtomTree;
 class AtomNode{
   public:
     AtomNode(int, AtomNode* left_node, AtomNode* right_node);
-  
-    // TODO: move children to private
-    AtomNode* left_child;
-    AtomNode* right_child;
-  
+ 
+    AtomNode* getLeftChild() const;
+    AtomNode* getRightChild() const;
     Atom& getAtom() const;
     static Atom& getAtom(const int);
     int getAtomId() const;
     void print(); // used for testing
+
     static void setAtomList(const std::vector<Atom>&);
     static std::vector<Atom>& getAtomList();
   private:
+    AtomNode* _left_child;
+    AtomNode* _right_child;
     int _atom_id;
     static inline std::vector<Atom> _atom_list;
 };

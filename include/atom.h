@@ -3,6 +3,7 @@
 #define ATOM_H
 
 #include "vector.h"
+#include "exception.h"
 #include <vector>
 #include <array>
 #include <iostream>
@@ -34,7 +35,7 @@ struct Atom{
       case 1: return pos_y;
       case 2: return pos_z;
     }
-    throw std::invalid_argument;
+    throw ExceptIllegalFunctionCall();
   }
 
   void print(){

@@ -17,10 +17,17 @@ void findAdjacentRecursive(std::vector<Atom*>&, const Atom&, const double& shell
 
 // CONSTRUCTOR
 
-AtomNode::AtomNode(int atom_id, AtomNode* left_node, AtomNode* right_node)
-    : left_child(left_node), right_child(right_node), _atom_id(atom_id) {}
+AtomNode::AtomNode(int atom_id, AtomNode* left_node, AtomNode* right_node) : _left_child(left_node), _right_child(right_node), _atom_id(atom_id) {}
 
 // ACCESS
+
+AtomNode* AtomNode::getLeftChild() const {
+  return _left_child;
+}
+
+AtomNode* AtomNode::getRightChild() const {
+  return _right_child;
+}
 
 void AtomNode::setAtomList(const std::vector<Atom>& atom_list){
   AtomNode::_atom_list = atom_list;
@@ -51,12 +58,12 @@ void AtomNode::print(){
     << getAtom().getCoordinate(2) << ")";
 
   std::cout << "(-";
-  if(left_child!=NULL){
-    left_child->print();
+  if(getLeftChild() != NULL){
+    getLeftChild()->print();
   }
   std::cout << " +";
-  if(right_child!=NULL){
-    right_child->print();
+  if(getRightChild() != NULL){
+    getRightChild()->print();
   }
   std::cout << ")";
   return;
@@ -208,7 +215,7 @@ void findAdjacentRecursive(
         atom,
         shell_to_shell_dist,
         min_distance,
-        dist1D < 0 ? node->left_child : node->right_child,
+        dist1D < 0 ? node->getLeftChild() : node->getRightChild(),
         (dim+1)%3);
   }
   else{ // if atom is close enough to test atom that is could be adjacent
@@ -218,7 +225,7 @@ void findAdjacentRecursive(
         list_of_adjacent.push_back(test_atom);
       }
     }
-    for (AtomNode* child : {node->left_child, node->right_child}){
+    for (AtomNode* child : {node->getLeftChild(), node->getRightChild()}){
       findAdjacentRecursive(list_of_adjacent, atom, shell_to_shell_dist, min_distance, child, (dim+1)%3);
     }
   }

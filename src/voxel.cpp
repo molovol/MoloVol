@@ -299,14 +299,14 @@ void Voxel::traverseTree
   double dist1D = distance(atom.getPosVec(), pos_vxl, dim);
 
   if (abs(dist1D) > (rad_vxl + rad_max + rad_probe)){ // then atom is too far to matter for voxel type
-      traverseTree(dist1D < 0 ? node->left_child : node->right_child,
+      traverseTree(dist1D < 0 ? node->getLeftChild() : node->getRightChild(),
           rad_max, pos_vxl, rad_vxl, rad_probe, max_depth, exit_type, (dim+1)%3);
   }
   else{ // then atom is close enough to influence voxel type
     if(isAtom(atom, pos_vxl, rad_vxl, rad_probe)){return;}
 
     // continue with both children
-    for (AtomNode* child : {node->left_child, node->right_child}){
+    for (AtomNode* child : {node->getLeftChild(), node->getRightChild()}){
       traverseTree(child, rad_max, pos_vxl, rad_vxl, rad_probe, max_depth, exit_type, (dim+1)%3);
     }
   }
@@ -354,7 +354,7 @@ void Voxel::listFromTree(
   double rad_atom = node->getAtom().getRad();
 
   if (abs(dist1D) > rad_point + rad_max + max_dist) { // then atom is too far
-      listFromTree(atom_id_list, dist1D<0? node->left_child : node->right_child, pos_point, rad_point, rad_max, max_dist, (dim+1)%3);
+      listFromTree(atom_id_list, dist1D<0? node->getLeftChild() : node->getRightChild(), pos_point, rad_point, rad_max, max_dist, (dim+1)%3);
   }
   else { // then atom may be close enough
     if ((pos_point-node->getAtom().getPosVec()) < rad_point + rad_atom + max_dist){
@@ -362,7 +362,7 @@ void Voxel::listFromTree(
     }
 
     // continue with both children
-    for (AtomNode* child : {node->left_child, node->right_child}){
+    for (AtomNode* child : {node->getLeftChild(), node->getRightChild()}){
       listFromTree(atom_id_list, child, pos_point, rad_point, rad_max, max_dist, (dim+1)%3);
     }
   }
