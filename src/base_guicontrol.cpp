@@ -148,9 +148,9 @@ void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>
     // column 0 (include checkbox)
     // if no radius is found for the element, color cells to point it to the user
     if (std::wcstod(atomListGrid->GetCellValue(row, 3), NULL) == 0){
-      atomListGrid->SetCellBackgroundColour(row, 1, col_grey_cell);
-      atomListGrid->SetCellBackgroundColour(row, 2, col_grey_cell);
-      atomListGrid->SetCellBackgroundColour(row, 3, col_red_cell);
+      atomListGrid->SetCellBackgroundColour(row, 1, _col_grey_cell);
+      atomListGrid->SetCellBackgroundColour(row, 2, _col_grey_cell);
+      atomListGrid->SetCellBackgroundColour(row, 3, _col_red_cell);
     }
     else { // if a radius is found, include by default the element
       atomListGrid->SetCellValue(row, 0, "1");

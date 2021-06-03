@@ -12,7 +12,7 @@
 // AUX FUNCTIONS //
 ///////////////////
 
-inline double Voxel::calcRadiusOfInfluence(const double& max_depth){
+inline double Voxel::calcVxlRadius(const double& max_depth){
   return max_depth != 0 ? 0.86602540378 * s_cell->getVxlSize() * (pow(2,max_depth) - 1) : 0;
 }
 char mergeTypes(std::vector<Voxel*>&);
@@ -185,9 +185,10 @@ unsigned char Voxel::getID() const {return _identity;}
 /////////////////////////////////
 
 // function to call before beginning the type assignment routine in order to prepare static variables
-void Voxel::prepareTypeAssignment(Space* cell, AtomTree atomtree){
+void Voxel::prepareTypeAssignment(Space* cell, std::vector<Atom>& atoms){
   s_cell = cell;
-  s_atomtree = atomtree;
+  delete s_atomtree;
+  s_atomtree = new AtomTree(atoms);
 }
 
 void Voxel::storeProbe(const double r_probe, const bool masking_mode){
@@ -204,8 +205,8 @@ char Voxel::evalRelationToAtoms(const std::array<unsigned,3>& index_vxl, Vector 
   if(Ctrl::getInstance()->getAbortFlag()){return 0;}
   if (isAssigned()) {return _type;}
   if (!hasSubvoxel()) {
-    double rad_vxl = calcRadiusOfInfluence(lvl); // calculated every time, since max_depth may change (not expensive)
-    traverseTree(s_atomtree.getRoot(), s_atomtree.getMaxRad(), pos_vxl, rad_vxl, s_r_probe, lvl);
+    double rad_vxl = calcVxlRadius(lvl); // calculated every time, since max_depth may change (not expensive)
+    traverseTree(s_atomtree->getRoot(), s_atomtree->getMaxRad(), pos_vxl, rad_vxl, s_r_probe, lvl);
     if (_type == 0){_type = s_masking_mode? 0b00100001 : 0b00001001;}
   }
   if (hasSubvoxel()) {
@@ -299,14 +300,14 @@ void Voxel::traverseTree
   double dist1D = distance(atom.getPosVec(), pos_vxl, dim);
 
   if (abs(dist1D) > (rad_vxl + rad_max + rad_probe)){ // then atom is too far to matter for voxel type
-      traverseTree(dist1D < 0 ? node->left_child : node->right_child,
+      traverseTree(dist1D < 0 ? node->getLeftChild() : node->getRightChild(),
           rad_max, pos_vxl, rad_vxl, rad_probe, max_depth, exit_type, (dim+1)%3);
   }
   else{ // then atom is close enough to influence voxel type
     if(isAtom(atom, pos_vxl, rad_vxl, rad_probe)){return;}
 
     // continue with both children
-    for (AtomNode* child : {node->left_child, node->right_child}){
+    for (AtomNode* child : {node->getLeftChild(), node->getRightChild()}){
       traverseTree(child, rad_max, pos_vxl, rad_vxl, rad_probe, max_depth, exit_type, (dim+1)%3);
     }
   }
@@ -335,7 +336,6 @@ bool Voxel::isAtom(const Atom& atom, const Vector& pos_vxl, const double rad_vxl
   return false;
 }
 
-// not currently in use
 // go through a tree, starting from node. return a list of atoms that are a specified max distance
 // from a point with radius rad_point.
 void Voxel::listFromTree(
@@ -354,7 +354,7 @@ void Voxel::listFromTree(
   double rad_atom = node->getAtom().getRad();
 
   if (abs(dist1D) > rad_point + rad_max + max_dist) { // then atom is too far
-      listFromTree(atom_id_list, dist1D<0? node->left_child : node->right_child, pos_point, rad_point, rad_max, max_dist, (dim+1)%3);
+      listFromTree(atom_id_list, dist1D<0? node->getLeftChild() : node->getRightChild(), pos_point, rad_point, rad_max, max_dist, (dim+1)%3);
   }
   else { // then atom may be close enough
     if ((pos_point-node->getAtom().getPosVec()) < rad_point + rad_atom + max_dist){
@@ -362,7 +362,7 @@ void Voxel::listFromTree(
     }
 
     // continue with both children
-    for (AtomNode* child : {node->left_child, node->right_child}){
+    for (AtomNode* child : {node->getLeftChild(), node->getRightChild()}){
       listFromTree(atom_id_list, child, pos_point, rad_point, rad_max, max_dist, (dim+1)%3);
     }
   }

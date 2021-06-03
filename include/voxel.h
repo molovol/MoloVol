@@ -47,7 +47,7 @@ class Voxel{
     bool isAssigned(); // state of bit 0
 
     // calc preparation
-    static void prepareTypeAssignment(Space*, AtomTree);
+    static void prepareTypeAssignment(Space*, std::vector<Atom>&);
     static void storeProbe(const double, const bool);
     static void computeIndices();
     static void computeIndices(unsigned int);
@@ -65,16 +65,6 @@ class Voxel{
     // shell vs void
     char evalRelationToVoxels(const std::array<unsigned int,3>&, const unsigned, bool=false);
 
-    // unused
-    static void listFromTree(
-        std::vector<int>&,
-        const AtomNode*,
-        const Vector&,
-        const double&,
-        const double&,
-        const double&,
-        const char=0);
-
     // volume
     void tallyVoxelsOfType(std::map<char,unsigned>&,
         std::map<unsigned char,unsigned>&,
@@ -84,19 +74,21 @@ class Voxel{
         const std::array<unsigned,3>&,
         const int);
 
+    // unused but could become useful
+    static void listFromTree(std::vector<int>&, const AtomNode*, const Vector&, const double&, const double&, const double&, const char=0);
   private:
     char _type;
     unsigned char _identity;
 
-    static inline Space* s_cell;
+    static inline Space* s_cell; // gets destroyed by Model
     // atom vs core
-    static inline AtomTree s_atomtree;
+    static inline AtomTree* s_atomtree;
     // shell vs void
     static inline double s_r_probe;
     static inline bool s_masking_mode;
     static inline SearchIndex s_search_indices;
 
-    static inline double calcRadiusOfInfluence(const double& max_depth);
+    static inline double calcVxlRadius(const double& max_depth);
 
     // atom vs core
     bool isAtom(const Atom&, const Vector&, const double, const double);

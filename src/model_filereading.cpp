@@ -2,6 +2,7 @@
 #include "atom.h"
 #include "controller.h"
 #include "misc.h"
+#include "exception.h"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -39,7 +40,7 @@ bool Model::readRadiusFileSetMaps(std::string& radius_path){
   if (data.rad_map.size() == 0) {return false;}
 
   setRadiusMap(data.rad_map);
-  elem_Z = data.atomic_num_map;
+  _elem_Z = data.atomic_num_map;
   return true;
 }
 
@@ -65,16 +66,16 @@ bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
     throw;
   }
 
-  if (raw_atom_coordinates.size() == 0){ // If no atom is detected in the input file, the file is deemed invalid
+  if (_raw_atom_coordinates.size() == 0){ // If no atom is detected in the input file, the file is deemed invalid
     throw ExceptInvalidInputFile();
   }
   return true;
 }
 
 void Model::clearAtomData(){
-  atom_amounts.clear();
-  raw_atom_coordinates.clear();
-  space_group = "";
+  _atom_amounts.clear();
+  _raw_atom_coordinates.clear();
+  _space_group = "";
   for(int i = 0; i < 6; i++){
     _cell_param[i] = 0;
   }
@@ -108,10 +109,10 @@ void Model::readFileXYZ(const std::string& filepath){
       first_atom_line_encountered = true;
 
       const std::string valid_symbol = strToValidSymbol(substrings[0]);
-      atom_amounts[valid_symbol]++; // adds one to counter for this symbol
+      _atom_amounts[valid_symbol]++; // adds one to counter for this symbol
 
       // Stores the full list of atom coordinates from the input file
-      raw_atom_coordinates.push_back(std::make_tuple(valid_symbol, std::stod(substrings[1]), std::stod(substrings[2]), std::stod(substrings[3])));
+      _raw_atom_coordinates.push_back(std::make_tuple(valid_symbol, std::stod(substrings[1]), std::stod(substrings[2]), std::stod(substrings[3])));
     }
     else {
       // due to the .xyz format the first few lines may not be atom entries. an error should only be detected,
@@ -184,10 +185,10 @@ void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
         invalid_symbol_detected = true;
         continue;
       }
-      atom_amounts[symbol]++; // adds one to counter for this symbol
+      _atom_amounts[symbol]++; // adds one to counter for this symbol
 
       // stores the full list of atom coordinates from the input file
-      raw_atom_coordinates.emplace_back(symbol, atom_line.ortho_coord[0], atom_line.ortho_coord[1], atom_line.ortho_coord[2]);
+      _raw_atom_coordinates.emplace_back(symbol, atom_line.ortho_coord[0], atom_line.ortho_coord[1], atom_line.ortho_coord[2]);
     }
     else if (record_name == "CRYST1"){
       // for the last substring (space group) mercury recognizes only 10 chars but official PDB format is 11 chars
@@ -197,8 +198,8 @@ void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
         try{_cell_param[i] = std::stod(substrings[i]);}
         catch (const std::invalid_argument& e){invalid_cell_params = true;}
       }
-      space_group = substrings[6];
-      removeWhiteSpaces(space_group);
+      _space_group = substrings[6];
+      removeWhiteSpaces(_space_group);
     }
   }
   // file has been read
@@ -211,7 +212,7 @@ void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
 // used in unittest
 std::vector<std::string> Model::listElementsInStructure(){
   std::vector<std::string> list;
-  for (auto elem : atom_amounts){
+  for (auto elem : _atom_amounts){
     list.push_back(elem.first);
   }
   return list;
@@ -266,7 +267,7 @@ bool Model::getSymmetryElements(std::string group, std::vector<int> &sym_matrix_
 
 // returns the radius of an atom with a given symbol
 inline double Model::findRadiusOfAtom(const std::string& symbol){
-  return radius_map[symbol];
+  return _radius_map[symbol];
 }
 
 inline double Model::findRadiusOfAtom(const Atom& at){

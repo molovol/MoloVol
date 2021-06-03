@@ -46,7 +46,7 @@ class Space{
     void printGrid();
 
     // type evaluation
-    void assignTypeInGrid(const AtomTree&, const double, const double, bool, bool&);
+    void assignTypeInGrid(std::vector<Atom>&, const double, const double, bool, bool&);
     void getVolume(std::map<char,double>&, std::vector<Cavity>&);
     void getUnitCellVolume(std::map<char,double>&, std::vector<Cavity>&);
     void setUnitCellIndexes();

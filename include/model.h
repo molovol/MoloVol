@@ -111,7 +111,6 @@ class Model{
     // calls the Space constructor and creates a cell containing all atoms. Cell size is defined by atom positions
     void defineCell();
     void setAtomListForCalculation();
-    void storeAtomsInTree();
     void linkAtomsToAdjacentAtoms(const double&);
     void linkToAdjacentAtoms(const double&, Atom&);
     CalcReportBundle calcVolume();
@@ -124,18 +123,17 @@ class Model{
   private:
     CalcReportBundle _data;
     std::string _time_stamp; // stores the time when the calculation was run for output folder and report
-    std::string output_folder = "."; // default folder is the program folder but it is changed with the output file routine
-    std::vector<std::tuple<std::string, double, double, double>> raw_atom_coordinates;
-    std::vector<std::tuple<std::string, double, double, double>> processed_atom_coordinates;
+    std::string _output_folder = "."; // default folder is the program folder but it is changed with the output file routine
+    std::vector<std::tuple<std::string, double, double, double>> _raw_atom_coordinates;
+    std::vector<std::tuple<std::string, double, double, double>> _processed_atom_coordinates;
     double _cell_param[6]; // unit cell parameters in order: A, B, C, alpha, beta, gamma
     double _cart_matrix[3][3]; // cartesian coordinates of vectors A, B, C
-    std::string space_group;
-    std::unordered_map<std::string, double> radius_map;
-    std::unordered_map<std::string, int> elem_Z;
-    std::map<std::string, int> atom_amounts;
-    std::map<std::string, int> unit_cell_atom_amounts; // stores atoms of unit cell to generate chemical formula
-    std::vector<Atom> atoms;
-    AtomTree atomtree;
+    std::string _space_group;
+    std::unordered_map<std::string, double> _radius_map;
+    std::unordered_map<std::string, int> _elem_Z;
+    std::map<std::string, int> _atom_amounts;
+    std::map<std::string, int> _unit_cell_atom_amounts; // stores atoms of unit cell to generate chemical formula
+    std::vector<Atom> _atoms;
     Space _cell;
     double _max_atom_radius = 0;
 

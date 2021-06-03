@@ -14,7 +14,7 @@
 ///////////////////
 
 void Model::createReport(){
-  createReport(output_folder+"/MoloVol report " + _time_stamp +".txt");
+  createReport(_output_folder+"/MoloVol report " + _time_stamp +".txt");
 }
 
 void Model::createReport(std::string path){
@@ -61,7 +61,7 @@ void Model::createReport(std::string path){
   output_report << "Grid step size (resolution): " << _data.grid_step << " A\n";
   output_report << "Maximum tree depth (algorithm acceleration): " << _data.max_depth << "\n";
   output_report << "Elements radii:\n";
-  for(std::unordered_map<std::string, double>::iterator it = radius_map.begin(); it != radius_map.end(); it++){
+  for(std::unordered_map<std::string, double>::iterator it = _radius_map.begin(); it != _radius_map.end(); it++){
     if(isIncluded(it->first, _data.included_elements)){
       output_report << it->first << " : " << it->second << " A\n";
     }
@@ -160,7 +160,7 @@ void Model::createReport(std::string path){
   output_report << "\nIf you wish to visualize the structure file in PyMOL with the same element radii as in the MoloVol calculation,\n";
   output_report << "paste the following command lines (all at once) in the command prompt of PyMOL after opening the structure file.\n\n";
 
-  for(std::unordered_map<std::string, double>::iterator it = radius_map.begin(); it != radius_map.end(); it++){
+  for(std::unordered_map<std::string, double>::iterator it = _radius_map.begin(); it != _radius_map.end(); it++){
     if(isIncluded(it->first, _data.included_elements)){
       output_report << "alter (elem " << it->first << "),vdw=" << it->second << "\n";
     }
@@ -182,9 +182,9 @@ void Model::writeCrystStruct(std::string path){
 }
 
 void Model::writeCrystStruct(){
-  std::string path = output_folder+"/struct_orthogonal_cell_"+ _time_stamp +".xyz";
+  std::string path = _output_folder+"/struct_orthogonal_cell_"+ _time_stamp +".xyz";
   writeXYZfile(_data.orth_cell, path, "Orthogonal cell");
-  path = output_folder+"/struct_partial_supercell_"+ _time_stamp +".xyz";
+  path = _output_folder+"/struct_partial_supercell_"+ _time_stamp +".xyz";
   writeXYZfile(_data.supercell, path, "Partial supercell");
 }
 
@@ -205,7 +205,7 @@ void Model::writeXYZfile(const std::vector<std::tuple<std::string, double, doubl
 ////////////////////////
 
 void Model::writeTotalSurfaceMap(){
-  writeTotalSurfaceMap(output_folder + "/full_surface_map_" + _time_stamp + ".dx");
+  writeTotalSurfaceMap(_output_folder + "/full_surface_map_" + _time_stamp + ".dx");
 }
 
 void Model::writeTotalSurfaceMap(const std::string file_path){
@@ -248,7 +248,7 @@ void Model::writeTotalSurfaceMap(const std::string file_path){
 }
 
 void Model::writeCavitiesMaps(){
-  writeCavitiesMaps(output_folder + "/surface_map_" + _time_stamp + ".dx");
+  writeCavitiesMaps(_output_folder + "/surface_map_" + _time_stamp + ".dx");
 }
 
 void Model::writeCavitiesMaps(const std::string file_path){
