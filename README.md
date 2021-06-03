@@ -5,7 +5,7 @@ MoloVol is a free, cross-plattform, scientific software for volume and surface c
 ## Utility
 With the MoloVol software we aim to combine an intuitive and easy-to-use user interface with powerful computing algorithms. We want the software to serve a broad range of scientist by being easily accessible on all common platforms.
 
-The MoloVol software, along with many of its features, is currently in early development. The software is being actively developed on Windows 10 and macOS Catalina.
+The MoloVol software, along with many of its features, is currently in early development. The software is being actively developed on Windows 10 and macOS Big Sur.
 
 ## Getting Started
 
