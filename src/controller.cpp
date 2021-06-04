@@ -57,7 +57,7 @@ bool Ctrl::loadRadiusFile(){
 
   std::string radius_filepath = s_gui->getRadiusFilepath();
   // even if there is no valid radii file, the program can be used by manually setting radii in the GUI after loading a structure
-  if(!_current_calculation->readRadiusFileSetMaps(radius_filepath)){
+  if(!_current_calculation->importRadiusFile(radius_filepath)){
     displayErrorMessage(101);
   }
   // refresh atom list using new radius map

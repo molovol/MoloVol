@@ -19,7 +19,6 @@ bool Ctrl::unittestExcluded(){
 
   // preparation for calling runCalculation()
   std::unordered_map<std::string, double> rad_map = _current_calculation->importRadiusMap(radius_filepath);
-  _current_calculation->setRadiusMap(rad_map);
 
   double error[3];
   CalcReportBundle data[3];

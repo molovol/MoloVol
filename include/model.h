@@ -67,7 +67,7 @@ class Space;
 class Model{
   public:
     // radius file import
-    bool readRadiusFileSetMaps(std::string&);
+    bool importRadiusFile(std::string&);
     std::unordered_map<std::string, double> importRadiusMap(const std::string&);
     // atom file import
     bool readAtomsFromFile(const std::string&, bool);

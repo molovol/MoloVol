@@ -33,7 +33,7 @@ RadiusFileBundle importDataFromRadiusFile(const std::string& radius_path);
 
 // generates two two maps for assigning a radius/ atomic number respectively, to a element symbol
 // sets the maps to members of the model class
-bool Model::readRadiusFileSetMaps(std::string& radius_path){
+bool Model::importRadiusFile(std::string& radius_path){
 
   RadiusFileBundle data = importDataFromRadiusFile(radius_path);
 

@@ -55,7 +55,7 @@ bool Model::setParameters(std::string file_path,
   }
   _data.atom_file_path = file_path;
   _output_folder = output_dir;
-  if (_output_folder.empty()){
+  if (_output_folder.empty() && (make_report || make_full_map || make_cav_maps)){
     Ctrl::getInstance()->displayErrorMessage(302);
     return false;
   }
@@ -67,7 +67,7 @@ bool Model::setParameters(std::string file_path,
   _data.make_report = make_report;
   _data.make_full_map = make_full_map;
   _data.make_cav_maps = make_cav_maps;
-  _radius_map = rad_map;
+  setRadiusMap(rad_map);
   _data.included_elements = included_elem;
   _max_atom_radius = max_radius;
   return true;
@@ -229,8 +229,6 @@ std::vector<std::tuple<std::string, int, double>> Model::generateAtomList(){
   return atoms_for_list;
 }
 
-// TODO should be obselete because radius_map is set by setParameters
-// but it is still used in Model::readRadiusFileSetMaps and Ctrl::unittestExcluded()
 void Model::setRadiusMap(std::unordered_map<std::string, double> map){
   _radius_map = map;
 }
