@@ -54,8 +54,11 @@ bool Model::setParameters(std::string file_path,
     return false;
   }
   _data.atom_file_path = file_path;
-  // TODO: user should always have to specify the output folder. maybe throw exception if output_dir empty
-  _output_folder = output_dir.empty()? "." : output_dir;
+  _output_folder = output_dir;
+  if (_output_folder.empty()){
+    Ctrl::getInstance()->displayErrorMessage(302);
+    return false;
+  }
   _data.inc_hetatm = inc_hetatm;
   _data.analyze_unit_cell = analyze_unit_cell;
   _data.calc_surface_areas = calc_surface_areas;
