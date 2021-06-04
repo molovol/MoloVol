@@ -356,7 +356,7 @@ void Model::writeSurfaceMap(const std::string file_path,
             output_file << 0;
           }
         }
-        else { // TODO inform the user that there is something odd with the surface map
+        else {
           issue_encountered = true;
           output_file << -2;
         }

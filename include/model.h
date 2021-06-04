@@ -43,22 +43,22 @@ struct CalcReportBundle{
   double surf_molecular;
   double surf_probe_excluded;
   double surf_probe_accessible;
-  double getSurfVdw(){return surf_vdw;}
-  double getSurfMolecular(){return surf_molecular;}
-  double getSurfProbeExcluded(){return surf_probe_excluded;}
-  double getSurfProbeAccessible(){return surf_probe_accessible;}
+  double getSurfVdw() const {return surf_vdw;}
+  double getSurfMolecular() const {return surf_molecular;}
+  double getSurfProbeExcluded() const {return surf_probe_excluded;}
+  double getSurfProbeAccessible() const {return surf_probe_accessible;}
   // cavity volumes and surfaces
   std::vector<Cavity> cavities;
-  double getCavVolume(const unsigned char i){return cavities[i].getVolume();}
-  std::array<double,3> getCavCentre(const unsigned char);
-  std::array<double,3> getCavCenter(const unsigned char i){return getCavCentre(i);}
+  double getCavVolume(const unsigned char i) const {return cavities[i].getVolume();}
+  std::array<double,3> getCavCentre(const unsigned char) const;
+  std::array<double,3> getCavCenter(const unsigned char i) const {return getCavCentre(i);}
   double getCavSurfCore(const unsigned char i) const {return cavities[i].getSurfCore();}
   double getCavSurfShell(const unsigned char i) const {return cavities[i].getSurfShell();}
   // time
   std::vector<double> elapsed_seconds;
   void addTime(const double t){elapsed_seconds.push_back(t);}
-  double getTime(const unsigned i){return elapsed_seconds[i];}
-  double getTime();
+  double getTime(const unsigned i) const {return elapsed_seconds[i];}
+  double getTime() const;
 };
 
 class AtomTree;
