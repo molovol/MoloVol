@@ -316,7 +316,8 @@ static const std::map<int, std::string> s_error_codes = {
   // 3xx: Issue with Output
   {300, "Output failed!"},
   {301, "Data missing to export file. Calculation may be still running or has not been started."},
-  {302, "Invalid output directory. Please select a valid output directory."}
+  {302, "Invalid output directory. Please select a valid output directory."},
+  {303, "An unidentified issue has been encountered while writing the surface map."}
 };
 
 void Ctrl::displayErrorMessage(const int error_code){
