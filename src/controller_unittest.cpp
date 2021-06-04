@@ -17,9 +17,6 @@ bool Ctrl::unittestExcluded(){
   const double rad_probe1 = 1.2;
   const double expected_volumes[] = {1.399000, 4.393000, 9.054000};
 
-  // preparation for calling runCalculation()
-  std::unordered_map<std::string, double> rad_map = _current_calculation->importRadiusMap(radius_filepath);
-
   double error[3];
   CalcReportBundle data[3];
   for (int i = 0; i < 3; i++){
@@ -40,7 +37,7 @@ bool Ctrl::unittestExcluded(){
         false,
         false,
         false,
-        rad_map,
+        _current_calculation->extractRadiusMap(radius_filepath),
         included_elements,
         3);
 
@@ -74,8 +71,6 @@ bool Ctrl::unittestProtein(){
   const double expected_vdwVolume = 14337.422000;
   const double expected_time = 67;
 
-  std::unordered_map<std::string, double> rad_map = _current_calculation->importRadiusMap(radius_filepath);
-
   double error_vdwVolume;
   double diff_time;
   CalcReportBundle data;
@@ -96,7 +91,7 @@ bool Ctrl::unittestProtein(){
       false,
       false,
       false,
-      rad_map,
+      _current_calculation->extractRadiusMap(radius_filepath),
       included_elements,
       3);
 
@@ -124,7 +119,7 @@ bool Ctrl::unittestRadius(){
   double rad_probe2 = 1.2;
   bool two_probe = true;
 
-  std::unordered_map<std::string, double> rad_map = _current_calculation->importRadiusMap(radius_filepath);
+  std::unordered_map<std::string, double> rad_map = _current_calculation->extractRadiusMap(radius_filepath);
   {int max_depth = 4;
     //for (int max_depth = 4; max_depth < ; max_depth++){
     {double grid_step = 0.1;
@@ -183,8 +178,6 @@ bool Ctrl::unittest2Probe(){
   int max_depth = 4;
   double grid_step = 0.1;
 
-  std::unordered_map<std::string, double> rad_map = _current_calculation->importRadiusMap(radius_filepath);
-
   CalcReportBundle data;
   _current_calculation->readAtomsFromFile(atom_filepath, false);
   std::vector<std::string> included_elements = _current_calculation->listElementsInStructure();
@@ -203,7 +196,7 @@ bool Ctrl::unittest2Probe(){
       false,
       false,
       false,
-      rad_map,
+      _current_calculation->extractRadiusMap(radius_filepath),
       included_elements,
       3);
 
@@ -236,8 +229,6 @@ bool Ctrl::unittestSurface(){
   int max_depth = 4;
   double grid_step = 0.1;
 
-  std::unordered_map<std::string, double> rad_map = _current_calculation->importRadiusMap(radius_filepath);
-
   CalcReportBundle data;
   _current_calculation->readAtomsFromFile(atom_filepath, false);
   std::vector<std::string> included_elements = _current_calculation->listElementsInStructure();
@@ -256,7 +247,7 @@ bool Ctrl::unittestSurface(){
       false,
       false,
       false,
-      rad_map,
+      _current_calculation->extractRadiusMap(radius_filepath),
       included_elements,
       3);
 
@@ -294,8 +285,6 @@ bool Ctrl::unittestFloodfill(){
   int max_depth = 4;
   double grid_step = 0.3;
 
-  std::unordered_map<std::string, double> rad_map = _current_calculation->importRadiusMap(radius_filepath);
-
   CalcReportBundle data;
   _current_calculation->readAtomsFromFile(atom_filepath, false);
   std::vector<std::string> included_elements = _current_calculation->listElementsInStructure();
@@ -314,7 +303,7 @@ bool Ctrl::unittestFloodfill(){
       false,
       false,
       false,
-      rad_map,
+      _current_calculation->extractRadiusMap(radius_filepath),
       included_elements,
       3);
 

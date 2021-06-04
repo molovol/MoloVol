@@ -199,7 +199,6 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void SetSizerExportSubPanel(wxPanel*, wxButton*, wxCheckBox*);
 
     // methods to handle events
-    //virtual void OnExit(wxCommandEvent& event);
     void OnClose(wxCloseEvent& event);
     void OnCalc(wxCommandEvent& event);
     void OnAbort(wxCommandEvent& event);

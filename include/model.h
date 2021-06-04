@@ -68,7 +68,7 @@ class Model{
   public:
     // radius file import
     bool importRadiusFile(std::string&);
-    std::unordered_map<std::string, double> importRadiusMap(const std::string&);
+    std::unordered_map<std::string, double> extractRadiusMap(const std::string&);
     // atom file import
     bool readAtomsFromFile(const std::string&, bool);
     void clearAtomData();
