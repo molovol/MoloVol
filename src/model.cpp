@@ -209,7 +209,7 @@ void Model::setAtomListForCalculation(){
                      std::get<2>(atom_coordinates[i]),
                      std::get<3>(atom_coordinates[i]),
                      std::get<0>(atom_coordinates[i]),
-                     _radius_map[std::get<0>(atom_coordinates[i])],
+                     findRadiusOfAtom(std::get<0>(atom_coordinates[i])),
                      _elem_Z[std::get<0>(atom_coordinates[i])]);
       _atoms.push_back(at);
     }
@@ -224,7 +224,7 @@ std::vector<std::tuple<std::string, int, double>> Model::generateAtomList(){
   // Element1: Number of Atoms with that symbol
   // Element2: Radius
   for(auto elem : _atom_amounts){
-    atoms_for_list.push_back(std::make_tuple(elem.first, elem.second, _radius_map[elem.first]));
+    atoms_for_list.push_back(std::make_tuple(elem.first, elem.second, findRadiusOfAtom(elem.first)));
   }
   return atoms_for_list;
 }
@@ -233,7 +233,6 @@ std::vector<std::tuple<std::string, int, double>> Model::generateAtomList(){
 // but it is still used in Model::readRadiusFileSetMaps and Ctrl::unittestExcluded()
 void Model::setRadiusMap(std::unordered_map<std::string, double> map){
   _radius_map = map;
-  return;
 }
 
 void Model::generateChemicalFormula(){

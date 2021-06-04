@@ -101,8 +101,8 @@ class Model{
     void generateSupercell(double);
     void generateUsefulAtomMapFromSupercell(double);
 
-    inline double findRadiusOfAtom(const std::string&);
-    inline double findRadiusOfAtom(const Atom&); //TODO has not been tested
+    double findRadiusOfAtom(const std::string&);
+    double findRadiusOfAtom(const Atom&);
 
     // controller-model communication
     CalcReportBundle generateData();
