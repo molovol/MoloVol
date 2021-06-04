@@ -135,13 +135,11 @@ CalcReportBundle Model::generateVolumeData(){
 }
 
 CalcReportBundle Model::generateSurfaceData(){
+  // requires volume calculation!
+  auto start = std::chrono::steady_clock::now();
   Ctrl::getInstance()->updateStatus("Calculating surface areas...");
   Ctrl::getInstance()->updateProgressBar(0);
 
-  // TODO: add way for this function to tell whether volume calculation has been conducted before
-  auto start = std::chrono::steady_clock::now();
-
-  // TODO: consider making different solid_types for each probe mode
   std::vector<std::vector<char>> solid_types =
   { {0b00000011},
     {0b00000011, 0b00000101},
