@@ -572,7 +572,6 @@ bool Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
 // TALLY //
 ///////////
 
-// TODO: Optimise. Allow for tallying multiples types at once
 void Voxel::tallyVoxelsOfType(std::map<char,unsigned>& type_tally,
     std::map<unsigned char,unsigned>& id_core_tally,
     std::map<unsigned char,unsigned>& id_shell_tally,

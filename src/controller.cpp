@@ -57,7 +57,7 @@ bool Ctrl::loadRadiusFile(){
 
   std::string radius_filepath = s_gui->getRadiusFilepath();
   // even if there is no valid radii file, the program can be used by manually setting radii in the GUI after loading a structure
-  if(!_current_calculation->readRadiusFileSetMaps(radius_filepath)){
+  if(!_current_calculation->importRadiusFile(radius_filepath)){
     displayErrorMessage(101);
   }
   // refresh atom list using new radius map
@@ -297,6 +297,7 @@ void Ctrl::updateCalculationStatus(){
 static const std::map<int, std::string> s_error_codes = {
   {0, "Unidentified error code."}, // no user should ever see this
   // 1xx: Invalid Input
+  {100, "Import failed!"},
   {101, "Invalid radius definition file. Please select a valid file or set radii manually."},
   {102, "Invalid structure file. Please select a valid file."},
   {103, "Invalid file format. Please make sure that the input files have the correct file extensions."},
@@ -310,10 +311,13 @@ static const std::map<int, std::string> s_error_codes = {
   {113, "Space group or symmetry not found. Check the structure and space group files or untick the Unit Cell Analysis tickbox"},
   {114, "Invalid ATOM or HETATM line encountered. Import may be incomplete. Check the structure file."},
   // 2xx: Issue during Calculation
-  {200, "Calculation failed!"}, // unspecific error
+  {200, "Calculation failed!"},
   {201, "Total number of cavities (255) exceeded. Consider changing the probe size. Calculation will proceed."},
   // 3xx: Issue with Output
-  {301, "Data missing to export file. Calculation may be still running or has not been started."}
+  {300, "Output failed!"},
+  {301, "Data missing to export file. Calculation may be still running or has not been started."},
+  {302, "Invalid output directory. Please select a valid output directory."},
+  {303, "An unidentified issue has been encountered while writing the surface map."}
 };
 
 void Ctrl::displayErrorMessage(const int error_code){

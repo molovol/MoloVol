@@ -260,7 +260,7 @@ void MainFrame::InitAtomfilePanel(){
 }
 
 void MainFrame::InitRadiusfilePanel(){
-  radiusText = new wxStaticText(radiusfilePanel, TEXT_Radius, "Elements radii:");
+  radiusText = new wxStaticText(radiusfilePanel, TEXT_Radius, "Radius file:");
   radiusButton = new wxButton(radiusfilePanel, BUTTON_Radius, "Browse");
   radiuspathText = new wxTextCtrl(radiusfilePanel, TEXT_Radiuspath, "./inputfile/radii.txt");
 
@@ -533,7 +533,7 @@ void MainFrame::InitAutoExportPanel(){
 
   {
     outputdirText = new wxStaticText(subPanel, TEXT_Outputdir, "Auto save directory:");
-    dirpickerText = new wxTextCtrl(subPanel, TEXT_Dirpicker);
+    dirpickerText = new wxTextCtrl(subPanel, TEXT_Dirpicker, "", wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
     dirpickerButton = new wxButton(subPanel, BUTTON_Dirpicker, "Browse");
 
     SetSizerFilePanel(subPanel, outputdirText, dirpickerButton, dirpickerText);

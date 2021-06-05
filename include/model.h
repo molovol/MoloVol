@@ -67,8 +67,8 @@ class Space;
 class Model{
   public:
     // radius file import
-    bool readRadiusFileSetMaps(std::string&);
-    std::unordered_map<std::string, double> importRadiusMap(const std::string&);
+    bool importRadiusFile(std::string&);
+    std::unordered_map<std::string, double> extractRadiusMap(const std::string&);
     // atom file import
     bool readAtomsFromFile(const std::string&, bool);
     void clearAtomData();
@@ -101,8 +101,8 @@ class Model{
     void generateSupercell(double);
     void generateUsefulAtomMapFromSupercell(double);
 
-    inline double findRadiusOfAtom(const std::string&);
-    inline double findRadiusOfAtom(const Atom&); //TODO has not been tested
+    double findRadiusOfAtom(const std::string&);
+    double findRadiusOfAtom(const Atom&);
 
     // controller-model communication
     CalcReportBundle generateData();

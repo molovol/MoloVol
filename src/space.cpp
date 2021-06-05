@@ -88,14 +88,15 @@ void Space::setBoundaries(const std::vector<Atom> &atoms, const double add_space
 void Space::initGrid(){
   _grid.clear();
   // determine how many top lvl voxels in each direction are needed
+  std::array<unsigned long,3> n_top_lvl_vxl;
   for (int dim = 0; dim < 3; dim++){
-    _n_gridsteps[dim] = std::ceil (std::ceil( (getSize())[dim] / _grid_size ) / std::pow(2,_max_depth) );
+    n_top_lvl_vxl[dim] = std::ceil (std::ceil( (getSize())[dim] / _grid_size ) / std::pow(2,_max_depth) );
   }
   // initialise 3d tensors for each octree level
   for (int lvl = 0; lvl <= _max_depth; ++lvl){
-    _grid.push_back(Container3D<Voxel>( _n_gridsteps[0]*pow(2,_max_depth-lvl),
-                                        _n_gridsteps[1]*pow(2,_max_depth-lvl),
-                                        _n_gridsteps[2]*pow(2,_max_depth-lvl)));
+    _grid.push_back(Container3D<Voxel>( n_top_lvl_vxl[0]*pow(2,_max_depth-lvl),
+                                        n_top_lvl_vxl[1]*pow(2,_max_depth-lvl),
+                                        n_top_lvl_vxl[2]*pow(2,_max_depth-lvl)));
   }
 }
 
@@ -135,19 +136,19 @@ void Space::assignAtomVsCore(){
   const double vxl_dist = _grid_size * pow(2,_max_depth);
   std::array<double,3> vxl_pos;
   std::array<unsigned,3> top_lvl_index;
-  for(top_lvl_index[0] = 0; top_lvl_index[0] < _n_gridsteps[0]; top_lvl_index[0]++){
+  for(top_lvl_index[0] = 0; top_lvl_index[0] < getGridsteps()[0]; top_lvl_index[0]++){
     Ctrl::getInstance()->updateCalculationStatus();
     vxl_pos[0] = vxl_origin[0] + vxl_dist * (0.5 + top_lvl_index[0]);
-    for(top_lvl_index[1] = 0; top_lvl_index[1] < _n_gridsteps[1]; top_lvl_index[1]++){
+    for(top_lvl_index[1] = 0; top_lvl_index[1] < getGridsteps()[1]; top_lvl_index[1]++){
       vxl_pos[1] = vxl_origin[1] + vxl_dist * (0.5 + top_lvl_index[1]);
-      for(top_lvl_index[2] = 0; top_lvl_index[2] < _n_gridsteps[2]; top_lvl_index[2]++){
+      for(top_lvl_index[2] = 0; top_lvl_index[2] < getGridsteps()[2]; top_lvl_index[2]++){
         vxl_pos[2] = vxl_origin[2] + vxl_dist * (0.5 + top_lvl_index[2]);
         // voxel position is deliberately not stored in voxel object to reduce memory cost
         if (Ctrl::getInstance()->getAbortFlag()){return;}
         getTopVxl(top_lvl_index).evalRelationToAtoms(top_lvl_index, vxl_pos, _max_depth);
       }
     }
-    Ctrl::getInstance()->updateProgressBar(int(100*(double(top_lvl_index[0])+1)/double(_n_gridsteps[0])));
+    Ctrl::getInstance()->updateProgressBar(int(100*(double(top_lvl_index[0])+1)/double(getGridsteps()[0])));
   }
 }
 
@@ -155,9 +156,9 @@ void Space::identifyCavities(){
   if (Ctrl::getInstance()->getAbortFlag()){return;}
   std::array<unsigned int,3> vxl_index;
   unsigned char id = 1;
-  for(vxl_index[0] = 0; vxl_index[0] < _n_gridsteps[0]; vxl_index[0]++){
-    for(vxl_index[1] = 0; vxl_index[1] < _n_gridsteps[1]; vxl_index[1]++){
-      for(vxl_index[2] = 0; vxl_index[2] < _n_gridsteps[2]; vxl_index[2]++){
+  for(vxl_index[0] = 0; vxl_index[0] < getGridsteps()[0]; vxl_index[0]++){
+    for(vxl_index[1] = 0; vxl_index[1] < getGridsteps()[1]; vxl_index[1]++){
+      for(vxl_index[2] = 0; vxl_index[2] < getGridsteps()[2]; vxl_index[2]++){
         if (Ctrl::getInstance()->getAbortFlag()){return;}
         try{
           descendToCore(id,vxl_index,getMaxDepth()); // id gets iterated inside this function
@@ -167,7 +168,7 @@ void Space::identifyCavities(){
         }
       }
     }
-    Ctrl::getInstance()->updateProgressBar(int(100*(double(vxl_index[0])+1)/double(_n_gridsteps[0])));
+    Ctrl::getInstance()->updateProgressBar(int(100*(double(vxl_index[0])+1)/double(getGridsteps()[0])));
   }
 }
 
@@ -202,15 +203,15 @@ void Space::descendToCore(unsigned char& id, const std::array<unsigned,3> index,
 void Space::assignShellVsVoid(){
   if (Ctrl::getInstance()->getAbortFlag()){return;}
   std::array<unsigned int,3> vxl_index;
-  for(vxl_index[0] = 0; vxl_index[0] < _n_gridsteps[0]; vxl_index[0]++){
+  for(vxl_index[0] = 0; vxl_index[0] < getGridsteps()[0]; vxl_index[0]++){
     Ctrl::getInstance()->updateCalculationStatus();
-    for(vxl_index[1] = 0; vxl_index[1] < _n_gridsteps[1]; vxl_index[1]++){
-      for(vxl_index[2] = 0; vxl_index[2] < _n_gridsteps[2]; vxl_index[2]++){
+    for(vxl_index[1] = 0; vxl_index[1] < getGridsteps()[1]; vxl_index[1]++){
+      for(vxl_index[2] = 0; vxl_index[2] < getGridsteps()[2]; vxl_index[2]++){
         if (Ctrl::getInstance()->getAbortFlag()){return;}
         getTopVxl(vxl_index).evalRelationToVoxels(vxl_index, _max_depth);
       }
     }
-    Ctrl::getInstance()->updateProgressBar(int(100*(double(vxl_index[0])+1)/double(_n_gridsteps[0])));
+    Ctrl::getInstance()->updateProgressBar(int(100*(double(vxl_index[0])+1)/double(getGridsteps()[0])));
   }
 }
 
@@ -236,9 +237,9 @@ void Space::getVolume(std::map<char,double>& volumes, std::vector<Cavity>& cavit
   // go through all top level voxels and search recursively for pure types. once found, each bottom level voxel
   // adds 1 to the tally. at the same time the boundaries of the cavities are determined
   std::array<unsigned,3> top_lvl_index;
-  for (top_lvl_index[0] = 0; top_lvl_index[0] < _n_gridsteps[0]; top_lvl_index[0]++){
-    for (top_lvl_index[1] = 0; top_lvl_index[1] < _n_gridsteps[1]; top_lvl_index[1]++){
-      for (top_lvl_index[2] = 0; top_lvl_index[2] < _n_gridsteps[2]; top_lvl_index[2]++){
+  for (top_lvl_index[0] = 0; top_lvl_index[0] < getGridsteps()[0]; top_lvl_index[0]++){
+    for (top_lvl_index[1] = 0; top_lvl_index[1] < getGridsteps()[1]; top_lvl_index[1]++){
+      for (top_lvl_index[2] = 0; top_lvl_index[2] < getGridsteps()[2]; top_lvl_index[2]++){
         getTopVxl(top_lvl_index).tallyVoxelsOfType(type_tally, id_core_tally, id_shell_tally, id_min, id_max, top_lvl_index, _max_depth);
       }
     }
@@ -657,50 +658,44 @@ Voxel& Space::getTopVxl(const std::array<int,3> arr){
 // check whether coord is inside grid bounds
 bool Space::isInBounds(const std::array<int,3>& coord, const unsigned lvl){
   for (char i = 0; i < 3; i++){
-    if(coord[i] < 0 || coord[i] >= _n_gridsteps[i] * std::pow(2,_max_depth-lvl)){return false;}
+    if(coord[i] < 0 || coord[i] >= getGridsteps()[i] * std::pow(2,_max_depth-lvl)){return false;}
   }
   return true;
 }
 bool Space::isInBounds(const std::array<unsigned,3>& coord, const unsigned lvl){
   for (char i = 0; i < 3; i++){
-    if(coord[i] < 0 || coord[i] >= _n_gridsteps[i] * std::pow(2,_max_depth-lvl)){return false;}
+    if(coord[i] < 0 || coord[i] >= getGridsteps()[i] * std::pow(2,_max_depth-lvl)){return false;}
   }
   return true;
 }
 
 
-std::array<unsigned int,3> Space::getGridsteps(){
-  return _n_gridsteps;
+const std::array<unsigned long,3> Space::getGridsteps(){
+  return getGridstepsOnLvl(_max_depth);
+}
+
+const std::array<unsigned long,3> Space::getGridstepsOnLvl(const int lvl) const {
+  return _grid[lvl].getNumElements();
 }
 
 std::array<std::array<unsigned int,3>,2> Space::getUnitCellIndexes(){
   return {_unit_cell_start_index, _unit_cell_end_index};
 }
 
-unsigned long int Space::totalVxlOnLvl(const int lvl) const{
-  unsigned long int total = 1;
-  const std::array<unsigned long int,3> gridsteps = gridstepsOnLvl(lvl);
+unsigned long Space::totalVxlOnLvl(const int lvl) const{
+  unsigned long total = 1;
+  const std::array<unsigned long,3> gridsteps = getGridstepsOnLvl(lvl);
   for (char i = 0; i < 3; i++){
     total *= gridsteps[i];
   }
   return total;
 }
 
-// TODO: read this value from Container3D and remove _n_gridsteps entirely
-const std::array<unsigned long int,3> Space::gridstepsOnLvl(const int level) const {
-  if (level > _max_depth){throw ExceptIllegalFunctionCall();}
-  std::array<unsigned long int,3> n_voxels;
-  for (char i = 0; i < 3; i++){
-    n_voxels[i] = _n_gridsteps[i] * pow(2,_max_depth-level);
-  }
-  return n_voxels;
-}
-
 ////////////////
 // PRINT GRID //
 ////////////////
 
-std::array<unsigned int,3> makeIndices(std::array<unsigned int,3> indices, int depth){
+std::array<unsigned long,3> makeIndices(std::array<unsigned long,3> indices, int depth){
   for (char i = 0; i < 3; i++){
     indices[i] *= pow(2,depth);
   }
@@ -712,7 +707,7 @@ void Space::printGrid(){
 
   bool disp_id = false;
   int depth = 0;
-  std::array<unsigned int,3> indices = makeIndices(_n_gridsteps, depth);
+  std::array<unsigned long,3> indices = makeIndices(getGridsteps(), depth);
 
   unsigned int x_min = 0;
   unsigned int y_min = 0;
@@ -733,7 +728,7 @@ void Space::printGrid(){
     if (usr_inp == '+' || usr_inp == '-'){
       if (usr_inp == '+' && depth < _max_depth){depth++;}
       else if (usr_inp == '-' && depth > 0){depth--;}
-      indices = makeIndices(_n_gridsteps,depth);
+      indices = makeIndices(getGridsteps(),depth);
       x_min = 0;
       y_min = 0;
       x_max = ((indices[0] >= 50)? 50: indices[0]);

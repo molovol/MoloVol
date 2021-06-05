@@ -60,23 +60,6 @@ class Container3D{
       }
       return arr;
     }
-    // display 
-    void print(){
-      for (unsigned long int i = 0; i<_n_elements[0]; i++){
-        for (unsigned long int j = 0; j<_n_elements[1]; j++){
-          for (unsigned long int k = 0; k<_n_elements[2]; k++){
-            // TODO: find a general solution for outputting contents
-            if (getElement(i,j,k) == 0b00000011){
-              std::cout << "A" << " ";
-            }
-            else{
-              std::cout << "e" << " ";}
-          }
-          std::cout << std::endl;
-        }
-        std::cout << std::endl;
-      }
-    }
   
   private:
     std::vector<T> _data;

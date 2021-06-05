@@ -294,7 +294,7 @@ void Model::writeSurfaceMap(const std::string file_path,
                             std::array<unsigned int,3> end_index,
                             const bool partial_map,
                             const unsigned char id){
-
+  bool issue_encountered = false;
   // assemble data
   Container3D<Voxel>* surface_map = &_cell.getGrid(0);
 
@@ -357,6 +357,7 @@ void Model::writeSurfaceMap(const std::string file_path,
           }
         }
         else { // TODO inform the user that there is something odd with the surface map
+          issue_encountered = true;
           output_file << -2;
         }
         output_file << ((column == 2)? '\n' : ' ');
@@ -375,4 +376,5 @@ void Model::writeSurfaceMap(const std::string file_path,
 
   // close the file
   output_file.close();
+  if (issue_encountered) {Ctrl::getInstance()->displayErrorMessage(303);}
 }

@@ -15,37 +15,6 @@ std::wstring Symbol::cubed(){
   return L"\u00B3";
 }
 
-// from an int, produce a string of utf-8 encoded subscripts
-// TODO not used and untested
-std::wstring Symbol::numSubscript(int num){
-  std::wstring retval = L"";
-
-  while (num > 0){
-    wchar_t subscript = 0x2080;           // unicode encoding of subscript "0"
-    int digit = num%10;
-    subscript = subscript + digit;
-    retval.push_back(subscript);
-    num = num/10;
-  }
-  return retval;
-}
-
-// from a numeric string, produce a string of unicode encoded subscripts
-// TODO not used and untested
-std::wstring Symbol::numSubscript(std::string num){
-  std::wstring retval = L"";
-
-  // iterate over all chars in input
-  for (char c : num){
-    assert(c >= '0' && c <= '9');
-    wchar_t subscript = 0x2080;           // unicode encoding of subscript "0"
-    int digit = c - '0';                  // convert numeric char to corresponding int
-    subscript = subscript + digit;        // adding a digit to subscript "0" return subscript of that digit
-    retval.push_back(subscript);
-  }
-  return retval;
-}
-
 // from a numeric char, return the unicode encoded subscripts
 wchar_t Symbol::digitSubscript(char digit){
   wchar_t subscript = 0x2080;           // unicode encoding of subscript "0"

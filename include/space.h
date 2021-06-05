@@ -37,7 +37,7 @@ class Space{
     Voxel& getTopVxl(const unsigned int, const unsigned int, const unsigned int);
     Voxel& getTopVxl(const std::array<unsigned int,3>);
     Voxel& getTopVxl(const std::array<int,3>);
-    std::array<unsigned int,3> getGridsteps();
+    const std::array<unsigned long,3> getGridsteps();
     std::array<std::array<unsigned int,3>,2> getUnitCellIndexes();
     unsigned long int totalVxlOnLvl(const int) const;
 
@@ -66,7 +66,6 @@ class Space{
     std::array <double,3> _cart_min; // this is also the "origin" of the space
     std::array <double,3> _cart_max;
     std::vector<Container3D<Voxel>> _grid;
-    std::array<unsigned int,3> _n_gridsteps; // number of top level voxels in x,y,z direction
     std::array<unsigned int,3> _unit_cell_start_index; // bottom level voxels indexes for the start of the unit cell in x,y,z direction
     std::array<unsigned int,3> _unit_cell_end_index; // bottom level voxels indexes for the end of the unit cell in x,y,z direction
     std::array<double,3> _unit_cell_mod_index; // bottom level voxels fractional indexes for the end of the unit cell in x,y,z direction
@@ -79,7 +78,7 @@ class Space{
 
     void initGrid();
 
-    const std::array<unsigned long int,3> gridstepsOnLvl(const int) const;
+    const std::array<unsigned long int,3> getGridstepsOnLvl(const int) const;
     void assignAtomVsCore();
     void identifyCavities();
     void descendToCore(unsigned char&, const std::array<unsigned,3>, int);

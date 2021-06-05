@@ -25,18 +25,15 @@ struct RadiusFileBundle{ // data bundle for radius file import
   std::unordered_map<std::string, double> rad_map;
   std::unordered_map<std::string, int> atomic_num_map;
 };
-RadiusFileBundle importDataFromRadiusFile(const std::string& radius_path);
-
 ////////////////////////
 // RADIUS FILE IMPORT //
 ////////////////////////
+RadiusFileBundle extractDataFromRadiusFile(const std::string& radius_path);
 
 // generates two two maps for assigning a radius/ atomic number respectively, to a element symbol
 // sets the maps to members of the model class
-bool Model::readRadiusFileSetMaps(std::string& radius_path){
-
-  RadiusFileBundle data = importDataFromRadiusFile(radius_path);
-
+bool Model::importRadiusFile(std::string& radius_path){
+  RadiusFileBundle data = extractDataFromRadiusFile(radius_path);
   if (data.rad_map.size() == 0) {return false;}
 
   setRadiusMap(data.rad_map);
@@ -46,8 +43,41 @@ bool Model::readRadiusFileSetMaps(std::string& radius_path){
 
 // used for importing only the radius map from the radius file
 // needed for running the app from the command line
-std::unordered_map<std::string, double> Model::importRadiusMap(const std::string& radius_path){
-  return importDataFromRadiusFile(radius_path).rad_map;
+std::unordered_map<std::string, double> Model::extractRadiusMap(const std::string& radius_path){
+  return extractDataFromRadiusFile(radius_path).rad_map;
+}
+
+RadiusFileBundle extractDataFromRadiusFile(const std::string& radius_path){
+  RadiusFileBundle data;
+
+  std::string line;
+  std::ifstream inp_file(radius_path);
+  bool invalid_symbol_detected = false;
+  bool invalid_radius_value = false;
+  while(getline(inp_file,line)){
+    std::vector<std::string> substrings = splitLine(line);
+    // substings[0]: Atomic Number
+    // substings[1]: Element Symbol
+    // substings[2]: Radius
+    if(substrings.size() == 3){
+      substrings[1] = strToValidSymbol(substrings[1]);
+      // skip entry if element symbol invalid
+      if (substrings[1].empty()){
+        invalid_symbol_detected = true;
+      }
+      else {
+        try{data.rad_map[substrings[1]] = std::stod(substrings[2]);}
+        catch (const std::invalid_argument& e){
+          data.rad_map[substrings[1]] = 0;
+          invalid_radius_value = true;
+        }
+        data.atomic_num_map[substrings[1]] = std::stoi(substrings[0]);
+      }
+    }
+  }
+  if (invalid_symbol_detected) {Ctrl::getInstance()->displayErrorMessage(106);}
+  if (invalid_radius_value) {Ctrl::getInstance()->displayErrorMessage(107);}
+  return data;
 }
 
 //////////////////////
@@ -266,11 +296,11 @@ bool Model::getSymmetryElements(std::string group, std::vector<int> &sym_matrix_
 ////////////////////////
 
 // returns the radius of an atom with a given symbol
-inline double Model::findRadiusOfAtom(const std::string& symbol){
+double Model::findRadiusOfAtom(const std::string& symbol){
   return _radius_map[symbol];
 }
 
-inline double Model::findRadiusOfAtom(const Atom& at){
+double Model::findRadiusOfAtom(const Atom& at){
   return findRadiusOfAtom(at.symbol);
 }
 
@@ -326,38 +356,5 @@ std::string strToValidSymbol(std::string str){
     }
   }
   return str;
-}
-
-RadiusFileBundle importDataFromRadiusFile(const std::string& radius_path){
-  RadiusFileBundle data;
-
-  std::string line;
-  std::ifstream inp_file(radius_path);
-  bool invalid_symbol_detected = false;
-  bool invalid_radius_value = false;
-  while(getline(inp_file,line)){
-    std::vector<std::string> substrings = splitLine(line);
-    // substings[0]: Atomic Number
-    // substings[1]: Element Symbol
-    // substings[2]: Radius
-    if(substrings.size() == 3){
-      substrings[1] = strToValidSymbol(substrings[1]);
-      // skip entry if element symbol invalid
-      if (substrings[1].empty()){
-        invalid_symbol_detected = true;
-      }
-      else {
-        try{data.rad_map[substrings[1]] = std::stod(substrings[2]);}
-        catch (const std::invalid_argument& e){
-          data.rad_map[substrings[1]] = 0;
-          invalid_radius_value = true;
-        }
-        data.atomic_num_map[substrings[1]] = std::stoi(substrings[0]);
-      }
-    }
-  }
-  if (invalid_symbol_detected) {Ctrl::getInstance()->displayErrorMessage(106);}
-  if (invalid_radius_value) {Ctrl::getInstance()->displayErrorMessage(107);}
-  return data;
 }
 

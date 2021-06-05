@@ -54,8 +54,11 @@ bool Model::setParameters(std::string file_path,
     return false;
   }
   _data.atom_file_path = file_path;
-  // TODO: user should always have to specify the output folder. maybe throw exception if output_dir empty
-  _output_folder = output_dir.empty()? "." : output_dir;
+  _output_folder = output_dir;
+  if (_output_folder.empty() && (make_report || make_full_map || make_cav_maps)){
+    Ctrl::getInstance()->displayErrorMessage(302);
+    return false;
+  }
   _data.inc_hetatm = inc_hetatm;
   _data.analyze_unit_cell = analyze_unit_cell;
   _data.calc_surface_areas = calc_surface_areas;
@@ -64,7 +67,7 @@ bool Model::setParameters(std::string file_path,
   _data.make_report = make_report;
   _data.make_full_map = make_full_map;
   _data.make_cav_maps = make_cav_maps;
-  _radius_map = rad_map;
+  setRadiusMap(rad_map);
   _data.included_elements = included_elem;
   _max_atom_radius = max_radius;
   return true;
@@ -92,7 +95,6 @@ bool Model::setProbeRadii(const double r_1, const double r_2, const bool probe_m
 // CALCULATION ENTRY //
 ///////////////////////
 
-// TODO: consider making return value const, in order to prevent controller from messing with this
 CalcReportBundle Model::generateData(){
   // save the date and time of calculation for output files
   _time_stamp = timeNow();
@@ -133,13 +135,11 @@ CalcReportBundle Model::generateVolumeData(){
 }
 
 CalcReportBundle Model::generateSurfaceData(){
+  // requires volume calculation!
+  auto start = std::chrono::steady_clock::now();
   Ctrl::getInstance()->updateStatus("Calculating surface areas...");
   Ctrl::getInstance()->updateProgressBar(0);
 
-  // TODO: add way for this function to tell whether volume calculation has been conducted before
-  auto start = std::chrono::steady_clock::now();
-
-  // TODO: consider making different solid_types for each probe mode
   std::vector<std::vector<char>> solid_types =
   { {0b00000011},
     {0b00000011, 0b00000101},
@@ -206,7 +206,7 @@ void Model::setAtomListForCalculation(){
                      std::get<2>(atom_coordinates[i]),
                      std::get<3>(atom_coordinates[i]),
                      std::get<0>(atom_coordinates[i]),
-                     _radius_map[std::get<0>(atom_coordinates[i])],
+                     findRadiusOfAtom(std::get<0>(atom_coordinates[i])),
                      _elem_Z[std::get<0>(atom_coordinates[i])]);
       _atoms.push_back(at);
     }
@@ -221,16 +221,13 @@ std::vector<std::tuple<std::string, int, double>> Model::generateAtomList(){
   // Element1: Number of Atoms with that symbol
   // Element2: Radius
   for(auto elem : _atom_amounts){
-    atoms_for_list.push_back(std::make_tuple(elem.first, elem.second, _radius_map[elem.first]));
+    atoms_for_list.push_back(std::make_tuple(elem.first, elem.second, findRadiusOfAtom(elem.first)));
   }
   return atoms_for_list;
 }
 
-// TODO should be obselete because radius_map is set by setParameters
-// but it is still used in Model::readRadiusFileSetMaps and Ctrl::unittestExcluded()
 void Model::setRadiusMap(std::unordered_map<std::string, double> map){
   _radius_map = map;
-  return;
 }
 
 void Model::generateChemicalFormula(){
