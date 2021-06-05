@@ -123,7 +123,7 @@ bool Ctrl::runCalculation(){
   }
 
   // CALCULATION
-  const CalcReportBundle data = _current_calculation->generateData();
+  CalcReportBundle data = _current_calculation->generateData();
   calculationDone(data.success);
 
   // OUTPUT
@@ -137,19 +137,19 @@ bool Ctrl::runCalculation(){
     notifyUser("\nElapsed time: " + std::to_string(data.getTime()) + " s");
 
     notifyUser("\n<VOLUME>");
-    notifyUser("\nVan der Waals volume: " + std::to_string(data.volumes.at(0b00000011)) + " ");
+    notifyUser("\nVan der Waals volume: " + std::to_string(data.volumes[0b00000011]) + " ");
     notifyUser(vol_unit);
-    notifyUser("\nProbe inaccessible volume: " + std::to_string(data.volumes.at(0b00000101)) + " ");
+    notifyUser("\nProbe inaccessible volume: " + std::to_string(data.volumes[0b00000101]) + " ");
     notifyUser(vol_unit);
     std::string prefix = data.probe_mode? "Small p" : "P";
-    notifyUser("\n"+ prefix +"robe core volume: " + std::to_string(data.volumes.at(0b00001001)) + " ");
+    notifyUser("\n"+ prefix +"robe core volume: " + std::to_string(data.volumes[0b00001001]) + " ");
     notifyUser(vol_unit);
-    notifyUser("\n"+ prefix +"robe shell volume: " + std::to_string(data.volumes.at(0b00010001)) + " ");
+    notifyUser("\n"+ prefix +"robe shell volume: " + std::to_string(data.volumes[0b00010001]) + " ");
     notifyUser(vol_unit);
     if(data.probe_mode){
-      notifyUser("\nLarge probe core volume: " + std::to_string(data.volumes.at(0b00100001)) + " ");
+      notifyUser("\nLarge probe core volume: " + std::to_string(data.volumes[0b00100001]) + " ");
       notifyUser(vol_unit);
-      notifyUser("\nLarge probe shell volume: " + std::to_string(data.volumes.at(0b01000001)) + " ");
+      notifyUser("\nLarge probe shell volume: " + std::to_string(data.volumes[0b01000001]) + " ");
       notifyUser(vol_unit);
     }
     if(data.calc_surface_areas && !Ctrl::getInstance()->getAbortFlag()){

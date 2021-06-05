@@ -13,7 +13,7 @@
 // CALCRESULTBUNDLE //
 //////////////////////
 
-std::array<double,3> CalcReportBundle::getCavCentre(const unsigned char i) const {
+std::array<double,3> CalcReportBundle::getCavCentre(const unsigned char i){
   std::array<double,3> cav_ctr;
   for (char j = 0; j < 3; ++j){
     cav_ctr[j] = (cavities[i].min_bound[j] + cavities[i].max_bound[j])/2;
@@ -21,7 +21,7 @@ std::array<double,3> CalcReportBundle::getCavCentre(const unsigned char i) const
   return cav_ctr;
 }
 
-double CalcReportBundle::getTime() const {
+double CalcReportBundle::getTime(){
   double total_seconds = 0;
   for (const double time : elapsed_seconds){
     total_seconds += time;
@@ -95,6 +95,7 @@ bool Model::setProbeRadii(const double r_1, const double r_2, const bool probe_m
 // CALCULATION ENTRY //
 ///////////////////////
 
+// TODO: consider making return value const, in order to prevent controller from messing with this
 CalcReportBundle Model::generateData(){
   // save the date and time of calculation for output files
   _time_stamp = timeNow();
