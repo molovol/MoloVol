@@ -170,7 +170,7 @@ void MainFrame::OnBrowse(wxCommandEvent& event, std::string& filetype, wxTextCtr
     return;
   }
 
-  textbox->SetLabel(openFileDialog.GetPath());
+  textbox->SetValue(openFileDialog.GetPath());
   // import files after file selection
   if (!getAtomFilepath().empty() && !getRadiusFilepath().empty()){
     OnLoadFiles(event);
