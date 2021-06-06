@@ -19,4 +19,4 @@ If you wish to report a bug or request a feature go to the project's GitHub:
 https://github.com/jmaglic/MoloVol/issues
 
 ## Development Team
-The development is currently lead by Jasmin B. Maglic and Roy Lavendomme.
+The development is currently lead by Jasmin B. Maglic and Roy Lavendomme. You may reach us via email through molovol@outlook.com
