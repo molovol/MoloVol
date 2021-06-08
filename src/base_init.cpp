@@ -279,10 +279,11 @@ void MainFrame::InitRadiusfilePanel(){
   radiusButton = new wxButton(radiusfilePanel, BUTTON_Radius, "Browse");
   
 #if defined(__APPLE__) && !defined(DEBUG)
-  radiuspathText = new wxTextCtrl(radiusfilePanel, TEXT_Radiuspath, getResourcesDir());
+  std::string default_path = getResourcesDir() + "/radii.txt";
 #else
-  radiuspathText = new wxTextCtrl(radiusfilePanel, TEXT_Radiuspath, "./inputfile/radii.txt");
+  std::string default_path = "./inputfile/radii.txt";
 #endif
+  radiuspathText = new wxTextCtrl(radiusfilePanel, TEXT_Radiuspath, default_path);
   SetSizerFilePanel(radiusfilePanel, radiusText, radiusButton, radiuspathText);
 }
 

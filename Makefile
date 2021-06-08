@@ -2,7 +2,10 @@ CC := g++
 SRCDIR := src
 BUILDDIR := build
 BINDIR := bin
-TARGET := bin/MoloVol
+APP := MoloVol
+TARGET := $(BINDIR)/$(APP)
+
+BUNDLE := $(TARGET).app
 
 TESTDIR := test
 TESTTARGET := test/out
@@ -28,14 +31,26 @@ all: $(TARGET)
 appbundle: CXXFLAGS += $(RELEASEFLAGS)
 appbundle: CFLAGS += $(RELEASEFLAGS)
 appbundle: $(TARGET)
+	@echo "Creating bundle..."
+	@echo " $(RM) -r $(BUNDLE)"; $(RM) -r $(BUNDLE)
+	@echo " mkdir $(BUNDLE)"; mkdir $(BUNDLE)
+	@echo " mkdir $(BUNDLE)/Contents"; mkdir $(BUNDLE)/Contents
+	@echo " cp res/MacOS/Info.plist $(BUNDLE)/Contents"; cp res/MacOS/Info.plist $(BUNDLE)/Contents
+	@echo " mkdir $(BUNDLE)/Contents/MacOS"; mkdir $(BUNDLE)/Contents/MacOS
+	@echo " mv $(TARGET) $(BUNDLE)/Contents/MacOS"; mv $(TARGET) $(BUNDLE)/Contents/MacOS
+	@echo " mkdir $(BUNDLE)/Contents/Resources"; mkdir $(BUNDLE)/Contents/Resources
+	@echo " cp res/MacOS/icon.icns $(BUNDLE)/Contents/Resources"; cp res/MacOS/icon.icns $(BUNDLE)/Contents/Resources
+	@echo " cp inputfile/radii.txt $(BUNDLE)/Contents/Resources"; cp inputfile/radii.txt $(BUNDLE)/Contents/Resources
+	@echo " cp inputfile/space_groups.txt $(BUNDLE)/Contents/Resources"; cp inputfile/space_groups.txt $(BUNDLE)/Contents/Resources
+	/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f $(BUNDLE)
 
 $(TARGET): $(OBJECTS)
-	@echo " Linking..."
+	@echo "Linking..."
 	mkdir -p $(BINDIR)
 	$(CC) $(CXXFLAGS) $^ `wx-config --cxxflags --libs` -o $(TARGET)
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
-	@mkdir -p $(BUILDDIR)
+	mkdir -p $(BUILDDIR)
 	$(CC) $(CFLAGS) $(INC) -c `wx-config --cxxflags --libs` -o $@ $<
 
 test: $(TESTOBJECTS)
@@ -52,12 +67,13 @@ protein:
 	$(TARGET) -u protein
 
 cleantest:
-	@echo " Cleaning Test Directory..."
+	@echo "Cleaning Test Directory..."
 	@echo " $(RM) -r $(TESTBUILDDIR)"; $(RM) -r $(TESTBUILDDIR)
 	@echo " $(RM) $(TESTTARGET)"; $(RM) $(TESTTARGET)
 
 clean:
-	@echo " Cleaning..."; 
+	@echo "Cleaning..."; 
 	@echo " $(RM) -r $(BUILDDIR) $(TARGET)"; $(RM) -r $(BUILDDIR) $(TARGET)
+	@echo " $(RM) -r $(BUNDLE)"; $(RM) -r $(BUNDLE)
 
-.PHONY: clean, test, cleantest, probetest, protein, appbundle
+.PHONY: all, clean, appbundle, test, cleantest, probetest, protein
