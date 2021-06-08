@@ -1,0 +1,14 @@
+<plist version="1.0">
+<dict>
+  <key>CFBundleName</key>
+  <string>MoloVol</string>
+  <key>CFBundleVersion</key>
+  <string>1.0</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+  <key>CFBundleExecutable</key>
+  <string>MoloVol</string>
+  <key>CFBundleIconFile</key>
+  <string>icon</string>
+</dict>
+</plist>
