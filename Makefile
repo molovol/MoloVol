@@ -22,6 +22,7 @@ DEBUGFLAGS := -O0 -g -D DEBUG
 RELEASEFLAGS := -O3
 CXXFLAGS := -std=c++17 -Wall -Werror 
 CFLAGS := -std=c++17 -Wno-unused-command-line-argument -Wno-invalid-source-encoding
+WXFLAGS := --cxxflags --libs --version=3.1
 INC := -I include
 
 all: CXXFLAGS += $(DEBUGFLAGS)
@@ -47,18 +48,18 @@ appbundle: $(TARGET)
 $(TARGET): $(OBJECTS)
 	@echo "Linking..."
 	mkdir -p $(BINDIR)
-	$(CC) $(CXXFLAGS) $^ `wx-config --cxxflags --libs` -o $(TARGET)
+	$(CC) $(CXXFLAGS) $^ `wx-config $(WXFLAGS)` -o $(TARGET)
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	mkdir -p $(BUILDDIR)
-	$(CC) $(CFLAGS) $(INC) -c `wx-config --cxxflags --libs` -o $@ $<
+	$(CC) $(CFLAGS) $(INC) -c `wx-config $(WXFLAGS)` -o $@ $<
 
 test: $(TESTOBJECTS)
-	$(CC) $(CXXFLAGS) $^ `wx-config --cxxflags --libs` -o $(TESTTARGET)
+	$(CC) $(CXXFLAGS) $^ `wx-config $(WXFLAGS)` -o $(TESTTARGET)
 
 $(TESTBUILDDIR)/%.o: $(TESTDIR)/%.$(SRCEXT)
 	@mkdir -p $(TESTBUILDDIR)
-	$(CC) $(CFLAGS) $(INC) -c `wx-config --cxxflags --libs` -o $@ $<
+	$(CC) $(CFLAGS) $(INC) -c `wx-config $(WXFLAGS)` -o $@ $<
 
 probetest:
 	$(TARGET) -u excluded
