@@ -253,7 +253,11 @@ bool Model::getSymmetryElements(std::string group, std::vector<int> &sym_matrix_
     group[i] = toupper(group[i]);
   }
   group = "'" + group + "'";
+#if defined(__APPLE__) && !defined(DEBUG)
+  std::ifstream sym_file(getResourcesDir() + "/space_groups.txt");
+#else
   std::ifstream sym_file("./inputfile/space_groups.txt");
+#endif
   std::string sym_line;
   bool group_found = 0;
   bool sym_matrix = 0;

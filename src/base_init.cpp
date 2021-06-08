@@ -4,24 +4,10 @@
 #  include <wx/wx.h>
 #endif
 
-#ifdef __APPLE__
-#include <CoreFoundation/CFBundle.h>  
-std::string getResourcesDir(){
-  CFURLRef resource_url = CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle());
-  char resource_path[PATH_MAX];
-  if (CFURLGetFileSystemRepresentation(resource_url, true, (UInt8 *)resource_path, PATH_MAX)){
-    if (resource_url != NULL){
-      CFRelease(resource_url);
-    }
-    return resource_path;
-  }
-  return "";
-}
-#endif
-
 #include "base.h"
 #include "special_chars.h"
 #include "controller.h"
+#include "misc.h"
 #include <cassert>
 
 // wxWidgets macro that contains the entry point, initialised the app, and calls wxApp::OnInit()
