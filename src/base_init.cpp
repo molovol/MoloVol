@@ -4,6 +4,21 @@
 #  include <wx/wx.h>
 #endif
 
+#ifdef __APPLE__
+#include <CoreFoundation/CFBundle.h>  
+std::string getResourcesDir(){
+  CFURLRef resource_url = CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle());
+  char resource_path[PATH_MAX];
+  if (CFURLGetFileSystemRepresentation(resource_url, true, (UInt8 *)resource_path, PATH_MAX)){
+    if (resource_url != NULL){
+      CFRelease(resource_url);
+    }
+    return resource_path;
+  }
+  return "";
+}
+#endif
+
 #include "base.h"
 #include "special_chars.h"
 #include "controller.h"
@@ -262,8 +277,12 @@ void MainFrame::InitAtomfilePanel(){
 void MainFrame::InitRadiusfilePanel(){
   radiusText = new wxStaticText(radiusfilePanel, TEXT_Radius, "Radius file:");
   radiusButton = new wxButton(radiusfilePanel, BUTTON_Radius, "Browse");
+  
+#if defined(__APPLE__) && !defined(DEBUG)
+  radiuspathText = new wxTextCtrl(radiusfilePanel, TEXT_Radiuspath, getResourcesDir());
+#else
   radiuspathText = new wxTextCtrl(radiusfilePanel, TEXT_Radiuspath, "./inputfile/radii.txt");
-
+#endif
   SetSizerFilePanel(radiusfilePanel, radiusText, radiusButton, radiuspathText);
 }
 

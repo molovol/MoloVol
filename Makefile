@@ -15,8 +15,10 @@ OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 TESTSOURCES := $(shell find $(TESTDIR) -type f -name *.$(SRCEXT))
 TESTOBJECTS := $(patsubst $(TESTDIR)/%,$(TESTBUILDDIR)/%,$(TESTSOURCES:.$(SRCEXT)=.o))
 
-CXXFLAGS := -O3 -g -std=c++17 -Wall -Werror 
-CFLAGS := -O3 -g -std=c++17 -Wno-unused-command-line-argument -Wno-invalid-source-encoding
+DEBUGFLAGS := -O0 -g -D DEBUG
+RELEASEFLAGS := -03
+CXXFLAGS := $(DEBUGFLAGS) -std=c++17 -Wall -Werror 
+CFLAGS := $(DEBUGFLAGS) -std=c++17 -Wno-unused-command-line-argument -Wno-invalid-source-encoding
 INC := -I include
 
 $(TARGET): $(OBJECTS)
@@ -50,4 +52,4 @@ clean:
 	@echo " Cleaning..."; 
 	@echo " $(RM) -r $(BUILDDIR) $(TARGET)"; $(RM) -r $(BUILDDIR) $(TARGET)
 
-.PHONY: clean, test, cleantest, probetest, protein
+.PHONY: clean, test, cleantest, probetest, protein, appbundle
