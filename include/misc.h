@@ -12,6 +12,12 @@
 #include <ctime>
 #include <iostream>
 
+#ifdef __APPLE__
+#include <CoreFoundation/CFBundle.h>
+
+std::string getResourcesDir();
+#endif
+
 inline bool isIncluded(const std::string& element_symbol, const std::vector<std::string>& included_elements) {
   return (std::find(included_elements.begin(), included_elements.end(), element_symbol) != included_elements.end());
 }

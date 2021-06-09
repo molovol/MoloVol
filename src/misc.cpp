@@ -1,5 +1,20 @@
 #include "misc.h"
 
+#ifdef __APPLE__
+// access the app bundle resource folder
+std::string getResourcesDir(){
+  CFURLRef resource_url = CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle());
+  char resource_path[PATH_MAX];
+  if (CFURLGetFileSystemRepresentation(resource_url, true, (UInt8 *)resource_path, PATH_MAX)){
+    if (resource_url != NULL){
+      CFRelease(resource_url);
+    }
+    return resource_path;
+  }
+  return "";
+}
+#endif
+
 std::string fileExtension(const std::string& path){
   // will cause an issue, if there is a dot in the middle of the file AND no file extension
   size_t dot_pos = path.find_last_of(".");
