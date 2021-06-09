@@ -161,18 +161,22 @@ void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
     AtomLinePDB(const std::string& line){
       record_name = line.substr(0,6);
       assert (record_name == "ATOM  " || record_name == "HETATM");
-      serial_no = std::stoi(line.substr(6,5));
+      try{serial_no = std::stoi(line.substr(6,5));}
+      catch (const std::invalid_argument& e){serial_no=0;}
       name = line.substr(12,4);
       alt_loc = line[16];
       res_name = line.substr(17,3);
       chain_id = line[21];
-      res_seq = std::stoi(line.substr(22,4));
+      try{res_seq = std::stoi(line.substr(22,4));}
+      catch (const std::invalid_argument& e){res_seq=0;}
       insert_code = line[26];
       for (int i = 0; i < 3; ++i){
         ortho_coord[i] = std::stod(line.substr(30+i*8,8));
       }
-      occupancy = std::stod(line.substr(54,6));
-      temp_factor = std::stod(line.substr(60,6));
+      try{occupancy = std::stod(line.substr(54,6));}
+      catch (const std::invalid_argument& e){occupancy=0;}
+      try{temp_factor = std::stod(line.substr(60,6));}
+      catch (const std::invalid_argument& e){temp_factor=0;}
       element_symbol = line.substr(76,2);
       // some software generate pdb files with symbol left-justified instead of right-justified
       // therefore, it is better to check both characters and erase any white space
