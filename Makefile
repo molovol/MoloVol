@@ -63,6 +63,7 @@ dmg: appbundle
 	@mv $(BUNDLE) $(BINDIR)/dmgdir
 	@cp README.md $(BINDIR)/dmgdir/README.txt
 	@cp LICENSE $(BINDIR)/dmgdir/LICENSE.txt
+	@ln -s /Applications/ $(BINDIR)/dmgdir/drag_app_here
 	@hdiutil create -fs HFS+ -srcfolder "$(BINDIR)/dmgdir" -volname "$(DMGNAME)" "$(BINDIR)/$(DMGNAME).dmg"
 	@$(RM) -r $(BINDIR)/dmgdir
 
