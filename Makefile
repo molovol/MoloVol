@@ -2,6 +2,7 @@ CC := g++
 SRCDIR := src
 BUILDDIR := build
 BINDIR := bin
+LINUXRES := res/linux
 APP := MoloVol
 DMGNAME :=MoloVol_macOS_beta_v1
 TARGET := $(BINDIR)/$(APP)
@@ -67,6 +68,38 @@ dmg: appbundle
 	@hdiutil create -fs HFS+ -srcfolder "$(BINDIR)/dmgdir" -volname "$(DMGNAME)" "$(BINDIR)/$(DMGNAME).dmg"
 	@$(RM) -r $(BINDIR)/dmgdir
 
+deb: CXXFLAGS += $(RELEASEFLAGS)
+deb: CFLAGS += $(RELEASEFLAGS)
+deb: $(TARGET)
+	@$(RM) -r $(BINDIR)/deb-staging
+	@echo "Creating deb file..."
+	@mkdir $(BINDIR)/deb-staging
+	@mkdir $(BINDIR)/deb-staging/DEBIAN
+	@cp $(LINUXRES)/control $(BINDIR)/deb-staging/DEBIAN/
+	@mkdir $(BINDIR)/deb-staging/usr
+	@mkdir $(BINDIR)/deb-staging/usr/bin
+	@strip $(TARGET)
+	@mv $(TARGET) $(BINDIR)/deb-staging/usr/bin/molovol
+	@mkdir $(BINDIR)/deb-staging/usr/share
+	@mkdir $(BINDIR)/deb-staging/usr/share/applications
+	@cp $(LINUXRES)/MoloVol.desktop $(BINDIR)/deb-staging/usr/share/applications/
+	@mkdir $(BINDIR)/deb-staging/usr/share/doc
+	@mkdir $(BINDIR)/deb-staging/usr/share/doc/molovol
+	@cp $(LINUXRES)/copyright $(BINDIR)/deb-staging/usr/share/doc/molovol/
+	@cp $(LINUXRES)/changelog $(BINDIR)/deb-staging/usr/share/doc/molovol/
+	@gzip -9 -n $(BINDIR)/deb-staging/usr/share/doc/molovol/changelog
+	@mkdir $(BINDIR)/deb-staging/usr/share/man
+	@mkdir $(BINDIR)/deb-staging/usr/share/man/man1
+	@cp $(LINUXRES)/molovol.1 $(BINDIR)/deb-staging/usr/share/man/man1/
+	@gzip -9 -n $(BINDIR)/deb-staging/usr/share/man/man1/molovol.1
+	@mkdir $(BINDIR)/deb-staging/usr/share/molovol
+	@cp inputfile/space_groups.txt $(BINDIR)/deb-staging/usr/share/molovol/
+	@cp inputfile/radii.txt $(BINDIR)/deb-staging/usr/share/molovol/
+	@mkdir $(BINDIR)/deb-staging/usr/share/pixmaps
+	@cp $(LINUXRES)/molovol.png $(BINDIR)/deb-staging/usr/share/pixmaps/
+	@dpkg-deb --root-owner-group --build "$(BINDIR)/deb-staging" "molovol.deb"
+	@$(RM) -r $(BINDIR)/deb-staging
+
 test: $(TESTOBJECTS)
 	$(CC) $(CXXFLAGS) $^ `wx-config $(WXFLAGS)` -o $(TESTTARGET)
 
@@ -96,4 +129,4 @@ cleanall:
 	@echo " $(RM) -r $(BINDIR)"; $(RM) -r $(BINDIR)
 
 
-.PHONY: all, clean, cleanall, appbundle, test, cleantest, probetest, protein
+.PHONY: all, clean, cleanall, appbundle, dmg, deb, test, cleantest, probetest, protein
