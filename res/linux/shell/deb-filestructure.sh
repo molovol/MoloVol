@@ -12,4 +12,5 @@ mkdir $DIR/deb-staging/usr/share/man
 mkdir $DIR/deb-staging/usr/share/man/man1
 mkdir $DIR/deb-staging/usr/share/molovol
 mkdir $DIR/deb-staging/usr/share/pixmaps
+mkdir $DIR/deb-staging/usr/share/icons
 chmod 0755 $(find $DIR/deb-staging/usr -type d)
