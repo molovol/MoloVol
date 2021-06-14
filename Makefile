@@ -115,6 +115,7 @@ clean:
 	@echo " $(RM) -r $(BUILDDIR) $(TARGET)"; $(RM) -r $(BUILDDIR) $(TARGET)
 	@echo " $(RM) -r $(BUNDLE)"; $(RM) -r $(BUNDLE)
 	@echo " $(RM) -r $(BINDIR)/$(DMGNAME).dmg"; $(RM) -r $(BINDIR)/$(DMGNAME).dmg
+	@echo " $(RM) -r $(BINDIR)/molovol.deb"; $(RM) -r $(BINDIR)/molovol.deb
 
 cleanall:
 	@echo "Cleaning..."
