@@ -76,6 +76,7 @@ deb: $(TARGET)
 	@mkdir $(BINDIR)/deb-staging
 	@mkdir $(BINDIR)/deb-staging/DEBIAN
 	@cp $(LINUXRES)/control $(BINDIR)/deb-staging/DEBIAN/
+	@bash $(LINUXRES)/shell/f-architecture.sh >> $(BINDIR)/deb-staging/DEBIAN/control
 	@mkdir $(BINDIR)/deb-staging/usr
 	@mkdir $(BINDIR)/deb-staging/usr/bin
 	@strip $(TARGET)
@@ -97,7 +98,7 @@ deb: $(TARGET)
 	@cp inputfile/radii.txt $(BINDIR)/deb-staging/usr/share/molovol/
 	@mkdir $(BINDIR)/deb-staging/usr/share/pixmaps
 	@cp $(LINUXRES)/molovol.png $(BINDIR)/deb-staging/usr/share/pixmaps/
-	@dpkg-deb --root-owner-group --build "$(BINDIR)/deb-staging" "molovol.deb"
+	@dpkg-deb --root-owner-group --build "$(BINDIR)/deb-staging" "$(BINDIR)/molovol.deb"
 	@$(RM) -r $(BINDIR)/deb-staging
 
 test: $(TESTOBJECTS)

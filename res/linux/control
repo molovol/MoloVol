@@ -1,5 +1,4 @@
 Package: molovol
-Architecture: arm64
 Section: science
 Priority: optional
 Version: 0.1
