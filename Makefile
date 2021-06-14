@@ -87,6 +87,7 @@ deb: $(TARGET)
 	@cp inputfile/space_groups.txt $(BINDIR)/deb-staging/usr/share/molovol/
 	@cp inputfile/radii.txt $(BINDIR)/deb-staging/usr/share/molovol/
 	@cp $(LINUXRES)/molovol.png $(BINDIR)/deb-staging/usr/share/pixmaps/
+	@bash $(LINUXRES)/shell/icons.sh $(LINUXRES)/molovol.png $(BINDIR)/deb-staging/usr/share/icons/hicolor
 	@find $(BINDIR)/deb-staging/usr -type f -exec chmod 0644 {} +
 	@chmod 0755 $(BINDIR)/deb-staging/usr/bin/molovol
 	@dpkg-deb --root-owner-group --build "$(BINDIR)/deb-staging" "$(BINDIR)/molovol.deb"
