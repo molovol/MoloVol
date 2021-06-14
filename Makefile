@@ -73,30 +73,19 @@ deb: CFLAGS += $(RELEASEFLAGS)
 deb: $(TARGET)
 	@$(RM) -r $(BINDIR)/deb-staging
 	@echo "Creating deb file..."
-	@mkdir $(BINDIR)/deb-staging
-	@mkdir $(BINDIR)/deb-staging/DEBIAN
+	@bash $(LINUXRES)/shell/deb-filestructure.sh $(BINDIR)
 	@cp $(LINUXRES)/control $(BINDIR)/deb-staging/DEBIAN/
 	@bash $(LINUXRES)/shell/f-architecture.sh >> $(BINDIR)/deb-staging/DEBIAN/control
-	@mkdir $(BINDIR)/deb-staging/usr
-	@mkdir $(BINDIR)/deb-staging/usr/bin
 	@strip $(TARGET)
 	@mv $(TARGET) $(BINDIR)/deb-staging/usr/bin/molovol
-	@mkdir $(BINDIR)/deb-staging/usr/share
-	@mkdir $(BINDIR)/deb-staging/usr/share/applications
 	@cp $(LINUXRES)/MoloVol.desktop $(BINDIR)/deb-staging/usr/share/applications/
-	@mkdir $(BINDIR)/deb-staging/usr/share/doc
-	@mkdir $(BINDIR)/deb-staging/usr/share/doc/molovol
 	@cp $(LINUXRES)/copyright $(BINDIR)/deb-staging/usr/share/doc/molovol/
 	@cp $(LINUXRES)/changelog $(BINDIR)/deb-staging/usr/share/doc/molovol/
 	@gzip -9 -n $(BINDIR)/deb-staging/usr/share/doc/molovol/changelog
-	@mkdir $(BINDIR)/deb-staging/usr/share/man
-	@mkdir $(BINDIR)/deb-staging/usr/share/man/man1
 	@cp $(LINUXRES)/molovol.1 $(BINDIR)/deb-staging/usr/share/man/man1/
 	@gzip -9 -n $(BINDIR)/deb-staging/usr/share/man/man1/molovol.1
-	@mkdir $(BINDIR)/deb-staging/usr/share/molovol
 	@cp inputfile/space_groups.txt $(BINDIR)/deb-staging/usr/share/molovol/
 	@cp inputfile/radii.txt $(BINDIR)/deb-staging/usr/share/molovol/
-	@mkdir $(BINDIR)/deb-staging/usr/share/pixmaps
 	@cp $(LINUXRES)/molovol.png $(BINDIR)/deb-staging/usr/share/pixmaps/
 	@dpkg-deb --root-owner-group --build "$(BINDIR)/deb-staging" "$(BINDIR)/molovol.deb"
 	@$(RM) -r $(BINDIR)/deb-staging
