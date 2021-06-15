@@ -5,7 +5,9 @@ BINDIR := bin
 LINUXRES := res/linux
 SRCEXT := cpp
 APP := MoloVol
-INSTALLERNAME := MoloVol_macOS_beta_v1
+VERSION := beta_v1
+DMGNAME := $(APP)_macOS_$(VERSION)
+DEBNAME := $(APP)_debian_$(VERSION)
 
 TARGET := $(BINDIR)/$(APP)
 BUNDLE := $(TARGET).app
@@ -107,7 +109,7 @@ appbundle_entry:
 dmg: appbundle
 dmg: dmg_entry
 dmg_entry:
-	@echo " $(RM) -r $(BINDIR)/$(INSTALLERNAME).dmg"; $(RM) -r $(BINDIR)/$(INSTALLERNAME).dmg
+	@echo " $(RM) -r $(BINDIR)/$(DMGNAME).dmg"; $(RM) -r $(BINDIR)/$(DMGNAME).dmg
 	@$(RM) -r $(BINDIR)/dmgdir
 	@echo "Creating dmg file..."
 	@mkdir -p $(BINDIR)/dmgdir
@@ -115,7 +117,7 @@ dmg_entry:
 	@cp README.md $(BINDIR)/dmgdir/README.txt
 	@cp LICENSE $(BINDIR)/dmgdir/LICENSE.txt
 	@ln -s /Applications/ $(BINDIR)/dmgdir/drag_app_here
-	@hdiutil create -fs HFS+ -srcfolder "$(BINDIR)/dmgdir" -volname "$(INSTALLERNAME)" "$(BINDIR)/$(INSTALLERNAME).dmg"
+	@hdiutil create -fs HFS+ -srcfolder "$(BINDIR)/dmgdir" -volname "$(DMGNAME)" "$(BINDIR)/$(DMGNAME).dmg"
 	@$(RM) -r $(BINDIR)/dmgdir
 
 # INSTALLER ON DEBIAN AND UBUNTU
@@ -139,7 +141,7 @@ deb: release
 	@bash $(LINUXRES)/shell/icons.sh $(LINUXRES)/molovol.png $(BINDIR)/deb-staging/usr/share/icons/hicolor
 	@find $(BINDIR)/deb-staging/usr -type f -exec chmod 0644 {} +
 	@chmod 0755 $(BINDIR)/deb-staging/usr/bin/molovol
-	@dpkg-deb --root-owner-group --build "$(BINDIR)/deb-staging" "$(BINDIR)/$(INSTALLERNAME).deb"
+	@dpkg-deb --root-owner-group --build "$(BINDIR)/deb-staging" "$(BINDIR)/$(DEBNAME).deb"
 	@$(RM) -r $(BINDIR)/deb-staging
 
 # COMPILES ONLY FILES INSIDE TEST DIRECTORY
@@ -164,8 +166,8 @@ clean:
 	@echo " $(RM) -r $(BINDIR)/arm64_app"; $(RM) -r $(BINDIR)/arm64_app
 	@echo " $(RM) -r $(BINDIR)/x86_app"; $(RM) -r $(BINDIR)/x86_app
 	@echo " $(RM) -r $(BUNDLE)"; $(RM) -r $(BUNDLE)
-	@echo " $(RM) -r $(BINDIR)/$(INSTALLERNAME).dmg"; $(RM) -r $(BINDIR)/$(INSTALLERNAME).dmg
-	@echo " $(RM) -r $(BINDIR)/$(INSTALLERNAME).deb"; $(RM) -r $(BINDIR)/$(INSTALLERNAME).deb
+	@echo " $(RM) -r $(BINDIR)/$(DMGNAME).dmg"; $(RM) -r $(BINDIR)/$(DMGNAME).dmg
+	@echo " $(RM) -r $(BINDIR)/$(DEBNAME).deb"; $(RM) -r $(BINDIR)/$(DEBNAME).deb
 
 # DELETE BIN DIRECTORY
 cleanall:
