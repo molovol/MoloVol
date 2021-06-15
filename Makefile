@@ -175,4 +175,4 @@ cleanall:
 	@echo " $(RM) -r $(BUILDIR) $(BINDIR)"; $(RM) -r $(BUILDIR) $(BINDIR)
 
 
-.PHONY: all, clean, cleanall, release, universal_app, x86_app, arm64_app, appbundle, dmg, deb, test, cleantest, probetest, protein
+.PHONY: all, clean, cleanall, release, universal_app, x86_app, arm64_app, appbundle, appbundle_entry, dmg, dmg_entry, deb, test, cleantest, probetest, protein
