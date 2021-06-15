@@ -9,6 +9,8 @@ INSTALLERNAME := MoloVol_macOS_beta_v1
 
 TARGET := $(BINDIR)/$(APP)
 BUNDLE := $(TARGET).app
+BUILDDIR_ARM64 := $(BUILDDIR)/arm64
+BUILDDIR_X86 := $(BUILDDIR)/x86
 
 TESTDIR := test
 TESTTARGET := test/out
@@ -16,6 +18,8 @@ TESTBUILDDIR := test/build
 
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
+OBJECTS_ARM64 := $(patsubst $(SRCDIR)/%,$(BUILDDIR_ARM64)/%,$(SOURCES:.$(SRCEXT)=.o))
+OBJECTS_X86 := $(patsubst $(SRCDIR)/%,$(BUILDDIR_X86)/%,$(SOURCES:.$(SRCEXT)=.o))
 
 TESTSOURCES := $(shell find $(TESTDIR) -type f -name *.$(SRCEXT))
 TESTOBJECTS := $(patsubst $(TESTDIR)/%,$(TESTBUILDDIR)/%,$(TESTSOURCES:.$(SRCEXT)=.o))
@@ -50,21 +54,43 @@ release: CFLAGS += $(RELEASEFLAGS)
 release: $(TARGET)
 
 # FOR UNIVERSAL BINARY ON MACOS
-x86_app: ARCHFLAG = $(X86FLAG)
-x86_app: release
-	@mv $(TARGET) $(BINDIR)/x86_app
-	@echo " $(RM) -r $(BUILDDIR)"; $(RM) -r $(BUILDDIR)
-
 arm64_app: ARCHFLAG = $(ARM64FLAG)
-arm64_app: release
-	@mv $(TARGET) $(BINDIR)/arm64_app
-	@echo " $(RM) -r $(BUILDDIR)"; $(RM) -r $(BUILDDIR)
+arm64_app: $(OBJECTS_ARM64)
+	@echo "Linking..."
+	mkdir -p $(BINDIR)
+	$(CC) $(CXXFLAGS) $(ARCHFLAG) $^ `wx-config $(WXFLAGS)` -o $(BINDIR)/arm64_app
 
-universal_app: $(BINDIR)/x86_app $(BINDIR)/arm64_app
+$(BUILDDIR_ARM64)/%.o: $(SRCDIR)/%.$(SRCEXT)
+	mkdir -p $(BUILDDIR)
+	mkdir -p $(BUILDDIR_ARM64)
+	$(CC) $(CFLAGS) $(INC) $(ARCHFLAG) -c `wx-config $(WXFLAGS)` -o $@ $<
+
+x86_app: ARCHFLAG = $(X86FLAG)
+x86_app: $(OBJECTS_X86)
+	@echo "Linking..."
+	mkdir -p $(BINDIR)
+	$(CC) $(CXXFLAGS) $(ARCHFLAG) $^ `wx-config $(WXFLAGS)` -o $(BINDIR)/x86_app
+
+$(BUILDDIR_X86)/%.o: $(SRCDIR)/%.$(SRCEXT)
+	mkdir -p $(BUILDDIR)
+	mkdir -p $(BUILDDIR_X86)
+	$(CC) $(CFLAGS) $(INC) $(ARCHFLAG) -c `wx-config $(WXFLAGS)` -o $@ $<
+
+universal_app: CXXFLAGS += $(RELEASEFLAGS)
+universal_app: CFLAGS += $(RELEASEFLAGS)
+universal_app: x86_app arm64_app
 	@lipo -create -output $(TARGET) $(BINDIR)/x86_app $(BINDIR)/arm64_app
+
+appbundle_universal: universal_app
+appbundle_universal: appbundle_entry
+
+dmg_universal: appbundle_universal
+dmg_universal: dmg_entry
 
 # INSTALLER FOR MACOS
 appbundle: release
+appbundle: appbundle_entry
+appbundle_entry:
 	@echo "Creating bundle..."
 	@echo " $(RM) -r $(BUNDLE)"; $(RM) -r $(BUNDLE)
 	@echo " mkdir -p $(BUNDLE)"; mkdir -p $(BUNDLE)
@@ -79,6 +105,8 @@ appbundle: release
 	/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f $(BUNDLE)
 
 dmg: appbundle
+dmg: dmg_entry
+dmg_entry:
 	@echo " $(RM) -r $(BINDIR)/$(INSTALLERNAME).dmg"; $(RM) -r $(BINDIR)/$(INSTALLERNAME).dmg
 	@$(RM) -r $(BINDIR)/dmgdir
 	@echo "Creating dmg file..."
