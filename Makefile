@@ -179,7 +179,7 @@ clean:
 # DELETE BIN DIRECTORY
 cleanall:
 	@echo "Cleaning..."
-	@echo " $(RM) -r $(BUILDIR) $(BINDIR)"; $(RM) -r $(BUILDIR) $(BINDIR)
+	@echo " $(RM) -r $(BUILDDIR) $(BINDIR)"; $(RM) -r $(BUILDDIR) $(BINDIR)
 
 
 .PHONY: all, clean, cleanall, release, universal_app, x86_app, arm64_app, appbundle, appbundle_entry, dmg, dmg_entry, deb, test, cleantest, probetest, protein
