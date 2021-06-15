@@ -3,17 +3,17 @@ SRCDIR := src
 BUILDDIR := build
 BINDIR := bin
 LINUXRES := res/linux
+SRCEXT := cpp
 APP := MoloVol
 INSTALLERNAME := MoloVol_macOS_beta_v1
-TARGET := $(BINDIR)/$(APP)
 
+TARGET := $(BINDIR)/$(APP)
 BUNDLE := $(TARGET).app
 
 TESTDIR := test
 TESTTARGET := test/out
 TESTBUILDDIR := test/build
 
-SRCEXT := cpp
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 
@@ -25,11 +25,10 @@ RELEASEFLAGS := -O3
 CXXFLAGS := -std=c++17 -Wall -Werror 
 CFLAGS := -std=c++17 -Wno-unused-command-line-argument -Wno-invalid-source-encoding
 WXFLAGS := --cxxflags --libs --version=3.1
-INC := -I include
-
 ARCHFLAG := 
 X86FLAG := -target x86_64-apple-macos10.12
 ARM64FLAG := -target arm64-apple-macos11
+INC := -I include
 
 # DEVELOPMENT BUILD
 all: CXXFLAGS += $(DEBUGFLAGS)
