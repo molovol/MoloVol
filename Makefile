@@ -27,13 +27,45 @@ CFLAGS := -std=c++17 -Wno-unused-command-line-argument -Wno-invalid-source-encod
 WXFLAGS := --cxxflags --libs --version=3.1
 INC := -I include
 
+ARCHFLAG := 
+X86FLAG := -target x86_64-apple-macos10.12
+ARM64FLAG := -target arm64-apple-macos11
+
+# DEVELOPMENT BUILD
 all: CXXFLAGS += $(DEBUGFLAGS)
 all: CFLAGS += $(DEBUGFLAGS)
 all: $(TARGET)
 
-appbundle: CXXFLAGS += $(RELEASEFLAGS)
-appbundle: CFLAGS += $(RELEASEFLAGS)
-appbundle: $(TARGET)
+$(TARGET): $(OBJECTS)
+	@echo "Linking..."
+	mkdir -p $(BINDIR)
+	$(CC) $(CXXFLAGS) $(ARCHFLAG) $^ `wx-config $(WXFLAGS)` -o $(TARGET)
+
+$(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
+	mkdir -p $(BUILDDIR)
+	$(CC) $(CFLAGS) $(INC) $(ARCHFLAG) -c `wx-config $(WXFLAGS)` -o $@ $<
+
+# RELEASE BUILD - SHOULD BE PLACED IN INSTALLER PACKAGE
+release: CXXFLAGS += $(RELEASEFLAGS)
+release: CFLAGS += $(RELEASEFLAGS)
+release: $(TARGET)
+
+# FOR UNIVERSAL BINARY ON MACOS
+x86_app: ARCHFLAG = $(X86FLAG)
+x86_app: release
+	@mv $(TARGET) $(BINDIR)/x86_app
+	@echo " $(RM) -r $(BUILDDIR)"; $(RM) -r $(BUILDDIR)
+
+arm64_app: ARCHFLAG = $(ARM64FLAG)
+arm64_app: release
+	@mv $(TARGET) $(BINDIR)/arm64_app
+	@echo " $(RM) -r $(BUILDDIR)"; $(RM) -r $(BUILDDIR)
+
+universal_app: $(BINDIR)/x86_app $(BINDIR)/arm64_app
+	@lipo -create -output $(TARGET) $(BINDIR)/x86_app $(BINDIR)/arm64_app
+
+# INSTALLER FOR MACOS
+appbundle: release
 	@echo "Creating bundle..."
 	@echo " $(RM) -r $(BUNDLE)"; $(RM) -r $(BUNDLE)
 	@echo " mkdir -p $(BUNDLE)"; mkdir -p $(BUNDLE)
@@ -47,15 +79,6 @@ appbundle: $(TARGET)
 	@echo " cp inputfile/space_groups.txt $(BUNDLE)/Contents/Resources"; cp inputfile/space_groups.txt $(BUNDLE)/Contents/Resources
 	/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f $(BUNDLE)
 
-$(TARGET): $(OBJECTS)
-	@echo "Linking..."
-	mkdir -p $(BINDIR)
-	$(CC) $(CXXFLAGS) $^ `wx-config $(WXFLAGS)` -o $(TARGET)
-
-$(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
-	mkdir -p $(BUILDDIR)
-	$(CC) $(CFLAGS) $(INC) -c `wx-config $(WXFLAGS)` -o $@ $<
-
 dmg: appbundle
 	@echo " $(RM) -r $(BINDIR)/$(DMGNAME).dmg"; $(RM) -r $(BINDIR)/$(DMGNAME).dmg
 	@$(RM) -r $(BINDIR)/dmgdir
@@ -68,9 +91,8 @@ dmg: appbundle
 	@hdiutil create -fs HFS+ -srcfolder "$(BINDIR)/dmgdir" -volname "$(DMGNAME)" "$(BINDIR)/$(DMGNAME).dmg"
 	@$(RM) -r $(BINDIR)/dmgdir
 
-deb: CXXFLAGS += $(RELEASEFLAGS)
-deb: CFLAGS += $(RELEASEFLAGS)
-deb: $(TARGET)
+# INSTALLER ON DEBIAN AND UBUNTU
+deb: release
 	@$(RM) -r $(BINDIR)/deb-staging
 	@echo "Creating deb file..."
 	@bash $(LINUXRES)/shell/deb-filestructure.sh $(BINDIR)
@@ -93,6 +115,7 @@ deb: $(TARGET)
 	@dpkg-deb --root-owner-group --build "$(BINDIR)/deb-staging" "$(BINDIR)/molovol.deb"
 	@$(RM) -r $(BINDIR)/deb-staging
 
+# COMPILES ONLY FILES INSIDE TEST DIRECTORY
 test: $(TESTOBJECTS)
 	$(CC) $(CXXFLAGS) $^ `wx-config $(WXFLAGS)` -o $(TESTTARGET)
 
@@ -100,27 +123,26 @@ $(TESTBUILDDIR)/%.o: $(TESTDIR)/%.$(SRCEXT)
 	@mkdir -p $(TESTBUILDDIR)
 	$(CC) $(CFLAGS) $(INC) -c `wx-config $(WXFLAGS)` -o $@ $<
 
-probetest:
-	$(TARGET) -u excluded
-
-protein:
-	$(TARGET) -u protein
-
+# REMOVE TEST DIRECTORY BINARIES
 cleantest:
 	@echo "Cleaning Test Directory..."
 	@echo " $(RM) -r $(TESTBUILDDIR)"; $(RM) -r $(TESTBUILDDIR)
 	@echo " $(RM) $(TESTTARGET)"; $(RM) $(TESTTARGET)
 
+# EXPLICIT CLEAN
 clean:
 	@echo "Cleaning..."; 
 	@echo " $(RM) -r $(BUILDDIR) $(TARGET)"; $(RM) -r $(BUILDDIR) $(TARGET)
+	@echo " $(RM) -r $(BINDIR)/arm64_app"; $(RM) -r $(BINDIR)/arm64_app
+	@echo " $(RM) -r $(BINDIR)/x86_app"; $(RM) -r $(BINDIR)/x86_app
 	@echo " $(RM) -r $(BUNDLE)"; $(RM) -r $(BUNDLE)
 	@echo " $(RM) -r $(BINDIR)/$(DMGNAME).dmg"; $(RM) -r $(BINDIR)/$(DMGNAME).dmg
 	@echo " $(RM) -r $(BINDIR)/molovol.deb"; $(RM) -r $(BINDIR)/molovol.deb
 
+# DELETE BIN DIRECTORY
 cleanall:
 	@echo "Cleaning..."
 	@echo " $(RM) -r $(BINDIR)"; $(RM) -r $(BINDIR)
 
 
-.PHONY: all, clean, cleanall, appbundle, dmg, deb, test, cleantest, probetest, protein
+.PHONY: all, clean, cleanall, release, universal_app, x86_app, arm64_app, appbundle, dmg, deb, test, cleantest, probetest, protein
