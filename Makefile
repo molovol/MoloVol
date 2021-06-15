@@ -159,7 +159,8 @@ cleantest:
 # EXPLICIT CLEAN
 clean:
 	@echo "Cleaning..."; 
-	@echo " $(RM) -r $(BUILDDIR) $(TARGET)"; $(RM) -r $(BUILDDIR) $(TARGET)
+	@echo " $(RM) -r $(BUILDDIR)"; $(RM) -r $(BUILDDIR)
+	@echo " $(RM) -r $(TARGET)"; $(RM) -r $(TARGET)
 	@echo " $(RM) -r $(BINDIR)/arm64_app"; $(RM) -r $(BINDIR)/arm64_app
 	@echo " $(RM) -r $(BINDIR)/x86_app"; $(RM) -r $(BINDIR)/x86_app
 	@echo " $(RM) -r $(BUNDLE)"; $(RM) -r $(BUNDLE)
