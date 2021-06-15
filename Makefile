@@ -2,6 +2,7 @@ CC := g++
 SRCDIR := src
 BUILDDIR := build
 BINDIR := bin
+LINUXRES := res/linux
 APP := MoloVol
 DMGNAME :=MoloVol_macOS_beta_v1
 TARGET := $(BINDIR)/$(APP)
@@ -67,6 +68,31 @@ dmg: appbundle
 	@hdiutil create -fs HFS+ -srcfolder "$(BINDIR)/dmgdir" -volname "$(DMGNAME)" "$(BINDIR)/$(DMGNAME).dmg"
 	@$(RM) -r $(BINDIR)/dmgdir
 
+deb: CXXFLAGS += $(RELEASEFLAGS)
+deb: CFLAGS += $(RELEASEFLAGS)
+deb: $(TARGET)
+	@$(RM) -r $(BINDIR)/deb-staging
+	@echo "Creating deb file..."
+	@bash $(LINUXRES)/shell/deb-filestructure.sh $(BINDIR)
+	@cp $(LINUXRES)/control $(BINDIR)/deb-staging/DEBIAN/
+	@bash $(LINUXRES)/shell/f-architecture.sh >> $(BINDIR)/deb-staging/DEBIAN/control
+	@strip $(TARGET)
+	@mv $(TARGET) $(BINDIR)/deb-staging/usr/bin/molovol
+	@cp $(LINUXRES)/MoloVol.desktop $(BINDIR)/deb-staging/usr/share/applications/
+	@cp $(LINUXRES)/copyright $(BINDIR)/deb-staging/usr/share/doc/molovol/
+	@cp $(LINUXRES)/changelog $(BINDIR)/deb-staging/usr/share/doc/molovol/
+	@gzip -9 -n $(BINDIR)/deb-staging/usr/share/doc/molovol/changelog
+	@cp $(LINUXRES)/molovol.1 $(BINDIR)/deb-staging/usr/share/man/man1/
+	@gzip -9 -n $(BINDIR)/deb-staging/usr/share/man/man1/molovol.1
+	@cp inputfile/space_groups.txt $(BINDIR)/deb-staging/usr/share/molovol/
+	@cp inputfile/radii.txt $(BINDIR)/deb-staging/usr/share/molovol/
+	@cp $(LINUXRES)/molovol.png $(BINDIR)/deb-staging/usr/share/pixmaps/
+	@bash $(LINUXRES)/shell/icons.sh $(LINUXRES)/molovol.png $(BINDIR)/deb-staging/usr/share/icons/hicolor
+	@find $(BINDIR)/deb-staging/usr -type f -exec chmod 0644 {} +
+	@chmod 0755 $(BINDIR)/deb-staging/usr/bin/molovol
+	@dpkg-deb --root-owner-group --build "$(BINDIR)/deb-staging" "$(BINDIR)/molovol.deb"
+	@$(RM) -r $(BINDIR)/deb-staging
+
 test: $(TESTOBJECTS)
 	$(CC) $(CXXFLAGS) $^ `wx-config $(WXFLAGS)` -o $(TESTTARGET)
 
@@ -90,10 +116,11 @@ clean:
 	@echo " $(RM) -r $(BUILDDIR) $(TARGET)"; $(RM) -r $(BUILDDIR) $(TARGET)
 	@echo " $(RM) -r $(BUNDLE)"; $(RM) -r $(BUNDLE)
 	@echo " $(RM) -r $(BINDIR)/$(DMGNAME).dmg"; $(RM) -r $(BINDIR)/$(DMGNAME).dmg
+	@echo " $(RM) -r $(BINDIR)/molovol.deb"; $(RM) -r $(BINDIR)/molovol.deb
 
 cleanall:
 	@echo "Cleaning..."
 	@echo " $(RM) -r $(BINDIR)"; $(RM) -r $(BINDIR)
 
 
-.PHONY: all, clean, cleanall, appbundle, test, cleantest, probetest, protein
+.PHONY: all, clean, cleanall, appbundle, dmg, deb, test, cleantest, probetest, protein
