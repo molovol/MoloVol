@@ -5,7 +5,7 @@ BINDIR := bin
 LINUXRES := res/linux
 SRCEXT := cpp
 APP := MoloVol
-VERSION := beta_v1
+VERSION := v0.1
 DMGNAME := $(APP)_macOS_$(VERSION)
 DEBNAME := $(APP)_debian_$(VERSION)
 
