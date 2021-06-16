@@ -2,6 +2,8 @@
 <dict>
   <key>CFBundleName</key>
   <string>MoloVol</string>
+  <key>CFBundleDisplayName</key>
+  <string>MoloVol</string>
   <key>CFBundleVersion</key>
   <string>0.1</string>
   <key>CFBundlePackageType</key>
@@ -10,5 +12,7 @@
   <string>MoloVol</string>
   <key>CFBundleIconFile</key>
   <string>icon</string>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>en</string>
 </dict>
 </plist>
