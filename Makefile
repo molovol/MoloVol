@@ -32,9 +32,9 @@ CXXFLAGS := -std=c++17 -Wall -Werror
 CFLAGS := -std=c++17 -Wno-unused-command-line-argument -Wno-invalid-source-encoding
 WXFLAGS := --cxxflags --libs --version=3.1
 ARCHFLAG := 
-X86FLAG := -target x86_64-apple-macos10.12
+X86FLAG := -target x86_64-apple-macos10.11
 ARM64FLAG := -target arm64-apple-macos11
-MACOS_VERSIONFLAG := -mmacosx-version-min=10.15
+MACOS_VERSIONFLAG := -mmacosx-version-min=10.11
 INC := -I include
 
 # DEVELOPMENT BUILD
@@ -57,8 +57,6 @@ release: CFLAGS += $(RELEASEFLAGS)
 release: $(TARGET)
 
 # FOR UNIVERSAL BINARY ON MACOS
-arm64_app: CXXFLAGS += $(MACOS_VERSIONFLAG)
-arm64_app: CFLAGS += $(MACOS_VERSIONFLAG)
 arm64_app: ARCHFLAG = $(ARM64FLAG)
 arm64_app: $(OBJECTS_ARM64)
 	@echo "Linking..."
@@ -70,8 +68,6 @@ $(BUILDDIR_ARM64)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	mkdir -p $(BUILDDIR_ARM64)
 	$(CC) $(CFLAGS) $(INC) $(ARCHFLAG) -c `wx-config $(WXFLAGS)` -o $@ $<
 
-x86_app: CXXFLAGS += $(MACOS_VERSIONFLAG)
-x86_app: CFLAGS += $(MACOS_VERSIONFLAG)
 x86_app: ARCHFLAG = $(X86FLAG)
 x86_app: $(OBJECTS_X86)
 	@echo "Linking..."
