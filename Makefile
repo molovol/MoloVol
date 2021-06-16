@@ -34,7 +34,7 @@ WXFLAGS := --cxxflags --libs --version=3.1
 ARCHFLAG := 
 X86FLAG := -target x86_64-apple-macos10.12
 ARM64FLAG := -target arm64-apple-macos11
-MACOS_VERSIONFLAG := -mmacosx-version-min=10.6
+MACOS_VERSIONFLAG := -mmacosx-version-min=10.15
 INC := -I include
 
 # DEVELOPMENT BUILD
