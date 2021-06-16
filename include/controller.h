@@ -48,7 +48,7 @@ class Ctrl{
     bool unittestSurface();
     bool unittestFloodfill();
 
-    inline static const std::string s_version = "beta 1";
+    inline static const std::string s_version = "0.1.0";
   private:
     // consider making static pointer for model
     Model* _current_calculation;
