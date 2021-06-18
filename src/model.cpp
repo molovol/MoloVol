@@ -108,6 +108,7 @@ CalcReportBundle Model::generateData(){
   return data;
 }
 
+std::string generateChemicalFormula(const std::map<std::string,int>&, const std::vector<std::string>&);
 CalcReportBundle Model::generateVolumeData(){
   // PREPARATION
   // clear calculation times from previous runs
@@ -127,7 +128,7 @@ CalcReportBundle Model::generateVolumeData(){
   // set size of the box containing all atoms
   defineCell();
 
-  generateChemicalFormula();
+  _data.chemical_formula = generateChemicalFormula(optionAnalyzeUnitCell()? _unit_cell_atom_amounts : _atom_amounts, _data.included_elements);
   auto end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
   // START CALCULATION
@@ -230,29 +231,24 @@ void Model::setRadiusMap(std::unordered_map<std::string, double> map){
   _radius_map = map;
 }
 
-void Model::generateChemicalFormula(){
-  std::string chemical_formula_suffix = "";
-  std::string chemical_formula_prefix = "";
-  std::map<std::string, int> atom_list = (_data.analyze_unit_cell) ? _unit_cell_atom_amounts : _atom_amounts;
-  for(auto elem : atom_list){
+std::string generateChemicalFormula(const std::map<std::string,int>& n_atoms, const std::vector<std::string>& included_elem){
+  std::string chemical_formula = "";
+  std::string prefix = "";
+  // iterate through map in lexographic order
+  for (auto elem: n_atoms){
     std::string symbol = elem.first;
-    // if element is included by user in gui
-    if (isIncluded(symbol, _data.included_elements)){
-      std::string subscript = std::to_string(elem.second);
+    std::string subscript = std::to_string(elem.second);
+    if (isIncluded(symbol, included_elem)){
       // by convention: carbon comes first, then hydrogen, then in alphabetical order
-      if (symbol == "C"){
-        chemical_formula_prefix = symbol + subscript + chemical_formula_prefix;
+      if (symbol == "C" || symbol == "H"){
+        prefix += symbol + subscript;
       }
-      else if (symbol == "H"){
-        chemical_formula_prefix += symbol + subscript;
-      }
-
       else {
-        chemical_formula_suffix += symbol + subscript;
+        chemical_formula += symbol + subscript;
       }
     }
   }
-  _data.chemical_formula = chemical_formula_prefix + chemical_formula_suffix;
+  return prefix + chemical_formula;
 }
 
 ///////////////////////////

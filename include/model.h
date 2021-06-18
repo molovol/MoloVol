@@ -118,7 +118,6 @@ class Model{
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void setRadiusMap(std::unordered_map<std::string, double> map);
     bool setProbeRadii(const double, const double, const bool);
-    void generateChemicalFormula();
 
   private:
     CalcReportBundle _data;
