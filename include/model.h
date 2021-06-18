@@ -113,7 +113,6 @@ class Model{
     void setAtomListForCalculation();
     void linkAtomsToAdjacentAtoms(const double&);
     void linkToAdjacentAtoms(const double&, Atom&);
-    CalcReportBundle calcVolume();
     bool setParameters(std::string, std::string, bool, bool, bool, bool, double, double, double, int, bool, bool, bool, std::unordered_map<std::string, double>, std::vector<std::string>, double);
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void setRadiusMap(std::unordered_map<std::string, double> map);
@@ -135,6 +134,8 @@ class Model{
     std::vector<Atom> _atoms;
     Space _cell;
     double _max_atom_radius = 0;
+
+    void prepareVolumeCalc();
 
     // access functions for information stored in data
     double getCalcTime(){return _data.getTime();}

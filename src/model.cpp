@@ -108,18 +108,52 @@ CalcReportBundle Model::generateData(){
   return data;
 }
 
-std::string generateChemicalFormula(const std::map<std::string,int>&, const std::vector<std::string>&);
 CalcReportBundle Model::generateVolumeData(){
-  // PREPARATION
+  prepareVolumeCalc();
+  if (!_data.success){return _data;} // if there's been an error during preparation
+
+  { // assign each voxel in grid a type
+    auto start = std::chrono::steady_clock::now();
+    bool cavities_exceeded = false;
+    _cell.assignTypeInGrid(_atoms, getProbeRad1(), getProbeRad2(), optionProbeMode(), cavities_exceeded);
+    if(Ctrl::getInstance()->getAbortFlag()){
+      _data.success = false;
+      return _data;
+    }
+    if(cavities_exceeded){Ctrl::getInstance()->displayErrorMessage(201);}
+    auto end = std::chrono::steady_clock::now();
+    _data.addTime(std::chrono::duration<double>(end-start).count());
+  }
+  { // sum total volume
+    auto start = std::chrono::steady_clock::now();
+    if(_data.analyze_unit_cell){
+      _cell.getUnitCellVolume(_data.volumes, _data.cavities);
+    }
+    else{
+      _cell.getVolume(_data.volumes, _data.cavities);
+    }
+    
+    // sort cavities by volume from largest to smallest
+    inverseSort(_data.cavities);
+    auto end = std::chrono::steady_clock::now();
+    _data.addTime(std::chrono::duration<double>(end-start).count());
+  }
+  return _data;
+}
+
+std::string generateChemicalFormula(const std::map<std::string,int>&, const std::vector<std::string>&);
+void Model::prepareVolumeCalc(){
+  auto start = std::chrono::steady_clock::now();
   // clear calculation times from previous runs
   _data.elapsed_seconds.clear();
+  // reset the success value to avoid lingering errors from previous failed calculations
+  _data.success = true;
 
-  auto start = std::chrono::steady_clock::now();
-  // process atom data for unit cell analysis if the option it ticked
+  // process atom data for unit cell analysis if the option is ticked
   if(optionAnalyzeUnitCell()){
     if(!processUnitCell()){
       _data.success = false;
-      return _data;
+      return;
     }
   }
 
@@ -131,8 +165,6 @@ CalcReportBundle Model::generateVolumeData(){
   _data.chemical_formula = generateChemicalFormula(optionAnalyzeUnitCell()? _unit_cell_atom_amounts : _atom_amounts, _data.included_elements);
   auto end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
-  // START CALCULATION
-  return calcVolume();
 }
 
 CalcReportBundle Model::generateSurfaceData(){
@@ -262,42 +294,6 @@ void Model::defineCell(){
   }
   _cell = Space(_atoms, _data.grid_step, _data.max_depth, optionProbeMode()? getProbeRad2() : getProbeRad1(), optionAnalyzeUnitCell(), unit_cell_limits);
   return;
-}
-
-CalcReportBundle Model::calcVolume(){
-  // set back the default value of success to true to avoid lingering errors from previous failed calculations
-  _data.success = true;
-
-  { // assign each voxel in grid a type
-    auto start = std::chrono::steady_clock::now();
-    bool cavities_exceeded = false;
-    _cell.assignTypeInGrid(_atoms, getProbeRad1(), getProbeRad2(), optionProbeMode(), cavities_exceeded);
-    if(Ctrl::getInstance()->getAbortFlag()){
-      _data.success = false;
-      return _data;
-    }
-    if(cavities_exceeded){Ctrl::getInstance()->displayErrorMessage(201);}
-    auto end = std::chrono::steady_clock::now();
-    _data.addTime(std::chrono::duration<double>(end-start).count());
-  }
-
-  // debugging tool
-  // _cell.printGrid();
-
-  { // sum total volume
-    auto start = std::chrono::steady_clock::now();
-    if(_data.analyze_unit_cell){
-      _cell.getUnitCellVolume(_data.volumes, _data.cavities);
-    }
-    else{
-      _cell.getVolume(_data.volumes, _data.cavities);
-    }
-    auto end = std::chrono::steady_clock::now();
-    _data.addTime(std::chrono::duration<double>(end-start).count());
-  }
-  // sort cavities by volume from largest to smallest
-  inverseSort(_data.cavities);
-  return _data;
 }
 
 ////////////////////////////////////////////
