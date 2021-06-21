@@ -222,7 +222,6 @@ void Ctrl::clearOutput(){
 void Ctrl::displayResults(CalcReportBundle& data){
   clearOutput();
   if(data.success){
-    if(!data.cavities.empty()){displayCavityList(data);}
     std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
 
     notifyUser("Result for ");
@@ -260,6 +259,7 @@ void Ctrl::displayResults(CalcReportBundle& data){
       notifyUser(surf_unit);
     }
     notifyUser("\n");
+    if(!data.cavities.empty()){displayCavityList(data);}
   }
   else{
     if(!getAbortFlag()){displayErrorMessage(200);}
@@ -271,7 +271,27 @@ void Ctrl::displayCavityList(CalcReportBundle& data){
     s_gui->extDisplayCavityList(data.cavities);
   }
   else{
-    //TODO: display cavity data
+    std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
+    std::wstring surf_unit = Symbol::angstrom() + Symbol::squared();
+    
+    notifyUser("Cavity ID\tVolume (");
+    notifyUser(vol_unit);
+    notifyUser(")\tCore Surface (");
+    notifyUser(surf_unit);
+    notifyUser(")\tShell Surface (");
+    notifyUser(surf_unit);
+    notifyUser(")\tPosition (");
+    notifyUser(Symbol::angstrom());
+    notifyUser(",");
+    notifyUser(Symbol::angstrom());
+    notifyUser(",");
+    notifyUser(Symbol::angstrom());
+    notifyUser(")\n");
+    for (int i = 0; i < data.cavities.size(); ++i){
+      printf("%i\t%12.6f\t%12.6f\t%12.6f\t",
+          i+1, data.cavities[i].getVolume(), data.cavities[i].getSurfCore(), data.cavities[i].getSurfShell());
+      std::cout << data.cavities[i].getPosition() << std::endl;
+    }
   }
 }
 
