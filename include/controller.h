@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <wx/wx.h>
 
+struct CalcReportBundle;
 class Model;
 class MainFrame;
 class Ctrl{
@@ -60,7 +61,9 @@ class Ctrl{
     bool _abort_calculation; // variable for main thread to signal stopping the calculation
     bool _calculation_finished;
     bool _to_gui = true; // determines whether to print to console or to GUI
-    
+   
+    void displayResults(CalcReportBundle&);
+    void displayCavityList(CalcReportBundle&);
     std::string getErrorMessage(const int);
 };
 

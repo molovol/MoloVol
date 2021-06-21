@@ -89,6 +89,10 @@ bool Ctrl::loadAtomFile(){
   return successful_import;
 }
 
+/////////////////
+// CALCULATION //
+/////////////////
+
 // default function call: transfer data from GUI to Model
 bool Ctrl::runCalculation(){
   // reset abort flag
@@ -126,49 +130,8 @@ bool Ctrl::runCalculation(){
   calculationDone(data.success);
 
   // OUTPUT
-  clearOutput();
-  if(data.success){
-    if(!data.cavities.empty()){s_gui->extDisplayCavityList(data.cavities);}
-    std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
+  displayResults(data);
 
-    notifyUser("Result for ");
-    notifyUser(Symbol::generateChemicalFormulaUnicode(data.chemical_formula));
-    notifyUser("\nElapsed time: " + std::to_string(data.getTime()) + " s");
-
-    notifyUser("\n<VOLUME>");
-    notifyUser("\nVan der Waals volume: " + std::to_string(data.volumes[0b00000011]) + " ");
-    notifyUser(vol_unit);
-    notifyUser("\nProbe inaccessible volume: " + std::to_string(data.volumes[0b00000101]) + " ");
-    notifyUser(vol_unit);
-    std::string prefix = data.probe_mode? "Small p" : "P";
-    notifyUser("\n"+ prefix +"robe core volume: " + std::to_string(data.volumes[0b00001001]) + " ");
-    notifyUser(vol_unit);
-    notifyUser("\n"+ prefix +"robe shell volume: " + std::to_string(data.volumes[0b00010001]) + " ");
-    notifyUser(vol_unit);
-    if(data.probe_mode){
-      notifyUser("\nLarge probe core volume: " + std::to_string(data.volumes[0b00100001]) + " ");
-      notifyUser(vol_unit);
-      notifyUser("\nLarge probe shell volume: " + std::to_string(data.volumes[0b01000001]) + " ");
-      notifyUser(vol_unit);
-    }
-    if(data.calc_surface_areas && !Ctrl::getInstance()->getAbortFlag()){
-      std::wstring surf_unit = Symbol::angstrom() + Symbol::squared();
-      notifyUser("\n<SURFACE>");
-      notifyUser("\nVan der Waals surface: " + std::to_string(data.getSurfVdw()) + " ");
-      notifyUser(surf_unit);
-      if(data.probe_mode){
-        notifyUser("\nMolecular surface: " + std::to_string(data.getSurfMolecular()) + " ");
-        notifyUser(surf_unit);
-      }
-      notifyUser("\n"+prefix+"robe excluded surface: " + std::to_string(data.getSurfProbeExcluded()) + " ");
-      notifyUser(surf_unit);
-      notifyUser("\n"+prefix+"robe accessible surface: " + std::to_string(data.getSurfProbeAccessible()) + " ");
-      notifyUser(surf_unit);
-    }
-  }
-  else{
-    if(!getAbortFlag()){displayErrorMessage(200);}
-  }
   updateStatus((data.success && !Ctrl::getInstance()->getAbortFlag())? "Calculation done." : "Calculation aborted.");
 
   if (data.success){
@@ -229,14 +192,76 @@ bool Ctrl::runCalculation(const double probe_radius_s, const double grid_resolut
     included_elements);
 
   CalcReportBundle data = _current_calculation->generateData();
-  
+ 
+  displayResults(data);
+
   return data.success;
 }
+
+////////////////////////
+// USER COMMUNICATION //
+////////////////////////
 
 void Ctrl::clearOutput(){
   if (_to_gui) {
     s_gui->extClearOutputText();
     s_gui->extClearOutputGrid();
+  }
+}
+
+void Ctrl::displayResults(CalcReportBundle& data){
+  clearOutput();
+  if(data.success){
+    if(!data.cavities.empty()){displayCavityList(data);}
+    std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
+
+    notifyUser("Result for ");
+    notifyUser(Symbol::generateChemicalFormulaUnicode(data.chemical_formula));
+    notifyUser("\nElapsed time: " + std::to_string(data.getTime()) + " s");
+
+    notifyUser("\n<VOLUME>");
+    notifyUser("\nVan der Waals volume: " + std::to_string(data.volumes[0b00000011]) + " ");
+    notifyUser(vol_unit);
+    notifyUser("\nProbe inaccessible volume: " + std::to_string(data.volumes[0b00000101]) + " ");
+    notifyUser(vol_unit);
+    std::string prefix = data.probe_mode? "Small p" : "P";
+    notifyUser("\n"+ prefix +"robe core volume: " + std::to_string(data.volumes[0b00001001]) + " ");
+    notifyUser(vol_unit);
+    notifyUser("\n"+ prefix +"robe shell volume: " + std::to_string(data.volumes[0b00010001]) + " ");
+    notifyUser(vol_unit);
+    if(data.probe_mode){
+      notifyUser("\nLarge probe core volume: " + std::to_string(data.volumes[0b00100001]) + " ");
+      notifyUser(vol_unit);
+      notifyUser("\nLarge probe shell volume: " + std::to_string(data.volumes[0b01000001]) + " ");
+      notifyUser(vol_unit);
+    }
+    if(data.calc_surface_areas && !Ctrl::getInstance()->getAbortFlag()){
+      std::wstring surf_unit = Symbol::angstrom() + Symbol::squared();
+      notifyUser("\n<SURFACE>");
+      notifyUser("\nVan der Waals surface: " + std::to_string(data.getSurfVdw()) + " ");
+      notifyUser(surf_unit);
+      if(data.probe_mode){
+        notifyUser("\nMolecular surface: " + std::to_string(data.getSurfMolecular()) + " ");
+        notifyUser(surf_unit);
+      }
+      notifyUser("\n"+prefix+"robe excluded surface: " + std::to_string(data.getSurfProbeExcluded()) + " ");
+      notifyUser(surf_unit);
+      notifyUser("\n"+prefix+"robe accessible surface: " + std::to_string(data.getSurfProbeAccessible()) + " ");
+      notifyUser(surf_unit);
+    }
+    notifyUser("\n");
+  }
+  else{
+    if(!getAbortFlag()){displayErrorMessage(200);}
+  }
+}
+
+void Ctrl::displayCavityList(CalcReportBundle& data){
+  if (_to_gui){
+    s_gui->extDisplayCavityList(data.cavities);
+  }
+  else{
+    //TODO: display cavity data
   }
 }
 
@@ -276,6 +301,10 @@ void Ctrl::updateProgressBar(const int percentage){
     std::cout << std::to_string(percentage) + "\%"  << std::endl;
   }
 }
+
+////////////
+// EXPORT //
+////////////
 
 void Ctrl::exportReport(std::string path){
   _current_calculation->createReport(path);
