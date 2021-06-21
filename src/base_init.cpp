@@ -60,6 +60,10 @@ static const wxCmdLineEntryDesc cmd_line_desc[] =
 
 static const std::vector<std::string> required_args = {"r", "g", "fs"};
 
+bool validateProbes(const double, const double, const bool);
+bool validateExport(const std::string, const std::vector<bool>);
+bool validatePdb(const std::string, const bool, const bool);
+
 // return true to supress GUI, return false to open GUI
 void MainApp::evalCmdLine(){
   // if there are no cmd line arguments, open app normally
@@ -139,6 +143,10 @@ void MainApp::evalCmdLine(){
   exp_total_map = parser.Found("xt");
   exp_cavity_maps = parser.Found("xc");
 
+  validateProbes(probe_radius_s, probe_radius_l, opt_probe_mode);
+  validateExport(output_dir_path.ToStdString(), {exp_report, exp_total_map, exp_cavity_maps});
+  validatePdb(structure_file_path.ToStdString(), opt_include_hetatm, opt_unit_cell);
+
   // run calculation
   Ctrl::getInstance()->runCalculation(
       probe_radius_s, 
@@ -155,6 +163,21 @@ void MainApp::evalCmdLine(){
       exp_report,
       exp_total_map,
       exp_cavity_maps);
+}
+
+bool validateProbes(const double r1, const double r2, const bool pm){
+  //TODO
+  return true;
+}
+
+bool validateExport(const std::string out_dir, const std::vector<bool> exp_options){
+  //TODO
+  return true;
+}
+
+bool validatePdb(const std::string file, const bool hetatm, const bool unitcell){
+  //TODO
+  return true;
 }
 
 // OnRun() is called after OnInit() returns true. In order to suppress the GUI, the attribute "silent" has to
