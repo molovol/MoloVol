@@ -317,7 +317,10 @@ static const std::map<int, std::string> s_error_codes = {
   {300, "Output failed!"},
   {301, "Data missing to export file. Calculation may be still running or has not been started."},
   {302, "Invalid output directory. Please select a valid output directory."},
-  {303, "An unidentified issue has been encountered while writing the surface map."}
+  {303, "An unidentified issue has been encountered while writing the surface map."},
+  // 9xx: Issues with command line arguments
+  {900, "Command line interface failed!"},
+  {901, "At least one required command line argument missing."}
 };
 
 void Ctrl::displayErrorMessage(const int error_code){

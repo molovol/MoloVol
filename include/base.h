@@ -29,7 +29,7 @@ class MainApp: public wxApp
     virtual int OnExit();
 
   private:
-    bool evalCmdLine();
+    void evalCmdLine();
     void silenceGUI(bool);
     bool isSilent();
 };

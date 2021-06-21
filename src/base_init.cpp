@@ -20,14 +20,16 @@ IMPLEMENT_APP(MainApp)
 // first custom code that is run
 bool MainApp::OnInit()
 {
-  if(evalCmdLine()){
-    silenceGUI(true);
-    return true;
+  if (argc != 1){
+    // command line interface
+    evalCmdLine();
   }
-  // initialise the GUI
-  MainFrame* MainWin = new MainFrame(_("MoloVol " + Ctrl::s_version), wxDefaultPosition, wxDefaultSize);
-  MainWin->Show(true);
-  SetTopWindow(MainWin);
+  else {
+    // initialise the GUI
+    MainFrame* MainWin = new MainFrame(_("MoloVol " + Ctrl::s_version), wxDefaultPosition, wxDefaultSize);
+    MainWin->Show(true);
+    SetTopWindow(MainWin);
+  }
   return true;
 };
 
@@ -45,17 +47,16 @@ static const wxCmdLineEntryDesc cmd_line_desc[] =
 static const std::vector<std::string> required_args = {"r", "g", "fs"};
 
 // return true to supress GUI, return false to open GUI
-bool MainApp::evalCmdLine(){
+void MainApp::evalCmdLine(){
   // if there are no cmd line arguments, open app normally
-  if (argc == 1){return false;}
+  silenceGUI(true);
   wxCmdLineParser parser = wxCmdLineParser(argc,argv);
   parser.SetDesc(cmd_line_desc);
   // if something is wrong with the cmd line args, stop
-  if(parser.Parse() != 0){return true;}
-  // UNIT TESTS
+  if(parser.Parse() != 0){return;}
+  // unit tests
   wxString unittest_id;
   if (parser.Found("u",&unittest_id)){
-    silenceGUI(true);
     std::cout << "Selected unit test: " << unittest_id << std::endl;
     if (unittest_id=="excluded"){
       Ctrl::getInstance()->unittestExcluded();
@@ -76,9 +77,17 @@ bool MainApp::evalCmdLine(){
       Ctrl::getInstance()->unittestFloodfill();
     }
     else {
-      std::cout << "Invalid selection" << std::endl;}
+      std::cout << "Invalid selection" << std::endl;
+    }
+    return;
   }
-  return true;
+  // check if all required arguments are available
+  for (auto& arg_name : required_args){
+    if (!parser.Found(arg_name)){
+      Ctrl::getInstance()->displayErrorMessage(901);
+      return;
+    }
+  }
 }
 
 // OnRun() is called after OnInit() returns true. In order to suppress the GUI, the attribute "silent" has to
