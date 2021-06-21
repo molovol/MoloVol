@@ -3,7 +3,7 @@
 #define FLAGS_H
 
 // output flags
-enum : unsigned {
+enum mvOUT : unsigned {
   mvOUT_NONE = 0,
   
   mvOUT_STRUCTURE = 1 << 1,
