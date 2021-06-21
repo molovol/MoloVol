@@ -36,9 +36,13 @@ bool MainApp::OnInit()
 // contains all command line options
 static const wxCmdLineEntryDesc cmd_line_desc[] =
 {
+  // required
   { wxCMD_LINE_OPTION, "r", "radius", "Probe radius", wxCMD_LINE_VAL_DOUBLE},
   { wxCMD_LINE_OPTION, "g", "grid", "Spatial resolution of the underlying grid", wxCMD_LINE_VAL_DOUBLE},
   { wxCMD_LINE_OPTION, "fs", "file-structure", "Path to the structure file", wxCMD_LINE_VAL_STRING},
+  // optional
+  { wxCMD_LINE_OPTION, "fr", "file-radius", "Path to the radius file", wxCMD_LINE_VAL_STRING},
+  { wxCMD_LINE_OPTION, "d", "depth", "Octree depth", wxCMD_LINE_VAL_NUMBER},
   { wxCMD_LINE_SWITCH, "s", "silent", "Silence progress reporting", wxCMD_LINE_VAL_NONE, 0},
   { wxCMD_LINE_OPTION, "u", "unittest", "Run a programmed unit test", wxCMD_LINE_VAL_STRING},
   { wxCMD_LINE_NONE }
@@ -88,6 +92,8 @@ void MainApp::evalCmdLine(){
       return;
     }
   }
+
+  // minimum required arguments for calculation
   double probe_radius_s;
   double grid_resolution;
   wxString structure_file_path;
@@ -95,8 +101,22 @@ void MainApp::evalCmdLine(){
   parser.Found("r",&probe_radius_s);
   parser.Found("g",&grid_resolution);
   parser.Found("fs",&structure_file_path);
+ 
+  // optional arguments with default values
+  wxString radius_file_path = getResourcesDir() + "/radii.txt";
+  long tree_depth = 4;
 
-  Ctrl::getInstance()->runCalculation(probe_radius_s, grid_resolution, structure_file_path.ToStdString());
+  parser.Found("fr",&radius_file_path);
+  parser.Found("d",&tree_depth);
+
+  // run calculation
+  Ctrl::getInstance()->runCalculation(
+      probe_radius_s, 
+      grid_resolution, 
+      structure_file_path.ToStdString(), 
+      radius_file_path.ToStdString(),
+      (int)tree_depth
+      );
 }
 
 // OnRun() is called after OnInit() returns true. In order to suppress the GUI, the attribute "silent" has to
