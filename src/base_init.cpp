@@ -17,20 +17,35 @@ IMPLEMENT_APP(MainApp)
 // MAIN APP IS INITIALISED //
 /////////////////////////////
 
-// contains all command line options
-static const wxCmdLineEntryDesc gCmdLineDesc[] =
-{
-  { wxCMD_LINE_SWITCH, "s", "silent", "Silence GUI", wxCMD_LINE_VAL_NONE, 0},
-  { wxCMD_LINE_OPTION, "u", "unittest", "Run a unittest", wxCMD_LINE_VAL_STRING},
-  { wxCMD_LINE_NONE }
-};
-
 // first custom code that is run
 bool MainApp::OnInit()
 {
+  if(evalCmdLine()){
+    silenceGUI(true);
+    return true;
+  }
+  // initialise the GUI
+  MainFrame* MainWin = new MainFrame(_("MoloVol " + Ctrl::s_version), wxDefaultPosition, wxDefaultSize);
+  MainWin->Show(true);
+  SetTopWindow(MainWin);
+  return true;
+};
+
+// contains all command line options
+static const wxCmdLineEntryDesc gCmdLineDesc[] =
+{
+  { wxCMD_LINE_SWITCH, "s", "silent", "Silence progress reporting", wxCMD_LINE_VAL_NONE, 0},
+  { wxCMD_LINE_OPTION, "u", "unittest", "Run a programmed unit test", wxCMD_LINE_VAL_STRING},
+  { wxCMD_LINE_OPTION, "r", "radius", "Probe radius", wxCMD_LINE_VAL_DOUBLE},
+  { wxCMD_LINE_OPTION, "g", "grid", "Spatial resolution of the underlying grid", wxCMD_LINE_VAL_DOUBLE},
+  { wxCMD_LINE_OPTION, "fs", "file-structure", "Path to the structure file", wxCMD_LINE_VAL_STRING},
+  { wxCMD_LINE_NONE }
+};
+
+bool MainApp::evalCmdLine(){
   wxCmdLineParser parser = wxCmdLineParser(argc,argv);
   parser.SetDesc(gCmdLineDesc);
-  assert(parser.Parse()==0);
+  if(parser.Parse() != 0){return false;}
   wxString unittest_id;
   if (parser.Found("u",&unittest_id)){
     silenceGUI(true);
@@ -57,12 +72,8 @@ bool MainApp::OnInit()
       std::cout << "Invalid selection" << std::endl;}
     return true;
   }
-  // initialise the GUI
-  MainFrame* MainWin = new MainFrame(_("MoloVol " + Ctrl::s_version), wxDefaultPosition, wxDefaultSize);
-  MainWin->Show(true);
-  SetTopWindow(MainWin);
-  return true;
-};
+  return false;
+}
 
 // OnRun() is called after OnInit() returns true. In order to suppress the GUI, the attribute "silent" has to
 // be toggled. this can be done by opening the app from the command line
