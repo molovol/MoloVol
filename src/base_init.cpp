@@ -104,7 +104,17 @@ void MainApp::evalCmdLine(){
  
   // optional arguments with default values
   wxString radius_file_path = getResourcesDir() + "/radii.txt";
+  wxString output_dir_path = "";
+  wxString output = "vol";
+  double probe_radius_l = 0;
   long tree_depth = 4;
+  bool opt_include_hetatm = false;
+  bool opt_unit_cell = false;
+  bool opt_surface_area = false;
+  bool opt_probe_mode = false;
+  bool exp_report = false;
+  bool exp_total_map = false;
+  bool exp_cavity_maps = false;
 
   parser.Found("fr",&radius_file_path);
   parser.Found("d",&tree_depth);
@@ -112,11 +122,19 @@ void MainApp::evalCmdLine(){
   // run calculation
   Ctrl::getInstance()->runCalculation(
       probe_radius_s, 
+      probe_radius_l, 
       grid_resolution, 
       structure_file_path.ToStdString(), 
       radius_file_path.ToStdString(),
-      (int)tree_depth
-      );
+      output_dir_path.ToStdString(),
+      (int)tree_depth,
+      opt_include_hetatm,
+      opt_unit_cell,
+      opt_surface_area,
+      opt_probe_mode,
+      exp_report,
+      exp_total_map,
+      exp_cavity_maps);
 }
 
 // OnRun() is called after OnInit() returns true. In order to suppress the GUI, the attribute "silent" has to

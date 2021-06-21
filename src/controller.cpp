@@ -147,23 +147,22 @@ bool Ctrl::runCalculation(){
 // for starting a calculation from the command line
 bool Ctrl::runCalculation(
     const double probe_radius_s, 
+    const double probe_radius_l,
     const double grid_resolution, 
     const std::string& structure_file_path,
     const std::string& radius_file_path,
-    const int tree_depth
+    const std::string& output_dir_path,
+    const int tree_depth,
+    const bool opt_include_hetatm,
+    const bool opt_unit_cell,
+    const bool opt_surface_area,
+    const bool opt_probe_mode,
+    const bool exp_report,
+    const bool exp_total_map,
+    const bool exp_cavity_maps
     ){
   if(_current_calculation == NULL){_current_calculation = new Model();}
  
-  const std::string& output_dir_path="";
-  const bool opt_include_hetatm=false;
-  const bool opt_unit_cell=false;
-  const bool opt_surface_area=false;
-  const bool opt_probe_mode=false;
-  const double probe_radius_l=0;
-  const bool exp_report=false;
-  const bool exp_total_map=false;
-  const bool exp_cavity_maps=false;
-
   try{_current_calculation->readAtomsFromFile(structure_file_path, false);}
   catch (const ExceptInvalidInputFile& e){
     displayErrorMessage(102);
