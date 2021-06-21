@@ -171,7 +171,7 @@ bool Ctrl::runCalculation(
     ){
   if(_current_calculation == NULL){_current_calculation = new Model();}
  
-  try{_current_calculation->readAtomsFromFile(structure_file_path, false);}
+  try{_current_calculation->readAtomsFromFile(structure_file_path, opt_include_hetatm);}
   catch (const ExceptInvalidInputFile& e){
     displayErrorMessage(102);
     return false;
@@ -454,7 +454,7 @@ static const std::map<int, std::string> s_error_codes = {
   // 1xx: Invalid Input
   {100, "Import failed!"},
   {101, "Invalid radius definition file. Please select a valid file or set radii manually."},
-  {102, "Invalid structure file. Please select a valid file."},
+  {102, "Invalid structure file. Please select a valid file. You may need to enable the option HETATM."},
   {103, "Invalid file format. Please make sure that the input files have the correct file extensions."},
   {104, "Invalid probe radius input. The large probe must have a larger radius than the small probe."},
   {105, "Invalid entry in structure file encountered. Some atoms have not been imported. Please check the format of the input file."},
