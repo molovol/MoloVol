@@ -14,6 +14,7 @@ class Ctrl{
     static Ctrl* getInstance();
 
     void hush(const bool);
+    void version();
 
     void enableGUI();
     void disableGUI();

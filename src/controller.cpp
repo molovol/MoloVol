@@ -25,6 +25,10 @@ void Ctrl::hush(const bool quiet){
   _quiet = quiet;
 }
 
+void Ctrl::version(){
+  notifyUser("Version: " + s_version + "\n");
+}
+
 ////////////////
 // TOGGLE GUI //
 ////////////////
