@@ -42,7 +42,17 @@ static const wxCmdLineEntryDesc cmd_line_desc[] =
   { wxCMD_LINE_OPTION, "fs", "file-structure", "Path to the structure file", wxCMD_LINE_VAL_STRING},
   // optional
   { wxCMD_LINE_OPTION, "fr", "file-radius", "Path to the radius file", wxCMD_LINE_VAL_STRING},
+  { wxCMD_LINE_OPTION, "do", "dir-output", "Path to the output directory", wxCMD_LINE_VAL_STRING},
+  { wxCMD_LINE_OPTION, "o", "output", "Limit output to values", wxCMD_LINE_VAL_STRING},
+  { wxCMD_LINE_OPTION, "r2", "radius2", "Large probe radius", wxCMD_LINE_VAL_DOUBLE},
   { wxCMD_LINE_OPTION, "d", "depth", "Octree depth", wxCMD_LINE_VAL_NUMBER},
+  { wxCMD_LINE_SWITCH, "ht", "hetatm", "Include HETATM from pdb file", wxCMD_LINE_VAL_NONE, 0},
+  { wxCMD_LINE_SWITCH, "uc", "unitcell", "Evaluate unit cell", wxCMD_LINE_VAL_NONE, 0},
+  { wxCMD_LINE_SWITCH, "sf", "surface", "Calculate surfaces", wxCMD_LINE_VAL_NONE, 0},
+  { wxCMD_LINE_SWITCH, "pm", "probemode", "Enable two-probe mode", wxCMD_LINE_VAL_NONE, 0},
+  { wxCMD_LINE_SWITCH, "xr", "export-report", "Export report", wxCMD_LINE_VAL_NONE, 0},
+  { wxCMD_LINE_SWITCH, "xt", "export-total", "Export total surface map", wxCMD_LINE_VAL_NONE, 0},
+  { wxCMD_LINE_SWITCH, "xc", "export-cavities", "Export surface maps for all cavities", wxCMD_LINE_VAL_NONE, 0},
   { wxCMD_LINE_SWITCH, "s", "silent", "Silence progress reporting", wxCMD_LINE_VAL_NONE, 0},
   { wxCMD_LINE_OPTION, "u", "unittest", "Run a programmed unit test", wxCMD_LINE_VAL_STRING},
   { wxCMD_LINE_NONE }
@@ -117,7 +127,17 @@ void MainApp::evalCmdLine(){
   bool exp_cavity_maps = false;
 
   parser.Found("fr",&radius_file_path);
+  parser.Found("do",&output_dir_path);
+  parser.Found("o",&output);
+  parser.Found("r2",&probe_radius_l);
   parser.Found("d",&tree_depth);
+  opt_include_hetatm = parser.Found("ht");
+  opt_unit_cell = parser.Found("uc");
+  opt_surface_area = parser.Found("sf");
+  opt_probe_mode = parser.Found("pm");
+  exp_report = parser.Found("xr");
+  exp_total_map = parser.Found("xt");
+  exp_cavity_maps = parser.Found("xc");
 
   // run calculation
   Ctrl::getInstance()->runCalculation(
