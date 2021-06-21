@@ -480,7 +480,8 @@ static const std::map<int, std::string> s_error_codes = {
   {303, "An unidentified issue has been encountered while writing the surface map."},
   // 9xx: Issues with command line arguments
   {900, "Command line interface failed!"},
-  {901, "At least one required command line argument missing."}
+  {901, "At least one required command line argument missing."},
+  {902, "Invalid output display option. At least one parameter belonging to '-o' is invalid and will be ignored."}
 };
 
 void Ctrl::displayErrorMessage(const int error_code){

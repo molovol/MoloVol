@@ -22,7 +22,7 @@ static const wxCmdLineEntryDesc s_cmd_line_desc[] =
   // optional
   { wxCMD_LINE_OPTION, "fr", "file-radius", "Path to the radius file", wxCMD_LINE_VAL_STRING},
   { wxCMD_LINE_OPTION, "do", "dir-output", "Path to the output directory", wxCMD_LINE_VAL_STRING},
-  { wxCMD_LINE_OPTION, "o", "output", "Limit output to values", wxCMD_LINE_VAL_STRING},
+  { wxCMD_LINE_OPTION, "o", "output", "Control what parts of the output will be displayed", wxCMD_LINE_VAL_STRING},
   { wxCMD_LINE_OPTION, "r2", "radius2", "Large probe radius", wxCMD_LINE_VAL_DOUBLE},
   { wxCMD_LINE_OPTION, "d", "depth", "Octree depth", wxCMD_LINE_VAL_NUMBER},
   { wxCMD_LINE_SWITCH, "ht", "hetatm", "Include HETATM from pdb file", wxCMD_LINE_VAL_NONE, 0},
@@ -41,8 +41,8 @@ static const std::vector<std::string> s_required_args = {"r", "g", "fs"};
 
 bool validateProbes(const double, const double, const bool);
 bool validateExport(const std::string, const std::vector<bool>);
-bool validateOutput(const std::string);
 bool validatePdb(const std::string, const bool, const bool);
+unsigned evalDisplayOptions(const std::string);
 
 // return true to supress GUI, return false to open GUI
 void MainApp::evalCmdLine(){
@@ -132,10 +132,11 @@ void MainApp::evalCmdLine(){
 
   if(!validateProbes(probe_radius_s, probe_radius_l, opt_probe_mode)
       || !validateExport(output_dir_path.ToStdString(), {exp_report, exp_total_map, exp_cavity_maps})
-      || !validateOutput(output.ToStdString())
       || !validatePdb(structure_file_path.ToStdString(), opt_include_hetatm, opt_unit_cell)){
     return;
   }
+  
+  unsigned display_flag = evalDisplayOptions(output.ToStdString());
 
   // run calculation
   Ctrl::getInstance()->runCalculation(
@@ -172,17 +173,6 @@ bool validateExport(const std::string out_dir, const std::vector<bool> exp_optio
   return true;
 }
 
-bool validateOutput(const std::string output){ 
-  std::stringstream ss(output);
-  std::vector<std::string> options;
-  while(ss.good()){
-    std::string substr;
-    getline(ss, substr, ',');
-    options.push_back(substr);
-  }
-  return true;
-}
-
 bool validatePdb(const std::string file, const bool hetatm, const bool unitcell){
   if (fileExtension(file) != "pdb" && (hetatm || unitcell)){
     Ctrl::getInstance()->displayErrorMessage(115);
@@ -190,3 +180,57 @@ bool validatePdb(const std::string file, const bool hetatm, const bool unitcell)
   }
   return true;
 }
+
+static std::map<std::string,unsigned> s_display_map {
+  {"none", mvOUT_NONE},
+  {"inputfile", mvOUT_STRUCTURE},
+  {"resolution", mvOUT_RESOLUTION}, 
+  {"depth", mvOUT_DEPTH},
+  {"radius_small", mvOUT_RADIUS_S},
+  {"radius_large", mvOUT_RADIUS_L},
+  {"input", mvOUT_INP},
+  {"hetatm", mvOUT_OPT_HETATM},
+  {"unitcell", mvOUT_OPT_UNITCELL},
+  {"probemode", mvOUT_OPT_PROBEMODE},
+  {"surface", mvOUT_OPT_SURFACE},
+  {"options", mvOUT_OPT},
+  {"formula", mvOUT_FORMULA},
+  {"time", mvOUT_TIME},
+  {"vol_vdw", mvOUT_VOL_VDW},
+  {"vol_inaccessible", mvOUT_VOL_INACCESSIBLE},
+  {"vol_core_s", mvOUT_VOL_CORE_S},
+  {"vol_shell_s", mvOUT_VOL_SHELL_S},
+  {"vol_core_l", mvOUT_VOL_CORE_L},
+  {"vol_shell_l", mvOUT_VOL_SHELL_L},
+  {"vol", mvOUT_VOL},
+  {"surf_vdw", mvOUT_SURF_VDW},
+  {"surf_mol", mvOUT_SURF_MOL},
+  {"surf_excluded_s", mvOUT_SURF_EXCLUDED_S},
+  {"surf_accessible_s", mvOUT_SURF_ACCESSIBLE_S},
+  {"surf", mvOUT_SURF},
+  {"cavities", mvOUT_CAVITIES},
+  {"all", mvALL}
+};
+
+unsigned evalDisplayOptions(const std::string output){ 
+  std::stringstream ss(output);
+  std::vector<std::string> display_options;
+  while(ss.good()){
+    std::string substr;
+    getline(ss, substr, ',');
+    display_options.push_back(substr);
+  }
+  unsigned display_flag = 0;
+  bool unknown_flag;
+  for (std::string& elem : display_options){
+    if (s_display_map.find(elem) == s_display_map.end()){
+      unknown_flag = true;
+    }
+    else {
+      display_flag |= s_display_map.at(elem);
+    }
+  }
+  if (unknown_flag){Ctrl::getInstance()->displayErrorMessage(902);}
+  return display_flag;
+}
+
