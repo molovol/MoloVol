@@ -32,20 +32,27 @@ bool MainApp::OnInit()
 };
 
 // contains all command line options
-static const wxCmdLineEntryDesc gCmdLineDesc[] =
+static const wxCmdLineEntryDesc cmd_line_desc[] =
 {
-  { wxCMD_LINE_SWITCH, "s", "silent", "Silence progress reporting", wxCMD_LINE_VAL_NONE, 0},
-  { wxCMD_LINE_OPTION, "u", "unittest", "Run a programmed unit test", wxCMD_LINE_VAL_STRING},
   { wxCMD_LINE_OPTION, "r", "radius", "Probe radius", wxCMD_LINE_VAL_DOUBLE},
   { wxCMD_LINE_OPTION, "g", "grid", "Spatial resolution of the underlying grid", wxCMD_LINE_VAL_DOUBLE},
   { wxCMD_LINE_OPTION, "fs", "file-structure", "Path to the structure file", wxCMD_LINE_VAL_STRING},
+  { wxCMD_LINE_SWITCH, "s", "silent", "Silence progress reporting", wxCMD_LINE_VAL_NONE, 0},
+  { wxCMD_LINE_OPTION, "u", "unittest", "Run a programmed unit test", wxCMD_LINE_VAL_STRING},
   { wxCMD_LINE_NONE }
 };
 
+static const std::vector<std::string> required_args = {"r", "g", "fs"};
+
+// return true to supress GUI, return false to open GUI
 bool MainApp::evalCmdLine(){
+  // if there are no cmd line arguments, open app normally
+  if (argc == 1){return false;}
   wxCmdLineParser parser = wxCmdLineParser(argc,argv);
-  parser.SetDesc(gCmdLineDesc);
-  if(parser.Parse() != 0){return false;}
+  parser.SetDesc(cmd_line_desc);
+  // if something is wrong with the cmd line args, stop
+  if(parser.Parse() != 0){return true;}
+  // UNIT TESTS
   wxString unittest_id;
   if (parser.Found("u",&unittest_id)){
     silenceGUI(true);
@@ -70,9 +77,8 @@ bool MainApp::evalCmdLine(){
     }
     else {
       std::cout << "Invalid selection" << std::endl;}
-    return true;
   }
-  return false;
+  return true;
 }
 
 // OnRun() is called after OnInit() returns true. In order to suppress the GUI, the attribute "silent" has to
