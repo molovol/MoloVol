@@ -18,8 +18,9 @@
 
 std::string getResourcesDir();
 
-inline bool isIncluded(const std::string& element_symbol, const std::vector<std::string>& included_elements) {
-  return (std::find(included_elements.begin(), included_elements.end(), element_symbol) != included_elements.end());
+template <typename T>
+inline bool isIncluded(const T& elem, const std::vector<T>& list) {
+  return (std::find(list.begin(), list.end(), elem) != list.end());
 }
 
 inline double distance(const std::array<double,3> &start, const std::array<double,3> &end){

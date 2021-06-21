@@ -8,6 +8,7 @@
 #include "special_chars.h"
 #include "controller.h"
 #include "misc.h"
+#include "flags.h"
 #include <cassert>
 #include <filesystem>
 
@@ -63,6 +64,7 @@ static const std::vector<std::string> s_required_args = {"r", "g", "fs"};
 
 bool validateProbes(const double, const double, const bool);
 bool validateExport(const std::string, const std::vector<bool>);
+bool validateOutput(const std::string);
 bool validatePdb(const std::string, const bool, const bool);
 
 // return true to supress GUI, return false to open GUI
@@ -153,6 +155,7 @@ void MainApp::evalCmdLine(){
 
   if(!validateProbes(probe_radius_s, probe_radius_l, opt_probe_mode)
       || !validateExport(output_dir_path.ToStdString(), {exp_report, exp_total_map, exp_cavity_maps})
+      || !validateOutput(output.ToStdString())
       || !validatePdb(structure_file_path.ToStdString(), opt_include_hetatm, opt_unit_cell)){
     return;
   }
@@ -184,14 +187,15 @@ bool validateProbes(const double r1, const double r2, const bool pm){
 }
 
 bool validateExport(const std::string out_dir, const std::vector<bool> exp_options){
-  bool any_option_on = false;
-  for (const bool opt : exp_options){
-    any_option_on |= opt;
-  }
+  bool any_option_on = isIncluded(true,exp_options);
   if (any_option_on && !std::filesystem::is_directory(std::filesystem::path(out_dir))){
     Ctrl::getInstance()->displayErrorMessage(302);
     return false;
   }
+  return true;
+}
+
+bool validateOutput(const std::string output){ 
   return true;
 }
 

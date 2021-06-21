@@ -72,5 +72,4 @@ class Ctrl{
     std::string getErrorMessage(const int);
 };
 
-
 #endif
