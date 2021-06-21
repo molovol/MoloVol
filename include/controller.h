@@ -13,6 +13,8 @@ class Ctrl{
   public:
     static Ctrl* getInstance();
 
+    void hush(const bool);
+
     void enableGUI();
     void disableGUI();
     bool isGUIEnabled();
@@ -61,6 +63,7 @@ class Ctrl{
     bool _abort_calculation; // variable for main thread to signal stopping the calculation
     bool _calculation_finished;
     bool _to_gui = true; // determines whether to print to console or to GUI
+    bool _quiet = true; // silences all non-result command line outputs
    
     void displayResults(CalcReportBundle&);
     void displayCavityList(CalcReportBundle&);

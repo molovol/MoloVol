@@ -18,6 +18,14 @@ Ctrl* Ctrl::s_instance = NULL;
 MainFrame* Ctrl::s_gui = NULL;
 
 ////////////////
+// TOGGLE CLI //
+////////////////
+
+void Ctrl::hush(const bool quiet){
+  _quiet = quiet;
+}
+
+////////////////
 // TOGGLE GUI //
 ////////////////
 
@@ -317,7 +325,8 @@ void Ctrl::updateStatus(const std::string str){
   if (_to_gui) {
     s_gui->extSetStatus(str);
   }
-  else {
+  else if(_quiet) {}
+  else{
     std::cout << str << std::endl;
   }
 }
@@ -327,6 +336,7 @@ void Ctrl::updateProgressBar(const int percentage){
   if (_to_gui) {
     s_gui->extSetProgressBar(percentage);
   }
+  else if(_quiet) {}
   else {
     std::cout << std::to_string(percentage) + "\%"  << std::endl;
   }

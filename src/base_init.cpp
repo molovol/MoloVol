@@ -53,7 +53,7 @@ static const wxCmdLineEntryDesc cmd_line_desc[] =
   { wxCMD_LINE_SWITCH, "xr", "export-report", "Export report", wxCMD_LINE_VAL_NONE, 0},
   { wxCMD_LINE_SWITCH, "xt", "export-total", "Export total surface map", wxCMD_LINE_VAL_NONE, 0},
   { wxCMD_LINE_SWITCH, "xc", "export-cavities", "Export surface maps for all cavities", wxCMD_LINE_VAL_NONE, 0},
-  { wxCMD_LINE_SWITCH, "s", "silent", "Silence progress reporting", wxCMD_LINE_VAL_NONE, 0},
+  { wxCMD_LINE_SWITCH, "q", "quiet", "Silence progress reporting", wxCMD_LINE_VAL_NONE, 0},
   { wxCMD_LINE_OPTION, "u", "unittest", "Run a programmed unit test", wxCMD_LINE_VAL_STRING},
   { wxCMD_LINE_NONE }
 };
@@ -107,6 +107,8 @@ void MainApp::evalCmdLine(){
     }
   }
 
+  Ctrl::getInstance()->hush(parser.Found("q"));
+
   // minimum required arguments for calculation
   double probe_radius_s;
   double grid_resolution;
@@ -119,7 +121,7 @@ void MainApp::evalCmdLine(){
   // optional arguments with default values
   wxString radius_file_path = getResourcesDir() + "/radii.txt";
   wxString output_dir_path = "";
-  wxString output = "vol";
+  wxString output = "all"; // TODO: allow partial output (for instance: "vol", "surf", "time", etc.)
   double probe_radius_l = 0;
   long tree_depth = 4;
   bool opt_include_hetatm = false;
