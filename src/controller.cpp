@@ -6,6 +6,7 @@
 #include "misc.h"
 #include "exception.h"
 #include "special_chars.h"
+#include "flags.h"
 #include <chrono>
 #include <utility>
 #include <map>
@@ -171,8 +172,8 @@ bool Ctrl::runCalculation(
     const bool opt_probe_mode,
     const bool exp_report,
     const bool exp_total_map,
-    const bool exp_cavity_maps
-    ){
+    const bool exp_cavity_maps,
+    const unsigned display_flag){
   if(_current_calculation == NULL){_current_calculation = new Model();}
  
   try{_current_calculation->readAtomsFromFile(structure_file_path, opt_include_hetatm);}
@@ -207,9 +208,9 @@ bool Ctrl::runCalculation(
   CalcReportBundle data = _current_calculation->generateData();
 
   updateStatus((data.success && !Ctrl::getInstance()->getAbortFlag())? "Calculation done." : "Calculation aborted.");
-  
-  displayInput(data);
-  displayResults(data);
+ 
+  if (display_flag & (mvOUT_INP | mvOUT_OPT)){displayInput(data);}
+  if (display_flag & (mvOUT_VOL | mvOUT_SURF | mvOUT_CAVITIES)){displayResults(data);}
 
   if (data.success){
     // export if appropriate option is toggled

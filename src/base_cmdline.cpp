@@ -153,7 +153,8 @@ void MainApp::evalCmdLine(){
       opt_probe_mode,
       exp_report,
       exp_total_map,
-      exp_cavity_maps);
+      exp_cavity_maps,
+      display_flag);
 }
 
 bool validateProbes(const double r1, const double r2, const bool pm){
