@@ -69,6 +69,12 @@ bool Model::setParameters(std::string file_path,
   _data.make_cav_maps = make_cav_maps;
   setRadiusMap(rad_map);
   _data.included_elements = included_elem;
+  /*
+  _max_atom_radius = 0;
+  for (auto& elem : _data.included_elements){
+    if (findRadiusOfAtom(elem) > _max_atom_radius){_max_atom_radius = findRadiusOfAtom(elem);}
+  }
+  */
   _max_atom_radius = max_radius;
   return true;
 }

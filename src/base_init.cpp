@@ -88,6 +88,15 @@ void MainApp::evalCmdLine(){
       return;
     }
   }
+  double probe_radius_s;
+  double grid_resolution;
+  wxString structure_file_path;
+
+  parser.Found("r",&probe_radius_s);
+  parser.Found("g",&grid_resolution);
+  parser.Found("fs",&structure_file_path);
+
+  Ctrl::getInstance()->runCalculation(probe_radius_s, grid_resolution, structure_file_path.ToStdString());
 }
 
 // OnRun() is called after OnInit() returns true. In order to suppress the GUI, the attribute "silent" has to

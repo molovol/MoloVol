@@ -19,6 +19,7 @@ class Ctrl{
     bool loadRadiusFile();
     bool loadAtomFile();
     bool runCalculation();
+    bool runCalculation(const double, const double, const std::string&);
     void registerView(MainFrame* inp_gui);
     void clearOutput();
     void notifyUser(std::string);

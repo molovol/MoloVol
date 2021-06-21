@@ -182,6 +182,50 @@ bool Ctrl::runCalculation(){
   return data.success;
 }
 
+// for starting a calculation from the command line
+bool Ctrl::runCalculation(const double probe_radius_s, const double grid_resolution, const std::string& structure_file_path){
+  if(_current_calculation == NULL){_current_calculation = new Model();}
+ 
+  const std::string radius_filepath = getResourcesDir() + "/radii.txt";
+  const int max_depth = 4;
+    
+  const std::string& output_dir_path="";
+  const bool opt_include_hetatm=false;
+  const bool opt_unit_cell=false;
+  const bool opt_surface_area=false;
+  const bool opt_probe_mode=false;
+  const double probe_radius_l=0;
+  const bool exp_report=false;
+  const bool exp_total_map=false;
+  const bool exp_cavity_maps=false;
+  const int tree_depth=4;
+
+  _current_calculation->readAtomsFromFile(structure_file_path, false);
+  std::vector<std::string> included_elements = _current_calculation->listElementsInStructure();
+
+  _current_calculation->setParameters(
+    structure_file_path,
+    output_dir_path,
+    opt_include_hetatm,
+    opt_unit_cell,
+    opt_surface_area,
+    opt_probe_mode,
+    probe_radius_s,
+    probe_radius_l,
+    grid_resolution,
+    tree_depth,
+    exp_report,
+    exp_total_map,
+    exp_cavity_maps,
+    _current_calculation->extractRadiusMap(radius_filepath),
+    included_elements,
+    3);
+
+  CalcReportBundle data = _current_calculation->generateData();
+  
+  return data.success;
+}
+
 void Ctrl::clearOutput(){
   if (_to_gui) {
     s_gui->extClearOutputText();
