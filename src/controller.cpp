@@ -117,8 +117,7 @@ bool Ctrl::runCalculation(){
       s_gui->getMakeSurfaceMap(),
       s_gui->getMakeCavityMaps(),
       s_gui->generateRadiusMap(),
-      s_gui->getIncludedElements(),
-      s_gui->getMaxRad())){
+      s_gui->getIncludedElements())){
     return false;
   }
 
@@ -227,8 +226,7 @@ bool Ctrl::runCalculation(const double probe_radius_s, const double grid_resolut
     exp_total_map,
     exp_cavity_maps,
     _current_calculation->extractRadiusMap(radius_filepath),
-    included_elements,
-    3);
+    included_elements);
 
   CalcReportBundle data = _current_calculation->generateData();
   
