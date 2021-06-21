@@ -35,7 +35,7 @@ bool MainApp::OnInit()
 };
 
 // contains all command line options
-static const wxCmdLineEntryDesc cmd_line_desc[] =
+static const wxCmdLineEntryDesc s_cmd_line_desc[] =
 {
   // required
   { wxCMD_LINE_OPTION, "r", "radius", "Probe radius", wxCMD_LINE_VAL_DOUBLE},
@@ -59,7 +59,7 @@ static const wxCmdLineEntryDesc cmd_line_desc[] =
   { wxCMD_LINE_NONE }
 };
 
-static const std::vector<std::string> required_args = {"r", "g", "fs"};
+static const std::vector<std::string> s_required_args = {"r", "g", "fs"};
 
 bool validateProbes(const double, const double, const bool);
 bool validateExport(const std::string, const std::vector<bool>);
@@ -70,7 +70,7 @@ void MainApp::evalCmdLine(){
   // if there are no cmd line arguments, open app normally
   silenceGUI(true);
   wxCmdLineParser parser = wxCmdLineParser(argc,argv);
-  parser.SetDesc(cmd_line_desc);
+  parser.SetDesc(s_cmd_line_desc);
   // if something is wrong with the cmd line args, stop
   if(parser.Parse() != 0){return;}
   // version
@@ -106,7 +106,7 @@ void MainApp::evalCmdLine(){
     return;
   }
   // check if all required arguments are available
-  for (auto& arg_name : required_args){
+  for (auto& arg_name : s_required_args){
     if (!parser.Found(arg_name)){
       Ctrl::getInstance()->displayErrorMessage(901);
       return;
