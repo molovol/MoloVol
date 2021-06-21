@@ -195,6 +195,15 @@ bool Ctrl::runCalculation(
   CalcReportBundle data = _current_calculation->generateData();
  
   displayResults(data);
+  
+  updateStatus((data.success && !Ctrl::getInstance()->getAbortFlag())? "Calculation done." : "Calculation aborted.");
+
+  if (data.success){
+    // export if appropriate option is toggled
+    if(data.make_report){exportReport();}
+    if(data.make_full_map){exportSurfaceMap(false);}
+    if(data.make_cav_maps){exportSurfaceMap(true);}
+  }
 
   return data.success;
 }
@@ -309,14 +318,14 @@ void Ctrl::updateProgressBar(const int percentage){
 
 void Ctrl::exportReport(std::string path){
   _current_calculation->createReport(path);
-  if(s_gui->getAnalyzeUnitCell()){
+  if(_current_calculation->optionAnalyzeUnitCell()){
     _current_calculation->writeCrystStruct(path);
   }
 }
 
 void Ctrl::exportReport(){
   _current_calculation->createReport();
-  if(s_gui->getAnalyzeUnitCell()){
+  if(_current_calculation->optionAnalyzeUnitCell()){
     _current_calculation->writeCrystStruct();
   }
 }
@@ -391,6 +400,7 @@ static const std::map<int, std::string> s_error_codes = {
   {112, "Invalid unit cell parameters. Check the structure file, or untick the Unit Cell Analysis tickbox."},
   {113, "Space group or symmetry not found. Check the structure and space group files or untick the Unit Cell Analysis tickbox"},
   {114, "Invalid ATOM or HETATM line encountered. Import may be incomplete. Check the structure file."},
+  {115, "Invalid option(s). You may have selected an option that is incompatible with the structure file format."},
   // 2xx: Issue during Calculation
   {200, "Calculation failed!"},
   {201, "Total number of cavities (255) exceeded. Consider changing the probe size. Calculation will proceed."},

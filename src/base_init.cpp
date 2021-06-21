@@ -9,6 +9,7 @@
 #include "controller.h"
 #include "misc.h"
 #include <cassert>
+#include <filesystem>
 
 // wxWidgets macro that contains the entry point, initialised the app, and calls wxApp::OnInit()
 IMPLEMENT_APP(MainApp)
@@ -49,7 +50,6 @@ static const wxCmdLineEntryDesc cmd_line_desc[] =
   { wxCMD_LINE_SWITCH, "ht", "hetatm", "Include HETATM from pdb file", wxCMD_LINE_VAL_NONE, 0},
   { wxCMD_LINE_SWITCH, "uc", "unitcell", "Evaluate unit cell", wxCMD_LINE_VAL_NONE, 0},
   { wxCMD_LINE_SWITCH, "sf", "surface", "Calculate surfaces", wxCMD_LINE_VAL_NONE, 0},
-  { wxCMD_LINE_SWITCH, "pm", "probemode", "Enable two-probe mode", wxCMD_LINE_VAL_NONE, 0},
   { wxCMD_LINE_SWITCH, "xr", "export-report", "Export report", wxCMD_LINE_VAL_NONE, 0},
   { wxCMD_LINE_SWITCH, "xt", "export-total", "Export total surface map", wxCMD_LINE_VAL_NONE, 0},
   { wxCMD_LINE_SWITCH, "xc", "export-cavities", "Export surface maps for all cavities", wxCMD_LINE_VAL_NONE, 0},
@@ -138,14 +138,16 @@ void MainApp::evalCmdLine(){
   opt_include_hetatm = parser.Found("ht");
   opt_unit_cell = parser.Found("uc");
   opt_surface_area = parser.Found("sf");
-  opt_probe_mode = parser.Found("pm");
+  opt_probe_mode = parser.Found("r") && parser.Found("r2");
   exp_report = parser.Found("xr");
   exp_total_map = parser.Found("xt");
   exp_cavity_maps = parser.Found("xc");
 
-  validateProbes(probe_radius_s, probe_radius_l, opt_probe_mode);
-  validateExport(output_dir_path.ToStdString(), {exp_report, exp_total_map, exp_cavity_maps});
-  validatePdb(structure_file_path.ToStdString(), opt_include_hetatm, opt_unit_cell);
+  if(!validateProbes(probe_radius_s, probe_radius_l, opt_probe_mode)
+      || !validateExport(output_dir_path.ToStdString(), {exp_report, exp_total_map, exp_cavity_maps})
+      || !validatePdb(structure_file_path.ToStdString(), opt_include_hetatm, opt_unit_cell)){
+    return;
+  }
 
   // run calculation
   Ctrl::getInstance()->runCalculation(
@@ -166,17 +168,30 @@ void MainApp::evalCmdLine(){
 }
 
 bool validateProbes(const double r1, const double r2, const bool pm){
-  //TODO
+  if(pm && r2 < r1){
+    Ctrl::getInstance()->displayErrorMessage(104);
+    return false;
+  }
   return true;
 }
 
 bool validateExport(const std::string out_dir, const std::vector<bool> exp_options){
-  //TODO
+  bool any_option_on = false;
+  for (const bool opt : exp_options){
+    any_option_on |= opt;
+  }
+  if (any_option_on && !std::filesystem::is_directory(std::filesystem::path(out_dir))){
+    Ctrl::getInstance()->displayErrorMessage(302);
+    return false;
+  }
   return true;
 }
 
 bool validatePdb(const std::string file, const bool hetatm, const bool unitcell){
-  //TODO
+  if (fileExtension(file) != "pdb" && (hetatm || unitcell)){
+    Ctrl::getInstance()->displayErrorMessage(115);
+    return false; 
+  }
   return true;
 }
 
