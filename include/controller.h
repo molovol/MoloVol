@@ -65,6 +65,7 @@ class Ctrl{
     bool _to_gui = true; // determines whether to print to console or to GUI
     bool _quiet = true; // silences all non-result command line outputs
    
+    void displayInput(CalcReportBundle&);
     void displayResults(CalcReportBundle&);
     void displayCavityList(CalcReportBundle&);
     std::string getErrorMessage(const int);

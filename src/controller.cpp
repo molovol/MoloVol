@@ -137,10 +137,10 @@ bool Ctrl::runCalculation(){
   CalcReportBundle data = _current_calculation->generateData();
   calculationDone(data.success);
 
+  updateStatus((data.success && !Ctrl::getInstance()->getAbortFlag())? "Calculation done." : "Calculation aborted.");
+  
   // OUTPUT
   displayResults(data);
-
-  updateStatus((data.success && !Ctrl::getInstance()->getAbortFlag())? "Calculation done." : "Calculation aborted.");
 
   if (data.success){
     // export if appropriate option is toggled
@@ -201,10 +201,11 @@ bool Ctrl::runCalculation(
     included_elements);
 
   CalcReportBundle data = _current_calculation->generateData();
- 
-  displayResults(data);
-  
+
   updateStatus((data.success && !Ctrl::getInstance()->getAbortFlag())? "Calculation done." : "Calculation aborted.");
+  
+  displayInput(data);
+  displayResults(data);
 
   if (data.success){
     // export if appropriate option is toggled
@@ -227,11 +228,45 @@ void Ctrl::clearOutput(){
   }
 }
 
+void Ctrl::displayInput(CalcReportBundle& data){
+  auto yesno = [](bool b){
+    return std::string(b? "yes" : "no");
+  };
+  
+  if(!_to_gui){
+    notifyUser("<INPUT>"); 
+    notifyUser("\nStructure file: " + data.atom_file_path);
+    notifyUser("\nGrid resolution : " + std::to_string(data.grid_step) + " ");
+    notifyUser(Symbol::angstrom());
+    notifyUser("\nOctree depth : " + std::to_string(data.max_depth));
+    if (data.probe_mode){
+      notifyUser("\nSmall probe radius : " + std::to_string(data.r_probe1) + " ");
+      notifyUser(Symbol::angstrom());
+      notifyUser("\nLarge probe radius : " + std::to_string(data.r_probe2) + " ");
+      notifyUser(Symbol::angstrom());
+    }
+    else{
+      notifyUser("\nProbe radius : " + std::to_string(data.r_probe1) + " ");
+      notifyUser(Symbol::angstrom());
+    }
+
+    notifyUser("\n<OPTIONS>");
+    if (fileExtension(data.atom_file_path)=="pdb"){
+      notifyUser("\nInclude HETATM: " + yesno(data.inc_hetatm));
+      notifyUser("\nAnalyze unit cell: " + yesno(data.analyze_unit_cell));
+    }
+    notifyUser("\nEnable two-probe mode: " + yesno(data.probe_mode));
+    notifyUser("\nCalculate surface areas: " + yesno(data.calc_surface_areas));
+    notifyUser("\n");
+  }
+}
+
 void Ctrl::displayResults(CalcReportBundle& data){
   clearOutput();
+  if(!_to_gui){notifyUser("<OUTPUT>\n");}
   if(data.success){
     std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
-
+    
     notifyUser("Result for ");
     notifyUser(Symbol::generateChemicalFormulaUnicode(data.chemical_formula));
     notifyUser("\nElapsed time: " + std::to_string(data.getTime()) + " s");
@@ -282,7 +317,7 @@ void Ctrl::displayCavityList(CalcReportBundle& data){
     std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
     std::wstring surf_unit = Symbol::angstrom() + Symbol::squared();
     
-    notifyUser("Cavity ID\tVolume (");
+    notifyUser("\nCavity ID\tVolume (");
     notifyUser(vol_unit);
     notifyUser(")\tCore Surface (");
     notifyUser(surf_unit);
