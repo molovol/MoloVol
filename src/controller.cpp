@@ -200,7 +200,16 @@ bool Ctrl::runCalculation(const double probe_radius_s, const double grid_resolut
   const bool exp_cavity_maps=false;
   const int tree_depth=4;
 
-  _current_calculation->readAtomsFromFile(structure_file_path, false);
+  try{_current_calculation->readAtomsFromFile(structure_file_path, false);}
+  catch (const ExceptInvalidInputFile& e){
+    displayErrorMessage(102);
+    return false;
+  }
+  catch (const ExceptIllegalFileExtension& e){
+    displayErrorMessage(103);
+    return false;
+  }
+  
   std::vector<std::string> included_elements = _current_calculation->listElementsInStructure();
 
   _current_calculation->setParameters(
@@ -377,7 +386,7 @@ void Ctrl::displayErrorMessage(const int error_code){
 }
 
 void Ctrl::printErrorMessage(const int error_code){
-  std::cout << getErrorMessage(error_code) << std::endl;
+  std::cout << error_code << ": " << getErrorMessage(error_code) << std::endl;
 }
 
 std::string Ctrl::getErrorMessage(const int error_code){
