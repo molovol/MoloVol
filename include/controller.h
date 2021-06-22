@@ -2,15 +2,20 @@
 
 #define CONTROLLER_H
 
+#include "flags.h"
 #include <iostream>
 #include <unordered_map>
 #include <wx/wx.h>
 
+struct CalcReportBundle;
 class Model;
 class MainFrame;
 class Ctrl{
   public:
     static Ctrl* getInstance();
+
+    void hush(const bool);
+    void version();
 
     void enableGUI();
     void disableGUI();
@@ -19,6 +24,7 @@ class Ctrl{
     bool loadRadiusFile();
     bool loadAtomFile();
     bool runCalculation();
+    bool runCalculation(const double, const double, const double, const std::string&, const std::string&, const std::string&, const int, const bool, const bool, const bool, const bool, const bool, const bool, const bool, const unsigned);
     void registerView(MainFrame* inp_gui);
     void clearOutput();
     void notifyUser(std::string);
@@ -59,9 +65,12 @@ class Ctrl{
     bool _abort_calculation; // variable for main thread to signal stopping the calculation
     bool _calculation_finished;
     bool _to_gui = true; // determines whether to print to console or to GUI
-    
+    bool _quiet = true; // silences all non-result command line outputs
+   
+    void displayInput(CalcReportBundle&, const unsigned=mvOUT_ALL);
+    void displayResults(CalcReportBundle&, const unsigned=mvOUT_ALL);
+    void displayCavityList(CalcReportBundle&, const unsigned=mvOUT_ALL);
     std::string getErrorMessage(const int);
 };
-
 
 #endif

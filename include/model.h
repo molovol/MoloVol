@@ -114,11 +114,24 @@ class Model{
     void linkAtomsToAdjacentAtoms(const double&);
     void linkToAdjacentAtoms(const double&, Atom&);
     CalcReportBundle calcVolume();
-    bool setParameters(std::string, std::string, bool, bool, bool, bool, double, double, double, int, bool, bool, bool, std::unordered_map<std::string, double>, std::vector<std::string>, double);
+    bool setParameters(std::string, std::string, bool, bool, bool, bool, double, double, double, int, bool, bool, bool, std::unordered_map<std::string, double>, std::vector<std::string>);
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void setRadiusMap(std::unordered_map<std::string, double> map);
     bool setProbeRadii(const double, const double, const bool);
     void generateChemicalFormula();
+
+    // access functions for information stored in data
+    double getCalcTime(){return _data.getTime();}
+    double getProbeRad1(){return _data.r_probe1;}
+    void setProbeRad1(double r){_data.r_probe1 = r;}
+    double getProbeRad2(){return _data.r_probe2;}
+    void setProbeRad2(double r){_data.r_probe2 = r;}
+    bool optionProbeMode(){return _data.probe_mode;}
+    void toggleProbeMode(bool state){_data.probe_mode = state;}
+    bool optionIncludeHetatm(){return _data.inc_hetatm;}
+    bool optionAnalyzeUnitCell(){return _data.analyze_unit_cell;}
+    bool optionAnalyseUnitCell(){return _data.analyze_unit_cell;}
+    bool optionCalcSurfaceAreas(){return _data.calc_surface_areas;}
 
   private:
     CalcReportBundle _data;
@@ -136,19 +149,6 @@ class Model{
     std::vector<Atom> _atoms;
     Space _cell;
     double _max_atom_radius = 0;
-
-    // access functions for information stored in data
-    double getCalcTime(){return _data.getTime();}
-    double getProbeRad1(){return _data.r_probe1;}
-    void setProbeRad1(double r){_data.r_probe1 = r;}
-    double getProbeRad2(){return _data.r_probe2;}
-    void setProbeRad2(double r){_data.r_probe2 = r;}
-    bool optionProbeMode(){return _data.probe_mode;}
-    void toggleProbeMode(bool state){_data.probe_mode = state;}
-    bool optionIncludeHetatm(){return _data.inc_hetatm;}
-    bool optionAnalyzeUnitCell(){return _data.analyze_unit_cell;}
-    bool optionAnalyseUnitCell(){return _data.analyze_unit_cell;}
-    bool optionCalcSurfaceAreas(){return _data.calc_surface_areas;}
 };
 
 

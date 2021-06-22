@@ -17,50 +17,19 @@ IMPLEMENT_APP(MainApp)
 // MAIN APP IS INITIALISED //
 /////////////////////////////
 
-// contains all command line options
-static const wxCmdLineEntryDesc gCmdLineDesc[] =
-{
-  { wxCMD_LINE_SWITCH, "s", "silent", "Silence GUI", wxCMD_LINE_VAL_NONE, 0},
-  { wxCMD_LINE_OPTION, "u", "unittest", "Run a unittest", wxCMD_LINE_VAL_STRING},
-  { wxCMD_LINE_NONE }
-};
-
 // first custom code that is run
 bool MainApp::OnInit()
 {
-  wxCmdLineParser parser = wxCmdLineParser(argc,argv);
-  parser.SetDesc(gCmdLineDesc);
-  assert(parser.Parse()==0);
-  wxString unittest_id;
-  if (parser.Found("u",&unittest_id)){
-    silenceGUI(true);
-    std::cout << "Selected unit test: " << unittest_id << std::endl;
-    if (unittest_id=="excluded"){
-      Ctrl::getInstance()->unittestExcluded();
-    }
-    else if (unittest_id=="protein"){
-      Ctrl::getInstance()->unittestProtein();
-    }
-    else if (unittest_id=="radius"){
-      Ctrl::getInstance()->unittestRadius();
-    }
-    else if (unittest_id=="2probe"){
-      Ctrl::getInstance()->unittest2Probe();
-    }
-    else if (unittest_id=="surface"){
-      Ctrl::getInstance()->unittestSurface();
-    }
-    else if (unittest_id=="floodfill"){
-      Ctrl::getInstance()->unittestFloodfill();
-    }
-    else {
-      std::cout << "Invalid selection" << std::endl;}
-    return true;
+  if (argc != 1){
+    // command line interface
+    evalCmdLine();
   }
-  // initialise the GUI
-  MainFrame* MainWin = new MainFrame(_("MoloVol " + Ctrl::s_version), wxDefaultPosition, wxDefaultSize);
-  MainWin->Show(true);
-  SetTopWindow(MainWin);
+  else {
+    // initialise the GUI
+    MainFrame* MainWin = new MainFrame(_("MoloVol " + Ctrl::s_version), wxDefaultPosition, wxDefaultSize);
+    MainWin->Show(true);
+    SetTopWindow(MainWin);
+  }
   return true;
 };
 

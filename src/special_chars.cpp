@@ -3,20 +3,31 @@
 #include <iostream>
 #include <cassert>
 
+bool Symbol::s_ascii = false;
+
+void Symbol::limit2ascii(){
+  Symbol::s_ascii = true;
+}
+
+void Symbol::allow_unicode(){
+  Symbol::s_ascii = false;
+}
+
 std::wstring Symbol::angstrom(){
-  return L"\u212B";
+  return Symbol::s_ascii? L"A" : L"\u212B";
 }
 
 std::wstring Symbol::squared(){
-  return L"\u00B2";
+  return Symbol::s_ascii? L"^2" : L"\u00B2";
 }
 
 std::wstring Symbol::cubed(){
-  return L"\u00B3";
+  return Symbol::s_ascii? L"^3": L"\u00B3";
 }
 
 // from a numeric char, return the unicode encoded subscripts
 wchar_t Symbol::digitSubscript(char digit){
+  if (Symbol::s_ascii){return digit;}
   wchar_t subscript = 0x2080;           // unicode encoding of subscript "0"
   int value = digit - '0';              // convert numeric char to corresponding int
   subscript = subscript + value;        // adding a digit to subscript "0" return subscript of that digit
