@@ -9,6 +9,8 @@
 #include <chrono>
 #include <utility>
 #include <map>
+#include <sstream>
+#include <iomanip>
 
 ///////////////////////
 // STATIC ATTRIBUTES //
@@ -386,26 +388,52 @@ void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag
     s_gui->extDisplayCavityList(data.cavities);
   }
   else{
+
+    auto prep_field = [](int n_ws, char alignment){
+      std::stringstream ss;
+      if (alignment == 'r'){
+        ss << std::right;
+      }
+      else if (alignment == 'c'){
+        ss << std::internal;
+      }
+      else{
+        ss << std::left;
+      }
+      return ss;
+    };
+
+    auto field = [prep_field](int n_ws, std::string text="", char alignment='l'){
+      std::stringstream ss = prep_field(n_ws, alignment);
+      ss << std::setw(n_ws) << text;
+      return ss.str();
+    };
+    
+    auto wfield = [prep_field](int n_ws, std::wstring text=L"", char alignment='l'){
+      std::stringstream ss = prep_field(n_ws, alignment);
+      ss << std::setw(n_ws) << text;
+      return ss.str();
+    };
+
     std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
     std::wstring surf_unit = Symbol::angstrom() + Symbol::squared();
     
-    notifyUser("Cavity ID\tVolume (");
-    notifyUser(vol_unit);
-    notifyUser(")\tCore Surface (");
-    notifyUser(surf_unit);
-    notifyUser(")\tShell Surface (");
-    notifyUser(surf_unit);
-    notifyUser(")\tPosition (");
-    notifyUser(Symbol::angstrom());
-    notifyUser(",");
-    notifyUser(Symbol::angstrom());
-    notifyUser(",");
-    notifyUser(Symbol::angstrom());
-    notifyUser(")\n");
+    int width = 20;
+    notifyUser(field(width,"Cavity ID") + field(width,"Volume") + field(width,"Core Surface") + field(width,"Shell Surface") + field(width,"Position") + "\n");
+    
+    notifyUser(field(width));
+    notifyUser(wfield(width,L"(" + vol_unit + L")"));
+    notifyUser(wfield(width,L"(" + surf_unit + L")"));
+    notifyUser(wfield(width,L"(" + surf_unit + L")"));
+    notifyUser(wfield(width,L"(" + Symbol::angstrom() + L"," + Symbol::angstrom() + L"," + Symbol::angstrom() + L")"));
+    notifyUser("\n");
     for (int i = 0; i < data.cavities.size(); ++i){
-      printf("%i\t%12.6f\t%12.6f\t%12.6f\t",
-          i+1, data.cavities[i].getVolume(), data.cavities[i].getSurfCore(), data.cavities[i].getSurfShell());
-      std::cout << data.cavities[i].getPosition() << std::endl;
+      notifyUser(field(width,std::to_string(i+1)));
+      notifyUser(field(width,std::to_string(data.cavities[i].getVolume())));
+      notifyUser(field(width,std::to_string(data.cavities[i].getSurfCore())));
+      notifyUser(field(width,std::to_string(data.cavities[i].getSurfShell())));
+      notifyUser(field(width,data.cavities[i].getPosition()));
+      notifyUser("\n");
     }
   }
 }
