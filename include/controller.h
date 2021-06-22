@@ -2,6 +2,7 @@
 
 #define CONTROLLER_H
 
+#include "flags.h"
 #include <iostream>
 #include <unordered_map>
 #include <wx/wx.h>
@@ -66,9 +67,9 @@ class Ctrl{
     bool _to_gui = true; // determines whether to print to console or to GUI
     bool _quiet = true; // silences all non-result command line outputs
    
-    void displayInput(CalcReportBundle&);
-    void displayResults(CalcReportBundle&);
-    void displayCavityList(CalcReportBundle&);
+    void displayInput(CalcReportBundle&, const unsigned=mvOUT_ALL);
+    void displayResults(CalcReportBundle&, const unsigned=mvOUT_ALL);
+    void displayCavityList(CalcReportBundle&, const unsigned=mvOUT_ALL);
     std::string getErrorMessage(const int);
 };
 

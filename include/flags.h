@@ -37,7 +37,7 @@ enum mvOUT : unsigned {
   mvOUT_SURF = mvOUT_SURF_VDW | mvOUT_SURF_MOL | mvOUT_SURF_EXCLUDED_S | mvOUT_SURF_ACCESSIBLE_S,
 
   mvOUT_CAVITIES = 1 << 27,
-  mvALL = 0xFFFFFFFF
+  mvOUT_ALL = 0xFFFFFFFF
 };
 
 #endif
