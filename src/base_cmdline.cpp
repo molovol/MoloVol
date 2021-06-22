@@ -8,6 +8,7 @@
 #include "controller.h"
 #include "misc.h"
 #include "flags.h"
+#include "special_chars.h"
 #include <cassert>
 #include <filesystem>
 #include <sstream>
@@ -33,6 +34,7 @@ static const wxCmdLineEntryDesc s_cmd_line_desc[] =
   { wxCMD_LINE_SWITCH, "xc", "export-cavities", "Export surface maps for all cavities (requires:-do)", wxCMD_LINE_VAL_NONE, 0},
   { wxCMD_LINE_OPTION, "o", "output", "Control what parts of the output to display (default:all)", wxCMD_LINE_VAL_STRING},
   { wxCMD_LINE_SWITCH, "q", "quiet", "Silence progress reporting", wxCMD_LINE_VAL_NONE, 0},
+  { wxCMD_LINE_SWITCH, "ac", "ascii", "Limit output to ascii", wxCMD_LINE_VAL_NONE},
   { wxCMD_LINE_OPTION, "u", "unittest", "Run a pre-programmed unit test", wxCMD_LINE_VAL_STRING},
   { wxCMD_LINE_SWITCH, "v", "version", "Display the app version", wxCMD_LINE_VAL_NONE},
   { wxCMD_LINE_NONE }
@@ -53,6 +55,8 @@ void MainApp::evalCmdLine(){
   parser.SetDesc(s_cmd_line_desc);
   // if something is wrong with the cmd line args, stop
   if(parser.Parse() != 0){return;}
+  // ascii 
+  if(parser.Found("ac")){Symbol::limit2ascii();}
   // version
   if(parser.Found("v")){
     Ctrl::getInstance()->version();

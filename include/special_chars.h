@@ -12,6 +12,11 @@ class Symbol{
     static std::wstring cubed();
     static wchar_t digitSubscript(char digit);
     static std::wstring generateChemicalFormulaUnicode(std::string);
+
+    static void limit2ascii();
+    static void allow_unicode();
+  private:
+    static bool s_ascii;
 };
 
 #endif
