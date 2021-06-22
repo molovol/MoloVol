@@ -419,20 +419,28 @@ void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag
     std::wstring surf_unit = Symbol::angstrom() + Symbol::squared();
     
     int width = 20;
-    notifyUser(field(width,"Cavity ID") + field(width,"Volume") + field(width,"Core Surface") + field(width,"Shell Surface") + field(width,"Position") + "\n");
+
+    std::string header[] = {"Cavity ID", "Volume", "Core Surface", "Shell Surface", "Position"};
+    std::wstring units[] = {L"", L"(" + vol_unit + L")",L"(" + surf_unit + L")", L"(" + surf_unit + L")", L"(" + Symbol::angstrom() + L"," + Symbol::angstrom() + L"," + Symbol::angstrom() + L")"};
     
-    notifyUser(field(width));
-    notifyUser(wfield(width,L"(" + vol_unit + L")"));
-    notifyUser(wfield(width,L"(" + surf_unit + L")"));
-    notifyUser(wfield(width,L"(" + surf_unit + L")"));
-    notifyUser(wfield(width,L"(" + Symbol::angstrom() + L"," + Symbol::angstrom() + L"," + Symbol::angstrom() + L")"));
+    // HEADER
+    for (std::string elem : header){
+      notifyUser(field(width,elem));
+    }
     notifyUser("\n");
+    // UNITS
+    for (std::wstring elem : units){
+      notifyUser(wfield(width,elem));
+    }
+    notifyUser("\n");
+    
     for (int i = 0; i < data.cavities.size(); ++i){
-      notifyUser(field(width,std::to_string(i+1)));
-      notifyUser(field(width,std::to_string(data.cavities[i].getVolume())));
-      notifyUser(field(width,std::to_string(data.cavities[i].getSurfCore())));
-      notifyUser(field(width,std::to_string(data.cavities[i].getSurfShell())));
-      notifyUser(field(width,data.cavities[i].getPosition()));
+      // CAVITY VALUES
+      std::string values[] = {std::to_string(i+1), std::to_string(data.cavities[i].getVolume()), std::to_string(data.cavities[i].getSurfCore()), std::to_string(data.cavities[i].getSurfShell()), data.cavities[i].getPosition()};
+    
+      for (std::string elem : values){
+        notifyUser(field(width,elem));
+      }
       notifyUser("\n");
     }
   }
