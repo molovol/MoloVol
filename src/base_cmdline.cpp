@@ -15,6 +15,7 @@
 // contains all command line options
 static const wxCmdLineEntryDesc s_cmd_line_desc[] =
 {
+  { wxCMD_LINE_SWITCH, "h", "help", "Display help for command line interface", wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP},
   // required
   { wxCMD_LINE_OPTION, "r", "radius", "Probe radius", wxCMD_LINE_VAL_DOUBLE},
   { wxCMD_LINE_OPTION, "g", "grid", "Spatial resolution of the underlying grid", wxCMD_LINE_VAL_DOUBLE},
@@ -22,17 +23,17 @@ static const wxCmdLineEntryDesc s_cmd_line_desc[] =
   // optional
   { wxCMD_LINE_OPTION, "fr", "file-radius", "Path to the radius file", wxCMD_LINE_VAL_STRING},
   { wxCMD_LINE_OPTION, "do", "dir-output", "Path to the output directory", wxCMD_LINE_VAL_STRING},
-  { wxCMD_LINE_OPTION, "o", "output", "Control what parts of the output will be displayed", wxCMD_LINE_VAL_STRING},
-  { wxCMD_LINE_OPTION, "r2", "radius2", "Large probe radius", wxCMD_LINE_VAL_DOUBLE},
+  { wxCMD_LINE_OPTION, "r2", "radius2", "Large probe radius (for two-probe mode)", wxCMD_LINE_VAL_DOUBLE},
   { wxCMD_LINE_OPTION, "d", "depth", "Octree depth", wxCMD_LINE_VAL_NUMBER},
   { wxCMD_LINE_SWITCH, "ht", "hetatm", "Include HETATM from pdb file", wxCMD_LINE_VAL_NONE, 0},
   { wxCMD_LINE_SWITCH, "uc", "unitcell", "Evaluate unit cell", wxCMD_LINE_VAL_NONE, 0},
   { wxCMD_LINE_SWITCH, "sf", "surface", "Calculate surfaces", wxCMD_LINE_VAL_NONE, 0},
-  { wxCMD_LINE_SWITCH, "xr", "export-report", "Export report", wxCMD_LINE_VAL_NONE, 0},
-  { wxCMD_LINE_SWITCH, "xt", "export-total", "Export total surface map", wxCMD_LINE_VAL_NONE, 0},
-  { wxCMD_LINE_SWITCH, "xc", "export-cavities", "Export surface maps for all cavities", wxCMD_LINE_VAL_NONE, 0},
+  { wxCMD_LINE_SWITCH, "xr", "export-report", "Export report (requires:-do)", wxCMD_LINE_VAL_NONE, 0},
+  { wxCMD_LINE_SWITCH, "xt", "export-total", "Export total surface map (requires:-do)", wxCMD_LINE_VAL_NONE, 0},
+  { wxCMD_LINE_SWITCH, "xc", "export-cavities", "Export surface maps for all cavities (requires:-do)", wxCMD_LINE_VAL_NONE, 0},
+  { wxCMD_LINE_OPTION, "o", "output", "Control what parts of the output to display (default:all)", wxCMD_LINE_VAL_STRING},
   { wxCMD_LINE_SWITCH, "q", "quiet", "Silence progress reporting", wxCMD_LINE_VAL_NONE, 0},
-  { wxCMD_LINE_OPTION, "u", "unittest", "Run a programmed unit test", wxCMD_LINE_VAL_STRING},
+  { wxCMD_LINE_OPTION, "u", "unittest", "Run a pre-programmed unit test", wxCMD_LINE_VAL_STRING},
   { wxCMD_LINE_SWITCH, "v", "version", "Display the app version", wxCMD_LINE_VAL_NONE},
   { wxCMD_LINE_NONE }
 };
@@ -210,7 +211,7 @@ static std::map<std::string,unsigned> s_display_map {
   {"surf_accessible_s", mvOUT_SURF_ACCESSIBLE_S},
   {"surf", mvOUT_SURF},
   {"cavities", mvOUT_CAVITIES},
-  {"all", mvALL}
+  {"all", mvOUT_ALL}
 };
 
 unsigned evalDisplayOptions(const std::string output){ 
