@@ -388,8 +388,8 @@ void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag
     s_gui->extDisplayCavityList(data.cavities);
   }
   else{
-
-    auto prep_field = [](int n_ws, char alignment){
+    
+    auto field = [](int n_ws, std::string text="", char alignment='l'){
       std::stringstream ss;
       if (alignment == 'r'){
         ss << std::right;
@@ -400,17 +400,21 @@ void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag
       else{
         ss << std::left;
       }
-      return ss;
-    };
-
-    auto field = [prep_field](int n_ws, std::string text="", char alignment='l'){
-      std::stringstream ss = prep_field(n_ws, alignment);
       ss << std::setw(n_ws) << text;
       return ss.str();
     };
     
-    auto wfield = [prep_field](int n_ws, std::wstring text=L"", char alignment='l'){
-      std::stringstream ss = prep_field(n_ws, alignment);
+    auto wfield = [](int n_ws, std::wstring text=L"", char alignment='l'){
+      std::wstringstream ss;
+      if (alignment == 'r'){
+        ss << std::right;
+      }
+      else if (alignment == 'c'){
+        ss << std::internal;
+      }
+      else{
+        ss << std::left;
+      }
       ss << std::setw(n_ws) << text;
       return ss.str();
     };
