@@ -47,8 +47,7 @@ bool Model::setParameters(std::string file_path,
             bool make_full_map,
             bool make_cav_maps,
             std::unordered_map<std::string, double> rad_map,
-            std::vector<std::string> included_elem,
-            double max_radius){
+            std::vector<std::string> included_elem){
   if(!setProbeRadii(r_probe1, r_probe2, probe_mode)){
     _data.success = false;
     return false;
@@ -69,7 +68,10 @@ bool Model::setParameters(std::string file_path,
   _data.make_cav_maps = make_cav_maps;
   setRadiusMap(rad_map);
   _data.included_elements = included_elem;
-  _max_atom_radius = max_radius;
+  _max_atom_radius = 0;
+  for (auto& elem : _data.included_elements){
+    if (findRadiusOfAtom(elem) > _max_atom_radius){_max_atom_radius = findRadiusOfAtom(elem);}
+  }
   return true;
 }
 

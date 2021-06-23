@@ -38,8 +38,7 @@ bool Ctrl::unittestExcluded(){
         false,
         false,
         _current_calculation->extractRadiusMap(radius_filepath),
-        included_elements,
-        3);
+        included_elements);
 
     data[i] = _current_calculation->generateData();
     if(data[i].success){
@@ -92,8 +91,7 @@ bool Ctrl::unittestProtein(){
       false,
       false,
       _current_calculation->extractRadiusMap(radius_filepath),
-      included_elements,
-      3);
+      included_elements);
 
   data = _current_calculation->generateData();
   if(data.success){
@@ -147,8 +145,7 @@ bool Ctrl::unittestRadius(){
             false,
             false,
             rad_map,
-            included_elements,
-            3);
+            included_elements);
 
         data = _current_calculation->generateData();
 
@@ -197,8 +194,7 @@ bool Ctrl::unittest2Probe(){
       false,
       false,
       _current_calculation->extractRadiusMap(radius_filepath),
-      included_elements,
-      3);
+      included_elements);
 
   data = _current_calculation->generateData();
 
@@ -248,8 +244,7 @@ bool Ctrl::unittestSurface(){
       false,
       false,
       _current_calculation->extractRadiusMap(radius_filepath),
-      included_elements,
-      3);
+      included_elements);
 
   data = _current_calculation->generateData();
 
@@ -304,8 +299,7 @@ bool Ctrl::unittestFloodfill(){
       false,
       false,
       _current_calculation->extractRadiusMap(radius_filepath),
-      included_elements,
-      3);
+      included_elements);
 
   data = _current_calculation->generateData();
 
