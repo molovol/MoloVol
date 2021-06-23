@@ -19,6 +19,18 @@
 Ctrl* Ctrl::s_instance = NULL;
 MainFrame* Ctrl::s_gui = NULL;
 
+///////////////////////////
+// STATIC MEMBERS ACCESS //
+///////////////////////////
+
+std::string Ctrl::getDefaultElemPath(){
+  return getResourcesDir() + "/" + s_elem_file;
+}
+
+std::string Ctrl::getVersion(){
+  return s_version;
+}
+
 ////////////////
 // TOGGLE CLI //
 ////////////////
@@ -28,7 +40,7 @@ void Ctrl::hush(const bool quiet){
 }
 
 void Ctrl::version(){
-  notifyUser("Version: " + s_version + "\n");
+  notifyUser("Version: " + getVersion() + "\n");
 }
 
 ////////////////
@@ -69,9 +81,9 @@ bool Ctrl::loadRadiusFile(){
     _current_calculation = new Model();
   }
 
-  std::string radius_filepath = s_gui->getRadiusFilepath();
+  std::string elements_filepath = s_gui->getRadiusFilepath();
   // even if there is no valid radii file, the program can be used by manually setting radii in the GUI after loading a structure
-  if(!_current_calculation->importRadiusFile(radius_filepath)){
+  if(!_current_calculation->importElemFile(elements_filepath)){
     displayErrorMessage(101);
   }
   // refresh atom list using new radius map
@@ -144,7 +156,7 @@ bool Ctrl::runCalculation(){
   calculationDone(data.success);
 
   updateStatus((data.success && !Ctrl::getInstance()->getAbortFlag())? "Calculation done." : "Calculation aborted.");
-  
+
   // OUTPUT
   displayResults(data);
 
@@ -160,9 +172,9 @@ bool Ctrl::runCalculation(){
 
 // for starting a calculation from the command line
 bool Ctrl::runCalculation(
-    const double probe_radius_s, 
+    const double probe_radius_s,
     const double probe_radius_l,
-    const double grid_resolution, 
+    const double grid_resolution,
     const std::string& structure_file_path,
     const std::string& radius_file_path,
     const std::string& output_dir_path,
@@ -176,7 +188,7 @@ bool Ctrl::runCalculation(
     const bool exp_cavity_maps,
     const unsigned display_flag){
   if(_current_calculation == NULL){_current_calculation = new Model();}
- 
+
   try{_current_calculation->readAtomsFromFile(structure_file_path, opt_include_hetatm);}
   catch (const ExceptInvalidInputFile& e){
     displayErrorMessage(102);
@@ -186,7 +198,7 @@ bool Ctrl::runCalculation(
     displayErrorMessage(103);
     return false;
   }
-  
+
   std::vector<std::string> included_elements = _current_calculation->listElementsInStructure();
 
   _current_calculation->setParameters(
@@ -209,7 +221,7 @@ bool Ctrl::runCalculation(
   CalcReportBundle data = _current_calculation->generateData();
 
   updateStatus((data.success && !Ctrl::getInstance()->getAbortFlag())? "Calculation done." : "Calculation aborted.");
- 
+
   displayInput(data, display_flag);
   displayResults(data, display_flag);
 
@@ -240,7 +252,7 @@ void Ctrl::displayInput(CalcReportBundle& data, const unsigned display_flag){
   if (display_flag & (mvOUT_INP | mvOUT_OPT)){
     if(!_to_gui){
       if (display_flag & mvOUT_INP){
-        notifyUser("<INPUT>\n"); 
+        notifyUser("<INPUT>\n");
         if (display_flag & mvOUT_STRUCTURE){
           notifyUser("Structure file: " + data.atom_file_path + "\n");
         }
@@ -300,7 +312,7 @@ void Ctrl::displayResults(CalcReportBundle& data, const unsigned display_flag){
   }
   if(data.success){
     std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
-    
+
     if (display_flag & mvOUT_FORMULA){
       notifyUser("Result for: ");
       notifyUser(Symbol::generateChemicalFormulaUnicode(data.chemical_formula));
@@ -388,7 +400,7 @@ void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag
     s_gui->extDisplayCavityList(data.cavities);
   }
   else{
-    
+
     auto field = [](int n_ws, std::string text="", char alignment='l'){
       std::stringstream ss;
       if (alignment == 'r'){
@@ -403,7 +415,7 @@ void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag
       ss << std::setw(n_ws) << text;
       return ss.str();
     };
-    
+
     auto wfield = [](int n_ws, std::wstring text=L"", char alignment='l'){
       std::wstringstream ss;
       if (alignment == 'r'){
@@ -421,12 +433,12 @@ void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag
 
     std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
     std::wstring surf_unit = Symbol::angstrom() + Symbol::squared();
-    
+
     int width = 20;
 
     std::string header[] = {"Cavity ID", "Volume", "Core Surface", "Shell Surface", "Position"};
     std::wstring units[] = {L"", L"(" + vol_unit + L")",L"(" + surf_unit + L")", L"(" + surf_unit + L")", L"(" + Symbol::angstrom() + L"," + Symbol::angstrom() + L"," + Symbol::angstrom() + L")"};
-    
+
     // HEADER
     for (std::string elem : header){
       notifyUser(field(width,elem));
@@ -437,11 +449,11 @@ void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag
       notifyUser(wfield(width,elem));
     }
     notifyUser("\n");
-    
-    for (int i = 0; i < data.cavities.size(); ++i){
+
+    for (size_t i = 0; i < data.cavities.size(); ++i){
       // CAVITY VALUES
       std::string values[] = {std::to_string(i+1), std::to_string(data.cavities[i].getVolume()), std::to_string(data.cavities[i].getSurfCore()), std::to_string(data.cavities[i].getSurfShell()), data.cavities[i].getPosition()};
-    
+
       for (std::string elem : values){
         notifyUser(field(width,elem));
       }
@@ -565,13 +577,14 @@ static const std::map<int, std::string> s_error_codes = {
   {0, "Unidentified error code."}, // no user should ever see this
   // 1xx: Invalid Input
   {100, "Import failed!"},
-  {101, "Invalid radius definition file. Please select a valid file or set radii manually."},
+  {101, "Invalid elements file. Please select a valid file or set radii manually. Atomic weights will be set to 0."},
   {102, "Invalid structure file. Please select a valid file. You may need to enable the option HETATM."},
   {103, "Invalid file format. Please make sure that the input files have the correct file extensions."},
   {104, "Invalid probe radius input. The large probe must have a larger radius than the small probe."},
   {105, "Invalid entry in structure file encountered. Some atoms have not been imported. Please check the format of the input file."},
-  {106, "Invalid element symbol(s) in radius file detected. Some radii may be assigned incorrectly. Please make sure that all element symbols begin with an alphabetic character."},
-  {107, "Invalid radius value in radius file detected. Some radii may be set to 0. Please make sure that all radii are numeric."},
+  {106, "Invalid element symbol(s) in elements file detected. Some radii may be assigned incorrectly. Please make sure that all element symbols begin with an alphabetic character."},
+  {107, "Invalid radius value in elements file detected. Some radii may be set to 0. Please make sure that all radii are numeric."},
+  {108, "Invalid atomic weight value in elements file detected. Some atomic weights may be set to 0. Please make sure that all atomic weights are numeric."},
   // 11x: unit cell files
   {111, "Space group not found. Check the structure file, or untick the Unit Cell Analysis tickbox."},
   {112, "Invalid unit cell parameters. Check the structure file, or untick the Unit Cell Analysis tickbox."},

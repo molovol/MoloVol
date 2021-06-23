@@ -1,6 +1,6 @@
 #include "misc.h"
 
-// access the resource folder containing radii.txt and space_groups.txt
+// access the resource folder containing elements.txt and space_groups.txt
 std::string getResourcesDir(){
 #if defined(__APPLE__) && !defined(DEBUG)
   CFURLRef resource_url = CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle());

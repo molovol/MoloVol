@@ -67,7 +67,7 @@ class Space;
 class Model{
   public:
     // radius file import
-    bool importRadiusFile(std::string&);
+    bool importElemFile(std::string&);
     std::unordered_map<std::string, double> extractRadiusMap(const std::string&);
     // atom file import
     bool readAtomsFromFile(const std::string&, bool);
@@ -143,6 +143,7 @@ class Model{
     double _cart_matrix[3][3]; // cartesian coordinates of vectors A, B, C
     std::string _space_group;
     std::unordered_map<std::string, double> _radius_map;
+    std::unordered_map<std::string, double> _elem_weight;
     std::unordered_map<std::string, int> _elem_Z;
     std::map<std::string, int> _atom_amounts;
     std::map<std::string, int> _unit_cell_atom_amounts; // stores atoms of unit cell to generate chemical formula

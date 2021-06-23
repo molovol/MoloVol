@@ -26,7 +26,7 @@ bool MainApp::OnInit()
   }
   else {
     // initialise the GUI
-    MainFrame* MainWin = new MainFrame(_("MoloVol " + Ctrl::s_version), wxDefaultPosition, wxDefaultSize);
+    MainFrame* MainWin = new MainFrame(_("MoloVol " + Ctrl::getVersion()), wxDefaultPosition, wxDefaultSize);
     MainWin->Show(true);
     SetTopWindow(MainWin);
   }
@@ -232,8 +232,8 @@ void MainFrame::InitAtomfilePanel(){
 void MainFrame::InitRadiusfilePanel(){
   radiusText = new wxStaticText(radiusfilePanel, TEXT_Radius, "Radius file:");
   radiusButton = new wxButton(radiusfilePanel, BUTTON_Radius, "Browse");
-  
-  std::string default_path = getResourcesDir() + "/radii.txt";
+
+  std::string default_path = Ctrl::getDefaultElemPath();
   radiuspathText = new wxTextCtrl(radiusfilePanel, TEXT_Radiuspath, default_path);
   SetSizerFilePanel(radiusfilePanel, radiusText, radiusButton, radiuspathText);
 }

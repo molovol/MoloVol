@@ -34,7 +34,7 @@ void Model::createReport(std::string path){
   output_report << "Source code available at https://github.com/jmaglic/MoloVol under the MIT licence\n";
   output_report << "Copyright © 2020-2021 Jasmin B. Maglic, Roy Lavendomme\n\n";
   output_report << "MoloVol program: calculation results report\n";
-  output_report << "version: " + Ctrl::s_version + "\n\n";
+  output_report << "version: " + Ctrl::getVersion() + "\n\n";
   output_report << "Time of the calculation: " << _time_stamp << "\n";
   output_report << "Structure file analyzed: " << _data.atom_file_path << "\n";
   output_report << "Chemical formula: " + _data.chemical_formula << "\n";

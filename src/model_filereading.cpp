@@ -21,45 +21,49 @@ bool isAtomLine(const std::vector<std::string>& substrings);
 std::string strToValidSymbol(std::string str);
 static inline std::vector<std::string> splitLine(std::string& line);
 
-struct RadiusFileBundle{ // data bundle for radius file import
+struct ElementsFileBundle{ // data bundle for elements file import
   std::unordered_map<std::string, double> rad_map;
+  std::unordered_map<std::string, double> weight_map;
   std::unordered_map<std::string, int> atomic_num_map;
 };
-////////////////////////
-// RADIUS FILE IMPORT //
-////////////////////////
-RadiusFileBundle extractDataFromRadiusFile(const std::string& radius_path);
+//////////////////////////
+// Elements FILE IMPORT //
+//////////////////////////
+ElementsFileBundle extractDataFromElemFile(const std::string& elem_path);
 
-// generates two two maps for assigning a radius/ atomic number respectively, to a element symbol
+// generates three maps for assigning a radius, wheight and atomic number respectively, to an element symbol
 // sets the maps to members of the model class
-bool Model::importRadiusFile(std::string& radius_path){
-  RadiusFileBundle data = extractDataFromRadiusFile(radius_path);
+bool Model::importElemFile(std::string& elem_path){
+  ElementsFileBundle data = extractDataFromElemFile(elem_path);
   if (data.rad_map.size() == 0) {return false;}
 
   setRadiusMap(data.rad_map);
+  _elem_weight = data.weight_map;
   _elem_Z = data.atomic_num_map;
   return true;
 }
 
 // used for importing only the radius map from the radius file
 // needed for running the app from the command line
-std::unordered_map<std::string, double> Model::extractRadiusMap(const std::string& radius_path){
-  return extractDataFromRadiusFile(radius_path).rad_map;
+std::unordered_map<std::string, double> Model::extractRadiusMap(const std::string& elem_path){
+  return extractDataFromElemFile(elem_path).rad_map;
 }
 
-RadiusFileBundle extractDataFromRadiusFile(const std::string& radius_path){
-  RadiusFileBundle data;
+ElementsFileBundle extractDataFromElemFile(const std::string& elem_path){
+  ElementsFileBundle data;
 
   std::string line;
-  std::ifstream inp_file(radius_path);
+  std::ifstream inp_file(elem_path);
   bool invalid_symbol_detected = false;
   bool invalid_radius_value = false;
+  bool invalid_weight_value = false;
   while(getline(inp_file,line)){
     std::vector<std::string> substrings = splitLine(line);
     // substings[0]: Atomic Number
     // substings[1]: Element Symbol
     // substings[2]: Radius
-    if(substrings.size() == 3){
+    // substings[3]: Wheight
+    if(substrings.size() == 4){
       substrings[1] = strToValidSymbol(substrings[1]);
       // skip entry if element symbol invalid
       if (substrings[1].empty()){
@@ -71,12 +75,18 @@ RadiusFileBundle extractDataFromRadiusFile(const std::string& radius_path){
           data.rad_map[substrings[1]] = 0;
           invalid_radius_value = true;
         }
+        try{data.weight_map[substrings[1]] = std::stod(substrings[3]);}
+        catch (const std::invalid_argument& e){
+          data.weight_map[substrings[1]] = 0;
+          invalid_weight_value = true;
+        }
         data.atomic_num_map[substrings[1]] = std::stoi(substrings[0]);
       }
     }
   }
   if (invalid_symbol_detected) {Ctrl::getInstance()->displayErrorMessage(106);}
   if (invalid_radius_value) {Ctrl::getInstance()->displayErrorMessage(107);}
+  if (invalid_weight_value) {Ctrl::getInstance()->displayErrorMessage(108);}
   return data;
 }
 
