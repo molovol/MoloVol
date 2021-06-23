@@ -130,6 +130,7 @@ CalcReportBundle Model::generateVolumeData(){
   defineCell();
 
   generateChemicalFormula();
+  calcMolarMass();
   auto end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
   // START CALCULATION
@@ -257,6 +258,15 @@ void Model::generateChemicalFormula(){
   _data.chemical_formula = chemical_formula_prefix + chemical_formula_suffix;
 }
 
+void Model::calcMolarMass(){
+  double molar_mass = 0;
+  std::map<std::string, int> atom_list = (_data.analyze_unit_cell) ? _unit_cell_atom_amounts : _atom_amounts;
+  for(auto elem : atom_list){
+    molar_mass += _elem_weight[elem.first] * elem.second;
+  }
+  _data.molar_mass = molar_mass;
+}
+
 ///////////////////////////
 // CALCULATION FUNCTIONS //
 ///////////////////////////
@@ -326,7 +336,7 @@ bool Model::processUnitCell(){
   3) if atoms outside the orthogonal cell, move them inside
   4) remove duplicate atoms (allow 0.01-0.05 A error)
   5) create supercell at least 3x3x3 but big enough to include a radius around central unit cell = gridstep + largest_atom radius + 2*largest probe radius
-  6) create atom map based on unit cell limits + radius= gridstep + largest_atom radius + 2*largest probe radius
+  6) create atom map based on unit cell limits + radius = gridstep + largest_atom radius + 2*largest probe radius
   7) write structure file with processed atom list
   */
   double radius_limit = _data.grid_step + _max_atom_radius + 2*( (_data.probe_mode) ? getProbeRad2() : getProbeRad1() );
@@ -514,7 +524,7 @@ void Model::countAtomsInUnitCell(){
   }
 }
 
-// 5) create supercell at least 3x3x3 but big enough to include a radius around central unit cell = 2*(max_atom_rad+probe1+probe2+gridstep)
+// 5) create supercell at least 3x3x3 but big enough to include a radius around central unit cell = gridstep + largest_atom radius + 2*largest probe radius
 void Model::generateSupercell(double radius_limit){
   int initial_number_of_atoms = _processed_atom_coordinates.size();
   if(_cell_param[3] == 90 && _cell_param[4] == 90 && _cell_param[5] == 90){ // for orthogonal space groups, the algorithm is considerably simpler than for other space groups
@@ -564,7 +574,7 @@ void Model::generateSupercell(double radius_limit){
   }
 }
 
-// 6) create atom map based on cell limits + radius= 2*(max_atom_rad+probe1+probe2+gridstep)
+// 6) create atom map based on cell limits + radius= gridstep + largest_atom radius + 2*largest probe radius
 void Model::generateUsefulAtomMapFromSupercell(double radius_limit){
   for(size_t i = 0; i < _processed_atom_coordinates.size(); i++){
     if(std::get<1>(_processed_atom_coordinates[i]) < -radius_limit ||

@@ -45,9 +45,9 @@ void MainFrame::InitDefaultStates(){
   // set default accessibility of interactable gui controls
   wxWindow* widgets_enabled[] = {
     browseButton,
-    radiusButton,
+    elementsButton,
     filepathText,
-    radiuspathText,
+    elementspathText,
     atomListGrid,
     surfaceAreaCheckbox,
     twoProbesCheckbox,
@@ -178,16 +178,16 @@ void MainFrame::InitRightMainPanel(){
 //////////////////
 void MainFrame::InitBrowsePanel(){
 
-  radiusfilePanel = new wxPanel(browsePanel, PANEL_Radiusfile);
+  elementsfilePanel = new wxPanel(browsePanel, PANEL_Elementsfile);
   atomfilePanel = new wxPanel(browsePanel, PANEL_Atomfile);
   fileOptionsPanel = new wxPanel(browsePanel, PANEL_FileOptions, wxDefaultPosition, wxDefaultSize, 0);
 
-  InitRadiusfilePanel();
+  InitElementsfilePanel();
   InitAtomfilePanel();
   InitFileOptionsPanel();
 
   wxStaticBoxSizer *browserSizer = new wxStaticBoxSizer(wxVERTICAL,browsePanel);
-  browserSizer->Add(radiusfilePanel,0,wxEXPAND | wxTOP,6);
+  browserSizer->Add(elementsfilePanel,0,wxEXPAND | wxTOP,6);
   browserSizer->Add(atomfilePanel,0,wxEXPAND | wxTOP,10);
   browserSizer->Add(fileOptionsPanel,0,wxEXPAND,0);
   browsePanel->SetSizerAndFit(browserSizer);
@@ -211,7 +211,7 @@ void MainFrame::InitSandr(){
 // FILE SELECTION //
 ////////////////////
 
-// function used in InitAtomfilePanel and InitRadiusfilePanel to create and set the sizer
+// function used in InitAtomfilePanel and InitElementsfilePanel to create and set the sizer
 void MainFrame::SetSizerFilePanel(wxPanel* panel, wxStaticText* text, wxButton* button, wxTextCtrl* path){
 
   wxBoxSizer *fileSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -229,13 +229,13 @@ void MainFrame::InitAtomfilePanel(){
   SetSizerFilePanel(atomfilePanel, atomText, browseButton, filepathText);
 }
 
-void MainFrame::InitRadiusfilePanel(){
-  radiusText = new wxStaticText(radiusfilePanel, TEXT_Radius, "Radius file:");
-  radiusButton = new wxButton(radiusfilePanel, BUTTON_Radius, "Browse");
+void MainFrame::InitElementsfilePanel(){
+  elementsText = new wxStaticText(elementsfilePanel, TEXT_Elements, "Elements file:");
+  elementsButton = new wxButton(elementsfilePanel, BUTTON_Elements, "Browse");
 
   std::string default_path = Ctrl::getDefaultElemPath();
-  radiuspathText = new wxTextCtrl(radiusfilePanel, TEXT_Radiuspath, default_path);
-  SetSizerFilePanel(radiusfilePanel, radiusText, radiusButton, radiuspathText);
+  elementspathText = new wxTextCtrl(elementsfilePanel, TEXT_Elementspath, default_path);
+  SetSizerFilePanel(elementsfilePanel, elementsText, elementsButton, elementspathText);
 }
 
 /////////////////////////////////////

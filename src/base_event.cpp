@@ -22,7 +22,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_BUTTON(BUTTON_Calc, MainFrame::OnCalc)
   EVT_BUTTON(BUTTON_Abort, MainFrame::OnAbort)
   EVT_BUTTON(BUTTON_Browse, MainFrame::OnAtomBrowse)
-  EVT_BUTTON(BUTTON_Radius, MainFrame::OnRadiusBrowse)
+  EVT_BUTTON(BUTTON_Elements, MainFrame::OnElementsBrowse)
   EVT_BUTTON(BUTTON_LoadFiles, MainFrame::OnLoadFiles)
   EVT_BUTTON(BUTTON_Report, MainFrame::OnExportReport)
   EVT_BUTTON(BUTTON_TotalMap, MainFrame::OnExportTotalMap)
@@ -124,7 +124,7 @@ void MainFrame::OnCalculationFinished(wxCommandEvent& event){
 void MainFrame::OnLoadFiles(wxCommandEvent& event){
   enableGuiElements(false);
 
-  Ctrl::getInstance()->loadRadiusFile();
+  Ctrl::getInstance()->loadElementsFile();
   Ctrl::getInstance()->loadAtomFile();
 
   Ctrl::getInstance()->newCalculation();
@@ -147,10 +147,10 @@ void MainFrame::OnAtomBrowse(wxCommandEvent& event){
   enableGuiElements(true);
 }
 
-// browse for radius file
-void MainFrame::OnRadiusBrowse(wxCommandEvent& event){
+// browse for elements file
+void MainFrame::OnElementsBrowse(wxCommandEvent& event){
   std::string filetype = "TXT files (*.txt)|*.txt";
-  OnBrowse(event, filetype, radiuspathText);
+  OnBrowse(event, filetype, elementspathText);
 }
 
 // browse (can only be called by another method function)
@@ -172,7 +172,7 @@ void MainFrame::OnBrowse(wxCommandEvent& event, std::string& filetype, wxTextCtr
 
   textbox->SetValue(openFileDialog.GetPath());
   // import files after file selection
-  if (!getAtomFilepath().empty() && !getRadiusFilepath().empty()){
+  if (!getAtomFilepath().empty() && !getElementsFilepath().empty()){
     OnLoadFiles(event);
   }
 }
@@ -211,7 +211,7 @@ void MainFrame::GridChange(wxGridEvent& event){
 
 void MainFrame::OnTextInput(wxCommandEvent& event){
   filepathText->ChangeValue(filepathText->GetValue());
-  radiuspathText->ChangeValue(radiuspathText->GetValue());
+  elementspathText->ChangeValue(elementspathText->GetValue());
 
   probe1InputText->ChangeValue(probe1InputText->GetValue());
   probe2InputText->ChangeValue(probe2InputText->GetValue());

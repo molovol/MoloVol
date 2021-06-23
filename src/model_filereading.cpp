@@ -31,7 +31,7 @@ struct ElementsFileBundle{ // data bundle for elements file import
 //////////////////////////
 ElementsFileBundle extractDataFromElemFile(const std::string& elem_path);
 
-// generates three maps for assigning a radius, wheight and atomic number respectively, to an element symbol
+// generates three maps for assigning a radius, weight and atomic number respectively, to an element symbol
 // sets the maps to members of the model class
 bool Model::importElemFile(std::string& elem_path){
   ElementsFileBundle data = extractDataFromElemFile(elem_path);
@@ -62,7 +62,7 @@ ElementsFileBundle extractDataFromElemFile(const std::string& elem_path){
     // substings[0]: Atomic Number
     // substings[1]: Element Symbol
     // substings[2]: Radius
-    // substings[3]: Wheight
+    // substings[3]: Weight
     if(substrings.size() == 4){
       substrings[1] = strToValidSymbol(substrings[1]);
       // skip entry if element symbol invalid
@@ -316,6 +316,10 @@ double Model::findRadiusOfAtom(const std::string& symbol){
 
 double Model::findRadiusOfAtom(const Atom& at){
   return findRadiusOfAtom(at.symbol);
+}
+
+double Model::findWeightOfAtom(const std::string& symbol){
+  return _elem_weight[symbol];
 }
 
 ///////////////////

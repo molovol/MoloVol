@@ -24,7 +24,7 @@ class Ctrl{
     static std::string getDefaultElemPath();
     static std::string getVersion();
 
-    bool loadRadiusFile();
+    bool loadElementsFile();
     bool loadAtomFile();
     bool runCalculation();
     bool runCalculation(const double, const double, const double, const std::string&, const std::string&, const std::string&, const int, const bool, const bool, const bool, const bool, const bool, const bool, const bool, const unsigned);

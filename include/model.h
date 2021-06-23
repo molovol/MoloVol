@@ -29,6 +29,7 @@ struct CalcReportBundle{
   double r_probe2;
   std::vector<std::string> included_elements;
   std::string chemical_formula;
+  double molar_mass;
   // output options
   bool make_report;
   bool make_full_map;
@@ -66,7 +67,7 @@ struct Atom;
 class Space;
 class Model{
   public:
-    // radius file import
+    // elements file import
     bool importElemFile(std::string&);
     std::unordered_map<std::string, double> extractRadiusMap(const std::string&);
     // atom file import
@@ -103,6 +104,7 @@ class Model{
 
     double findRadiusOfAtom(const std::string&);
     double findRadiusOfAtom(const Atom&);
+    double findWeightOfAtom(const std::string&);
 
     // controller-model communication
     CalcReportBundle generateData();
@@ -119,6 +121,7 @@ class Model{
     void setRadiusMap(std::unordered_map<std::string, double> map);
     bool setProbeRadii(const double, const double, const bool);
     void generateChemicalFormula();
+    void calcMolarMass();
 
     // access functions for information stored in data
     double getCalcTime(){return _data.getTime();}

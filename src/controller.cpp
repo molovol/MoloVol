@@ -74,14 +74,14 @@ Ctrl* Ctrl::getInstance(){
   return s_instance;
 }
 
-bool Ctrl::loadRadiusFile(){
+bool Ctrl::loadElementsFile(){
   // create an instance of the model class
   // ensures, that there is only ever one instance of the model class
   if(_current_calculation == NULL){
     _current_calculation = new Model();
   }
 
-  std::string elements_filepath = s_gui->getRadiusFilepath();
+  std::string elements_filepath = s_gui->getElementsFilepath();
   // even if there is no valid radii file, the program can be used by manually setting radii in the GUI after loading a structure
   if(!_current_calculation->importElemFile(elements_filepath)){
     displayErrorMessage(101);
@@ -176,7 +176,7 @@ bool Ctrl::runCalculation(
     const double probe_radius_l,
     const double grid_resolution,
     const std::string& structure_file_path,
-    const std::string& radius_file_path,
+    const std::string& elements_file_path,
     const std::string& output_dir_path,
     const int tree_depth,
     const bool opt_include_hetatm,
@@ -215,7 +215,7 @@ bool Ctrl::runCalculation(
     exp_report,
     exp_total_map,
     exp_cavity_maps,
-    _current_calculation->extractRadiusMap(radius_file_path),
+    _current_calculation->extractRadiusMap(elements_file_path),
     included_elements);
 
   CalcReportBundle data = _current_calculation->generateData();

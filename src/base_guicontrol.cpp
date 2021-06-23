@@ -76,8 +76,8 @@ std::string MainFrame::getAtomFilepath(){
   return filepathText->GetValue().ToStdString();
 }
 
-std::string MainFrame::getRadiusFilepath(){
-  return radiuspathText->GetValue().ToStdString();
+std::string MainFrame::getElementsFilepath(){
+  return elementspathText->GetValue().ToStdString();
 }
 
 bool MainFrame::getIncludeHetatm(){

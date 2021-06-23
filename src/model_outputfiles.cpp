@@ -18,7 +18,9 @@ void Model::createReport(){
 }
 
 void Model::createReport(std::string path){
+  const double avogadro = 6.02214076e23;
   std::string small_p = (_data.probe_mode)? "Small probe" : "Probe";
+  std::string small_p_tab = (_data.probe_mode)? "" : "\t";
   std::ofstream output_report(path);
   output_report << "\n";
   output_report << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n";
@@ -36,9 +38,10 @@ void Model::createReport(std::string path){
   output_report << "MoloVol program: calculation results report\n";
   output_report << "version: " + Ctrl::getVersion() + "\n\n";
   output_report << "Time of the calculation: " << _time_stamp << "\n";
+  output_report << "Duration of the calculation: " << _data.getTime() << " s\n\n";
   output_report << "Structure file analyzed: " << _data.atom_file_path << "\n";
   output_report << "Chemical formula: " + _data.chemical_formula << "\n";
-  output_report << "Duration of the calculation: " << _data.getTime() << " s\n";
+  output_report << "Molar mass: " << _data.molar_mass << " g/mol\n";
 
   output_report << "\n\n\t////////////////////////////\n";
   output_report << "\t// Calculation parameters //\n";
@@ -67,36 +70,94 @@ void Model::createReport(std::string path){
     }
   }
 
-  // TODO consider crystal unit cell report with density, volumes per gram and volume ratio
-
   output_report << "\n\n\t//////////////////////////////\n";
   output_report << "\t// Total Volumes calculated //\n";
   output_report << "\t//////////////////////////////\n\n";
+  // factor to convert A^3 to cm^3/g
+  double volume_macro_factor = avogadro * 1e-24 / _data.molar_mass;
+  double unit_cell_vol = 0;
+
   if(_data.analyze_unit_cell){
     output_report << "Orthogonal(ized) unit cell axes: " << _cart_matrix[0][0] << " A, " << _cart_matrix[1][1] << " A, " << _cart_matrix[2][2] << " A\n";
-    output_report << "Total unit cell volume: " << _cart_matrix[0][0]*_cart_matrix[1][1]*_cart_matrix[2][2] << " A^3\n";
+    unit_cell_vol = _cart_matrix[0][0]*_cart_matrix[1][1]*_cart_matrix[2][2];
+    output_report << "Total unit cell volume: " << unit_cell_vol << " A^3\n\n";
   }
-  output_report << "Van der Waals volume: " << _data.volumes[0b00000011] << " A^3\n";
-  output_report << "Excluded void volume: " << _data.volumes[0b00000101] << " A^3\n";
-  output_report << "Molecular volume (vdw + excluded void): " << _data.volumes[0b00000011] + _data.volumes[0b00000101] << " A^3\n";
-  output_report << small_p << " core volume: " << _data.volumes[0b00001001] << " A^3\n";
-  output_report << small_p << " shell volume: " << _data.volumes[0b00010001] << " A^3\n";
+  output_report << "Van der Waals volume:\t\t" << _data.volumes[0b00000011] << " A^3";
+  if(_data.analyze_unit_cell){
+    output_report << "\t(unit cell fraction: " << _data.volumes[0b00000011] / unit_cell_vol << ")";
+  }
+  output_report << "\n\t\t\t\t" << _data.volumes[0b00000011] * volume_macro_factor << " cm^3/g\n\n";
+
+  output_report << "Excluded void volume:\t\t" << _data.volumes[0b00000101] << " A^3";
+  if(_data.analyze_unit_cell){
+    output_report << "\t(unit cell fraction: " << _data.volumes[0b00000101] / unit_cell_vol << ")";
+  }
+  output_report << "\n\t\t\t\t" << _data.volumes[0b00000101] * volume_macro_factor << " cm^3/g\n\n";
+
+  output_report << "Molecular volume:\t\t" << (_data.volumes[0b00000011] + _data.volumes[0b00000101]) << " A^3";
+  if(_data.analyze_unit_cell){
+    output_report << "\t(unit cell fraction: " << (_data.volumes[0b00000011] + _data.volumes[0b00000101]) / unit_cell_vol << ")";
+  }
+  output_report << "\n(vdw + excluded void)\t\t" << (_data.volumes[0b00000011] + _data.volumes[0b00000101]) * volume_macro_factor << " cm^3/g\n\n";
+
+  output_report << small_p << " core volume:\t" << small_p_tab << _data.volumes[0b00001001] << " A^3";
+  if(_data.analyze_unit_cell){
+    output_report << "\t(unit cell fraction: " << _data.volumes[0b00001001] / unit_cell_vol << ")";
+  }
+  output_report << "\n\t\t\t\t" << _data.volumes[0b00001001] * volume_macro_factor << " cm^3/g\n\n";
+
+  output_report << small_p << " shell volume:\t" << small_p_tab << _data.volumes[0b00010001] << " A^3";
+  if(_data.analyze_unit_cell){
+    output_report << "\t(unit cell fraction: " << _data.volumes[0b00010001] / unit_cell_vol << ")";
+  }
+  output_report << "\n\t\t\t\t" << _data.volumes[0b00010001] * volume_macro_factor << " cm^3/g\n\n";
+
+  output_report << small_p << " occupied volume:\t" << small_p_tab << (_data.volumes[0b00001001] + _data.volumes[0b00010001]) << " A^3";
+  if(_data.analyze_unit_cell){
+    output_report << "\t(unit cell fraction: " << (_data.volumes[0b00001001] + _data.volumes[0b00010001]) / unit_cell_vol << ")";
+  }
+  output_report << "\n(core + shell)\t\t\t" << (_data.volumes[0b00001001] + _data.volumes[0b00010001]) * volume_macro_factor << " cm^3/g\n\n";
+
   if(_data.probe_mode){
-    output_report << "Internal cavities and pockets volume (probe 1 core + shell): " << _data.volumes[0b00001001] + _data.volumes[0b00010001] << " A^3\n";
-    output_report << "Large probe core volume: " << _data.volumes[0b00100001] << " A^3\n";
-    output_report << "Large probe shell volume: " << _data.volumes[0b01000001] << " A^3\n";
+    output_report << "Large probe core volume:\t" << _data.volumes[0b00100001] << " A^3";
+    if(_data.analyze_unit_cell){
+      output_report << "\t(unit cell fraction: " << _data.volumes[0b00100001] / unit_cell_vol << ")";
+    }
+    output_report << "\n\t\t\t\t" << _data.volumes[0b00100001] * volume_macro_factor << " cm^3/g\n\n";
+
+    output_report << "Large probe shell volume:\t" << _data.volumes[0b01000001] << " A^3";
+    if(_data.analyze_unit_cell){
+      output_report << "\t(unit cell fraction: " << _data.volumes[0b01000001] / unit_cell_vol << ")";
+    }
+    output_report << "\n\t\t\t\t" << _data.volumes[0b01000001] * volume_macro_factor << " cm^3/g\n\n";
+
+    output_report << "Large probe occupied volume:\t" << (_data.volumes[0b00100001] + _data.volumes[0b01000001]) << " A^3";
+    if(_data.analyze_unit_cell){
+      output_report << "\t(unit cell fraction: " << (_data.volumes[0b00100001] + _data.volumes[0b01000001]) / unit_cell_vol << ")";
+    }
+    output_report << "\n(core + shell)\t\t\t" << (_data.volumes[0b00100001] + _data.volumes[0b01000001]) * volume_macro_factor << " cm^3/g\n";
   }
 
   if(_data.calc_surface_areas){
     output_report << "\n\n\t////////////////////////////////////\n";
     output_report << "\t// Total Surface Areas calculated //\n";
     output_report << "\t////////////////////////////////////\n\n";
-    output_report << "Van der Waals surface: " << _data.surf_vdw << " A^2\n";
+    // factor to convert A^2 to m^2/g
+    double area_macro_factor = avogadro * 1e-20 / _data.molar_mass;
+
+    output_report << "Van der Waals surface:\t\t\t" << _data.surf_vdw << " A^2\n";
+    output_report << "\t\t\t\t\t" << _data.surf_vdw * area_macro_factor << " m^2/g\n\n";
+
+    output_report << small_p << " excluded surface:\t\t" << small_p_tab << _data.surf_probe_excluded << " A^2\n";
+    output_report << "(similar to the Connolly surface)\t" << _data.surf_probe_excluded * area_macro_factor << " m^2/g\n\n";
+
+    output_report << small_p << " accessible surface:\t\t" << _data.surf_probe_accessible << " A^2\n";
+    output_report << "(similar to the Lee-Richards surface)\t" << _data.surf_probe_accessible * area_macro_factor << " m^2/g\n";
+
     if(_data.probe_mode){
-      output_report << "Molecular surface: " << _data.surf_molecular << " A^2 (both probes excluded surface, similar to the Connolly surface)\n";
+      output_report << "\nMolecular outer surface:\t\t" << _data.surf_molecular << " A^2\n";
+      output_report << "(both probes excluded surface)\t\t" << _data.surf_molecular * area_macro_factor << " m^2/g\n";
     }
-    output_report << small_p << " excluded surface: " << _data.surf_probe_excluded << " A^2 (similar to the Connolly surface)\n";
-    output_report << small_p << " accessible surface: " << _data.surf_probe_accessible << " A^2 (similar to the Lee-Richards surface)\n";
   }
 
   if(!_data.cavities.empty()){
@@ -111,7 +172,7 @@ void Model::createReport(std::string path){
     }
     output_report << "Note 1:\tPockets and isolated cavities are not differentiated yet.\n";
     output_report << "\tThis feature might be added in future versions if requested by the community.\n";
-    output_report << "Note 2:\tSeparate cavities are defined by space accessible to the core of probe 1.\n";
+    output_report << "Note 2:\tSeparate cavities are defined by space accessible to the core of the small probe.\n";
     output_report << "\tTwo cavities can be in contact but if a probe cannot pass from one to the other, they are considered separated.\n";
     output_report << "Note 3:\tIn single probe mode, the first 'cavity' consists of the outside space and pockets.\n";
     output_report << "Note 4:\tSome very small isolated chunks of small probe cores can be detected and lead to small cavities.\n";
