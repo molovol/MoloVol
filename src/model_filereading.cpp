@@ -80,7 +80,9 @@ ElementsFileBundle extractDataFromElemFile(const std::string& elem_path){
           data.weight_map[substrings[1]] = 0;
           invalid_weight_value = true;
         }
-        data.atomic_num_map[substrings[1]] = std::stoi(substrings[0]);
+        try{data.atomic_num_map[substrings[1]] = std::stoi(substrings[0]);}
+        catch (const std::invalid_argument& e){// ignore, this map is not currently used
+        }
       }
     }
   }
