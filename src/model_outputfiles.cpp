@@ -18,7 +18,7 @@ void Model::createReport(){
 }
 
 void Model::createReport(std::string path){
-  const double avogadro = 6.02214076e23;
+  const double AVOGADRO = 6.02214076e23;
   std::string small_p = (_data.probe_mode)? "Small probe" : "Probe";
   std::string small_p_tab = (_data.probe_mode)? "" : "\t";
   std::ofstream output_report(path);
@@ -74,7 +74,7 @@ void Model::createReport(std::string path){
   output_report << "\t// Total Volumes calculated //\n";
   output_report << "\t//////////////////////////////\n\n";
   // factor to convert A^3 to cm^3/g
-  double volume_macro_factor = avogadro * 1e-24 / _data.molar_mass;
+  double volume_macro_factor = AVOGADRO * 1e-24 / _data.molar_mass;
   double unit_cell_vol = 0;
 
   if(_data.analyze_unit_cell){
@@ -143,7 +143,7 @@ void Model::createReport(std::string path){
     output_report << "\t// Total Surface Areas calculated //\n";
     output_report << "\t////////////////////////////////////\n\n";
     // factor to convert A^2 to m^2/g
-    double area_macro_factor = avogadro * 1e-20 / _data.molar_mass;
+    double area_macro_factor = AVOGADRO * 1e-20 / _data.molar_mass;
 
     output_report << "Van der Waals surface:\t\t\t" << _data.surf_vdw << " A^2\n";
     output_report << "\t\t\t\t\t" << _data.surf_vdw * area_macro_factor << " m^2/g\n\n";
