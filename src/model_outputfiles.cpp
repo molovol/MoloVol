@@ -113,12 +113,12 @@ void Model::createReport(std::string path){
   output_report << vol_block("Excluded void volume", _data.volumes[0b00000101]);
   output_report << vol_block("Molecular volume", _data.volumes[0b00000011] + _data.volumes[0b00000101], "(vdw + probe inaccessible)");
   output_report << vol_block(small_p + " core volume", _data.volumes[0b00001001]);
-  output_report << vol_block(small_p + " shell volume", _data.volumes[0b000100001]);
-  output_report << vol_block(small_p + "occupied volume", _data.volumes[0b00001001] + _data.volumes[0b00010001], "(core + shell)");
+  output_report << vol_block(small_p + " shell volume", _data.volumes[0b00010001]);
+  output_report << vol_block(small_p + " occupied volume", _data.volumes[0b00001001] + _data.volumes[0b00010001], "(core + shell)");
 
   if(_data.probe_mode){
     output_report << vol_block("Large probe core volume", _data.volumes[0b00100001]);
-    output_report << vol_block("Large probe shell volume", _data.volumes[0b010000001]);
+    output_report << vol_block("Large probe shell volume", _data.volumes[0b01000001]);
     output_report << vol_block("Large probe occupied volume", _data.volumes[0b00100001] + _data.volumes[0b01000001], "(core + shell)");
   }
 
@@ -128,7 +128,7 @@ void Model::createReport(std::string path){
     output_report << "\t////////////////////////////////////\n\n";
     // factor to convert A^2 to m^2/g
     double area_macro_factor = AVOGADRO * 1e-20 / _data.molar_mass;
-    
+
     // layout function for surface data display
     auto surf_block = [row,area_macro_factor](std::string text, double surf, std::string subtext=""){
       std::string str = "";
