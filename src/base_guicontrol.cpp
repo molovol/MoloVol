@@ -137,6 +137,8 @@ void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>
 
   for (size_t row = 0; row < symbol_number_radius.size(); row++) {
     atomListGrid->AppendRows(1, true);
+    // column 0 (include tick box)
+    atomListGrid->SetCellAlignment(row, 0, wxALIGN_CENTER, wxALIGN_CENTER);
     // column 1 (symbol of atom)
     atomListGrid->SetCellValue(row, 1, std::get<0>(symbol_number_radius[row]));
     atomListGrid->SetReadOnly(row,1,true);
