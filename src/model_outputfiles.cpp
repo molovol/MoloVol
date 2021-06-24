@@ -34,7 +34,7 @@ void Model::createReport(std::string path){
   output_report << "   MM     M     MM    OOOO    LL    OOOO          V          OOOO    LL   \n\n";
   output_report << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n";
   output_report << "Source code available at https://github.com/jmaglic/MoloVol under the MIT licence\n";
-  output_report << "Copyright © 2020-2021 Jasmin B. Maglic, Roy Lavendomme\n\n";
+  output_report << "Copyright Â© 2020-2021 Jasmin B. Maglic, Roy Lavendomme\n\n";
   output_report << "MoloVol program: calculation results report\n";
   output_report << "version: " + Ctrl::getVersion() + "\n\n";
   output_report << "Time of the calculation: " << _time_stamp << "\n";
@@ -224,7 +224,7 @@ void Model::createReport(std::string path){
 void Model::writeCrystStruct(std::string path){
   path.erase(path.end()-4, path.end());
   writeXYZfile(_data.orth_cell, path+"_struct_orthogonal_cell.xyz", "Orthogonal cell");
-  writeXYZfile(_data.supercell, path+"_struct_partial_supercel.xyz", "Partial supercell");
+  writeXYZfile(_data.supercell, path+"_struct_partial_supercell.xyz", "Partial supercell");
 }
 
 void Model::writeCrystStruct(){
