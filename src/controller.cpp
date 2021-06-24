@@ -9,8 +9,6 @@
 #include <chrono>
 #include <utility>
 #include <map>
-#include <sstream>
-#include <iomanip>
 
 ///////////////////////
 // STATIC ATTRIBUTES //
@@ -400,37 +398,6 @@ void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag
     s_gui->extDisplayCavityList(data.cavities);
   }
   else{
-
-    auto field = [](int n_ws, std::string text="", char alignment='l'){
-      std::stringstream ss;
-      if (alignment == 'r'){
-        ss << std::right;
-      }
-      else if (alignment == 'c'){
-        ss << std::internal;
-      }
-      else{
-        ss << std::left;
-      }
-      ss << std::setw(n_ws) << text;
-      return ss.str();
-    };
-
-    auto wfield = [](int n_ws, std::wstring text=L"", char alignment='l'){
-      std::wstringstream ss;
-      if (alignment == 'r'){
-        ss << std::right;
-      }
-      else if (alignment == 'c'){
-        ss << std::internal;
-      }
-      else{
-        ss << std::left;
-      }
-      ss << std::setw(n_ws) << text;
-      return ss.str();
-    };
-
     std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
     std::wstring surf_unit = Symbol::angstrom() + Symbol::squared();
 

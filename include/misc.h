@@ -62,6 +62,9 @@ inline double custom_fmod(double numer, double denom){
   return (numer - int((numer/denom)) * denom);
 }
 
+std::string field(int n_ws, std::string="", char='l');
+std::wstring wfield(int n_ws, std::wstring=L"", char='l');
+
 ////////////////////
 // BIT OPERATIONS //
 ////////////////////
