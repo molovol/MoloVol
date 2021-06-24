@@ -68,7 +68,7 @@ class Space;
 class Model{
   public:
     // elements file import
-    bool importElemFile(std::string&);
+    bool importElemFile(const std::string&);
     std::unordered_map<std::string, double> extractRadiusMap(const std::string&);
     // atom file import
     bool readAtomsFromFile(const std::string&, bool);
@@ -118,6 +118,7 @@ class Model{
     bool setParameters(std::string, std::string, bool, bool, bool, bool, double, double, double, int, bool, bool, bool, std::unordered_map<std::string, double>, std::vector<std::string>);
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void setRadiusMap(std::unordered_map<std::string, double> map);
+    std::unordered_map<std::string,double> getRadiusMap();
     bool setProbeRadii(const double, const double, const bool);
     void calcMolarMass();
 

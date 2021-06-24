@@ -266,6 +266,10 @@ void Model::setRadiusMap(std::unordered_map<std::string, double> map){
   _radius_map = map;
 }
 
+std::unordered_map<std::string,double> Model::getRadiusMap(){
+  return _radius_map;
+}
+
 std::string generateChemicalFormula(const std::map<std::string,int>& n_atoms, const std::vector<std::string>& included_elem){
   std::string chemical_formula = "";
   std::string prefix = "";

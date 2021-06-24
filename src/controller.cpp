@@ -199,6 +199,11 @@ bool Ctrl::runCalculation(
 
   std::vector<std::string> included_elements = _current_calculation->listElementsInStructure();
 
+  if(!_current_calculation->importElemFile(elements_file_path)){
+    displayErrorMessage(903);
+    return false;
+  }
+
   _current_calculation->setParameters(
     structure_file_path,
     output_dir_path,
@@ -213,8 +218,8 @@ bool Ctrl::runCalculation(
     exp_report,
     exp_total_map,
     exp_cavity_maps,
-    _current_calculation->extractRadiusMap(elements_file_path),
-    included_elements);
+    _current_calculation->getRadiusMap(),
+    _current_calculation->listElementsInStructure());
 
   CalcReportBundle data = _current_calculation->generateData();
 
@@ -569,7 +574,8 @@ static const std::map<int, std::string> s_error_codes = {
   // 9xx: Issues with command line arguments
   {900, "Command line interface failed!"},
   {901, "At least one required command line argument missing."},
-  {902, "Invalid output display option. At least one parameter belonging to '-o' is invalid and will be ignored."}
+  {902, "Invalid output display option. At least one parameter belonging to '-o' is invalid and will be ignored."},
+  {903, "Elements file import failed. Calulation aborted."}
 };
 
 void Ctrl::displayErrorMessage(const int error_code){

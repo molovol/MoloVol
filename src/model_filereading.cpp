@@ -33,7 +33,7 @@ ElementsFileBundle extractDataFromElemFile(const std::string& elem_path);
 
 // generates three maps for assigning a radius, weight and atomic number respectively, to an element symbol
 // sets the maps to members of the model class
-bool Model::importElemFile(std::string& elem_path){
+bool Model::importElemFile(const std::string& elem_path){
   ElementsFileBundle data = extractDataFromElemFile(elem_path);
   if (data.rad_map.size() == 0) {return false;}
 
