@@ -33,21 +33,21 @@ double CalcReportBundle::getTime(){
 // CONTROLLER-MODEL COMMUNICATION //
 ////////////////////////////////////
 
-bool Model::setParameters(std::string file_path,
-            std::string output_dir,
-            bool inc_hetatm,
-            bool analyze_unit_cell,
-            bool calc_surface_areas,
-            bool probe_mode,
-            double r_probe1,
-            double r_probe2,
-            double grid_step,
-            int max_depth,
-            bool make_report,
-            bool make_full_map,
-            bool make_cav_maps,
-            std::unordered_map<std::string, double> rad_map,
-            std::vector<std::string> included_elem){
+bool Model::setParameters(const std::string file_path,
+            const std::string output_dir,
+            const bool inc_hetatm,
+            const bool analyze_unit_cell,
+            const bool calc_surface_areas,
+            const bool probe_mode,
+            const double r_probe1,
+            const double r_probe2,
+            const double grid_step,
+            const int max_depth,
+            const bool make_report,
+            const bool make_full_map,
+            const bool make_cav_maps,
+            const std::unordered_map<std::string, double> rad_map,
+            const std::vector<std::string> included_elem){
   if(!setProbeRadii(r_probe1, r_probe2, probe_mode)){
     _data.success = false;
     return false;

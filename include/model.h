@@ -115,7 +115,7 @@ class Model{
     void setAtomListForCalculation();
     void linkAtomsToAdjacentAtoms(const double&);
     void linkToAdjacentAtoms(const double&, Atom&);
-    bool setParameters(std::string, std::string, bool, bool, bool, bool, double, double, double, int, bool, bool, bool, std::unordered_map<std::string, double>, std::vector<std::string>);
+    bool setParameters(const std::string, const std::string, const bool, const bool, const bool, const bool, const double, const double, const double, const int, const bool, const bool, const bool, const std::unordered_map<std::string, double>, const std::vector<std::string>);
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void setRadiusMap(std::unordered_map<std::string, double> map);
     std::unordered_map<std::string,double> getRadiusMap();
