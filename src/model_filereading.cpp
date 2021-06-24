@@ -52,6 +52,15 @@ std::unordered_map<std::string, double> Model::extractRadiusMap(const std::strin
 ElementsFileBundle extractDataFromElemFile(const std::string& elem_path){
   ElementsFileBundle data;
 
+  auto hasCorrectFormat = [](std::vector<std::string> substrings){
+    if (substrings.size() != 4){return false;}
+    if (substrings[0].find_first_not_of("0123456789") != std::string::npos){return false;}
+    for (char i : {2,3}){
+      if (substrings[i].find_first_not_of("0123456789E.+e") != std::string::npos){return false;}
+    }
+    return true;
+  };
+
   std::string line;
   std::ifstream inp_file(elem_path);
   bool invalid_symbol_detected = false;
@@ -59,11 +68,11 @@ ElementsFileBundle extractDataFromElemFile(const std::string& elem_path){
   bool invalid_weight_value = false;
   while(getline(inp_file,line)){
     std::vector<std::string> substrings = splitLine(line);
-    // substings[0]: Atomic Number
-    // substings[1]: Element Symbol
-    // substings[2]: Radius
-    // substings[3]: Weight
-    if(substrings.size() == 4){
+    // substrings[0]: Atomic Number
+    // substrings[1]: Element Symbol
+    // substrings[2]: Radius
+    // substrings[3]: Weight
+    if(hasCorrectFormat(substrings)){
       substrings[1] = strToValidSymbol(substrings[1]);
       // skip entry if element symbol invalid
       if (substrings[1].empty()){
@@ -81,7 +90,8 @@ ElementsFileBundle extractDataFromElemFile(const std::string& elem_path){
           invalid_weight_value = true;
         }
         try{data.atomic_num_map[substrings[1]] = std::stoi(substrings[0]);}
-        catch (const std::invalid_argument& e){// ignore, this map is not currently used
+        catch (const std::invalid_argument& e){
+          data.atomic_num_map[substrings[1]] = 0;
         }
       }
     }
