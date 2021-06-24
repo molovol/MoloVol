@@ -82,81 +82,66 @@ void Model::createReport(std::string path){
     unit_cell_vol = _cart_matrix[0][0]*_cart_matrix[1][1]*_cart_matrix[2][2];
     output_report << "Total unit cell volume: " << unit_cell_vol << " A^3\n\n";
   }
-  output_report << "Van der Waals volume:\t\t" << _data.volumes[0b00000011] << " A^3";
-  if(_data.analyze_unit_cell){
-    output_report << "\t(unit cell fraction: " << _data.volumes[0b00000011] / unit_cell_vol << ")";
-  }
-  output_report << "\n\t\t\t\t" << _data.volumes[0b00000011] * volume_macro_factor << " cm^3/g\n\n";
 
-  output_report << "Excluded void volume:\t\t" << _data.volumes[0b00000101] << " A^3";
-  if(_data.analyze_unit_cell){
-    output_report << "\t(unit cell fraction: " << _data.volumes[0b00000101] / unit_cell_vol << ")";
-  }
-  output_report << "\n\t\t\t\t" << _data.volumes[0b00000101] * volume_macro_factor << " cm^3/g\n\n";
+  // layout function for individual rows
+  const int col_width[] = {33,14,6,21,8}; // last column gets as much as needed
+  auto row = [col_width,this](std::string cell0, double cell1, std::string cell2, std::string cell3="", double cell4=0, std::string cell5=""){
+    std::string str = "";
+    str += field(col_width[0],cell0) + " ";
+    str += field(col_width[1],std::to_string(cell1),'r') + " ";
+    if (_data.analyze_unit_cell && cell4!=0) {
+      str += field(col_width[2],cell2) + " ";
+      str += field(col_width[3],cell3) + " ";
+      str += field(col_width[4],std::to_string(cell4),'r') + " ";
+      str += cell5;
+    }
+    else{
+    str += cell2;
+    }
+    return str + "\n";
+  };
 
-  output_report << "Molecular volume:\t\t" << (_data.volumes[0b00000011] + _data.volumes[0b00000101]) << " A^3";
-  if(_data.analyze_unit_cell){
-    output_report << "\t(unit cell fraction: " << (_data.volumes[0b00000011] + _data.volumes[0b00000101]) / unit_cell_vol << ")";
-  }
-  output_report << "\n(vdw + excluded void)\t\t" << (_data.volumes[0b00000011] + _data.volumes[0b00000101]) * volume_macro_factor << " cm^3/g\n\n";
+  // layout function for volume data display
+  auto vol_block = [row, unit_cell_vol, volume_macro_factor](std::string text, double vol, std::string subtext=""){
+    std::string str = "";
+    str += row(text + ":", vol,"A^3","(unit cell fraction:", vol/unit_cell_vol, ")");
+    str += row(subtext,vol * volume_macro_factor, "cm^3/g");
+    return str + "\n";
+  };
 
-  output_report << small_p << " core volume:\t" << small_p_tab << _data.volumes[0b00001001] << " A^3";
-  if(_data.analyze_unit_cell){
-    output_report << "\t(unit cell fraction: " << _data.volumes[0b00001001] / unit_cell_vol << ")";
-  }
-  output_report << "\n\t\t\t\t" << _data.volumes[0b00001001] * volume_macro_factor << " cm^3/g\n\n";
-
-  output_report << small_p << " shell volume:\t" << small_p_tab << _data.volumes[0b00010001] << " A^3";
-  if(_data.analyze_unit_cell){
-    output_report << "\t(unit cell fraction: " << _data.volumes[0b00010001] / unit_cell_vol << ")";
-  }
-  output_report << "\n\t\t\t\t" << _data.volumes[0b00010001] * volume_macro_factor << " cm^3/g\n\n";
-
-  output_report << small_p << " occupied volume:\t" << small_p_tab << (_data.volumes[0b00001001] + _data.volumes[0b00010001]) << " A^3";
-  if(_data.analyze_unit_cell){
-    output_report << "\t(unit cell fraction: " << (_data.volumes[0b00001001] + _data.volumes[0b00010001]) / unit_cell_vol << ")";
-  }
-  output_report << "\n(core + shell)\t\t\t" << (_data.volumes[0b00001001] + _data.volumes[0b00010001]) * volume_macro_factor << " cm^3/g\n\n";
+  output_report << vol_block("Van der Waals volume", _data.volumes[0b00000011]);
+  output_report << vol_block("Excluded void volume", _data.volumes[0b00000101]);
+  output_report << vol_block("Molecular volume", _data.volumes[0b00000011] + _data.volumes[0b00000101], "(vdw + probe inaccessible)");
+  output_report << vol_block(small_p + " core volume", _data.volumes[0b00001001]);
+  output_report << vol_block(small_p + " shell volume", _data.volumes[0b000100001]);
+  output_report << vol_block(small_p + "occupied volume", _data.volumes[0b00001001] + _data.volumes[0b00010001], "(core + shell)");
 
   if(_data.probe_mode){
-    output_report << "Large probe core volume:\t" << _data.volumes[0b00100001] << " A^3";
-    if(_data.analyze_unit_cell){
-      output_report << "\t(unit cell fraction: " << _data.volumes[0b00100001] / unit_cell_vol << ")";
-    }
-    output_report << "\n\t\t\t\t" << _data.volumes[0b00100001] * volume_macro_factor << " cm^3/g\n\n";
-
-    output_report << "Large probe shell volume:\t" << _data.volumes[0b01000001] << " A^3";
-    if(_data.analyze_unit_cell){
-      output_report << "\t(unit cell fraction: " << _data.volumes[0b01000001] / unit_cell_vol << ")";
-    }
-    output_report << "\n\t\t\t\t" << _data.volumes[0b01000001] * volume_macro_factor << " cm^3/g\n\n";
-
-    output_report << "Large probe occupied volume:\t" << (_data.volumes[0b00100001] + _data.volumes[0b01000001]) << " A^3";
-    if(_data.analyze_unit_cell){
-      output_report << "\t(unit cell fraction: " << (_data.volumes[0b00100001] + _data.volumes[0b01000001]) / unit_cell_vol << ")";
-    }
-    output_report << "\n(core + shell)\t\t\t" << (_data.volumes[0b00100001] + _data.volumes[0b01000001]) * volume_macro_factor << " cm^3/g\n";
+    output_report << vol_block("Large probe core volume", _data.volumes[0b00100001]);
+    output_report << vol_block("Large probe shell volume", _data.volumes[0b010000001]);
+    output_report << vol_block("Large probe occupied volume", _data.volumes[0b00100001] + _data.volumes[0b01000001], "(core + shell)");
   }
 
   if(_data.calc_surface_areas){
-    output_report << "\n\n\t////////////////////////////////////\n";
+    output_report << "\n\t////////////////////////////////////\n";
     output_report << "\t// Total Surface Areas calculated //\n";
     output_report << "\t////////////////////////////////////\n\n";
     // factor to convert A^2 to m^2/g
     double area_macro_factor = AVOGADRO * 1e-20 / _data.molar_mass;
+    
+    // layout function for surface data display
+    auto surf_block = [row,area_macro_factor](std::string text, double surf, std::string subtext=""){
+      std::string str = "";
+      str += row(text + ":", surf, "A^2");
+      str += row(subtext, surf * area_macro_factor, "m^2/g");
+      return str + "\n";
+    };
 
-    output_report << "Van der Waals surface:\t\t\t" << _data.surf_vdw << " A^2\n";
-    output_report << "\t\t\t\t\t" << _data.surf_vdw * area_macro_factor << " m^2/g\n\n";
-
-    output_report << small_p << " excluded surface:\t\t" << small_p_tab << _data.surf_probe_excluded << " A^2\n";
-    output_report << "(similar to the Connolly surface)\t" << _data.surf_probe_excluded * area_macro_factor << " m^2/g\n\n";
-
-    output_report << small_p << " accessible surface:\t\t" << _data.surf_probe_accessible << " A^2\n";
-    output_report << "(similar to the Lee-Richards surface)\t" << _data.surf_probe_accessible * area_macro_factor << " m^2/g\n";
-
+    output_report << surf_block("Van der Waals surface", _data.surf_vdw);
+    output_report << surf_block(small_p + " excluded surface", _data.surf_probe_excluded, "(similar to Connolly surface)");
+    output_report << surf_block(small_p + " accessible surface", _data.surf_probe_accessible, "(similar to Lee-Richards surface)");
     if(_data.probe_mode){
-      output_report << "\nMolecular outer surface:\t\t" << _data.surf_molecular << " A^2\n";
-      output_report << "(both probes excluded surface)\t\t" << _data.surf_molecular * area_macro_factor << " m^2/g\n";
+      output_report << surf_block("Molecular outer surface", _data.surf_molecular, "(both probes excluded surface)");
     }
   }
 

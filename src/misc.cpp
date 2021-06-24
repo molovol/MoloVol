@@ -74,7 +74,7 @@ std::string field(int n_ws, std::string text, char alignment){
   if (alignment == 'r'){
     ss << std::right;
   }
-  else if (alignment == 'c'){
+  else if (alignment == 'i'){
     ss << std::internal;
   }
   else{
@@ -89,7 +89,7 @@ std::wstring wfield(int n_ws, std::wstring text, char alignment){
   if (alignment == 'r'){
     ss << std::right;
   }
-  else if (alignment == 'c'){
+  else if (alignment == 'i'){
     ss << std::internal;
   }
   else{
