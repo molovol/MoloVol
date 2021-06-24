@@ -57,7 +57,7 @@ class MainFrame: public wxFrame, public wxThreadHelper
 
     void printToOutput(const std::string text);
     std::string getAtomFilepath();
-    std::string getRadiusFilepath();
+    std::string getElementsFilepath();
     bool getIncludeHetatm();
     bool getAnalyzeUnitCell();
     bool getCalcSurfaceAreas();
@@ -104,10 +104,10 @@ class MainFrame: public wxFrame, public wxThreadHelper
             wxStaticText* atomText;
             wxButton* browseButton;
             wxTextCtrl* filepathText;
-          wxPanel* radiusfilePanel;
-            wxStaticText* radiusText;
-            wxButton* radiusButton;
-            wxTextCtrl* radiuspathText;
+          wxPanel* elementsfilePanel;
+            wxStaticText* elementsText;
+            wxButton* elementsButton;
+            wxTextCtrl* elementspathText;
           wxPanel* fileOptionsPanel;
             wxCheckBox* pdbHetatmCheckbox;
             wxButton* loadFilesButton;
@@ -175,7 +175,7 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void InitLeftMainPanel();
     void InitBrowsePanel();
     void InitAtomfilePanel();
-    void InitRadiusfilePanel();
+    void InitElementsfilePanel();
     void SetSizerFilePanel(wxPanel*, wxStaticText*, wxButton*, wxTextCtrl*);
     void InitFileOptionsPanel();
     void InitAtomListPanel();
@@ -205,7 +205,7 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void OnAbort(wxCommandEvent& event);
     void OnCalculationFinished(wxCommandEvent& event);
     void OnAtomBrowse(wxCommandEvent& event);
-    void OnRadiusBrowse(wxCommandEvent& event);
+    void OnElementsBrowse(wxCommandEvent& event);
     void OnLoadFiles(wxCommandEvent& event);
     void OnBrowse(wxCommandEvent& event, std::string& filetype, wxTextCtrl* textbox);
     void OnTextInput(wxCommandEvent&);
@@ -249,10 +249,10 @@ enum
           TEXT_Atom,
           BUTTON_Browse,
           TEXT_Filename,
-        PANEL_Radiusfile,
-          TEXT_Radius,
-          BUTTON_Radius,
-          TEXT_Radiuspath,
+        PANEL_Elementsfile,
+          TEXT_Elements,
+          BUTTON_Elements,
+          TEXT_Elementspath,
         PANEL_FileOptions,
           CHECKBOX_Hetatm,
           BUTTON_LoadFiles,

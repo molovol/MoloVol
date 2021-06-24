@@ -2,6 +2,7 @@
 #include "base.h"
 #include "atom.h" // i don't know why
 #include "model.h"
+#include "misc.h"
 #include <cmath>
 #include <map>
 
@@ -10,8 +11,8 @@ bool Ctrl::unittestExcluded(){
 
   // parameters for unittest:
   const std::string atom_filepaths[] =
-  {"./inputfile/probetest_pair.xyz", "./inputfile/probetest_triplet.xyz", "./inputfile/probetest_quadruplet.xyz"};
-  const std::string radius_filepath = "./inputfile/radii.txt";
+  {getResourcesDir() + "/probetest_pair.xyz", getResourcesDir() + "/probetest_triplet.xyz", getResourcesDir() + "/probetest_quadruplet.xyz"};
+  const std::string elem_filepath = Ctrl::getDefaultElemPath();
   const double grid_step = 0.1;
   const int max_depth = 4;
   const double rad_probe1 = 1.2;
@@ -37,7 +38,7 @@ bool Ctrl::unittestExcluded(){
         false,
         false,
         false,
-        _current_calculation->extractRadiusMap(radius_filepath),
+        _current_calculation->extractRadiusMap(elem_filepath),
         included_elements);
 
     data[i] = _current_calculation->generateData();
@@ -62,8 +63,8 @@ bool Ctrl::unittestProtein(){
   if(_current_calculation == NULL){_current_calculation = new Model();}
 
   // parameters for unittest:
-  const std::string atom_filepath = "./inputfile/6s8y.xyz";
-  const std::string radius_filepath = "./inputfile/radii.txt";
+  const std::string atom_filepath = getResourcesDir() + "/6s8y.xyz";
+  const std::string elem_filepath = Ctrl::getDefaultElemPath();
   const double grid_step = 0.1;
   const int max_depth = 4;
   const double rad_probe1 = 1.2;
@@ -90,7 +91,7 @@ bool Ctrl::unittestProtein(){
       false,
       false,
       false,
-      _current_calculation->extractRadiusMap(radius_filepath),
+      _current_calculation->extractRadiusMap(elem_filepath),
       included_elements);
 
   data = _current_calculation->generateData();
@@ -112,12 +113,12 @@ bool Ctrl::unittestRadius(){
   if(_current_calculation == NULL){_current_calculation = new Model();}
 
   // parameters for unittest:
-  const std::string atom_filepath = "./inputfile/probetest_pair.xyz";
-  const std::string radius_filepath = "./inputfile/radii.txt";
+  const std::string atom_filepath = getResourcesDir() + "/probetest_pair.xyz";
+  const std::string elem_filepath = Ctrl::getDefaultElemPath();
   double rad_probe2 = 1.2;
   bool two_probe = true;
 
-  std::unordered_map<std::string, double> rad_map = _current_calculation->extractRadiusMap(radius_filepath);
+  std::unordered_map<std::string, double> rad_map = _current_calculation->extractRadiusMap(elem_filepath);
   {int max_depth = 4;
     //for (int max_depth = 4; max_depth < ; max_depth++){
     {double grid_step = 0.1;
@@ -167,8 +168,8 @@ bool Ctrl::unittest2Probe(){
   if(_current_calculation == NULL){_current_calculation = new Model();}
 
   // parameters for unittest:
-  const std::string atom_filepath = "./inputfile/probetest_quadruplet.xyz";
-  const std::string radius_filepath = "./inputfile/radii.txt";
+  const std::string atom_filepath = getResourcesDir() + "/probetest_quadruplet.xyz";
+  const std::string elem_filepath = Ctrl::getDefaultElemPath();
   double rad_probe2 = 2;
   double rad_probe1 = 0.5;
   bool two_probe = true;
@@ -193,7 +194,7 @@ bool Ctrl::unittest2Probe(){
       false,
       false,
       false,
-      _current_calculation->extractRadiusMap(radius_filepath),
+      _current_calculation->extractRadiusMap(elem_filepath),
       included_elements);
 
   data = _current_calculation->generateData();
@@ -216,8 +217,8 @@ bool Ctrl::unittestSurface(){
   if(_current_calculation == NULL){_current_calculation = new Model();}
 
   // parameters for unittest:
-  const std::string atom_filepath = "./inputfile/6s8y.xyz";
-  const std::string radius_filepath = "./inputfile/radii.txt";
+  const std::string atom_filepath = getResourcesDir() + "/6s8y.xyz";
+  const std::string elem_filepath = Ctrl::getDefaultElemPath();
   double rad_probe2 = 2;
   double rad_probe1 = 1.2;
   bool two_probe = false;
@@ -243,7 +244,7 @@ bool Ctrl::unittestSurface(){
       false,
       false,
       false,
-      _current_calculation->extractRadiusMap(radius_filepath),
+      _current_calculation->extractRadiusMap(elem_filepath),
       included_elements);
 
   data = _current_calculation->generateData();
@@ -271,8 +272,8 @@ bool Ctrl::unittestFloodfill(){
   if(_current_calculation == NULL){_current_calculation = new Model();}
 
   // parameters for unittest:
-  const std::string atom_filepath = "./inputfile/Pd6L4_open_cage_Fujita.xyz";
-  const std::string radius_filepath = "./inputfile/radii.txt";
+  const std::string atom_filepath = getResourcesDir() + "/Pd6L4_open_cage_Fujita.xyz";
+  const std::string elem_filepath = Ctrl::getDefaultElemPath();
   double rad_probe2 = 4;
   double rad_probe1 = 1.2;
   bool two_probe = true;
@@ -298,7 +299,7 @@ bool Ctrl::unittestFloodfill(){
       false,
       false,
       false,
-      _current_calculation->extractRadiusMap(radius_filepath),
+      _current_calculation->extractRadiusMap(elem_filepath),
       included_elements);
 
   data = _current_calculation->generateData();

@@ -26,7 +26,7 @@ bool MainApp::OnInit()
   }
   else {
     // initialise the GUI
-    MainFrame* MainWin = new MainFrame(_("MoloVol " + Ctrl::s_version), wxDefaultPosition, wxDefaultSize);
+    MainFrame* MainWin = new MainFrame(_("MoloVol " + Ctrl::getVersion()), wxDefaultPosition, wxDefaultSize);
     MainWin->Show(true);
     SetTopWindow(MainWin);
   }
@@ -45,9 +45,9 @@ void MainFrame::InitDefaultStates(){
   // set default accessibility of interactable gui controls
   wxWindow* widgets_enabled[] = {
     browseButton,
-    radiusButton,
+    elementsButton,
     filepathText,
-    radiuspathText,
+    elementspathText,
     atomListGrid,
     surfaceAreaCheckbox,
     twoProbesCheckbox,
@@ -178,16 +178,16 @@ void MainFrame::InitRightMainPanel(){
 //////////////////
 void MainFrame::InitBrowsePanel(){
 
-  radiusfilePanel = new wxPanel(browsePanel, PANEL_Radiusfile);
+  elementsfilePanel = new wxPanel(browsePanel, PANEL_Elementsfile);
   atomfilePanel = new wxPanel(browsePanel, PANEL_Atomfile);
   fileOptionsPanel = new wxPanel(browsePanel, PANEL_FileOptions, wxDefaultPosition, wxDefaultSize, 0);
 
-  InitRadiusfilePanel();
+  InitElementsfilePanel();
   InitAtomfilePanel();
   InitFileOptionsPanel();
 
   wxStaticBoxSizer *browserSizer = new wxStaticBoxSizer(wxVERTICAL,browsePanel);
-  browserSizer->Add(radiusfilePanel,0,wxEXPAND | wxTOP,6);
+  browserSizer->Add(elementsfilePanel,0,wxEXPAND | wxTOP,6);
   browserSizer->Add(atomfilePanel,0,wxEXPAND | wxTOP,10);
   browserSizer->Add(fileOptionsPanel,0,wxEXPAND,0);
   browsePanel->SetSizerAndFit(browserSizer);
@@ -211,7 +211,7 @@ void MainFrame::InitSandr(){
 // FILE SELECTION //
 ////////////////////
 
-// function used in InitAtomfilePanel and InitRadiusfilePanel to create and set the sizer
+// function used in InitAtomfilePanel and InitElementsfilePanel to create and set the sizer
 void MainFrame::SetSizerFilePanel(wxPanel* panel, wxStaticText* text, wxButton* button, wxTextCtrl* path){
 
   wxBoxSizer *fileSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -229,13 +229,13 @@ void MainFrame::InitAtomfilePanel(){
   SetSizerFilePanel(atomfilePanel, atomText, browseButton, filepathText);
 }
 
-void MainFrame::InitRadiusfilePanel(){
-  radiusText = new wxStaticText(radiusfilePanel, TEXT_Radius, "Radius file:");
-  radiusButton = new wxButton(radiusfilePanel, BUTTON_Radius, "Browse");
-  
-  std::string default_path = getResourcesDir() + "/radii.txt";
-  radiuspathText = new wxTextCtrl(radiusfilePanel, TEXT_Radiuspath, default_path);
-  SetSizerFilePanel(radiusfilePanel, radiusText, radiusButton, radiuspathText);
+void MainFrame::InitElementsfilePanel(){
+  elementsText = new wxStaticText(elementsfilePanel, TEXT_Elements, "Elements file:");
+  elementsButton = new wxButton(elementsfilePanel, BUTTON_Elements, "Browse");
+
+  std::string default_path = Ctrl::getDefaultElemPath();
+  elementspathText = new wxTextCtrl(elementsfilePanel, TEXT_Elementspath, default_path);
+  SetSizerFilePanel(elementsfilePanel, elementsText, elementsButton, elementspathText);
 }
 
 /////////////////////////////////////
@@ -422,7 +422,9 @@ void MainFrame::InitCommunicationPanel(){
 }
 
 void MainFrame::InitOutputPanel(){
-  outputText = new wxTextCtrl(outputPanel, TEXT_Output, _("Output Dialog"), wxDefaultPosition, wxSize(-1,100), wxTE_MULTILINE | wxTE_READONLY);
+  outputText = new wxTextCtrl(outputPanel, TEXT_Output, _("Output Dialog"), wxDefaultPosition, wxSize(420,100), wxTE_MULTILINE | wxTE_READONLY);
+  // the width of 420 pixels gives enough room for the vertical scroll bar when multiple cavities are listed
+  // with default width, the vertical scroll bar hides a part of the grid thus generating a horizontal scroll bar
 
   outputGrid = new wxGrid(outputPanel, GRID_Output);
   outputGrid->SetRowLabelSize(0);
@@ -435,7 +437,7 @@ void MainFrame::InitOutputPanel(){
       "Volume (" + Symbol::angstrom() + Symbol::cubed() + ")",
       "Core Surface\n(" + Symbol::angstrom() + Symbol::squared() + ")",
       "Shell Surface\n(" + Symbol::angstrom() + Symbol::squared() + ")",
-      "Position\n("+Symbol::angstrom()+","+Symbol::angstrom()+","+Symbol::angstrom()+")"};
+      "Center Coord\nx, y, z ("+Symbol::angstrom()+")"};
   for (size_t row = 0; row < col_headers.size(); ++row){
     outputGrid->SetColLabelValue(row, col_headers[row]);
     if (row == 0){

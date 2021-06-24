@@ -1,6 +1,8 @@
 #include "misc.h"
+#include <sstream>
+#include <iomanip>
 
-// access the resource folder containing radii.txt and space_groups.txt
+// access the resource folder containing elements.txt and space_groups.txt
 std::string getResourcesDir(){
 #if defined(__APPLE__) && !defined(DEBUG)
   CFURLRef resource_url = CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle());
@@ -66,3 +68,34 @@ void removeEOL(std::string& str){
 void removeWhiteSpaces(std::string& str){
   str.erase(std::remove(str.begin(), str.end(), ' '), str.end());
 }
+
+std::string field(int n_ws, std::string text, char alignment){
+  std::stringstream ss;
+  if (alignment == 'r'){
+    ss << std::right;
+  }
+  else if (alignment == 'i'){
+    ss << std::internal;
+  }
+  else{
+    ss << std::left;
+  }
+  ss << std::setw(n_ws) << text;
+  return ss.str();
+};
+
+std::wstring wfield(int n_ws, std::wstring text, char alignment){
+  std::wstringstream ss;
+  if (alignment == 'r'){
+    ss << std::right;
+  }
+  else if (alignment == 'i'){
+    ss << std::internal;
+  }
+  else{
+    ss << std::left;
+  }
+  ss << std::setw(n_ws) << text;
+  return ss.str();
+};
+

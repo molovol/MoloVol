@@ -21,7 +21,10 @@ class Ctrl{
     void disableGUI();
     bool isGUIEnabled();
 
-    bool loadRadiusFile();
+    static std::string getDefaultElemPath();
+    static std::string getVersion();
+
+    bool loadElementsFile();
     bool loadAtomFile();
     bool runCalculation();
     bool runCalculation(const double, const double, const double, const std::string&, const std::string&, const std::string&, const int, const bool, const bool, const bool, const bool, const bool, const bool, const bool, const unsigned);
@@ -54,7 +57,6 @@ class Ctrl{
     bool unittestSurface();
     bool unittestFloodfill();
 
-    inline static const std::string s_version = "0.1.0";
   private:
     // consider making static pointer for model
     Model* _current_calculation;
@@ -66,11 +68,14 @@ class Ctrl{
     bool _calculation_finished;
     bool _to_gui = true; // determines whether to print to console or to GUI
     bool _quiet = true; // silences all non-result command line outputs
-   
+
     void displayInput(CalcReportBundle&, const unsigned=mvOUT_ALL);
     void displayResults(CalcReportBundle&, const unsigned=mvOUT_ALL);
     void displayCavityList(CalcReportBundle&, const unsigned=mvOUT_ALL);
     std::string getErrorMessage(const int);
+
+    inline static const std::string s_version = "0.1.0";
+    inline static const std::string s_elem_file = "elements.txt";
 };
 
 #endif

@@ -33,21 +33,21 @@ double CalcReportBundle::getTime(){
 // CONTROLLER-MODEL COMMUNICATION //
 ////////////////////////////////////
 
-bool Model::setParameters(std::string file_path,
-            std::string output_dir,
-            bool inc_hetatm,
-            bool analyze_unit_cell,
-            bool calc_surface_areas,
-            bool probe_mode,
-            double r_probe1,
-            double r_probe2,
-            double grid_step,
-            int max_depth,
-            bool make_report,
-            bool make_full_map,
-            bool make_cav_maps,
-            std::unordered_map<std::string, double> rad_map,
-            std::vector<std::string> included_elem){
+bool Model::setParameters(const std::string file_path,
+            const std::string output_dir,
+            const bool inc_hetatm,
+            const bool analyze_unit_cell,
+            const bool calc_surface_areas,
+            const bool probe_mode,
+            const double r_probe1,
+            const double r_probe2,
+            const double grid_step,
+            const int max_depth,
+            const bool make_report,
+            const bool make_full_map,
+            const bool make_cav_maps,
+            const std::unordered_map<std::string, double> rad_map,
+            const std::vector<std::string> included_elem){
   if(!setProbeRadii(r_probe1, r_probe2, probe_mode)){
     _data.success = false;
     return false;
@@ -111,16 +111,52 @@ CalcReportBundle Model::generateData(){
 }
 
 CalcReportBundle Model::generateVolumeData(){
-  // PREPARATION
+  prepareVolumeCalc();
+  if (!_data.success){return _data;} // if there's been an error during preparation
+
+  { // assign each voxel in grid a type
+    auto start = std::chrono::steady_clock::now();
+    bool cavities_exceeded = false;
+    _cell.assignTypeInGrid(_atoms, getProbeRad1(), getProbeRad2(), optionProbeMode(), cavities_exceeded);
+    if(Ctrl::getInstance()->getAbortFlag()){
+      _data.success = false;
+      return _data;
+    }
+    if(cavities_exceeded){Ctrl::getInstance()->displayErrorMessage(201);}
+    auto end = std::chrono::steady_clock::now();
+    _data.addTime(std::chrono::duration<double>(end-start).count());
+  }
+  { // sum total volume
+    auto start = std::chrono::steady_clock::now();
+    if(_data.analyze_unit_cell){
+      _cell.getUnitCellVolume(_data.volumes, _data.cavities);
+    }
+    else{
+      _cell.getVolume(_data.volumes, _data.cavities);
+    }
+    
+    // sort cavities by volume from largest to smallest
+    inverseSort(_data.cavities);
+    auto end = std::chrono::steady_clock::now();
+    _data.addTime(std::chrono::duration<double>(end-start).count());
+  }
+  return _data;
+}
+
+double calcMolarMass(const std::map<std::string,int>&, const std::unordered_map<std::string,double>&);
+std::string generateChemicalFormula(const std::map<std::string,int>&, const std::vector<std::string>&);
+void Model::prepareVolumeCalc(){
+  auto start = std::chrono::steady_clock::now();
   // clear calculation times from previous runs
   _data.elapsed_seconds.clear();
+  // reset the success value to avoid lingering errors from previous failed calculations
+  _data.success = true;
 
-  auto start = std::chrono::steady_clock::now();
-  // process atom data for unit cell analysis if the option it ticked
+  // process atom data for unit cell analysis if the option is ticked
   if(optionAnalyzeUnitCell()){
     if(!processUnitCell()){
       _data.success = false;
-      return _data;
+      return;
     }
   }
 
@@ -129,11 +165,10 @@ CalcReportBundle Model::generateVolumeData(){
   // set size of the box containing all atoms
   defineCell();
 
-  generateChemicalFormula();
+  _data.molar_mass = calcMolarMass(optionAnalyzeUnitCell()? _unit_cell_atom_amounts : _atom_amounts, _elem_weight);
+  _data.chemical_formula = generateChemicalFormula(optionAnalyzeUnitCell()? _unit_cell_atom_amounts : _atom_amounts, _data.included_elements);
   auto end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
-  // START CALCULATION
-  return calcVolume();
 }
 
 CalcReportBundle Model::generateSurfaceData(){
@@ -232,29 +267,38 @@ void Model::setRadiusMap(std::unordered_map<std::string, double> map){
   _radius_map = map;
 }
 
-void Model::generateChemicalFormula(){
-  std::string chemical_formula_suffix = "";
-  std::string chemical_formula_prefix = "";
-  std::map<std::string, int> atom_list = (_data.analyze_unit_cell) ? _unit_cell_atom_amounts : _atom_amounts;
-  for(auto elem : atom_list){
-    std::string symbol = elem.first;
-    // if element is included by user in gui
-    if (isIncluded(symbol, _data.included_elements)){
-      std::string subscript = std::to_string(elem.second);
-      // by convention: carbon comes first, then hydrogen, then in alphabetical order
-      if (symbol == "C"){
-        chemical_formula_prefix = symbol + subscript + chemical_formula_prefix;
-      }
-      else if (symbol == "H"){
-        chemical_formula_prefix += symbol + subscript;
-      }
+std::unordered_map<std::string,double> Model::getRadiusMap(){
+  return _radius_map;
+}
 
+std::string generateChemicalFormula(const std::map<std::string,int>& n_atoms, const std::vector<std::string>& included_elem){
+  std::string chemical_formula = "";
+  std::string prefix = "";
+  // iterate through map in lexographic order
+  for (auto elem: n_atoms){
+    std::string symbol = elem.first;
+    std::string subscript = std::to_string(elem.second);
+    if (isIncluded(symbol, included_elem)){
+      // by convention: carbon comes first, then hydrogen, then in alphabetical order
+      if (symbol == "C" || symbol == "H"){
+        prefix += symbol + subscript;
+      }
       else {
-        chemical_formula_suffix += symbol + subscript;
+        chemical_formula += symbol + subscript;
       }
     }
   }
-  _data.chemical_formula = chemical_formula_prefix + chemical_formula_suffix;
+  return prefix + chemical_formula;
+}
+
+double calcMolarMass(const std::map<std::string,int>& atom_list, const std::unordered_map<std::string,double>& elem_weight){
+  double molar_mass = 0;
+  for(auto elem : atom_list){
+    if (elem_weight.find(elem.first) != elem_weight.end()){ // skip if element weight was not given
+      molar_mass += elem_weight.at(elem.first) * elem.second;
+    }
+  }
+  return molar_mass;
 }
 
 ///////////////////////////
@@ -268,42 +312,6 @@ void Model::defineCell(){
   }
   _cell = Space(_atoms, _data.grid_step, _data.max_depth, optionProbeMode()? getProbeRad2() : getProbeRad1(), optionAnalyzeUnitCell(), unit_cell_limits);
   return;
-}
-
-CalcReportBundle Model::calcVolume(){
-  // set back the default value of success to true to avoid lingering errors from previous failed calculations
-  _data.success = true;
-
-  { // assign each voxel in grid a type
-    auto start = std::chrono::steady_clock::now();
-    bool cavities_exceeded = false;
-    _cell.assignTypeInGrid(_atoms, getProbeRad1(), getProbeRad2(), optionProbeMode(), cavities_exceeded);
-    if(Ctrl::getInstance()->getAbortFlag()){
-      _data.success = false;
-      return _data;
-    }
-    if(cavities_exceeded){Ctrl::getInstance()->displayErrorMessage(201);}
-    auto end = std::chrono::steady_clock::now();
-    _data.addTime(std::chrono::duration<double>(end-start).count());
-  }
-
-  // debugging tool
-  // _cell.printGrid();
-
-  { // sum total volume
-    auto start = std::chrono::steady_clock::now();
-    if(_data.analyze_unit_cell){
-      _cell.getUnitCellVolume(_data.volumes, _data.cavities);
-    }
-    else{
-      _cell.getVolume(_data.volumes, _data.cavities);
-    }
-    auto end = std::chrono::steady_clock::now();
-    _data.addTime(std::chrono::duration<double>(end-start).count());
-  }
-  // sort cavities by volume from largest to smallest
-  inverseSort(_data.cavities);
-  return _data;
 }
 
 ////////////////////////////////////////////
@@ -326,7 +334,7 @@ bool Model::processUnitCell(){
   3) if atoms outside the orthogonal cell, move them inside
   4) remove duplicate atoms (allow 0.01-0.05 A error)
   5) create supercell at least 3x3x3 but big enough to include a radius around central unit cell = gridstep + largest_atom radius + 2*largest probe radius
-  6) create atom map based on unit cell limits + radius= gridstep + largest_atom radius + 2*largest probe radius
+  6) create atom map based on unit cell limits + radius = gridstep + largest_atom radius + 2*largest probe radius
   7) write structure file with processed atom list
   */
   double radius_limit = _data.grid_step + _max_atom_radius + 2*( (_data.probe_mode) ? getProbeRad2() : getProbeRad1() );
@@ -514,7 +522,7 @@ void Model::countAtomsInUnitCell(){
   }
 }
 
-// 5) create supercell at least 3x3x3 but big enough to include a radius around central unit cell = 2*(max_atom_rad+probe1+probe2+gridstep)
+// 5) create supercell at least 3x3x3 but big enough to include a radius around central unit cell = gridstep + largest_atom radius + 2*largest probe radius
 void Model::generateSupercell(double radius_limit){
   int initial_number_of_atoms = _processed_atom_coordinates.size();
   if(_cell_param[3] == 90 && _cell_param[4] == 90 && _cell_param[5] == 90){ // for orthogonal space groups, the algorithm is considerably simpler than for other space groups
@@ -564,7 +572,7 @@ void Model::generateSupercell(double radius_limit){
   }
 }
 
-// 6) create atom map based on cell limits + radius= 2*(max_atom_rad+probe1+probe2+gridstep)
+// 6) create atom map based on cell limits + radius= gridstep + largest_atom radius + 2*largest probe radius
 void Model::generateUsefulAtomMapFromSupercell(double radius_limit){
   for(size_t i = 0; i < _processed_atom_coordinates.size(); i++){
     if(std::get<1>(_processed_atom_coordinates[i]) < -radius_limit ||

@@ -32,9 +32,9 @@ CXXFLAGS := -std=c++17 -Wall -Werror
 CFLAGS := -std=c++17 -Wno-unused-command-line-argument -Wno-invalid-source-encoding
 WXFLAGS := --cxxflags --libs --version=3.1
 ARCHFLAG := 
-X86FLAG := -target x86_64-apple-macos10.11
+X86FLAG := -target x86_64-apple-macos10.15
 ARM64FLAG := -target arm64-apple-macos11
-MACOS_VERSIONFLAG := -mmacosx-version-min=10.11
+MACOS_VERSIONFLAG := -mmacosx-version-min=10.15
 INC := -I include
 
 # DEVELOPMENT BUILD
@@ -105,7 +105,7 @@ appbundle_entry:
 	@echo " mv $(TARGET) $(BUNDLE)/Contents/MacOS"; mv $(TARGET) $(BUNDLE)/Contents/MacOS
 	@echo " mkdir -p $(BUNDLE)/Contents/Resources"; mkdir -p $(BUNDLE)/Contents/Resources
 	@echo " cp res/MacOS/icon.icns $(BUNDLE)/Contents/Resources"; cp res/MacOS/icon.icns $(BUNDLE)/Contents/Resources
-	@echo " cp inputfile/radii.txt $(BUNDLE)/Contents/Resources"; cp inputfile/radii.txt $(BUNDLE)/Contents/Resources
+	@echo " cp inputfile/elements.txt $(BUNDLE)/Contents/Resources"; cp inputfile/elements.txt $(BUNDLE)/Contents/Resources
 	@echo " cp inputfile/space_groups.txt $(BUNDLE)/Contents/Resources"; cp inputfile/space_groups.txt $(BUNDLE)/Contents/Resources
 	/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f $(BUNDLE)
 
@@ -139,7 +139,7 @@ deb: release
 	@cp $(LINUXRES)/molovol.1 $(BINDIR)/deb-staging/usr/share/man/man1/
 	@gzip -9 -n $(BINDIR)/deb-staging/usr/share/man/man1/molovol.1
 	@cp inputfile/space_groups.txt $(BINDIR)/deb-staging/usr/share/molovol/
-	@cp inputfile/radii.txt $(BINDIR)/deb-staging/usr/share/molovol/
+	@cp inputfile/elements.txt $(BINDIR)/deb-staging/usr/share/molovol/
 	@cp $(LINUXRES)/molovol.png $(BINDIR)/deb-staging/usr/share/pixmaps/
 	@bash $(LINUXRES)/shell/icons.sh $(LINUXRES)/molovol.png $(BINDIR)/deb-staging/usr/share/icons/hicolor
 	@find $(BINDIR)/deb-staging/usr -type f -exec chmod 0644 {} +

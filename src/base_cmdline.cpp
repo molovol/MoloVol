@@ -22,7 +22,7 @@ static const wxCmdLineEntryDesc s_cmd_line_desc[] =
   { wxCMD_LINE_OPTION, "g", "grid", "Spatial resolution of the underlying grid", wxCMD_LINE_VAL_DOUBLE},
   { wxCMD_LINE_OPTION, "fs", "file-structure", "Path to the structure file", wxCMD_LINE_VAL_STRING},
   // optional
-  { wxCMD_LINE_OPTION, "fr", "file-radius", "Path to the radius file", wxCMD_LINE_VAL_STRING},
+  { wxCMD_LINE_OPTION, "fe", "file-elements", "Path to the elements file", wxCMD_LINE_VAL_STRING},
   { wxCMD_LINE_OPTION, "do", "dir-output", "Path to the output directory", wxCMD_LINE_VAL_STRING},
   { wxCMD_LINE_OPTION, "r2", "radius2", "Large probe radius (for two-probe mode)", wxCMD_LINE_VAL_DOUBLE},
   { wxCMD_LINE_OPTION, "d", "depth", "Octree depth", wxCMD_LINE_VAL_NUMBER},
@@ -55,7 +55,7 @@ void MainApp::evalCmdLine(){
   parser.SetDesc(s_cmd_line_desc);
   // if something is wrong with the cmd line args, stop
   if(parser.Parse() != 0){return;}
-  // ascii 
+  // ascii
   if(parser.Found("un")){Symbol::allow_unicode();}
   else{Symbol::limit2ascii();}
   // version
@@ -108,9 +108,9 @@ void MainApp::evalCmdLine(){
   parser.Found("r",&probe_radius_s);
   parser.Found("g",&grid_resolution);
   parser.Found("fs",&structure_file_path);
- 
+
   // optional arguments with default values
-  wxString radius_file_path = getResourcesDir() + "/radii.txt";
+  wxString elements_file_path = Ctrl::getDefaultElemPath();
   wxString output_dir_path = "";
   wxString output = "all"; // TODO: allow partial output (for instance: "vol", "surf", "time", etc.)
   double probe_radius_l = 0;
@@ -123,7 +123,7 @@ void MainApp::evalCmdLine(){
   bool exp_total_map = false;
   bool exp_cavity_maps = false;
 
-  parser.Found("fr",&radius_file_path);
+  parser.Found("fe",&elements_file_path);
   parser.Found("do",&output_dir_path);
   parser.Found("o",&output);
   parser.Found("r2",&probe_radius_l);
@@ -141,16 +141,16 @@ void MainApp::evalCmdLine(){
       || !validatePdb(structure_file_path.ToStdString(), opt_include_hetatm, opt_unit_cell)){
     return;
   }
-  
+
   unsigned display_flag = evalDisplayOptions(output.ToStdString());
 
   // run calculation
   Ctrl::getInstance()->runCalculation(
-      probe_radius_s, 
-      probe_radius_l, 
-      grid_resolution, 
-      structure_file_path.ToStdString(), 
-      radius_file_path.ToStdString(),
+      probe_radius_s,
+      probe_radius_l,
+      grid_resolution,
+      structure_file_path.ToStdString(),
+      elements_file_path.ToStdString(),
       output_dir_path.ToStdString(),
       (int)tree_depth,
       opt_include_hetatm,
@@ -183,7 +183,7 @@ bool validateExport(const std::string out_dir, const std::vector<bool> exp_optio
 bool validatePdb(const std::string file, const bool hetatm, const bool unitcell){
   if (fileExtension(file) != "pdb" && (hetatm || unitcell)){
     Ctrl::getInstance()->displayErrorMessage(115);
-    return false; 
+    return false;
   }
   return true;
 }
@@ -191,7 +191,7 @@ bool validatePdb(const std::string file, const bool hetatm, const bool unitcell)
 static std::map<std::string,unsigned> s_display_map {
   {"none", mvOUT_NONE},
   {"inputfile", mvOUT_STRUCTURE},
-  {"resolution", mvOUT_RESOLUTION}, 
+  {"resolution", mvOUT_RESOLUTION},
   {"depth", mvOUT_DEPTH},
   {"radius_small", mvOUT_RADIUS_S},
   {"radius_large", mvOUT_RADIUS_L},
@@ -219,7 +219,7 @@ static std::map<std::string,unsigned> s_display_map {
   {"all", mvOUT_ALL}
 };
 
-unsigned evalDisplayOptions(const std::string output){ 
+unsigned evalDisplayOptions(const std::string output){
   std::stringstream ss(output);
   std::vector<std::string> display_options;
   while(ss.good()){

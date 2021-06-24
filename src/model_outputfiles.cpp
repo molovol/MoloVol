@@ -18,7 +18,9 @@ void Model::createReport(){
 }
 
 void Model::createReport(std::string path){
+  const double AVOGADRO = 6.02214076e23;
   std::string small_p = (_data.probe_mode)? "Small probe" : "Probe";
+  std::string small_p_tab = (_data.probe_mode)? "" : "\t";
   std::ofstream output_report(path);
   output_report << "\n";
   output_report << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n";
@@ -32,13 +34,14 @@ void Model::createReport(std::string path){
   output_report << "   MM     M     MM    OOOO    LL    OOOO          V          OOOO    LL   \n\n";
   output_report << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n";
   output_report << "Source code available at https://github.com/jmaglic/MoloVol under the MIT licence\n";
-  output_report << "Copyright © 2020-2021 Jasmin B. Maglic, Roy Lavendomme\n\n";
+  output_report << "Copyright Â© 2020-2021 Jasmin B. Maglic, Roy Lavendomme\n\n";
   output_report << "MoloVol program: calculation results report\n";
-  output_report << "version: " + Ctrl::s_version + "\n\n";
+  output_report << "version: " + Ctrl::getVersion() + "\n\n";
   output_report << "Time of the calculation: " << _time_stamp << "\n";
+  output_report << "Duration of the calculation: " << _data.getTime() << " s\n\n";
   output_report << "Structure file analyzed: " << _data.atom_file_path << "\n";
   output_report << "Chemical formula: " + _data.chemical_formula << "\n";
-  output_report << "Duration of the calculation: " << _data.getTime() << " s\n";
+  output_report << "Molar mass: " << _data.molar_mass << " g/mol\n";
 
   output_report << "\n\n\t////////////////////////////\n";
   output_report << "\t// Calculation parameters //\n";
@@ -67,36 +70,79 @@ void Model::createReport(std::string path){
     }
   }
 
-  // TODO consider crystal unit cell report with density, volumes per gram and volume ratio
-
   output_report << "\n\n\t//////////////////////////////\n";
   output_report << "\t// Total Volumes calculated //\n";
   output_report << "\t//////////////////////////////\n\n";
+  // factor to convert A^3 to cm^3/g
+  double volume_macro_factor = AVOGADRO * 1e-24 / _data.molar_mass;
+  double unit_cell_vol = 0;
+
   if(_data.analyze_unit_cell){
     output_report << "Orthogonal(ized) unit cell axes: " << _cart_matrix[0][0] << " A, " << _cart_matrix[1][1] << " A, " << _cart_matrix[2][2] << " A\n";
-    output_report << "Total unit cell volume: " << _cart_matrix[0][0]*_cart_matrix[1][1]*_cart_matrix[2][2] << " A^3\n";
+    unit_cell_vol = _cart_matrix[0][0]*_cart_matrix[1][1]*_cart_matrix[2][2];
+    output_report << "Total unit cell volume: " << unit_cell_vol << " A^3\n\n";
   }
-  output_report << "Van der Waals volume: " << _data.volumes[0b00000011] << " A^3\n";
-  output_report << "Excluded void volume: " << _data.volumes[0b00000101] << " A^3\n";
-  output_report << "Molecular volume (vdw + excluded void): " << _data.volumes[0b00000011] + _data.volumes[0b00000101] << " A^3\n";
-  output_report << small_p << " core volume: " << _data.volumes[0b00001001] << " A^3\n";
-  output_report << small_p << " shell volume: " << _data.volumes[0b00010001] << " A^3\n";
+
+  // layout function for individual rows
+  const int col_width[] = {33,14,6,21,8}; // last column gets as much as needed
+  auto row = [col_width,this](std::string cell0, double cell1, std::string cell2, std::string cell3="", double cell4=0, std::string cell5=""){
+    std::string str = "";
+    str += field(col_width[0],cell0) + " ";
+    str += field(col_width[1],std::to_string(cell1),'r') + " ";
+    if (_data.analyze_unit_cell && cell4!=0) {
+      str += field(col_width[2],cell2) + " ";
+      str += field(col_width[3],cell3) + " ";
+      str += field(col_width[4],std::to_string(cell4),'r') + " ";
+      str += cell5;
+    }
+    else{
+    str += cell2;
+    }
+    return str + "\n";
+  };
+
+  // layout function for volume data display
+  auto vol_block = [row, unit_cell_vol, volume_macro_factor](std::string text, double vol, std::string subtext=""){
+    std::string str = "";
+    str += row(text + ":", vol,"A^3","(unit cell fraction:", vol/unit_cell_vol, ")");
+    str += row(subtext,vol * volume_macro_factor, "cm^3/g");
+    return str + "\n";
+  };
+
+  output_report << vol_block("Van der Waals volume", _data.volumes[0b00000011]);
+  output_report << vol_block("Excluded void volume", _data.volumes[0b00000101]);
+  output_report << vol_block("Molecular volume", _data.volumes[0b00000011] + _data.volumes[0b00000101], "(vdw + probe inaccessible)");
+  output_report << vol_block(small_p + " core volume", _data.volumes[0b00001001]);
+  output_report << vol_block(small_p + " shell volume", _data.volumes[0b00010001]);
+  output_report << vol_block(small_p + " occupied volume", _data.volumes[0b00001001] + _data.volumes[0b00010001], "(core + shell)");
+
   if(_data.probe_mode){
-    output_report << "Internal cavities and pockets volume (probe 1 core + shell): " << _data.volumes[0b00001001] + _data.volumes[0b00010001] << " A^3\n";
-    output_report << "Large probe core volume: " << _data.volumes[0b00100001] << " A^3\n";
-    output_report << "Large probe shell volume: " << _data.volumes[0b01000001] << " A^3\n";
+    output_report << vol_block("Large probe core volume", _data.volumes[0b00100001]);
+    output_report << vol_block("Large probe shell volume", _data.volumes[0b01000001]);
+    output_report << vol_block("Large probe occupied volume", _data.volumes[0b00100001] + _data.volumes[0b01000001], "(core + shell)");
   }
 
   if(_data.calc_surface_areas){
-    output_report << "\n\n\t////////////////////////////////////\n";
+    output_report << "\n\t////////////////////////////////////\n";
     output_report << "\t// Total Surface Areas calculated //\n";
     output_report << "\t////////////////////////////////////\n\n";
-    output_report << "Van der Waals surface: " << _data.surf_vdw << " A^2\n";
+    // factor to convert A^2 to m^2/g
+    double area_macro_factor = AVOGADRO * 1e-20 / _data.molar_mass;
+
+    // layout function for surface data display
+    auto surf_block = [row,area_macro_factor](std::string text, double surf, std::string subtext=""){
+      std::string str = "";
+      str += row(text + ":", surf, "A^2");
+      str += row(subtext, surf * area_macro_factor, "m^2/g");
+      return str + "\n";
+    };
+
+    output_report << surf_block("Van der Waals surface", _data.surf_vdw);
+    output_report << surf_block(small_p + " excluded surface", _data.surf_probe_excluded, "(similar to Connolly surface)");
+    output_report << surf_block(small_p + " accessible surface", _data.surf_probe_accessible, "(similar to Lee-Richards surface)");
     if(_data.probe_mode){
-      output_report << "Molecular surface: " << _data.surf_molecular << " A^2 (both probes excluded surface, similar to the Connolly surface)\n";
+      output_report << surf_block("Molecular outer surface", _data.surf_molecular, "(both probes excluded surface)");
     }
-    output_report << small_p << " excluded surface: " << _data.surf_probe_excluded << " A^2 (similar to the Connolly surface)\n";
-    output_report << small_p << " accessible surface: " << _data.surf_probe_accessible << " A^2 (similar to the Lee-Richards surface)\n";
   }
 
   if(!_data.cavities.empty()){
@@ -111,7 +157,7 @@ void Model::createReport(std::string path){
     }
     output_report << "Note 1:\tPockets and isolated cavities are not differentiated yet.\n";
     output_report << "\tThis feature might be added in future versions if requested by the community.\n";
-    output_report << "Note 2:\tSeparate cavities are defined by space accessible to the core of probe 1.\n";
+    output_report << "Note 2:\tSeparate cavities are defined by space accessible to the core of the small probe.\n";
     output_report << "\tTwo cavities can be in contact but if a probe cannot pass from one to the other, they are considered separated.\n";
     output_report << "Note 3:\tIn single probe mode, the first 'cavity' consists of the outside space and pockets.\n";
     output_report << "Note 4:\tSome very small isolated chunks of small probe cores can be detected and lead to small cavities.\n";
@@ -178,7 +224,7 @@ void Model::createReport(std::string path){
 void Model::writeCrystStruct(std::string path){
   path.erase(path.end()-4, path.end());
   writeXYZfile(_data.orth_cell, path+"_struct_orthogonal_cell.xyz", "Orthogonal cell");
-  writeXYZfile(_data.supercell, path+"_struct_partial_supercel.xyz", "Partial supercell");
+  writeXYZfile(_data.supercell, path+"_struct_partial_supercell.xyz", "Partial supercell");
 }
 
 void Model::writeCrystStruct(){
