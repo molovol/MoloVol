@@ -120,7 +120,6 @@ class Model{
     void setRadiusMap(std::unordered_map<std::string, double> map);
     std::unordered_map<std::string,double> getRadiusMap();
     bool setProbeRadii(const double, const double, const bool);
-    void calcMolarMass();
 
     // access functions for information stored in data
     double getCalcTime(){return _data.getTime();}

@@ -143,6 +143,7 @@ CalcReportBundle Model::generateVolumeData(){
   return _data;
 }
 
+double calcMolarMass(const std::map<std::string,int>&, const std::unordered_map<std::string,double>&);
 std::string generateChemicalFormula(const std::map<std::string,int>&, const std::vector<std::string>&);
 void Model::prepareVolumeCalc(){
   auto start = std::chrono::steady_clock::now();
@@ -164,7 +165,7 @@ void Model::prepareVolumeCalc(){
   // set size of the box containing all atoms
   defineCell();
 
-  calcMolarMass();
+  _data.molar_mass = calcMolarMass(optionAnalyzeUnitCell()? _unit_cell_atom_amounts : _atom_amounts, _elem_weight);
   _data.chemical_formula = generateChemicalFormula(optionAnalyzeUnitCell()? _unit_cell_atom_amounts : _atom_amounts, _data.included_elements);
   auto end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
@@ -290,13 +291,12 @@ std::string generateChemicalFormula(const std::map<std::string,int>& n_atoms, co
   return prefix + chemical_formula;
 }
 
-void Model::calcMolarMass(){
+double calcMolarMass(const std::map<std::string,int>& atom_list, const std::unordered_map<std::string,double>& elem_weight){
   double molar_mass = 0;
-  std::map<std::string, int> atom_list = (_data.analyze_unit_cell) ? _unit_cell_atom_amounts : _atom_amounts;
   for(auto elem : atom_list){
-    molar_mass += _elem_weight[elem.first] * elem.second;
+    molar_mass += elem_weight.at(elem.first) * elem.second;
   }
-  _data.molar_mass = molar_mass;
+  return molar_mass;
 }
 
 ///////////////////////////
