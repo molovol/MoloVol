@@ -27,7 +27,7 @@ struct ElementsFileBundle{ // data bundle for elements file import
   std::unordered_map<std::string, int> atomic_num_map;
 };
 //////////////////////////
-// Elements FILE IMPORT //
+// ELEMENTS FILE IMPORT //
 //////////////////////////
 ElementsFileBundle extractDataFromElemFile(const std::string& elem_path);
 

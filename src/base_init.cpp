@@ -422,7 +422,9 @@ void MainFrame::InitCommunicationPanel(){
 }
 
 void MainFrame::InitOutputPanel(){
-  outputText = new wxTextCtrl(outputPanel, TEXT_Output, _("Output Dialog"), wxDefaultPosition, wxSize(-1,100), wxTE_MULTILINE | wxTE_READONLY);
+  outputText = new wxTextCtrl(outputPanel, TEXT_Output, _("Output Dialog"), wxDefaultPosition, wxSize(420,100), wxTE_MULTILINE | wxTE_READONLY);
+  // the width of 420 pixels gives enough room for the vertical scroll bar when multiple cavities are listed
+  // with default width, the vertical scroll bar hides a part of the grid thus generating a horizontal scroll bar
 
   outputGrid = new wxGrid(outputPanel, GRID_Output);
   outputGrid->SetRowLabelSize(0);
@@ -435,7 +437,7 @@ void MainFrame::InitOutputPanel(){
       "Volume (" + Symbol::angstrom() + Symbol::cubed() + ")",
       "Core Surface\n(" + Symbol::angstrom() + Symbol::squared() + ")",
       "Shell Surface\n(" + Symbol::angstrom() + Symbol::squared() + ")",
-      "Position\n("+Symbol::angstrom()+","+Symbol::angstrom()+","+Symbol::angstrom()+")"};
+      "Center Coord\nx, y, z ("+Symbol::angstrom()+")"};
   for (size_t row = 0; row < col_headers.size(); ++row){
     outputGrid->SetColLabelValue(row, col_headers[row]);
     if (row == 0){
