@@ -32,9 +32,9 @@ CXXFLAGS := -std=c++17 -Wall -Werror
 CFLAGS := -std=c++17 -Wno-unused-command-line-argument -Wno-invalid-source-encoding
 WXFLAGS := --cxxflags --libs --version=3.1
 ARCHFLAG := 
-X86FLAG := -target x86_64-apple-macos10.15
+X86FLAG := -target x86_64-apple-macos10.11
 ARM64FLAG := -target arm64-apple-macos11
-MACOS_VERSIONFLAG := -mmacosx-version-min=10.15
+MACOS_VERSIONFLAG := -mmacosx-version-min=10.11
 INC := -I include
 
 # DEVELOPMENT BUILD
