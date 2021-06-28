@@ -6,7 +6,7 @@ LINUXRES := res/linux
 SRCEXT := cpp
 APP := MoloVol
 VERSION := v0.1
-DMGNAME := $(APP)_macOS_$(VERSION)
+DMGNAME := $(APP)_macOS-10.11+_$(VERSION)
 DEBNAME := $(APP)_debian_$(VERSION)
 
 TARGET := $(BINDIR)/$(APP)
@@ -30,7 +30,10 @@ DEBUGFLAGS := -O0 -g -D DEBUG
 RELEASEFLAGS := -O3
 CXXFLAGS := -std=c++17 -Wall -Werror 
 CFLAGS := -std=c++17 -Wno-unused-command-line-argument -Wno-invalid-source-encoding
-WXFLAGS := --cxxflags --libs --version=3.1
+
+WXCONFIGLIBS := $(shell wx-config --libs)
+WXCONFIGLIBS := $(WXCONFIGLIBS:-ltiff=/usr/local/opt/libtiff/lib/libtiff.a)
+LDFLAGS := $(WXCONFIGLIBS)
 ARCHFLAG := 
 X86FLAG := -target x86_64-apple-macos10.11
 ARM64FLAG := -target arm64-apple-macos11
@@ -45,11 +48,11 @@ all: $(TARGET)
 $(TARGET): $(OBJECTS)
 	@echo "Linking..."
 	mkdir -p $(BINDIR)
-	$(CC) $(CXXFLAGS) $(ARCHFLAG) $^ `wx-config $(WXFLAGS)` -o $(TARGET)
+	$(CC) $(CXXFLAGS) $(ARCHFLAG) $^ $(LDFLAGS) -o $(TARGET)
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	mkdir -p $(BUILDDIR)
-	$(CC) $(CFLAGS) $(INC) $(ARCHFLAG) -c `wx-config $(WXFLAGS)` -o $@ $<
+	$(CC) $(CFLAGS) $(INC) $(ARCHFLAG) -c `wx-config --cxxflags` -o $@ $<
 
 # RELEASE BUILD - SHOULD BE PLACED IN INSTALLER PACKAGE
 release: CXXFLAGS += $(RELEASEFLAGS)
@@ -60,24 +63,24 @@ release: $(TARGET)
 arm64_app: ARCHFLAG = $(ARM64FLAG)
 arm64_app: $(OBJECTS_ARM64)
 	@echo "Linking..."
-	mkdir -p $(BINDIR)
-	$(CC) $(CXXFLAGS) $(ARCHFLAG) $^ `wx-config $(WXFLAGS)` -o $(BINDIR)/arm64_app
+	@mkdir -p $(BINDIR)
+	$(CC) $(CXXFLAGS) $(ARCHFLAG) $^ $(LDFLAGS) -o $(BINDIR)/arm64_app
 
 $(BUILDDIR_ARM64)/%.o: $(SRCDIR)/%.$(SRCEXT)
-	mkdir -p $(BUILDDIR)
-	mkdir -p $(BUILDDIR_ARM64)
-	$(CC) $(CFLAGS) $(INC) $(ARCHFLAG) -c `wx-config $(WXFLAGS)` -o $@ $<
+	@mkdir -p $(BUILDDIR)
+	@mkdir -p $(BUILDDIR_ARM64)
+	$(CC) $(CFLAGS) $(INC) $(ARCHFLAG) -c `wx-config --cxxflags` -o $@ $<
 
 x86_app: ARCHFLAG = $(X86FLAG)
 x86_app: $(OBJECTS_X86)
 	@echo "Linking..."
-	mkdir -p $(BINDIR)
-	$(CC) $(CXXFLAGS) $(ARCHFLAG) $^ `wx-config $(WXFLAGS)` -o $(BINDIR)/x86_app
+	@mkdir -p $(BINDIR)
+	$(CC) $(CXXFLAGS) $(ARCHFLAG) $^ $(LDFLAGS) -o $(BINDIR)/x86_app
 
 $(BUILDDIR_X86)/%.o: $(SRCDIR)/%.$(SRCEXT)
-	mkdir -p $(BUILDDIR)
-	mkdir -p $(BUILDDIR_X86)
-	$(CC) $(CFLAGS) $(INC) $(ARCHFLAG) -c `wx-config $(WXFLAGS)` -o $@ $<
+	@mkdir -p $(BUILDDIR)
+	@mkdir -p $(BUILDDIR_X86)
+	$(CC) $(CFLAGS) $(INC) $(ARCHFLAG) -c `wx-config --cxxflags` -o $@ $<
 
 universal_app: CXXFLAGS += $(RELEASEFLAGS)
 universal_app: CFLAGS += $(RELEASEFLAGS)
@@ -149,11 +152,11 @@ deb: release
 
 # COMPILES ONLY FILES INSIDE TEST DIRECTORY
 test: $(TESTOBJECTS)
-	$(CC) $(CXXFLAGS) $^ `wx-config $(WXFLAGS)` -o $(TESTTARGET)
+	$(CC) $(CXXFLAGS) $^ -o $(TESTTARGET)
 
 $(TESTBUILDDIR)/%.o: $(TESTDIR)/%.$(SRCEXT)
 	@mkdir -p $(TESTBUILDDIR)
-	$(CC) $(CFLAGS) $(INC) -c `wx-config $(WXFLAGS)` -o $@ $<
+	$(CC) $(CFLAGS) $(INC) -c -o $@ $<
 
 # REMOVE TEST DIRECTORY BINARIES
 cleantest:
