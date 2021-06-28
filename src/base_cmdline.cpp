@@ -10,7 +10,6 @@
 #include "flags.h"
 #include "special_chars.h"
 #include <cassert>
-#include <filesystem>
 #include <sstream>
 
 // contains all command line options
@@ -112,7 +111,7 @@ void MainApp::evalCmdLine(){
   // optional arguments with default values
   wxString elements_file_path = Ctrl::getDefaultElemPath();
   wxString output_dir_path = "";
-  wxString output = "all"; // TODO: allow partial output (for instance: "vol", "surf", "time", etc.)
+  wxString output = "all";
   double probe_radius_l = 0;
   long tree_depth = 4;
   bool opt_include_hetatm = false;
@@ -173,7 +172,7 @@ bool validateProbes(const double r1, const double r2, const bool pm){
 
 bool validateExport(const std::string out_dir, const std::vector<bool> exp_options){
   bool any_option_on = isIncluded(true,exp_options);
-  if (any_option_on && !std::filesystem::is_directory(std::filesystem::path(out_dir))){
+  if (any_option_on && out_dir.empty()){
     Ctrl::getInstance()->displayErrorMessage(302);
     return false;
   }
@@ -228,7 +227,7 @@ unsigned evalDisplayOptions(const std::string output){
     display_options.push_back(substr);
   }
   unsigned display_flag = 0;
-  bool unknown_flag;
+  bool unknown_flag = false;
   for (std::string& elem : display_options){
     if (s_display_map.find(elem) == s_display_map.end()){
       unknown_flag = true;
