@@ -6,11 +6,17 @@ LINUXRES := res/linux
 SRCEXT := cpp
 APP := MoloVol
 VERSION := v0.1
-DMGNAME := $(APP)_macOS_$(VERSION)
+DMGNAME := $(APP)_macOS-10.11+_$(VERSION)
 DEBNAME := $(APP)_debian_$(VERSION)
 
 TARGET := $(BINDIR)/$(APP)
 BUNDLE := $(TARGET).app
+LIBNAME_LIBTIFF := libtiff.5.dylib
+LIBDIR_LIBTIFF := /usr/local/opt/libtiff/lib
+LIBNAME_JPEG := libjpeg.9.dylib
+LIBDIR_JPEG := /usr/local/opt/jpeg/lib
+FWDIR := $(BUNDLE)/Contents/Frameworks
+FWDIRREL := @executable_path/../Frameworks
 BUILDDIR_ARM64 := $(BUILDDIR)/arm64
 BUILDDIR_X86 := $(BUILDDIR)/x86
 
@@ -107,6 +113,11 @@ appbundle_entry:
 	@echo " cp res/MacOS/icon.icns $(BUNDLE)/Contents/Resources"; cp res/MacOS/icon.icns $(BUNDLE)/Contents/Resources
 	@echo " cp inputfile/elements.txt $(BUNDLE)/Contents/Resources"; cp inputfile/elements.txt $(BUNDLE)/Contents/Resources
 	@echo " cp inputfile/space_groups.txt $(BUNDLE)/Contents/Resources"; cp inputfile/space_groups.txt $(BUNDLE)/Contents/Resources
+	@echo " mkdir -p $(BUNDLE)/Contents/Frameworks"; mkdir -p $(BUNDLE)/Contents/Frameworks
+	cp $(LIBDIR_LIBTIFF)/$(LIBNAME_LIBTIFF) $(FWDIR)
+	cp $(LIBDIR_JPEG)/$(LIBNAME_JPEG) $(FWDIR)
+	install_name_tool -change "$(LIBDIR_LIBTIFF)/$(LIBNAME_LIBTIFF)" "$(FWDIRREL)/$(LIBNAME_LIBTIFF)" $(BUNDLE)/Contents/MacOS/MoloVol 
+	install_name_tool -change "$(LIBDIR_JPEG)/$(LIBNAME_JPEG)" "$(FWDIRREL)/$(LIBNAME_JPEG)" $(FWDIR)/$(LIBNAME_LIBTIFF)
 	/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f $(BUNDLE)
 
 dmg: appbundle
