@@ -14,7 +14,7 @@
 ///////////////////
 
 void Model::createReport(){
-  createReport(_output_folder+"/MoloVol report " + _time_stamp +".txt");
+  createReport(_output_folder+ "/" + fileName(_data.atom_file_path) + "_MoloVol_report_" + _time_stamp +".txt");
 }
 
 void Model::createReport(std::string path){
@@ -195,7 +195,7 @@ void Model::createReport(std::string path){
     output_report << "Level 5.0 : Small probe accessible surface (similar to Lee-Richards molecular surface but only 'inside')\n";
   }
   else{
-    output_report << "Level 2.0 : Molecular surface (probe excluded, similar to the Connolly surface)\n";
+    output_report << "Level 2.0 : Molecular and cavity surface (probe excluded, similar to the Connolly surface)\n";
     output_report << "Level 5.0 : Probe accessible surface (similar to the Lee-Richards molecular surface)\n";
   }
   output_report << "\nFor help on how to vizualize maps check the user manual or:\n";
@@ -229,9 +229,9 @@ void Model::writeCrystStruct(std::string path){
 }
 
 void Model::writeCrystStruct(){
-  std::string path = _output_folder+"/struct_orthogonal_cell_"+ _time_stamp +".xyz";
+  std::string path = _output_folder+ "/" + fileName(_data.atom_file_path) + "_struct_orthogonal_cell_"+ _time_stamp +".xyz";
   writeXYZfile(_data.orth_cell, path, "Orthogonal cell");
-  path = _output_folder+"/struct_partial_supercell_"+ _time_stamp +".xyz";
+  path = _output_folder+ "/" + fileName(_data.atom_file_path) + "_struct_partial_supercell_"+ _time_stamp +".xyz";
   writeXYZfile(_data.supercell, path, "Partial supercell");
 }
 
@@ -252,7 +252,7 @@ void Model::writeXYZfile(const std::vector<std::tuple<std::string, double, doubl
 ////////////////////////
 
 void Model::writeTotalSurfaceMap(){
-  writeTotalSurfaceMap(_output_folder + "/full_surface_map_" + _time_stamp + ".dx");
+  writeTotalSurfaceMap(_output_folder + "/" + fileName(_data.atom_file_path) + "_full_surface_map_" + _time_stamp + ".dx");
 }
 
 void Model::writeTotalSurfaceMap(const std::string file_path){
@@ -295,7 +295,7 @@ void Model::writeTotalSurfaceMap(const std::string file_path){
 }
 
 void Model::writeCavitiesMaps(){
-  writeCavitiesMaps(_output_folder + "/surface_map_" + _time_stamp + ".dx");
+  writeCavitiesMaps(_output_folder + "/" + fileName(_data.atom_file_path) + "_surface_map_" + _time_stamp + ".dx");
 }
 
 void Model::writeCavitiesMaps(const std::string file_path){

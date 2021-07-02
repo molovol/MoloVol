@@ -33,6 +33,7 @@ std::string fileExtension(const std::string& path){
 }
 
 std::string fileName(const std::string& path){
+// TODO: if the file path is entered with slash (valid path on windows), the filename will not be returned correctly
   size_t bslash_pos = path.find_last_of("\\");
   if (bslash_pos != std::string::npos){
     return path.substr(bslash_pos+1);
