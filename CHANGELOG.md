@@ -5,6 +5,7 @@ This changelog keeps track of changes in a user-friendly way. It is based on [ke
 ## Unreleased
 
 ### Added
+* The name of the output files from the automatic export option now include the name of the input structure file.
 * Fully functional command line interface that allows accessing all functionalities directly form the command line.
 * Macroscopic volume and surface area values are now provided in the report.
 * Unit cell volume fractions are now provided in the report.
