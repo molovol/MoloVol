@@ -80,7 +80,8 @@ void Model::createReport(std::string path){
   if(_data.analyze_unit_cell){
     output_report << "Orthogonal(ized) unit cell axes: " << _cart_matrix[0][0] << " A, " << _cart_matrix[1][1] << " A, " << _cart_matrix[2][2] << " A\n";
     unit_cell_vol = _cart_matrix[0][0]*_cart_matrix[1][1]*_cart_matrix[2][2];
-    output_report << "Total unit cell volume: " << unit_cell_vol << " A^3\n\n";
+    output_report << "Total unit cell volume: " << unit_cell_vol << " A^3\n";
+    output_report << "Density: " << _data.molar_mass * 1e24 / (unit_cell_vol * AVOGADRO) << " g/cm^3\n\n";
   }
 
   // layout function for individual rows
