@@ -430,11 +430,9 @@ void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag
 
     for (size_t i = 0; i < data.cavities.size(); ++i){
       // CAVITY VALUES
-      std::string volume = std::to_string(data.cavities[i].getVolume());
       // in single probe mode, the first cavity with id 1 comprises outside empty space and is meaningless
-      if(!data.probe_mode && !data.analyze_unit_cell && data.cavities[i].id == 1){
-        volume = "oustide";
-      }
+      std::string volume = (!data.probe_mode && !data.analyze_unit_cell && data.cavities[i].id == 1)? "outside" 
+        : std::to_string(data.cavities[i].getVolume());
       std::string values[] = {std::to_string(i+1), volume, std::to_string(data.cavities[i].getSurfCore()), std::to_string(data.cavities[i].getSurfShell()), data.cavities[i].getPosition()};
 
       for (std::string elem : values){
