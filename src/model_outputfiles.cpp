@@ -115,7 +115,7 @@ void Model::createReport(std::string path){
   output_report << vol_block("Excluded void volume", _data.volumes[0b00000101]);
   output_report << vol_block("Molecular volume", _data.volumes[0b00000011] + _data.volumes[0b00000101], "(vdw + probe inaccessible)");
   if(!_data.probe_mode && !_data.analyze_unit_cell){
-    output_report << small_p << " core volume: Not applicable (includes unlimited outside space)\n";
+    output_report << small_p << " core volume: Not applicable (includes unlimited outside space)\n\n";
   }
   else{
     output_report << vol_block(small_p + " core volume", _data.volumes[0b00001001]);
@@ -127,7 +127,7 @@ void Model::createReport(std::string path){
 
   if(_data.probe_mode){
     if(!_data.analyze_unit_cell){
-      output_report << "Large probe core volume: Not applicable (includes unlimited outside space)\n";
+      output_report << "Large probe core volume: Not applicable (includes unlimited outside space)\n\n";
     }
     else{
       output_report << vol_block("Large probe core volume", _data.volumes[0b00100001]);
