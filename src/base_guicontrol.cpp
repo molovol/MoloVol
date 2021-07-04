@@ -39,8 +39,8 @@ void MainFrame::extSetProgressBar(const int percentage){
   GetEventHandler()->CallAfter(&MainFrame::setProgressBar, percentage);
 }
 
-void MainFrame::extDisplayCavityList(const std::vector<Cavity>& cavities){
-  GetEventHandler()->CallAfter(&MainFrame::displayCavityList, cavities);
+void MainFrame::extDisplayCavityList(const std::vector<Cavity>& cavities, const bool opt_uc, const bool opt_pm){
+  GetEventHandler()->CallAfter(&MainFrame::displayCavityList, cavities, std::array<bool,2>{opt_uc, opt_pm});
 }
 
 void MainFrame::extOpenErrorDialog(const int error_code, const std::string& error_message){
@@ -163,19 +163,18 @@ void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>
   }
 }
 
-void MainFrame::displayCavityList(const std::vector<Cavity>& cavities){
+void MainFrame::displayCavityList(const std::vector<Cavity>& cavities, const std::array<bool,2> options_uc_pm){
   // delete all rows
   clearOutputGrid();
   // add appropriate nuber of rows
   outputGrid->AppendRows(cavities.size());
   for (int row = 0; row < outputGrid->GetNumberRows(); ++row){
     outputGrid->SetCellValue(row, 0, std::to_string(row+1));
-    std::string volume = std::to_string(cavities[row].getVolume());
-    std::cout << int(cavities[row].id) << "\n";
-    // in single probe mode, the first cavity with id 1 comprises outside empty space and is meaningless
-    if(!getProbeMode() && !getAnalyzeUnitCell() && cavities[row].id == 1){
-      volume = "oustide";
-    }
+
+    // in single probe mode, the cavity with id 1 comprises outside empty space and is meaningless
+    std::string volume = (!options_uc_pm[0] && !options_uc_pm[1] && cavities[row].id == 1)? "outside" 
+      : std::to_string(cavities[row].getVolume());
+    
     outputGrid->SetCellValue(row, 1, volume);
     if(getCalcSurfaceAreas()){
       outputGrid->SetCellValue(row, 2, std::to_string(cavities[row].getSurfCore()));

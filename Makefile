@@ -26,7 +26,7 @@ OBJECTS_X86 := $(patsubst $(SRCDIR)/%,$(BUILDDIR_X86)/%,$(SOURCES:.$(SRCEXT)=.o)
 TESTSOURCES := $(shell find $(TESTDIR) -type f -name *.$(SRCEXT))
 TESTOBJECTS := $(patsubst $(TESTDIR)/%,$(TESTBUILDDIR)/%,$(TESTSOURCES:.$(SRCEXT)=.o))
 
-DEBUGFLAGS := -O0 -g -D DEBUG
+DEBUGFLAGS := -O3 -g -D DEBUG
 RELEASEFLAGS := -O3
 CXXFLAGS := -std=c++17 -Wall -Werror 
 CFLAGS := -std=c++17 -Wno-unused-command-line-argument -Wno-invalid-source-encoding

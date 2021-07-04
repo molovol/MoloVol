@@ -406,7 +406,7 @@ void Ctrl::displayResults(CalcReportBundle& data, const unsigned display_flag){
 
 void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag){
   if (_to_gui){
-    s_gui->extDisplayCavityList(data.cavities);
+    s_gui->extDisplayCavityList(data.cavities, data.analyze_unit_cell, data.probe_mode);
   }
   else{
     std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
