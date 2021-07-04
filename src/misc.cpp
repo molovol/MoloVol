@@ -1,6 +1,7 @@
 #include "misc.h"
 #include <sstream>
 #include <iomanip>
+#include <experimental/filesystem>
 
 // access the resource folder containing elements.txt and space_groups.txt
 std::string getResourcesDir(){
@@ -33,14 +34,14 @@ std::string fileExtension(const std::string& path){
 }
 
 std::string fileName(const std::string& path){
-// TODO: if the file path is entered with slash (valid path on windows), the filename will not be returned correctly
-  size_t bslash_pos = path.find_last_of("\\");
-  if (bslash_pos != std::string::npos){
-    return path.substr(bslash_pos+1);
+  std::array<char,2> separators = {'\\','/'};
+  for (char sep : separators){
+    size_t sep_pos = path.find_last_of(sep);
+    if (sep_pos != std::string::npos){
+      return path.substr(sep_pos+1);
+    }
   }
-  else{
-    return "invalid";
-  }
+  return "invalid";
 }
 
 // find the current time and convert to a string in format year-month-day_hour-min-sec
