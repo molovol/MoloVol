@@ -38,7 +38,7 @@ std::string fileName(const std::string& path){
   for (char sep : separators){
     size_t sep_pos = path.find_last_of(sep);
     if (sep_pos != std::string::npos){
-      return path.substr(sep_pos+1);
+      return path.substr(sep_pos+1,path.find_last_of('.')-(sep_pos+1));
     }
   }
   return "invalid";
