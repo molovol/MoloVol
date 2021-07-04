@@ -115,19 +115,27 @@ void Model::createReport(std::string path){
   output_report << vol_block("Excluded void volume", _data.volumes[0b00000101]);
   output_report << vol_block("Molecular volume", _data.volumes[0b00000011] + _data.volumes[0b00000101], "(vdw + probe inaccessible)");
   if(!_data.probe_mode && !_data.analyze_unit_cell){
-    output_report << "Warning: the following value includes outside space and is not meaningful\n";
+    output_report << small_p << " core volume: Not applicable (includes unlimited outside space)\n";
   }
-  output_report << vol_block(small_p + " core volume", _data.volumes[0b00001001]);
+  else{
+    output_report << vol_block(small_p + " core volume", _data.volumes[0b00001001]);
+  }
   output_report << vol_block(small_p + " shell volume", _data.volumes[0b00010001]);
-  output_report << vol_block(small_p + " occupied volume", _data.volumes[0b00001001] + _data.volumes[0b00010001], "(core + shell)");
+  if(_data.probe_mode || _data.analyze_unit_cell){
+    output_report << vol_block(small_p + " occupied volume", _data.volumes[0b00001001] + _data.volumes[0b00010001], "(core + shell)");
+  }
 
   if(_data.probe_mode){
     if(!_data.analyze_unit_cell){
-      output_report << "Warning: the following value includes outside space and is not meaningful\n";
+      output_report << "Large probe core volume: Not applicable (includes unlimited outside space)\n";
     }
-    output_report << vol_block("Large probe core volume", _data.volumes[0b00100001]);
+    else{
+      output_report << vol_block("Large probe core volume", _data.volumes[0b00100001]);
+    }
     output_report << vol_block("Large probe shell volume", _data.volumes[0b01000001]);
-    output_report << vol_block("Large probe occupied volume", _data.volumes[0b00100001] + _data.volumes[0b01000001], "(core + shell)");
+    if(_data.analyze_unit_cell){
+      output_report << vol_block("Large probe occupied volume", _data.volumes[0b00100001] + _data.volumes[0b01000001], "(core + shell)");
+    }
   }
 
   if(_data.calc_surface_areas){
