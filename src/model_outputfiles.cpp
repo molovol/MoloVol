@@ -113,11 +113,17 @@ void Model::createReport(std::string path){
   output_report << vol_block("Van der Waals volume", _data.volumes[0b00000011]);
   output_report << vol_block("Excluded void volume", _data.volumes[0b00000101]);
   output_report << vol_block("Molecular volume", _data.volumes[0b00000011] + _data.volumes[0b00000101], "(vdw + probe inaccessible)");
+  if(!_data.probe_mode && !_data.analyze_unit_cell){
+    output_report << "Warning: the following value includes outside space and is not meaningful\n";
+  }
   output_report << vol_block(small_p + " core volume", _data.volumes[0b00001001]);
   output_report << vol_block(small_p + " shell volume", _data.volumes[0b00010001]);
   output_report << vol_block(small_p + " occupied volume", _data.volumes[0b00001001] + _data.volumes[0b00010001], "(core + shell)");
 
   if(_data.probe_mode){
+    if(!_data.analyze_unit_cell){
+      output_report << "Warning: the following value includes outside space and is not meaningful\n";
+    }
     output_report << vol_block("Large probe core volume", _data.volumes[0b00100001]);
     output_report << vol_block("Large probe shell volume", _data.volumes[0b01000001]);
     output_report << vol_block("Large probe occupied volume", _data.volumes[0b00100001] + _data.volumes[0b01000001], "(core + shell)");
@@ -172,9 +178,16 @@ void Model::createReport(std::string path){
     for(unsigned int i = 0; i < _data.cavities.size(); i++){
       std::array<double,3> cav_center = _data.getCavCenter(i);
       // default precision is 6, which means that double values will take less than a tab space
-      output_report << i+1 << "\t"
-                    << _data.cavities[i].getVolume() << "\t\t"
-                    << _data.cavities[i].core_vol << "\t\t";
+      output_report << i+1 << "\t";
+      // in single probe mode, the first cavity with id 1 comprises outside empty space and is meaningless
+      if(!_data.probe_mode && !_data.analyze_unit_cell && _data.cavities[i].id == 1){
+        output_report << "outside\t\t"
+                      << "outside\t\t";
+      }
+      else{
+        output_report << _data.cavities[i].getVolume() << "\t\t"
+                      << _data.cavities[i].core_vol << "\t\t";
+      }
       if(_data.calc_surface_areas){
         output_report << _data.cavities[i].surf_shell << "\t\t"
                       << _data.cavities[i].surf_core << "\t\t";

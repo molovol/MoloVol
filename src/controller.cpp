@@ -340,6 +340,9 @@ void Ctrl::displayResults(CalcReportBundle& data, const unsigned display_flag){
     }
     std::string prefix = data.probe_mode? "Small p" : "P";
     if (display_flag & mvOUT_VOL_CORE_S){
+      if(!data.probe_mode && !data.analyze_unit_cell){
+        notifyUser("Warning: the following value includes outside space and is not meaningful\n");
+      }
       notifyUser(prefix +"robe core volume: " + std::to_string(data.volumes[0b00001001]) + " ");
       notifyUser(vol_unit);
       notifyUser("\n");
@@ -351,6 +354,9 @@ void Ctrl::displayResults(CalcReportBundle& data, const unsigned display_flag){
     }
     if(data.probe_mode){
       if (display_flag & mvOUT_VOL_SHELL_L){
+        if(!data.analyze_unit_cell){
+          notifyUser("Warning: the following value includes outside space and is not meaningful\n");
+        }
         notifyUser("Large probe core volume: " + std::to_string(data.volumes[0b00100001]) + " ");
         notifyUser(vol_unit);
         notifyUser("\n");
@@ -424,7 +430,12 @@ void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag
 
     for (size_t i = 0; i < data.cavities.size(); ++i){
       // CAVITY VALUES
-      std::string values[] = {std::to_string(i+1), std::to_string(data.cavities[i].getVolume()), std::to_string(data.cavities[i].getSurfCore()), std::to_string(data.cavities[i].getSurfShell()), data.cavities[i].getPosition()};
+      std::string volume = std::to_string(data.cavities[i].getVolume());
+      // in single probe mode, the first cavity with id 1 comprises outside empty space and is meaningless
+      if(!data.probe_mode && !data.analyze_unit_cell && data.cavities[i].id == 1){
+        volume = "oustide";
+      }
+      std::string values[] = {std::to_string(i+1), volume, std::to_string(data.cavities[i].getSurfCore()), std::to_string(data.cavities[i].getSurfShell()), data.cavities[i].getPosition()};
 
       for (std::string elem : values){
         notifyUser(field(width,elem));

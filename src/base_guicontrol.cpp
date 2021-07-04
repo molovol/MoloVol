@@ -170,7 +170,13 @@ void MainFrame::displayCavityList(const std::vector<Cavity>& cavities){
   outputGrid->AppendRows(cavities.size());
   for (int row = 0; row < outputGrid->GetNumberRows(); ++row){
     outputGrid->SetCellValue(row, 0, std::to_string(row+1));
-    outputGrid->SetCellValue(row, 1, std::to_string(cavities[row].getVolume()));
+    std::string volume = std::to_string(cavities[row].getVolume());
+    std::cout << int(cavities[row].id) << "\n";
+    // in single probe mode, the first cavity with id 1 comprises outside empty space and is meaningless
+    if(!getProbeMode() && !getAnalyzeUnitCell() && cavities[row].id == 1){
+      volume = "oustide";
+    }
+    outputGrid->SetCellValue(row, 1, volume);
     if(getCalcSurfaceAreas()){
       outputGrid->SetCellValue(row, 2, std::to_string(cavities[row].getSurfCore()));
       outputGrid->SetCellValue(row, 3, std::to_string(cavities[row].getSurfShell()));
