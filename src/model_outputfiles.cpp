@@ -13,8 +13,9 @@
 // RESULT REPORT //
 ///////////////////
 
+std::string makeExportFileName(const std::string, const CalcReportBundle&, const char, const unsigned char=0);
 void Model::createReport(){
-  createReport(_output_folder+ "/" + fileName(_data.atom_file_path) + "_MoloVol_report_" + _time_stamp +".txt");
+  createReport(makeExportFileName(_output_folder, _data, 'r'));
 }
 
 void Model::createReport(std::string path){
@@ -242,9 +243,9 @@ void Model::writeCrystStruct(std::string path){
 }
 
 void Model::writeCrystStruct(){
-  std::string path = _output_folder+ "/" + fileName(_data.atom_file_path) + "_struct_orthogonal_cell_"+ _time_stamp +".xyz";
+  std::string path = makeExportFileName(_output_folder, _data, 'c');
   writeXYZfile(_data.orth_cell, path, "Orthogonal cell");
-  path = _output_folder+ "/" + fileName(_data.atom_file_path) + "_struct_partial_supercell_"+ _time_stamp +".xyz";
+  path = makeExportFileName(_output_folder, _data, 'p');
   writeXYZfile(_data.supercell, path, "Partial supercell");
 }
 
@@ -265,7 +266,7 @@ void Model::writeXYZfile(const std::vector<std::tuple<std::string, double, doubl
 ////////////////////////
 
 void Model::writeTotalSurfaceMap(){
-  writeTotalSurfaceMap(_output_folder + "/" + fileName(_data.atom_file_path) + "_full_surface_map_" + _time_stamp + ".dx");
+  writeTotalSurfaceMap(makeExportFileName(_output_folder, _data, 's'));
 }
 
 void Model::writeTotalSurfaceMap(const std::string file_path){
@@ -308,7 +309,7 @@ void Model::writeTotalSurfaceMap(const std::string file_path){
 }
 
 void Model::writeCavitiesMaps(){
-  writeCavitiesMaps(_output_folder + "/" + fileName(_data.atom_file_path) + "_surface_map_" + _time_stamp + ".dx");
+  writeCavitiesMaps("make_auto_name");
 }
 
 void Model::writeCavitiesMaps(const std::string file_path){
@@ -333,8 +334,14 @@ void Model::writeCavitiesMaps(const std::string file_path){
       n_elements[i] = end_index[i] - start_index[i];
       origin[i] = cell_min[i] + ((double(start_index[i]) + 0.5) * vxl_length);
     }
-    std::string cavity_file_name = file_path;
-    cavity_file_name.insert(file_path.length() - 3, "_cav_" + std::to_string(id+1));
+    std::string cavity_file_name;
+    if (file_path == "make_auto_name"){
+      cavity_file_name = makeExportFileName(_output_folder, _data, 's', id+1);
+    }
+    else{
+      cavity_file_name = file_path;
+      cavity_file_name.insert(file_path.find_last_of('.'), "_cav" + std::to_string(id+1));
+    }
     /*
     // alternative with cav id + name of file
     size_t path_end = file_path.find_last_of("\\/");
@@ -437,4 +444,58 @@ void Model::writeSurfaceMap(const std::string file_path,
   // close the file
   output_file.close();
   if (issue_encountered) {Ctrl::getInstance()->displayErrorMessage(303);}
+}
+
+///////////////
+// FILE NAME //
+///////////////
+
+static const std::map<char,std::string> s_file_descriptor{
+  {'r' , "MoloVol-report"},
+  {'s' , "surface-map"},
+  {'c' , "struct-orthogonal-cell"},
+  {'p' , "struct-partial-supercell"}
+};
+
+static const std::map<char,std::string> s_file_extension{
+  {'r' , ".txt"},
+  {'s' , ".dx"},
+  {'c' , ".xyz"},
+  {'p' , ".xyz"}
+};
+
+bool fileExists(const std::string&);
+std::string rstripZeros(const std::string str);
+std::string makeExportFileName(const std::string dir, const CalcReportBundle& data, const char filetype, const unsigned char n_cav){
+  assert(s_file_descriptor.count(filetype));
+  std::string filename = "";
+  filename += fileName(data.atom_file_path);
+  filename += "_" + s_file_descriptor.at(filetype);
+  filename += "_grid-" + rstripZeros(std::to_string(data.grid_step));
+  filename += "_rad1-" + rstripZeros(std::to_string(data.r_probe1));
+  if (data.probe_mode){
+    filename += "_rad2-" + rstripZeros(std::to_string(data.r_probe2));
+  }
+  if(filetype == 's'){
+    filename += (n_cav)? "_cav" + std::to_string(n_cav) : "_full-structure";
+  }
+  std::string fullname = dir + "/" + filename + s_file_extension.at(filetype);
+  int i = 2;
+  while (fileExists(fullname)){
+    fullname = dir + "/" + filename + "_" + std::to_string(i) + s_file_extension.at(filetype);
+    i++;
+  }
+  return fullname;
+}
+
+std::string rstripZeros(std::string str){
+  return str.erase(str.find_first_of('0',str.find_first_of('.')+2), str.find_first_of('.')+2 - str.length());
+}
+
+bool fileExists(const std::string& path){
+  if (FILE *file = fopen(path.c_str(), "r")){
+    fclose(file);
+    return true;
+  }
+  else {return false;}
 }
