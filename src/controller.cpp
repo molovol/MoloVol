@@ -341,7 +341,7 @@ void Ctrl::displayResults(CalcReportBundle& data, const unsigned display_flag){
     std::string prefix = data.probe_mode? "Small p" : "P";
     if (display_flag & mvOUT_VOL_CORE_S){
       if(!data.probe_mode && !data.analyze_unit_cell){
-        notifyUser(prefix +"robe core volume: Not applicable (includes unlimited outside space)\n");
+        notifyUser(prefix +"robe core volume: No physical meaning, contains all volume outside the structure.\n");
       }
       else{
         notifyUser(prefix +"robe core volume: " + std::to_string(data.volumes[0b00001001]) + " ");
@@ -357,7 +357,7 @@ void Ctrl::displayResults(CalcReportBundle& data, const unsigned display_flag){
     if(data.probe_mode){
       if (display_flag & mvOUT_VOL_SHELL_L){
         if(!data.analyze_unit_cell){
-          notifyUser("Large probe core volume: Not applicable (includes unlimited outside space)\n");
+          notifyUser("Large probe core volume: No physical meaning, contains all volume outside the structure.\n");
         }
         else{
           notifyUser("Large probe core volume: " + std::to_string(data.volumes[0b00100001]) + " ");
