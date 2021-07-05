@@ -121,7 +121,7 @@ class MainFrame: public wxFrame, public wxThreadHelper
           wxCheckBox* twoProbesCheckbox;
           wxPanel* probe1Panel;
             wxStaticText* probe1Text;
-            wxTextCtrl* probe1InputText;
+            wxComboBox* probe1DropDown;
             wxStaticText* probe1UnitText; // possibly usable universally?
           wxPanel* probe2Panel;
             wxStaticText* probe2Text;

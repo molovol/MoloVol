@@ -97,7 +97,7 @@ bool MainFrame::getProbeMode(){
 }
 
 double MainFrame::getProbe1Radius(){
-  return std::stod(probe1InputText->GetValue().ToStdString());
+  return std::stod(probe1DropDown->GetValue().ToStdString());
 }
 
 double MainFrame::getProbe2Radius(){
