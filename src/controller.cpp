@@ -130,22 +130,28 @@ bool Ctrl::runCalculation(){
 
   // PARAMETERS
   // save parameters in model
-  if(!_current_calculation->setParameters(
-      s_gui->getAtomFilepath(),
-      s_gui->getOutputDir(),
-      s_gui->getIncludeHetatm(),
-      s_gui->getAnalyzeUnitCell(),
-      s_gui->getCalcSurfaceAreas(),
-      s_gui->getProbeMode(),
-      s_gui->getProbe1Radius(),
-      s_gui->getProbe2Radius(),
-      s_gui->getGridsize(),
-      s_gui->getDepth(),
-      s_gui->getMakeReport(),
-      s_gui->getMakeSurfaceMap(),
-      s_gui->getMakeCavityMaps(),
-      s_gui->generateRadiusMap(),
-      s_gui->getIncludedElements())){
+  try{
+    if(!_current_calculation->setParameters(
+        s_gui->getAtomFilepath(),
+        s_gui->getOutputDir(),
+        s_gui->getIncludeHetatm(),
+        s_gui->getAnalyzeUnitCell(),
+        s_gui->getCalcSurfaceAreas(),
+        s_gui->getProbeMode(),
+        s_gui->getProbe1Radius(),
+        s_gui->getProbe2Radius(),
+        s_gui->getGridsize(),
+        s_gui->getDepth(),
+        s_gui->getMakeReport(),
+        s_gui->getMakeSurfaceMap(),
+        s_gui->getMakeCavityMaps(),
+        s_gui->generateRadiusMap(),
+        s_gui->getIncludedElements())){
+      return false;
+    }
+  }
+  catch (const std::invalid_argument&){
+    displayErrorMessage(109);
     return false;
   }
 
@@ -557,6 +563,7 @@ static const std::map<int, std::string> s_error_codes = {
   {106, "Invalid element symbol(s) in elements file detected. Some radii may be assigned incorrectly. Please make sure that all element symbols begin with an alphabetic character."},
   {107, "Invalid radius value in elements file detected. Some radii may be set to 0. Please make sure that all radii are numeric."},
   {108, "Invalid atomic weight value in elements file detected. Some atomic weights may be set to 0. Please make sure that all atomic weights are numeric."},
+  {109, "Invalid numeric input. Please make sure that all input values have a valid number format."},
   // 11x: unit cell files
   {111, "Space group not found. Check the structure file, or untick the Unit Cell Analysis tickbox."},
   {112, "Invalid unit cell parameters. Check the structure file, or untick the Unit Cell Analysis tickbox."},
