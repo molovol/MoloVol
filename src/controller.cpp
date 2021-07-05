@@ -150,7 +150,7 @@ bool Ctrl::runCalculation(){
       return false;
     }
   }
-  catch (const std::invalid_argument&){
+  catch (const std::invalid_argument& e){
     displayErrorMessage(109);
     return false;
   }
