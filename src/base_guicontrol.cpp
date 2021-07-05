@@ -100,7 +100,7 @@ double MainFrame::getProbe1Radius(){
   try {
     return std::stod(probe1DropDown->GetValue().ToStdString());
   }
-  catch (const std::invalid_argument){
+  catch (const std::invalid_argument& e){
     throw;
   }
 }
@@ -109,7 +109,7 @@ double MainFrame::getProbe2Radius(){
   try{
     return getProbeMode()? std::stod(probe2InputText->GetValue().ToStdString()) : 0;
   }
-  catch (const std::invalid_argument){
+  catch (const std::invalid_argument& e){
     throw;
   }
 }
@@ -118,7 +118,7 @@ double MainFrame::getGridsize(){
   try{
     return std::stod(gridsizeInputText->GetValue().ToStdString());
   }
-  catch (const std::invalid_argument){
+  catch (const std::invalid_argument& e){
     throw;
   }
 }
