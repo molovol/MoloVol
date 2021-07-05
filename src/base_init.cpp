@@ -305,11 +305,14 @@ void MainFrame::InitProbe1Panel(){
 
   const wxString drop_down_options[] = {
     "1.2 (Hydrogen)",
-    "1.4 (Water)"
+    "1.4 (Water)",
+    "1.66 (Nitrogen)",
+    "1.83 (Argon)",
+    "1.86 (N2 sphere rad.)"
   };
 
   probe1Text = new wxStaticText(probe1Panel, TEXT_Probe1, "Small Probe radius:");
-  probe1DropDown = new wxComboBox(probe1Panel, TEXT_Probe1Input, "1.2", wxDefaultPosition, wxDefaultSize, 
+  probe1DropDown = new wxComboBox(probe1Panel, TEXT_Probe1Input, "1.2", wxDefaultPosition, wxDefaultSize,
       sizeof(drop_down_options)/sizeof(drop_down_options[0]), drop_down_options);
   probe1UnitText = new wxStaticText(probe1Panel, TEXT_Probe1Unit, L" \u212B"); // unicode for angstrom
 
