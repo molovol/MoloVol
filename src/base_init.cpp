@@ -224,7 +224,7 @@ void MainFrame::SetSizerFilePanel(wxPanel* panel, wxStaticText* text, wxButton* 
 void MainFrame::InitAtomfilePanel(){
   atomText = new wxStaticText(atomfilePanel, TEXT_Atom, "Structure file:");
   browseButton = new wxButton(atomfilePanel, BUTTON_Browse, "Browse");
-  filepathText = new wxTextCtrl(atomfilePanel, TEXT_Filename, wxEmptyString);
+  filepathText = new wxTextCtrl(atomfilePanel, TEXT_Filename, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
 
   SetSizerFilePanel(atomfilePanel, atomText, browseButton, filepathText);
 }
@@ -234,7 +234,7 @@ void MainFrame::InitElementsfilePanel(){
   elementsButton = new wxButton(elementsfilePanel, BUTTON_Elements, "Browse");
 
   std::string default_path = Ctrl::getDefaultElemPath();
-  elementspathText = new wxTextCtrl(elementsfilePanel, TEXT_Elementspath, default_path);
+  elementspathText = new wxTextCtrl(elementsfilePanel, TEXT_Elementspath, default_path, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
   SetSizerFilePanel(elementsfilePanel, elementsText, elementsButton, elementspathText);
 }
 
