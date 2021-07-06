@@ -340,9 +340,14 @@ void Ctrl::displayResults(CalcReportBundle& data, const unsigned display_flag){
     }
     std::string prefix = data.probe_mode? "Small p" : "P";
     if (display_flag & mvOUT_VOL_CORE_S){
-      notifyUser(prefix +"robe core volume: " + std::to_string(data.volumes[0b00001001]) + " ");
-      notifyUser(vol_unit);
-      notifyUser("\n");
+      if(!data.probe_mode && !data.analyze_unit_cell){
+        notifyUser(prefix +"robe core volume: No physical meaning, contains all volume outside the structure.\n");
+      }
+      else{
+        notifyUser(prefix +"robe core volume: " + std::to_string(data.volumes[0b00001001]) + " ");
+        notifyUser(vol_unit);
+        notifyUser("\n");
+      }
     }
     if (display_flag & mvOUT_VOL_SHELL_S){
       notifyUser(prefix +"robe shell volume: " + std::to_string(data.volumes[0b00010001]) + " ");
@@ -351,9 +356,14 @@ void Ctrl::displayResults(CalcReportBundle& data, const unsigned display_flag){
     }
     if(data.probe_mode){
       if (display_flag & mvOUT_VOL_SHELL_L){
-        notifyUser("Large probe core volume: " + std::to_string(data.volumes[0b00100001]) + " ");
-        notifyUser(vol_unit);
-        notifyUser("\n");
+        if(!data.analyze_unit_cell){
+          notifyUser("Large probe core volume: No physical meaning, contains all volume outside the structure.\n");
+        }
+        else{
+          notifyUser("Large probe core volume: " + std::to_string(data.volumes[0b00100001]) + " ");
+          notifyUser(vol_unit);
+          notifyUser("\n");
+        }
       }
       if (display_flag & mvOUT_VOL_SHELL_L){
         notifyUser("Large probe shell volume: " + std::to_string(data.volumes[0b01000001]) + " ");
@@ -400,7 +410,7 @@ void Ctrl::displayResults(CalcReportBundle& data, const unsigned display_flag){
 
 void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag){
   if (_to_gui){
-    s_gui->extDisplayCavityList(data.cavities);
+    s_gui->extDisplayCavityList(data.cavities, data.analyze_unit_cell, data.probe_mode);
   }
   else{
     std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
@@ -424,7 +434,10 @@ void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag
 
     for (size_t i = 0; i < data.cavities.size(); ++i){
       // CAVITY VALUES
-      std::string values[] = {std::to_string(i+1), std::to_string(data.cavities[i].getVolume()), std::to_string(data.cavities[i].getSurfCore()), std::to_string(data.cavities[i].getSurfShell()), data.cavities[i].getPosition()};
+      // in single probe mode, the first cavity with id 1 comprises outside empty space and is meaningless
+      std::string volume = (!data.probe_mode && !data.analyze_unit_cell && data.cavities[i].id == 1)? "outside"
+        : std::to_string(data.cavities[i].getVolume());
+      std::string values[] = {std::to_string(i+1), volume, std::to_string(data.cavities[i].getSurfCore()), std::to_string(data.cavities[i].getSurfShell()), data.cavities[i].getPosition()};
 
       for (std::string elem : values){
         notifyUser(field(width,elem));

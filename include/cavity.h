@@ -10,7 +10,7 @@
 struct Cavity{
   Cavity() = default;
   Cavity(unsigned char id, double core_vol, double shell_vol, std::array<double,3> min_bound, std::array<double,3> max_bound, std::array<unsigned int,3> min_index, std::array<unsigned int,3> max_index) :
-    id(id), core_vol(core_vol), shell_vol(shell_vol), min_bound(min_bound), max_bound(max_bound), min_index(min_index), max_index(max_index){};
+    id(id), core_vol(core_vol), shell_vol(shell_vol), min_bound(min_bound), max_bound(max_bound), min_index(min_index), max_index(max_index), surf_core(0), surf_shell(0){};
   unsigned char id; // the number assigned to core and shell voxels belonging to this cavity
   double core_vol;
   double shell_vol;

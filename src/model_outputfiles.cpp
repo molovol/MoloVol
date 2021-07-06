@@ -13,8 +13,9 @@
 // RESULT REPORT //
 ///////////////////
 
+std::string makeExportFileName(const std::string, const CalcReportBundle&, const char, const unsigned char=0);
 void Model::createReport(){
-  createReport(_output_folder+"/MoloVol report " + _time_stamp +".txt");
+  createReport(makeExportFileName(_output_folder, _data, 'r'));
 }
 
 void Model::createReport(std::string path){
@@ -80,7 +81,8 @@ void Model::createReport(std::string path){
   if(_data.analyze_unit_cell){
     output_report << "Orthogonal(ized) unit cell axes: " << _cart_matrix[0][0] << " A, " << _cart_matrix[1][1] << " A, " << _cart_matrix[2][2] << " A\n";
     unit_cell_vol = _cart_matrix[0][0]*_cart_matrix[1][1]*_cart_matrix[2][2];
-    output_report << "Total unit cell volume: " << unit_cell_vol << " A^3\n\n";
+    output_report << "Total unit cell volume: " << unit_cell_vol << " A^3\n";
+    output_report << "Density: " << _data.molar_mass * 1e24 / (unit_cell_vol * AVOGADRO) << " g/cm^3\n\n";
   }
 
   // layout function for individual rows
@@ -112,14 +114,28 @@ void Model::createReport(std::string path){
   output_report << vol_block("Van der Waals volume", _data.volumes[0b00000011]);
   output_report << vol_block("Excluded void volume", _data.volumes[0b00000101]);
   output_report << vol_block("Molecular volume", _data.volumes[0b00000011] + _data.volumes[0b00000101], "(vdw + probe inaccessible)");
-  output_report << vol_block(small_p + " core volume", _data.volumes[0b00001001]);
+  if(!_data.probe_mode && !_data.analyze_unit_cell){
+    output_report << small_p << " core volume: No physical meaning, contains all volume outside the structure.\n\n";
+  }
+  else{
+    output_report << vol_block(small_p + " core volume", _data.volumes[0b00001001]);
+  }
   output_report << vol_block(small_p + " shell volume", _data.volumes[0b00010001]);
-  output_report << vol_block(small_p + " occupied volume", _data.volumes[0b00001001] + _data.volumes[0b00010001], "(core + shell)");
+  if(_data.probe_mode || _data.analyze_unit_cell){
+    output_report << vol_block(small_p + " occupied volume", _data.volumes[0b00001001] + _data.volumes[0b00010001], "(core + shell)");
+  }
 
   if(_data.probe_mode){
-    output_report << vol_block("Large probe core volume", _data.volumes[0b00100001]);
+    if(!_data.analyze_unit_cell){
+      output_report << "Large probe core volume: No physical meaning, contains all volume outside the structure.\n\n";
+    }
+    else{
+      output_report << vol_block("Large probe core volume", _data.volumes[0b00100001]);
+    }
     output_report << vol_block("Large probe shell volume", _data.volumes[0b01000001]);
-    output_report << vol_block("Large probe occupied volume", _data.volumes[0b00100001] + _data.volumes[0b01000001], "(core + shell)");
+    if(_data.analyze_unit_cell){
+      output_report << vol_block("Large probe occupied volume", _data.volumes[0b00100001] + _data.volumes[0b01000001], "(core + shell)");
+    }
   }
 
   if(_data.calc_surface_areas){
@@ -171,9 +187,16 @@ void Model::createReport(std::string path){
     for(unsigned int i = 0; i < _data.cavities.size(); i++){
       std::array<double,3> cav_center = _data.getCavCenter(i);
       // default precision is 6, which means that double values will take less than a tab space
-      output_report << i+1 << "\t"
-                    << _data.cavities[i].getVolume() << "\t\t"
-                    << _data.cavities[i].core_vol << "\t\t";
+      output_report << i+1 << "\t";
+      // in single probe mode, the first cavity with id 1 comprises outside empty space and is meaningless
+      if(!_data.probe_mode && !_data.analyze_unit_cell && _data.cavities[i].id == 1){
+        output_report << "outside\t\t"
+                      << "outside\t\t";
+      }
+      else{
+        output_report << _data.cavities[i].getVolume() << "\t\t"
+                      << _data.cavities[i].core_vol << "\t\t";
+      }
       if(_data.calc_surface_areas){
         output_report << _data.cavities[i].surf_shell << "\t\t"
                       << _data.cavities[i].surf_core << "\t\t";
@@ -194,7 +217,7 @@ void Model::createReport(std::string path){
     output_report << "Level 5.0 : Small probe accessible surface (similar to Lee-Richards molecular surface but only 'inside')\n";
   }
   else{
-    output_report << "Level 2.0 : Molecular surface (probe excluded, similar to the Connolly surface)\n";
+    output_report << "Level 2.0 : Molecular and cavity surface (probe excluded, similar to the Connolly surface)\n";
     output_report << "Level 5.0 : Probe accessible surface (similar to the Lee-Richards molecular surface)\n";
   }
   output_report << "\nFor help on how to vizualize maps check the user manual or:\n";
@@ -228,9 +251,9 @@ void Model::writeCrystStruct(std::string path){
 }
 
 void Model::writeCrystStruct(){
-  std::string path = _output_folder+"/struct_orthogonal_cell_"+ _time_stamp +".xyz";
+  std::string path = makeExportFileName(_output_folder, _data, 'c');
   writeXYZfile(_data.orth_cell, path, "Orthogonal cell");
-  path = _output_folder+"/struct_partial_supercell_"+ _time_stamp +".xyz";
+  path = makeExportFileName(_output_folder, _data, 'p');
   writeXYZfile(_data.supercell, path, "Partial supercell");
 }
 
@@ -251,7 +274,7 @@ void Model::writeXYZfile(const std::vector<std::tuple<std::string, double, doubl
 ////////////////////////
 
 void Model::writeTotalSurfaceMap(){
-  writeTotalSurfaceMap(_output_folder + "/full_surface_map_" + _time_stamp + ".dx");
+  writeTotalSurfaceMap(makeExportFileName(_output_folder, _data, 's'));
 }
 
 void Model::writeTotalSurfaceMap(const std::string file_path){
@@ -294,7 +317,7 @@ void Model::writeTotalSurfaceMap(const std::string file_path){
 }
 
 void Model::writeCavitiesMaps(){
-  writeCavitiesMaps(_output_folder + "/surface_map_" + _time_stamp + ".dx");
+  writeCavitiesMaps("make_auto_name");
 }
 
 void Model::writeCavitiesMaps(const std::string file_path){
@@ -319,8 +342,14 @@ void Model::writeCavitiesMaps(const std::string file_path){
       n_elements[i] = end_index[i] - start_index[i];
       origin[i] = cell_min[i] + ((double(start_index[i]) + 0.5) * vxl_length);
     }
-    std::string cavity_file_name = file_path;
-    cavity_file_name.insert(file_path.length() - 3, "_cav_" + std::to_string(id+1));
+    std::string cavity_file_name;
+    if (file_path == "make_auto_name"){
+      cavity_file_name = makeExportFileName(_output_folder, _data, 's', id+1);
+    }
+    else{
+      cavity_file_name = file_path;
+      cavity_file_name.insert(file_path.find_last_of('.'), "_cav" + std::to_string(id+1));
+    }
     /*
     // alternative with cav id + name of file
     size_t path_end = file_path.find_last_of("\\/");
@@ -423,4 +452,58 @@ void Model::writeSurfaceMap(const std::string file_path,
   // close the file
   output_file.close();
   if (issue_encountered) {Ctrl::getInstance()->displayErrorMessage(303);}
+}
+
+///////////////
+// FILE NAME //
+///////////////
+
+static const std::map<char,std::string> s_file_descriptor{
+  {'r' , "MoloVol-report"},
+  {'s' , "surface-map"},
+  {'c' , "struct-orthogonal-cell"},
+  {'p' , "struct-partial-supercell"}
+};
+
+static const std::map<char,std::string> s_file_extension{
+  {'r' , ".txt"},
+  {'s' , ".dx"},
+  {'c' , ".xyz"},
+  {'p' , ".xyz"}
+};
+
+bool fileExists(const std::string&);
+std::string rstripZeros(const std::string str);
+std::string makeExportFileName(const std::string dir, const CalcReportBundle& data, const char filetype, const unsigned char n_cav){
+  assert(s_file_descriptor.count(filetype));
+  std::string filename = "";
+  filename += fileName(data.atom_file_path);
+  filename += "_" + s_file_descriptor.at(filetype);
+  filename += "_grid-" + rstripZeros(std::to_string(data.grid_step));
+  filename += "_rad1-" + rstripZeros(std::to_string(data.r_probe1));
+  if (data.probe_mode){
+    filename += "_rad2-" + rstripZeros(std::to_string(data.r_probe2));
+  }
+  if(filetype == 's'){
+    filename += (n_cav)? "_cav" + std::to_string(n_cav) : "_full-structure";
+  }
+  std::string fullname = dir + "/" + filename + s_file_extension.at(filetype);
+  int i = 2;
+  while (fileExists(fullname)){
+    fullname = dir + "/" + filename + "_" + std::to_string(i) + s_file_extension.at(filetype);
+    i++;
+  }
+  return fullname;
+}
+
+std::string rstripZeros(std::string str){
+  return str.erase(str.find_first_of('0',str.find_first_of('.')+2), str.find_first_of('.')+2 - str.length());
+}
+
+bool fileExists(const std::string& path){
+  if (FILE *file = fopen(path.c_str(), "r")){
+    fclose(file);
+    return true;
+  }
+  else {return false;}
 }
