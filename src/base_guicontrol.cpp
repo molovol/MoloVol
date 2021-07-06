@@ -97,15 +97,30 @@ bool MainFrame::getProbeMode(){
 }
 
 double MainFrame::getProbe1Radius(){
-  return std::stod(probe1InputText->GetValue().ToStdString());
+  try {
+    return std::stod(probe1DropDown->GetValue().ToStdString());
+  }
+  catch (const std::invalid_argument& e){
+    throw;
+  }
 }
 
 double MainFrame::getProbe2Radius(){
-  return getProbeMode()? std::stod(probe2InputText->GetValue().ToStdString()) : 0;
+  try{
+    return getProbeMode()? std::stod(probe2InputText->GetValue().ToStdString()) : 0;
+  }
+  catch (const std::invalid_argument& e){
+    throw;
+  }
 }
 
 double MainFrame::getGridsize(){
-  return std::stod(gridsizeInputText->GetValue().ToStdString());
+  try{
+    return std::stod(gridsizeInputText->GetValue().ToStdString());
+  }
+  catch (const std::invalid_argument& e){
+    throw;
+  }
 }
 
 int MainFrame::getDepth(){

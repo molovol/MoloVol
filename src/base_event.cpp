@@ -209,13 +209,24 @@ void MainFrame::GridChange(wxGridEvent& event){
   atomListGrid->ForceRefresh();
 }
 
+static bool s_first_call = true;
 void MainFrame::OnTextInput(wxCommandEvent& event){
-  filepathText->ChangeValue(filepathText->GetValue());
-  elementspathText->ChangeValue(elementspathText->GetValue());
+  if (s_first_call){
+    s_first_call = !s_first_call;
+    return;
+  }
 
-  probe1InputText->ChangeValue(probe1InputText->GetValue());
-  probe2InputText->ChangeValue(probe2InputText->GetValue());
-  gridsizeInputText->ChangeValue(gridsizeInputText->GetValue());
+  wxTextEntry* text_ctrls[] = {
+    filepathText,
+    elementspathText,
+    probe1DropDown,
+    probe2InputText,
+    gridsizeInputText
+  };
+
+  for (auto& elem : text_ctrls){
+    elem->ChangeValue(elem->GetValue());
+  }
 }
 
 ///////////////
