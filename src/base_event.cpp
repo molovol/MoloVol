@@ -24,6 +24,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_BUTTON(BUTTON_Browse, MainFrame::OnAtomBrowse)
   EVT_BUTTON(BUTTON_Elements, MainFrame::OnElementsBrowse)
   EVT_BUTTON(BUTTON_LoadFiles, MainFrame::OnLoadFiles)
+  EVT_TEXT_ENTER(TEXT_Filename, MainFrame::OnLoadFiles)
+  EVT_TEXT_ENTER(TEXT_Elementspath, MainFrame::OnLoadFiles)
   EVT_BUTTON(BUTTON_Report, MainFrame::OnExportReport)
   EVT_BUTTON(BUTTON_TotalMap, MainFrame::OnExportTotalMap)
   EVT_BUTTON(BUTTON_CavityMap, MainFrame::OnExportCavityMap)
@@ -155,7 +157,7 @@ void MainFrame::OnElementsBrowse(wxCommandEvent& event){
 
 // browse (can only be called by another method function)
 void MainFrame::OnBrowse(wxCommandEvent& event, std::string& filetype, wxTextCtrl* textbox){
-  wxFileDialog openFileDialog(this,_("Select file"),"","",filetype,wxFD_OPEN|wxFD_FILE_MUST_EXIST);
+  wxFileDialog openFileDialog(this,_("Select file"),textbox->GetValue(),"",filetype,wxFD_OPEN|wxFD_FILE_MUST_EXIST);
 
   // if user closes dialog
   if (openFileDialog.ShowModal() == wxID_CANCEL)
@@ -302,7 +304,7 @@ void MainFrame::OnToggleAutoExport(wxCommandEvent& event){
 }
 
 void MainFrame::OnBrowseOutput(wxCommandEvent& event){
-  wxDirDialog openDirDialog(this, _("Select output directory"), "", wxDD_DIR_MUST_EXIST | wxDD_DEFAULT_STYLE);
+  wxDirDialog openDirDialog(this, _("Select output directory"), dirpickerText->GetValue(), wxDD_DIR_MUST_EXIST | wxDD_DEFAULT_STYLE);
 
   // if user closes dialog
   if (openDirDialog.ShowModal() == wxID_CANCEL){
