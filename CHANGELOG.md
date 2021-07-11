@@ -4,6 +4,8 @@ This changelog keeps track of changes in a user-friendly way. It is based on [ke
 
 ## Unreleased
 
+## [v0.2.0](https://github.com/jmaglic/MoloVol/releases/tag/v0.2.0) - 2021-07-11
+
 ### Added
 * The name of the output files from the automatic export option now include the name of the input structure file.
 * Fully functional command line interface that allows accessing all functionalities directly form the command line.
