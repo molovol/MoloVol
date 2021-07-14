@@ -514,13 +514,10 @@ bool Model::convertCifSymmetryElements(const std::vector<std::string> &symop_lis
     }
     for (int j = 0; j < 9; j++){
       _sym_matrix_XYZ.emplace_back(sym_xyz[j]);
-      std::cout << _sym_matrix_XYZ[i*9+j] << " ";
     }
     for (int j = 0; j < 3; j++){
       _sym_matrix_fraction.emplace_back(sym_frac[j]);
-      std::cout << _sym_matrix_fraction[i*3+j] << " ";
     }
-    std::cout << "\n";
   }
   // TODO deal with potential errors
   return true;
