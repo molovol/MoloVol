@@ -381,19 +381,23 @@ struct VoxelLoc{
 bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& start_index, const int start_lvl){
   assert(_type == 0b00001001);
   if(getID() != 0){return false;}
+  // set the ID of the start voxel and all its children
   setID(id);
   passIDtoChildren(start_index, start_lvl);
 
+  // initialise flood fill stack and add first voxel
   std::vector<VoxelLoc> flood_stack;
   flood_stack.push_back(VoxelLoc(start_index, start_lvl));
 
+  // reusing SearchIndex to get a vector of all neighbour voxel indices, i.e.
+  // (1,0,0); (1,0,1); (1,1,0), (1,1,1), etc.
   std::vector<std::vector<std::array<int,3>>> neighbour_indices = SearchIndex().computeIndices(3);
   neighbour_indices.erase(neighbour_indices.begin());
 
   // adds neighbours to the stack, IDs are assigned before adding to the stack
   while (flood_stack.size() > 0){
     if (Ctrl::getInstance()->getAbortFlag()){return false;}
-    Ctrl::getInstance()->updateCalculationStatus();
+    Ctrl::getInstance()->updateCalculationStatus(); // checks for abort button click
     VoxelLoc vxl = flood_stack.back();
     flood_stack.pop_back();
 
@@ -402,9 +406,18 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
       for (const auto& rel_index : shell){
 
         nb_index = add(vxl.index, rel_index);
-        if (!s_cell->isInBounds(nb_index,vxl.lvl)){continue;} // skip if index is invalid
+        if (!s_cell->isInBounds(nb_index,vxl.lvl)){
+          continue; // skip if index is invalid
+          // TODO: for unit cell analysis, check the opposite side of the unit cell here
+        }
         Voxel& nb_vxl = s_cell->getVxlFromGrid(nb_index,vxl.lvl);
-        if (!nb_vxl.isCore()) {continue;} // skip if neighbour is not core
+        if (!nb_vxl.isCore()) { // skip if neighbour is not core
+          continue;
+          // TODO: if nb is large voxel shell, then count a new interface
+          // all voxels that are evaluated afterwards may also be part of the interface
+          // keep track of the next voxels and register if they are part of the interface
+          // first evaluate all interface voxels, then the rest
+        }
 
         if (nb_vxl.hasSubvoxel()){
           // descend to all subvoxels that border this voxel and add to stack
