@@ -296,7 +296,7 @@ void Model::readFileCIF(const std::string& filepath){
     no_ws_line = line;
     removeWhiteSpaces(no_ws_line);
 
-    if(line[0] != '#' && !no_ws_line.empty()){ // if not comment or empty line, analyze data
+    if(no_ws_line[0] != '#' && !no_ws_line.empty()){ // skip comment and empty lines
       // cif files usually contain explicit symmetry operations
       // however, space group P1 does not have any symmetry operation excepted the identity
       // therefore, the symmetry operation list might not be present for this group
@@ -362,13 +362,12 @@ void Model::readFileCIF(const std::string& filepath){
       }
       if(loop == 3){ // in list of symmetry operations
         // if a data name is found, the list of symmetry operation value ended
-        if(line.find("_") != std::string::npos){
-          if(line.find("loop_") != std::string::npos){
-            loop = 1;
-          }
-          else{
-            loop = 0;
-          }
+        if(no_ws_line[0] == '_'){
+          loop = 0;
+          symmetry_data_acquired = true;
+        }
+        else if(line.find("loop_") != std::string::npos){
+          loop = 1;
           symmetry_data_acquired = true;
         }
         else{
@@ -378,9 +377,8 @@ void Model::readFileCIF(const std::string& filepath){
         }
       }
       if(loop == 4){ // in list of headers (data name) for atoms
-
         // if no data name is found, the list of atom parameters started
-        if(line.find("_") == std::string::npos){
+        if(no_ws_line[0] != '_'){
           loop = 5;
         }
         else{
@@ -392,13 +390,12 @@ void Model::readFileCIF(const std::string& filepath){
       }
       if(loop == 5){ // in list of atom parameters
         // if a data name is found, the list of atom parameters ended
-        if(line.find("_") != std::string::npos){
-          if(line.find("loop_") != std::string::npos){
-            loop = 1;
-          }
-          else{
-            loop = 0;
-          }
+        if(no_ws_line[0] == '_'){
+          loop = 0;
+          atom_data_acquired = true;
+        }
+        else if(line.find("loop_") != std::string::npos){
+          loop = 1;
           atom_data_acquired = true;
         }
         else{
