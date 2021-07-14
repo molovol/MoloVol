@@ -569,7 +569,7 @@ static const std::map<int, std::string> s_error_codes = {
   // 1xx: Invalid Input
   {100, "Import failed!"},
   {101, "Invalid elements file. Please select a valid file or set radii manually. Atomic weights will be set to 0."},
-  {102, "Invalid structure file. Please select a valid file. You may need to enable the option HETATM."},
+  {102, "Invalid structure file. Please select a valid file. You may need to enable the option HETATM for PDB files."},
   {103, "Invalid file format. Please make sure that the input files have the correct file extensions."},
   {104, "Invalid probe radius input. The large probe must have a larger radius than the small probe."},
   {105, "Invalid entry in structure file encountered. Some atoms have not been imported. Please check the format of the input file."},
@@ -595,7 +595,7 @@ static const std::map<int, std::string> s_error_codes = {
   {900, "Command line interface failed!"},
   {901, "At least one required command line argument missing."},
   {902, "Invalid output display option. At least one parameter belonging to '-o' is invalid and will be ignored."},
-  {903, "Elements file import failed. Calulation aborted."}
+  {903, "Elements file import failed. Calculation aborted."}
 };
 
 void Ctrl::displayErrorMessage(const int error_code){
