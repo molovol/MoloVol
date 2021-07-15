@@ -347,7 +347,7 @@ void Model::readFileCIF(const std::string& filepath){
         else if(!atom_data_acquired && line.find("_atom_site_") != std::string::npos){
           loop = 4;
         }
-        else if(line.find("_") == std::string::npos){ // if no useful data name was found, it is an unneeded loop
+        else if(no_ws_line[0] != '_'){ // if no useful data name was found, it is an unneeded loop
           loop = 0;
         }
       }
@@ -356,7 +356,7 @@ void Model::readFileCIF(const std::string& filepath){
         // it is unnecessary to store these headers as they are irrelevant to the symop data analysis algorithm
 
         // if no data name is found, the list of symmetry operations started
-        if(line.find("_") == std::string::npos){
+        if(no_ws_line[0] != '_'){
           loop = 3;
         }
       }
