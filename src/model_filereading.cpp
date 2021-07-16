@@ -437,10 +437,9 @@ void Model::readFileCIF(const std::string& filepath){
   else{
     convertCifSymmetryElements(symop_list);
   }
-  convertCifAtomsList(atom_headers, atom_list); // TODO: handle invalid argument error from stod
-
-  // TODO deal with errors
-  // if (invalid_entry_encountered){Ctrl::getInstance()->displayErrorMessage(105);}
+  if (!convertCifAtomsList(atom_headers, atom_list)){
+    Ctrl::getInstance()->displayErrorMessage(105); // at least one atom line could not be read
+  }
 }
 
 // used in unittest
@@ -577,7 +576,7 @@ bool Model::convertCifAtomsList(const std::vector<std::string> &atom_headers, co
       }
     }
 
-    // Stores the full list of atom coordinates from the input file
+    // stores the full list of atom coordinates from the input file
     _raw_atom_coordinates.push_back(std::make_tuple(symbol, xyz[0], xyz[1], xyz[2]));
   }
   return all_lines_valid;
