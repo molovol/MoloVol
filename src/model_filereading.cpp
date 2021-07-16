@@ -523,6 +523,7 @@ bool Model::convertCifSymmetryElements(const std::vector<std::string> &symop_lis
 }
 
 bool Model::convertCifAtomsList(const std::vector<std::string> &atom_headers, const std::vector<std::string> &atom_list){
+  bool all_lines_valid = true;
   // in cif files, the position of parameters such as element symbol within an atom line is flexible
   // thus, it is necessary to keep track of the position of useful parameters for this program
   static const std::vector<std::string> s_keywords = {
@@ -547,8 +548,9 @@ bool Model::convertCifAtomsList(const std::vector<std::string> &atom_headers, co
   for(const std::string& line : atom_list){
     std::vector<std::string> substrings = splitLine(line);
 
+    // check if substring has enough elements
     if (substrings.size() <= *std::max_element(param_pos.begin(), param_pos.end())){
-      // something's wrong
+      all_lines_valid = false;
       continue;
     }
 
@@ -557,11 +559,12 @@ bool Model::convertCifAtomsList(const std::vector<std::string> &atom_headers, co
 
     std::array<double,3> abc_frac;
     for(int i = 0; i < 3; i++){
+      // check whether the values can be converted to doubles
       try{
         abc_frac[i] = std::stod(substrings[param_pos[i+1]]);
       }
       catch (std::invalid_argument& e){
-        // something's wrong
+        all_lines_valid = false;
         continue;
       }
     }
@@ -577,7 +580,7 @@ bool Model::convertCifAtomsList(const std::vector<std::string> &atom_headers, co
     // Stores the full list of atom coordinates from the input file
     _raw_atom_coordinates.push_back(std::make_tuple(symbol, xyz[0], xyz[1], xyz[2]));
   }
-  return true;
+  return all_lines_valid;
 }
 
 bool Model::getSymmetryElements(std::string group, std::vector<int> &sym_matrix_XYZ, std::vector<double> &sym_matrix_fraction){
