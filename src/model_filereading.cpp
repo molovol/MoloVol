@@ -523,21 +523,21 @@ bool Model::convertCifSymmetryElements(const std::vector<std::string> &symop_lis
 }
 
 bool Model::convertCifAtomsList(const std::vector<std::string> &atom_headers, const std::vector<std::string> &atom_list){
-  size_t param_pos[4];
   // in cif files, the position of parameters such as element symbol within an atom line is flexible
-  // thus, it is necessary to define the position of useful parameters for this program
-  for(size_t i = 0; i < atom_headers.size(); i++){
-    if(atom_headers[i].find("_atom_site_type_symbol") != std::string::npos){
-      param_pos[0] = i;
-    }
-    else if(atom_headers[i].find("_atom_site_fract_x") != std::string::npos){
-      param_pos[1] = i;
-    }
-    else if(atom_headers[i].find("_atom_site_fract_y") != std::string::npos){
-      param_pos[2] = i;
-    }
-    else if(atom_headers[i].find("_atom_site_fract_z") != std::string::npos){
-      param_pos[3] = i;
+  // thus, it is necessary to keep track of the position of useful parameters for this program
+  static std::vector<std::string> s_keywords = {
+    "_atom_site_type_symbol", 
+    "_atom_site_fract_x", 
+    "_atom_site_fract_y", 
+    "_atom_site_fract_z"
+  };
+  size_t param_pos[s_keywords.size()];
+
+  for(size_t i = 0; i < atom_headers.size(); ++i){
+    for (size_t j = 0; j < s_keywords.size(); ++j){
+      if (atom_headers[i].find(s_keywords[j]) != std::string::npos){
+        param_pos[j] = i;
+      }
     }
   }
   // store the useful parameters: element symbol and x, y, z coordinates (after conversion from unit cell axes a, b, c fraction)
