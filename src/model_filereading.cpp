@@ -523,8 +523,9 @@ bool Model::convertCifSymmetryElements(const std::vector<std::string> &symop_lis
 
 bool Model::convertCifAtomsList(const std::vector<std::string> &atom_headers, const std::vector<std::string> &atom_list){
   bool all_lines_valid = true;
-  // in cif files, the position of parameters such as element symbol within an atom line is flexible
-  // thus, it is necessary to keep track of the position of useful parameters for this program
+  // in cif files the order of data values is not fixed
+  // atom_headers contains the info on the order of data values stored in atom_list
+  // fields that we're interested in:
   static const std::vector<std::string> s_keywords = {
     "_atom_site_type_symbol", 
     "_atom_site_fract_x", 
@@ -533,6 +534,7 @@ bool Model::convertCifAtomsList(const std::vector<std::string> &atom_headers, co
   };
   std::vector<size_t> param_pos(s_keywords.size());
 
+  // save what position the data values can be found
   for(size_t i = 0; i < atom_headers.size(); ++i){
     for (size_t j = 0; j < s_keywords.size(); ++j){
       if (atom_headers[i].find(s_keywords[j]) != std::string::npos){
@@ -540,10 +542,6 @@ bool Model::convertCifAtomsList(const std::vector<std::string> &atom_headers, co
       }
     }
   }
-  // store the useful parameters: element symbol and x, y, z coordinates 
-  // (after conversion from unit cell axes a, b, c fraction)
-  // in cif file atom lines, atom parameters are separated by white_space
-  // the atom line is split in a list of parameters
   for(const std::string& line : atom_list){
     std::vector<std::string> substrings = splitLine(line);
 
@@ -553,9 +551,7 @@ bool Model::convertCifAtomsList(const std::vector<std::string> &atom_headers, co
       continue;
     }
 
-    const std::string symbol = strToValidSymbol(substrings[param_pos[0]]);
-    _atom_amounts[symbol]++; // adds one to counter for this symbol
-
+    // save the fractional positional data from atom_list
     std::array<double,3> abc_frac;
     for(int i = 0; i < 3; i++){
       // check whether the values can be converted to doubles
@@ -568,7 +564,7 @@ bool Model::convertCifAtomsList(const std::vector<std::string> &atom_headers, co
       }
     }
 
-    // apply the matrix to the faction coordinates
+    // apply the matrix to the fractional coordinates to get cartesian coordinates
     std::array<double,3> xyz = {0,0,0};
     for(int i = 0; i < 3; ++i){ // loop for x, y ,z
       for(int j = 0; j < 3; ++j){ // loop for a, b ,c
@@ -576,7 +572,11 @@ bool Model::convertCifAtomsList(const std::vector<std::string> &atom_headers, co
       }
     }
 
-    // stores the full list of atom coordinates from the input file
+    // get the element symbol and keep track of their number
+    const std::string symbol = strToValidSymbol(substrings[param_pos[0]]);
+    _atom_amounts[symbol]++;
+    
+    // store the full list of atom coordinates from the input file
     _raw_atom_coordinates.push_back(std::make_tuple(symbol, xyz[0], xyz[1], xyz[2]));
   }
   return all_lines_valid;
