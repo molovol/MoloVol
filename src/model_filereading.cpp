@@ -299,60 +299,58 @@ void Model::readFileCIF(const std::string& filepath){
 
     if(no_ws_line[0] == '#' || no_ws_line.empty()){continue;} // skip comment and empty lines
 
+    // KEYWORD SEARCH
     // cif files usually contain explicit symmetry operations
     // however, space group P1 does not have any symmetry operation except the identity
     // therefore, the symmetry operation list may not be present for this group
     // and it is useful to keep track of the space group if it is P1
-    if(line.find("_space_group_name_") != std::string::npos){
-      if(no_ws_line.find("'p1'") != std::string::npos){
+    if(line.find("_space_group_name_") != std::string::npos && no_ws_line.find("'p1'") != std::string::npos){
         space_group_P1 = true;
+    }
+    // list of symmetry operations or atom coordinates will start with "loop_"
+    else if(!loop && line.find("loop_") != std::string::npos){
+      loop = 1; // we have entered a loop
+      continue;
+    }
+    else {
+      static const std::array<std::string,6> s_cell_data_keywords = {
+        "_cell_length_a",
+        "_cell_length_b",
+        "_cell_length_c",
+        "_cell_angle_alpha",
+        "_cell_angle_beta",
+        "_cell_angle_gamma"
+      };
+      std::vector<std::string> substrings = splitLine(line);
+      for (size_t i = 0; i < s_cell_data_keywords.size(); ++i){
+        if (line.find(s_cell_data_keywords[i]) != std::string::npos){
+          // TODO: catch invalid_argument exception from stod
+          _cell_param[i] = std::stod(substrings[1]);
+          cell_data_acquired++;
+          break;
+        }
       }
     }
-    else if(line.find("_cell_length_a") != std::string::npos){ // unit cell parameters in order: A, B, C, alpha, beta, gamma
-      std::vector<std::string> substrings = splitLine(line);
-      _cell_param[0] = std::stod(substrings[1]);
-      cell_data_acquired++;
-    }
-    else if(line.find("_cell_length_b") != std::string::npos){
-      std::vector<std::string> substrings = splitLine(line);
-      _cell_param[1] = std::stod(substrings[1]);
-      cell_data_acquired++;
-    }
-    else if(line.find("_cell_length_c") != std::string::npos){
-      std::vector<std::string> substrings = splitLine(line);
-      _cell_param[2] = std::stod(substrings[1]);
-      cell_data_acquired++;
-    }
-    else if(line.find("_cell_angle_alpha") != std::string::npos){
-      std::vector<std::string> substrings = splitLine(line);
-      _cell_param[3] = std::stod(substrings[1]);
-      cell_data_acquired++;
-    }
-    else if(line.find("_cell_angle_beta") != std::string::npos){
-      std::vector<std::string> substrings = splitLine(line);
-      _cell_param[4] = std::stod(substrings[1]);
-      cell_data_acquired++;
-    }
-    else if(line.find("_cell_angle_gamma") != std::string::npos){
-      std::vector<std::string> substrings = splitLine(line);
-      _cell_param[5] = std::stod(substrings[1]);
-      cell_data_acquired++;
-    }
-    else if(loop == 0 && line.find("loop_") != std::string::npos){ // list of symmetry operations or atom coordinates will start with "loop_"
-      loop = 1;
-    }
-    else if(loop == 1){
-      // the type of list in the loop need to be identified
-      if(!symmetry_data_acquired && (line.find("_space_group_symop_") != std::string::npos || line.find("_symmetry_equiv_pos_") != std::string::npos)){
+
+    if (!loop){continue;} // if we're not in a loop, continue with the next line
+    // LOOP
+
+    // identify whether this loop contains interesting data
+    if(loop == 1){
+      if(!symmetry_data_acquired && (line.find("_space_group_symop_") != std::string::npos 
+            || line.find("_symmetry_equiv_pos_") != std::string::npos)){
+        // symmetry data loop
         loop = 2;
       }
       else if(!atom_data_acquired && line.find("_atom_site_") != std::string::npos){
+        // atom data loop
         loop = 4;
       }
-      else if(no_ws_line[0] != '_'){ // if no useful data name was found, it is an unneeded loop
+      else if(no_ws_line[0] != '_'){ // we have left the loop without finding an interesting keyword
         loop = 0;
       }
     }
+
     if(loop == 2){ // in list of headers (data name) for symmetry operations
       // there are either 1 or 2 headers in these symop loops
       // it is unnecessary to store these headers as they are irrelevant to the symop data analysis algorithm
