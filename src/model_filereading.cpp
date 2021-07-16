@@ -531,7 +531,7 @@ bool Model::convertCifAtomsList(const std::vector<std::string> &atom_headers, co
     "_atom_site_fract_y", 
     "_atom_site_fract_z"
   };
-  size_t param_pos[s_keywords.size()];
+  std::vector<size_t> param_pos(s_keywords.size());
 
   for(size_t i = 0; i < atom_headers.size(); ++i){
     for (size_t j = 0; j < s_keywords.size(); ++j){
@@ -546,20 +546,30 @@ bool Model::convertCifAtomsList(const std::vector<std::string> &atom_headers, co
   // the atom line is split in a list of parameters
   for(const std::string& line : atom_list){
     std::vector<std::string> substrings = splitLine(line);
-    // TODO: make sure substrings doesn't have fewer elements than can be accessed with param_pos
-    
+
+    if (substrings.size() <= *std::max_element(param_pos.begin(), param_pos.end())){
+      // something's wrong
+      continue;
+    }
+
     const std::string symbol = strToValidSymbol(substrings[param_pos[0]]);
     _atom_amounts[symbol]++; // adds one to counter for this symbol
 
     std::array<double,3> abc_frac;
     for(int i = 0; i < 3; i++){
-      abc_frac[i] = std::stod(substrings[param_pos[i+1]]);
+      try{
+        abc_frac[i] = std::stod(substrings[param_pos[i+1]]);
+      }
+      catch (std::invalid_argument& e){
+        // something's wrong
+        continue;
+      }
     }
 
     // apply the matrix to the faction coordinates
     std::array<double,3> xyz = {0,0,0};
-    for(int i = 0; i < 3; i++){ // loop for x, y ,z
-      for(int j = 0; j < 3; j++){ // loop for a, b ,c
+    for(int i = 0; i < 3; ++i){ // loop for x, y ,z
+      for(int j = 0; j < 3; ++j){ // loop for a, b ,c
         xyz[i] += abc_frac[j] * _cart_matrix[j][i];
       }
     }
