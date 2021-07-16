@@ -19,7 +19,7 @@
 
 bool isAtomLine(const std::vector<std::string>& substrings);
 std::string strToValidSymbol(std::string str);
-static inline std::vector<std::string> splitLine(std::string& line);
+static inline std::vector<std::string> splitLine(const std::string& line);
 
 struct ElementsFileBundle{ // data bundle for elements file import
   std::unordered_map<std::string, double> rad_map;
@@ -437,7 +437,7 @@ void Model::readFileCIF(const std::string& filepath){
   else{
     convertCifSymmetryElements(symop_list);
   }
-  convertCifAtomsList(atom_headers, atom_list);
+  convertCifAtomsList(atom_headers, atom_list); // TODO: handle invalid argument error from stod
 
   // TODO deal with errors
   // if (invalid_entry_encountered){Ctrl::getInstance()->displayErrorMessage(105);}
@@ -525,7 +525,7 @@ bool Model::convertCifSymmetryElements(const std::vector<std::string> &symop_lis
 bool Model::convertCifAtomsList(const std::vector<std::string> &atom_headers, const std::vector<std::string> &atom_list){
   // in cif files, the position of parameters such as element symbol within an atom line is flexible
   // thus, it is necessary to keep track of the position of useful parameters for this program
-  static std::vector<std::string> s_keywords = {
+  static const std::vector<std::string> s_keywords = {
     "_atom_site_type_symbol", 
     "_atom_site_fract_x", 
     "_atom_site_fract_y", 
@@ -540,29 +540,33 @@ bool Model::convertCifAtomsList(const std::vector<std::string> &atom_headers, co
       }
     }
   }
-  // store the useful parameters: element symbol and x, y, z coordinates (after conversion from unit cell axes a, b, c fraction)
+  // store the useful parameters: element symbol and x, y, z coordinates 
+  // (after conversion from unit cell axes a, b, c fraction)
   // in cif file atom lines, atom parameters are separated by white_space
   // the atom line is split in a list of parameters
-  for(size_t atom = 0; atom < atom_list.size(); atom++){
-    std::string line = atom_list[atom];
+  for(const std::string& line : atom_list){
     std::vector<std::string> substrings = splitLine(line);
+    // TODO: make sure substrings doesn't have fewer elements than can be accessed with param_pos
+    
     const std::string symbol = strToValidSymbol(substrings[param_pos[0]]);
-    std::array<double, 3> abc_frac;
+    _atom_amounts[symbol]++; // adds one to counter for this symbol
+
+    std::array<double,3> abc_frac;
     for(int i = 0; i < 3; i++){
       abc_frac[i] = std::stod(substrings[param_pos[i+1]]);
     }
+
     // apply the matrix to the faction coordinates
-    std::array<double, 3> xyz = {0,0,0};
+    std::array<double,3> xyz = {0,0,0};
     for(int i = 0; i < 3; i++){ // loop for x, y ,z
       for(int j = 0; j < 3; j++){ // loop for a, b ,c
-        xyz[i] += abc_frac[j]*_cart_matrix[j][i];
+        xyz[i] += abc_frac[j] * _cart_matrix[j][i];
       }
     }
-    _atom_amounts[symbol]++; // adds one to counter for this symbol
+
     // Stores the full list of atom coordinates from the input file
     _raw_atom_coordinates.push_back(std::make_tuple(symbol, xyz[0], xyz[1], xyz[2]));
   }
-  // TODO deal with potential errors
   return true;
 }
 
@@ -631,7 +635,7 @@ double Model::findWeightOfAtom(const std::string& symbol){
 ///////////////////
 
 // split line into substrings when separated by whitespaces
-static inline std::vector<std::string> splitLine(std::string& line){
+static inline std::vector<std::string> splitLine(const std::string& line){
   std::istringstream iss(line);
   std::vector<std::string> substrings((std::istream_iterator<std::string>(iss)), std::istream_iterator<std::string>());
   return substrings;
