@@ -332,82 +332,83 @@ void Model::readFileCIF(const std::string& filepath){
       }
     }
 
-    if (!loop){continue;} // if we're not in a loop, continue with the next line
     // LOOP
+    if (loop){
+      // identify whether this loop contains interesting data
+      if(loop == 1){
+        if(!symmetry_data_acquired && (line.find("_space_group_symop_") != std::string::npos 
+              || line.find("_symmetry_equiv_pos_") != std::string::npos)){
+          // symmetry data loop
+          loop = 2;
+        }
+        else if(!atom_data_acquired && line.find("_atom_site_") != std::string::npos){
+          // atom data loop
+          loop = 4;
+        }
+        else if(no_ws_line[0] != '_'){ // we have left the loop without finding an interesting keyword
+          loop = 0;
+        }
+      }
 
-    // identify whether this loop contains interesting data
-    if(loop == 1){
-      if(!symmetry_data_acquired && (line.find("_space_group_symop_") != std::string::npos 
-            || line.find("_symmetry_equiv_pos_") != std::string::npos)){
-        // symmetry data loop
-        loop = 2;
-      }
-      else if(!atom_data_acquired && line.find("_atom_site_") != std::string::npos){
-        // atom data loop
-        loop = 4;
-      }
-      else if(no_ws_line[0] != '_'){ // we have left the loop without finding an interesting keyword
-        loop = 0;
-      }
-    }
+      if(loop == 2){ // in list of headers (data name) for symmetry operations
+        // there are either 1 or 2 headers in these symop loops
+        // it is unnecessary to store these headers as they are irrelevant to the symop data analysis algorithm
 
-    if(loop == 2){ // in list of headers (data name) for symmetry operations
-      // there are either 1 or 2 headers in these symop loops
-      // it is unnecessary to store these headers as they are irrelevant to the symop data analysis algorithm
-
-      // if no data name is found, the list of symmetry operations started
-      if(no_ws_line[0] != '_'){
-        loop = 3;
+        // if no data name is found, the list of symmetry operations started
+        if(no_ws_line[0] != '_'){
+          loop = 3;
+        }
       }
-    }
-    if(loop == 3){ // in list of symmetry operations
-      // if a data name is found, the list of symmetry operation value ended
-      if(no_ws_line[0] == '_'){
-        loop = 0;
-        symmetry_data_acquired = true;
+      if(loop == 3){ // in list of symmetry operations
+        // if a data name is found, the list of symmetry operation value ended
+        if(no_ws_line[0] == '_'){
+          loop = 0;
+          symmetry_data_acquired = true;
+        }
+        else if(line.find("loop_") != std::string::npos){
+          loop = 1;
+          symmetry_data_acquired = true;
+        }
+        else{
+          // store the line containing symmetry operation data for later processing
+          symop_list.emplace_back(line);
+          continue;
+        }
       }
-      else if(line.find("loop_") != std::string::npos){
-        loop = 1;
-        symmetry_data_acquired = true;
+      if(loop == 4){ // in list of headers (data name) for atoms
+        // if no data name is found, the list of atom parameters started
+        if(no_ws_line[0] != '_'){
+          loop = 5;
+        }
+        else{
+          // store atom headers in order of appearance because only certain types of atom data is useful
+          // and it is necessary to know in what order they appear
+          atom_headers.emplace_back(line);
+          continue;
+        }
       }
-      else{
-        // store the line containing symmetry operation data for later processing
-        symop_list.emplace_back(line);
-        continue;
-      }
-    }
-    if(loop == 4){ // in list of headers (data name) for atoms
-      // if no data name is found, the list of atom parameters started
-      if(no_ws_line[0] != '_'){
-        loop = 5;
-      }
-      else{
-        // store atom headers in order of appearance because only certain types of atom data is useful
-        // and it is necessary to know in what order they appear
-        atom_headers.emplace_back(line);
-        continue;
-      }
-    }
-    if(loop == 5){ // in list of atom parameters
-      // if a data name is found, the list of atom parameters ended
-      if(no_ws_line[0] == '_'){
-        loop = 0;
-        atom_data_acquired = true;
-      }
-      else if(line.find("loop_") != std::string::npos){
-        loop = 1;
-        atom_data_acquired = true;
-      }
-      else{
-        // store the line containing atom parameters for later processing
-        atom_list.emplace_back(line);
-        continue;
+      if(loop == 5){ // in list of atom parameters
+        // if a data name is found, the list of atom parameters ended
+        if(no_ws_line[0] == '_'){
+          loop = 0;
+          atom_data_acquired = true;
+        }
+        else if(line.find("loop_") != std::string::npos){
+          loop = 1;
+          atom_data_acquired = true;
+        }
+        else{
+          // store the line containing atom parameters for later processing
+          atom_list.emplace_back(line);
+          continue;
+        }
       }
     }
     
     // when all useful data is extracted, stop reading the cif file
     if(atom_data_acquired && symmetry_data_acquired && cell_data_acquired > 5){
-            break;}
+      break;
+    }
   }
   inp_file.close();
 
