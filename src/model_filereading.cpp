@@ -532,16 +532,21 @@ bool Model::convertCifAtomsList(const std::vector<std::string> &atom_headers, co
     "_atom_site_fract_y", 
     "_atom_site_fract_z"
   };
-  std::vector<size_t> param_pos(s_keywords.size());
+  std::vector<size_t> param_pos;
 
   // save what position the data values can be found
-  for(size_t i = 0; i < atom_headers.size(); ++i){
-    for (size_t j = 0; j < s_keywords.size(); ++j){
-      if (atom_headers[i].find(s_keywords[j]) != std::string::npos){
-        param_pos[j] = i;
+  for (const std::string& keyword : s_keywords){
+    for(size_t i = 0; i < atom_headers.size(); ++i){
+      if (atom_headers[i].find(keyword) != std::string::npos){
+        param_pos.push_back(i);
+        break;
       }
     }
   }
+
+  // if not all keywords have been found
+  if (s_keywords.size() != param_pos.size()){return false;}
+  
   for(const std::string& line : atom_list){
     std::vector<std::string> substrings = splitLine(line);
 
