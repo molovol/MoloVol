@@ -465,43 +465,26 @@ std::vector<std::string> Model::listElementsInStructure(){
 // symmetry elements in cif files are stored as strings that are not convenient for calculations
 // this function converts the list of strings in convenient matrix
 bool Model::convertCifSymmetryElements(const std::vector<std::string> &symop_list){
+  auto evalToken = [](const std::string& token, const char coord){
+    if (token.find({'-',coord}) != std::string::npos){
+      return -1;
+    }
+    return (token.find(coord) != std::string::npos)? 1 : 0;
+  };
+
   int sym_xyz[9];
   double sym_frac[3];
   std::string tokens[3];
-  std::string intermediate;
   for(size_t i = 0; i < symop_list.size(); i++){
     // stringstream class check1
     std::stringstream check1(symop_list[i]);
     // Tokenizing separated by comma
-    for (int j = 0; getline(check1, intermediate, ','); j++){
-      tokens[j] = intermediate;
-      if(tokens[j].find("-x") != std::string::npos){
-        sym_xyz[3*j] = -1;
+    for (int j = 0; getline(check1, tokens[j], ','); j++){
+      static const std::array<char,3> coords = {'x','y','z'};
+      for (size_t k = 0; k < coords.size(); ++k){
+        sym_xyz[3*j+k] = evalToken(tokens[j], coords[k]);
       }
-      else if(tokens[j].find("x") != std::string::npos){
-        sym_xyz[3*j] = 1;
-      }
-      else {
-      sym_xyz[3*j] = 0;
-      }
-      if(tokens[j].find("-y") != std::string::npos){
-        sym_xyz[3*j+1] = -1;
-      }
-      else if(tokens[j].find("y") != std::string::npos){
-        sym_xyz[3*j+1] = 1;
-      }
-      else {
-        sym_xyz[3*j+1] = 0;
-      }
-      if(tokens[j].find("-z") != std::string::npos){
-        sym_xyz[3*j+2] = -1;
-      }
-      else if(tokens[j].find("z") != std::string::npos){
-        sym_xyz[3*j+2] = 1;
-      }
-      else {
-        sym_xyz[3*j+2] = 0;
-      }
+      
       // if there is a fraction in the substring, convert to double
       size_t divide_pos = tokens[j].find("/");
       if(divide_pos != std::string::npos){
