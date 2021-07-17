@@ -286,6 +286,13 @@ void Model::readFileCIF(const std::string& filepath){
   std::vector<std::string> atom_headers;
   std::vector<std::string> atom_list;
 
+  auto containsKeyword = [](const std::string& line, const std::string& keyword=""){
+    // default: contains any keyword
+    if (keyword.empty()){return (line[0] == '_');}
+    // contains specific keyword
+    else {return (line.find(keyword) != std::string::npos);}
+  };
+
   while(getline(inp_file,line)){ // read file line by line
     // the information we need is case insensitive
     // therefore, it is safer to directly convert the lines to lower case
@@ -304,11 +311,11 @@ void Model::readFileCIF(const std::string& filepath){
     // however, space group P1 does not have any symmetry operation except the identity
     // therefore, the symmetry operation list may not be present for this group
     // and it is useful to keep track of the space group if it is P1
-    if(line.find("_space_group_name_") != std::string::npos && no_ws_line.find("'p1'") != std::string::npos){
+    if(containsKeyword(line,"_space_group_name_") && containsKeyword(no_ws_line,"'p1'")){
         space_group_P1 = true;
     }
     // list of symmetry operations or atom coordinates will start with "loop_"
-    else if(!loop && line.find("loop_") != std::string::npos){
+    else if(!loop && containsKeyword(line,"loop_")){
       loop = 1; // we have entered a loop
       continue;
     }
@@ -323,7 +330,7 @@ void Model::readFileCIF(const std::string& filepath){
       };
       std::vector<std::string> substrings = splitLine(line);
       for (size_t i = 0; i < s_cell_data_keywords.size(); ++i){
-        if (line.find(s_cell_data_keywords[i]) != std::string::npos){
+        if (containsKeyword(line,s_cell_data_keywords[i])){
           // TODO: catch invalid_argument exception from stod
           _cell_param[i] = std::stod(substrings[1]);
           cell_data_acquired++;
@@ -336,16 +343,16 @@ void Model::readFileCIF(const std::string& filepath){
     if (loop){
       // identify whether this loop contains interesting data
       if(loop == 1){
-        if(!symmetry_data_acquired && (line.find("_space_group_symop_") != std::string::npos 
-              || line.find("_symmetry_equiv_pos_") != std::string::npos)){
+        if(!symmetry_data_acquired 
+            && (containsKeyword(line,"_space_group_symop_") || containsKeyword(line,"_symmetry_equiv_pos_"))){
           // symmetry data loop
           loop = 2;
         }
-        else if(!atom_data_acquired && line.find("_atom_site_") != std::string::npos){
+        else if(!atom_data_acquired && containsKeyword(line,"_atom_site_")){
           // atom data loop
           loop = 4;
         }
-        else if(no_ws_line[0] != '_'){ // we have left the loop without finding an interesting keyword
+        else if(!containsKeyword(no_ws_line)){ // we have left the loop without finding an interesting keyword
           loop = 0;
         }
       }
@@ -355,17 +362,17 @@ void Model::readFileCIF(const std::string& filepath){
         // it is unnecessary to store these headers as they are irrelevant to the symop data analysis algorithm
 
         // if no data name is found, the list of symmetry operations started
-        if(no_ws_line[0] != '_'){
+        if(!containsKeyword(no_ws_line)){
           loop = 3;
         }
       }
       if(loop == 3){ // in list of symmetry operations
         // if a data name is found, the list of symmetry operation value ended
-        if(no_ws_line[0] == '_'){
+        if(containsKeyword(no_ws_line)){
           loop = 0;
           symmetry_data_acquired = true;
         }
-        else if(line.find("loop_") != std::string::npos){
+        else if(containsKeyword(line,"loop_")){
           loop = 1;
           symmetry_data_acquired = true;
         }
@@ -377,7 +384,7 @@ void Model::readFileCIF(const std::string& filepath){
       }
       if(loop == 4){ // in list of headers (data name) for atoms
         // if no data name is found, the list of atom parameters started
-        if(no_ws_line[0] != '_'){
+        if(!containsKeyword(no_ws_line)){
           loop = 5;
         }
         else{
@@ -389,11 +396,11 @@ void Model::readFileCIF(const std::string& filepath){
       }
       if(loop == 5){ // in list of atom parameters
         // if a data name is found, the list of atom parameters ended
-        if(no_ws_line[0] == '_'){
+        if(containsKeyword(no_ws_line)){
           loop = 0;
           atom_data_acquired = true;
         }
-        else if(line.find("loop_") != std::string::npos){
+        else if(containsKeyword(line,"loop_")){
           loop = 1;
           atom_data_acquired = true;
         }
