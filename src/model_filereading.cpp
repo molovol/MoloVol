@@ -114,9 +114,9 @@ bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
 
   try{
     readAtomFile(filepath, include_hetatm);
-  } catch(const ExceptIllegalFileExtension& e) {
-    throw;
   }
+  catch(const ExceptIllegalFileExtension& e) {throw;}
+  catch(const ExceptInvalidCellParams& e) {throw;}
 
   if (_raw_atom_coordinates.size() == 0){ // If no atom is detected in the input file, the file is deemed invalid
     throw ExceptInvalidInputFile();
@@ -144,7 +144,8 @@ bool Model::readAtomFile(const std::string& filepath, bool include_hetatm){
     readFilePDB(filepath, include_hetatm);
   }
   else if (fileExtension(filepath) == "cif"){
-    readFileCIF(filepath);
+    try{readFileCIF(filepath);}
+    catch (const ExceptInvalidCellParams& e){throw;}
   }
   else {throw ExceptIllegalFileExtension();}
   return true;
@@ -331,8 +332,8 @@ void Model::readFileCIF(const std::string& filepath){
       std::vector<std::string> substrings = splitLine(line);
       for (size_t i = 0; i < s_cell_data_keywords.size(); ++i){
         if (containsKeyword(line,s_cell_data_keywords[i])){
-          // TODO: catch invalid_argument exception from stod
-          _cell_param[i] = std::stod(substrings[1]);
+          try{_cell_param[i] = std::stod(substrings[1]);}
+          catch (const std::invalid_argument& e){throw ExceptInvalidCellParams();}
           cell_data_acquired++;
           break;
         }
@@ -357,7 +358,8 @@ void Model::readFileCIF(const std::string& filepath){
         }
       }
 
-      if(loop == 2){ // in list of headers (data name) for symmetry operations
+      if(loop == 2){
+        // in list of headers (data name) for symmetry operations
         // there are either 1 or 2 headers in these symop loops
         // it is unnecessary to store these headers as they are irrelevant to the symop data analysis algorithm
 
@@ -366,7 +368,8 @@ void Model::readFileCIF(const std::string& filepath){
           loop = 3;
         }
       }
-      if(loop == 3){ // in list of symmetry operations
+      if(loop == 3){
+        // in list of symmetry operations
         // if a data name is found, the list of symmetry operation value ended
         if(containsKeyword(no_ws_line)){
           loop = 0;
@@ -382,7 +385,8 @@ void Model::readFileCIF(const std::string& filepath){
           continue;
         }
       }
-      if(loop == 4){ // in list of headers (data name) for atoms
+      if(loop == 4){
+        // in list of headers (data name) for atoms
         // if no data name is found, the list of atom parameters started
         if(!containsKeyword(no_ws_line)){
           loop = 5;
@@ -394,7 +398,8 @@ void Model::readFileCIF(const std::string& filepath){
           continue;
         }
       }
-      if(loop == 5){ // in list of atom parameters
+      if(loop == 5){
+        // in list of atom parameters
         // if a data name is found, the list of atom parameters ended
         if(containsKeyword(no_ws_line)){
           loop = 0;

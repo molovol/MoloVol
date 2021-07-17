@@ -107,6 +107,10 @@ bool Ctrl::loadAtomFile(){
     displayErrorMessage(102);
     successful_import = false;
   }
+  catch (const ExceptInvalidCellParams& e){
+    displayErrorMessage(109);
+    successful_import = false;
+  }
 
   s_gui->displayAtomList(_current_calculation->generateAtomList()); // update gui
 
@@ -200,6 +204,10 @@ bool Ctrl::runCalculation(
   }
   catch (const ExceptIllegalFileExtension& e){
     displayErrorMessage(103);
+    return false;
+  }
+  catch (const ExceptInvalidCellParams& e){
+    displayErrorMessage(109);
     return false;
   }
 
