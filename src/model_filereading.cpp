@@ -471,8 +471,24 @@ bool Model::convertCifSymmetryElements(const std::vector<std::string> &symop_lis
     }
     return (token.find(coord) != std::string::npos)? 1 : 0;
   };
+  auto extractFrac = [](const std::string& line){
+    size_t divide_pos = line.find('/');
+    if(divide_pos != std::string::npos){
+      // TODO: make sure no elements outside range are accessed
+      // TODO: make sure an error is thrown if the characters are not digits
+      char char_num = line[divide_pos-1];
+      char char_denom = line[divide_pos+1];
+      if (!isdigit(char_num) || !isdigit(char_denom)){}
+      double num = double(char_num - '0');
+      double denom = double(char_denom - '0');
+      int sign = (divide_pos > 1 && line[divide_pos-2] == '-')? 1 : -1;
+      return sign * num/denom; 
+    }
+    else {
+      return double(0);
+    }
+  };
 
-  double sym_frac[3];
   std::string tokens[3];
   for(size_t i = 0; i < symop_list.size(); i++){
     // stringstream class check1
@@ -485,26 +501,7 @@ bool Model::convertCifSymmetryElements(const std::vector<std::string> &symop_lis
       }
       
       // if there is a fraction in the substring, convert to double
-      size_t divide_pos = tokens[j].find("/");
-      if(divide_pos != std::string::npos){
-        std::string str_num = "";
-        str_num += tokens[j][divide_pos-1];
-        std::string str_denom = "";
-        str_denom += tokens[j][divide_pos+1];
-        double num = std::stod(str_num);
-        double denom = std::stod(str_denom);
-        int sign = 1;
-        if(divide_pos > 1 && tokens[j][divide_pos-2] == '-'){
-          sign = -1;
-        }
-        sym_frac[j] = sign * num / denom;
-      }
-      else {
-        sym_frac[j] = 0;
-      }
-    }
-    for (int j = 0; j < 3; j++){
-      _sym_matrix_fraction.emplace_back(sym_frac[j]);
+      _sym_matrix_fraction.push_back(extractFrac(tokens[j]));
     }
   }
   // TODO deal with potential errors
