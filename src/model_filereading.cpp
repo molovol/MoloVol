@@ -473,20 +473,18 @@ bool Model::convertCifSymmetryElements(const std::vector<std::string> &symop_lis
   };
   auto extractFrac = [](const std::string& line){
     size_t divide_pos = line.find('/');
-    if(divide_pos != std::string::npos){
-      // TODO: make sure no elements outside range are accessed
-      // TODO: make sure an error is thrown if the characters are not digits
+    // prevent accessing positions in string that are out of range
+    if(divide_pos != std::string::npos && divide_pos > 0 && divide_pos < line.size()-1){
       char char_num = line[divide_pos-1];
       char char_denom = line[divide_pos+1];
-      if (!isdigit(char_num) || !isdigit(char_denom)){}
-      double num = double(char_num - '0');
-      double denom = double(char_denom - '0');
-      int sign = (divide_pos > 1 && line[divide_pos-2] == '-')? 1 : -1;
-      return sign * num/denom; 
+      if (isdigit(char_num) && isdigit(char_denom)){
+        double num = char_num - '0';
+        double denom = char_denom - '0';
+        int sign = (divide_pos > 1 && line[divide_pos-2] == '-')? 1 : -1;
+        return sign * num/denom;
+      }
     }
-    else {
-      return double(0);
-    }
+    return double(0);
   };
 
   std::string tokens[3];
@@ -503,7 +501,6 @@ bool Model::convertCifSymmetryElements(const std::vector<std::string> &symop_lis
       _sym_matrix_fraction.push_back(extractFrac(tokens[j]));
     }
   }
-  // TODO deal with potential errors
   return true;
 }
 
