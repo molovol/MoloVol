@@ -472,7 +472,6 @@ bool Model::convertCifSymmetryElements(const std::vector<std::string> &symop_lis
     return (token.find(coord) != std::string::npos)? 1 : 0;
   };
 
-  int sym_xyz[9];
   double sym_frac[3];
   std::string tokens[3];
   for(size_t i = 0; i < symop_list.size(); i++){
@@ -481,8 +480,8 @@ bool Model::convertCifSymmetryElements(const std::vector<std::string> &symop_lis
     // Tokenizing separated by comma
     for (int j = 0; getline(check1, tokens[j], ','); j++){
       static const std::array<char,3> coords = {'x','y','z'};
-      for (size_t k = 0; k < coords.size(); ++k){
-        sym_xyz[3*j+k] = evalToken(tokens[j], coords[k]);
+      for (char coord : coords){
+        _sym_matrix_XYZ.push_back(evalToken(tokens[j], coord));
       }
       
       // if there is a fraction in the substring, convert to double
@@ -503,9 +502,6 @@ bool Model::convertCifSymmetryElements(const std::vector<std::string> &symop_lis
       else {
         sym_frac[j] = 0;
       }
-    }
-    for (int j = 0; j < 9; j++){
-      _sym_matrix_XYZ.emplace_back(sym_xyz[j]);
     }
     for (int j = 0; j < 3; j++){
       _sym_matrix_fraction.emplace_back(sym_frac[j]);
