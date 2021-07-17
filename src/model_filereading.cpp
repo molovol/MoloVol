@@ -487,18 +487,18 @@ bool Model::convertCifSymmetryElements(const std::vector<std::string> &symop_lis
     return double(0);
   };
 
-  std::string tokens[3];
   for(size_t i = 0; i < symop_list.size(); i++){
     // stringstream class check1
     std::stringstream check1(symop_list[i]);
     // Tokenizing separated by comma
-    for (int j = 0; getline(check1, tokens[j], ','); j++){
+    std::string token;
+    for (int j = 0; getline(check1, token, ','); j++){
       for (char coord : {'x','y','z'}){
-        _sym_matrix_XYZ.push_back(evalToken(tokens[j], coord));
+        _sym_matrix_XYZ.push_back(evalToken(token, coord));
       }
       
       // if there is a fraction in the substring, convert to double
-      _sym_matrix_fraction.push_back(extractFrac(tokens[j]));
+      _sym_matrix_fraction.push_back(extractFrac(token));
     }
   }
   return true;
