@@ -495,8 +495,7 @@ bool Model::convertCifSymmetryElements(const std::vector<std::string> &symop_lis
     std::stringstream check1(symop_list[i]);
     // Tokenizing separated by comma
     for (int j = 0; getline(check1, tokens[j], ','); j++){
-      static const std::array<char,3> coords = {'x','y','z'};
-      for (char coord : coords){
+      for (char coord : {'x','y','z'}){
         _sym_matrix_XYZ.push_back(evalToken(tokens[j], coord));
       }
       
