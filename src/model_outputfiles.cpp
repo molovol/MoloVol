@@ -61,7 +61,7 @@ void Model::createReport(std::string path){
     output_report << "Probe radius: " << getProbeRad1() << " A\n";
   }
   output_report << "Grid resolution: " << _data.grid_step << " A\n";
-  output_report << "Optimization depth : " << _data.max_depth << "\n";
+  output_report << "Optimization depth: " << _data.max_depth << "\n";
   output_report << "Elements radii:\n";
   for(std::unordered_map<std::string, double>::iterator it = _radius_map.begin(); it != _radius_map.end(); it++){
     if(isIncluded(it->first, _data.included_elements)){
