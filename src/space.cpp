@@ -170,8 +170,12 @@ void Space::identifyCavities(){
     }
     Ctrl::getInstance()->updateProgressBar(int(100*(double(vxl_index[0])+1)/double(getGridsteps()[0])));
   }
+  // TODO: create the list of Cavities here with all the info that is already available
+  // i.e. IDs and interface count
 }
 
+// this function finds the lowest level core voxel. this voxel becomes the entry point
+// for the flood fill
 void Space::descendToCore(unsigned char& id, const std::array<unsigned,3> index, int lvl){
   Voxel& vxl = getVxlFromGrid(index,lvl);
   if (!vxl.isCore()){return;}

@@ -378,9 +378,30 @@ struct VoxelLoc{
   int lvl;
 };
 
+// this function returns false when accessing an existing cavity and returns
+// true every time a new cavity has been processed
 bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& start_index, const int start_lvl){
-  assert(_type == 0b00001001);
   if(getID() != 0){return false;}
+ 
+  // returns true if any neighbour voxel is of large core type
+  auto isInterfaceVxl = [](
+      const VoxelLoc& vxl,
+      std::vector<std::vector<std::array<int,3>>>& nb_indices)
+  {
+    for (const auto& shell : nb_indices){
+      for (const auto& rel_index : shell){
+        std::array<unsigned,3> abs_index = add(vxl.index, rel_index);
+        if (!s_cell->isInBounds(abs_index,vxl.lvl)){
+          continue;
+        }
+        if (readBit(s_cell->getVxlFromGrid(abs_index,vxl.lvl).getType(), 6)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+  
   // set the ID of the start voxel and all its children
   setID(id);
   passIDtoChildren(start_index, start_lvl);
@@ -389,17 +410,20 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
   std::vector<VoxelLoc> flood_stack;
   flood_stack.push_back(VoxelLoc(start_index, start_lvl));
 
-  // reusing SearchIndex to get a vector of all neighbour voxel indices, i.e.
+  // reusing SearchIndex to get a vector of all direct neighbour voxel indices, i.e.
   // (1,0,0); (1,0,1); (1,1,0), (1,1,1), etc.
   std::vector<std::vector<std::array<int,3>>> neighbour_indices = SearchIndex().computeIndices(3);
   neighbour_indices.erase(neighbour_indices.begin());
 
   // adds neighbours to the stack, IDs are assigned before adding to the stack
+  unsigned char n_interface;
   while (flood_stack.size() > 0){
     if (Ctrl::getInstance()->getAbortFlag()){return false;}
     Ctrl::getInstance()->updateCalculationStatus(); // checks for abort button click
     VoxelLoc vxl = flood_stack.back();
     flood_stack.pop_back();
+
+    bool interface_vxl = isInterfaceVxl(vxl,neighbour_indices);
 
     std::array<unsigned,3> nb_index;
     for (const auto& shell : neighbour_indices){
