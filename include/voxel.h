@@ -26,6 +26,7 @@ struct SearchIndex{
 
 class Space;
 class AtomTree;
+class FloodStack;
 struct Atom;
 struct AtomNode;
 struct VoxelLoc;
@@ -93,8 +94,8 @@ class Voxel{
     // atom vs core
     bool isAtom(const Atom&, const Vector&, const double, const double);
     // cavity id
-    void descend(std::vector<VoxelLoc>&, const unsigned char, const std::array<unsigned,3>&, const int, const std::array<int,3>&);
-    void ascend(std::vector<VoxelLoc>&, const unsigned char, const std::array<unsigned,3>, const int, std::array<unsigned,3>, const std::array<int,3>&);
+    void descend(FloodStack&, const unsigned char, const std::array<unsigned,3>&, const int, const std::array<int,3>&, const bool);
+    void ascend(FloodStack&, const unsigned char, const std::array<unsigned,3>, const int, std::array<unsigned,3>, const std::array<int,3>&, const bool);
     void passIDtoChildren(const std::array<unsigned,3>&, const int);
     // shell vs void
     bool searchForCore(const std::array<unsigned int,3>&, const unsigned, bool=false);

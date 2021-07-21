@@ -373,9 +373,39 @@ void Voxel::listFromTree(
 ///////////////
 
 struct VoxelLoc{
-  VoxelLoc(const std::array<unsigned,3>& index, const int lvl) : index(index), lvl(lvl) {}
+  VoxelLoc() = default;
+  VoxelLoc(const std::array<unsigned,3>& index, const int lvl) : index(index), lvl(lvl), has_interface_nb(false) {}
+  VoxelLoc(const std::array<unsigned,3>& index, const int lvl, const bool has_interface_nb) 
+    : index(index), lvl(lvl), has_interface_nb(has_interface_nb) {}
   std::array<unsigned,3> index;
   int lvl;
+  bool has_interface_nb;
+};
+
+class FloodStack{
+  private:
+    std::vector<VoxelLoc> economy_lane;
+    std::vector<VoxelLoc> priority_lane;
+  public:
+    FloodStack() = default;
+    VoxelLoc popOut(){
+      VoxelLoc vxl;
+      if (priority_lane.empty()){
+        vxl = economy_lane.back();
+        economy_lane.pop_back();
+      }
+      else {
+        vxl = priority_lane.back();
+        priority_lane.pop_back();
+      }
+      return vxl;
+    }
+    size_t size() const {
+      return economy_lane.size() + priority_lane.size();
+    }
+    void pushBack(const VoxelLoc& vxl, const bool priority=false){
+      (priority? priority_lane : economy_lane).push_back(vxl);
+    }
 };
 
 // this function returns false when accessing an existing cavity and returns
@@ -395,6 +425,8 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
           continue;
         }
         if (readBit(s_cell->getVxlFromGrid(abs_index,vxl.lvl).getType(), 6)) {
+          // TODO: this may not be the best test for interface voxel 
+          // since it doesn't guarantee that the voxels are touching
           return true;
         }
       }
@@ -407,8 +439,8 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
   passIDtoChildren(start_index, start_lvl);
 
   // initialise flood fill stack and add first voxel
-  std::vector<VoxelLoc> flood_stack;
-  flood_stack.push_back(VoxelLoc(start_index, start_lvl));
+  FloodStack stack;
+  stack.pushBack(VoxelLoc(start_index, start_lvl));
 
   // reusing SearchIndex to get a vector of all direct neighbour voxel indices, i.e.
   // (1,0,0); (1,0,1); (1,1,0), (1,1,1), etc.
@@ -417,13 +449,16 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
 
   // adds neighbours to the stack, IDs are assigned before adding to the stack
   unsigned char n_interface;
-  while (flood_stack.size() > 0){
+  while (stack.size() > 0){
     if (Ctrl::getInstance()->getAbortFlag()){return false;}
     Ctrl::getInstance()->updateCalculationStatus(); // checks for abort button click
-    VoxelLoc vxl = flood_stack.back();
-    flood_stack.pop_back();
+    VoxelLoc vxl = stack.popOut();
 
     bool interface_vxl = isInterfaceVxl(vxl,neighbour_indices);
+    if (isInterfaceVxl && !vxl.has_interface_nb){
+      // TODO: happens even in single probe mode?
+      n_interface++;
+    }
 
     std::array<unsigned,3> nb_index;
     for (const auto& shell : neighbour_indices){
@@ -437,34 +472,32 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
         Voxel& nb_vxl = s_cell->getVxlFromGrid(nb_index,vxl.lvl);
         if (!nb_vxl.isCore()) { // skip if neighbour is not core
           continue;
-          // TODO: if nb is large voxel shell, then count a new interface
-          // all voxels that are evaluated afterwards may also be part of the interface
-          // keep track of the next voxels and register if they are part of the interface
-          // first evaluate all interface voxels, then the rest
         }
 
+        // TODO: guarantee that interface voxels are always processed consecutively!
         if (nb_vxl.hasSubvoxel()){
           // descend to all subvoxels that border this voxel and add to stack
-          nb_vxl.descend(flood_stack, id, nb_index, vxl.lvl, rel_index);
+          nb_vxl.descend(stack, id, nb_index, vxl.lvl, rel_index, interface_vxl);
         }
         else {
           // ascend to highest parent of pure type and add to stack
-          nb_vxl.ascend(flood_stack, id, nb_index, vxl.lvl, vxl.index, rel_index);
+          nb_vxl.ascend(stack, id, nb_index, vxl.lvl, vxl.index, rel_index, interface_vxl);
         }
       }
     }
   }
+  //printBinary(n_interface);
   return true;
 }
 
-void Voxel::descend(std::vector<VoxelLoc>& stack, const unsigned char id, const std::array<unsigned,3>& index, const int lvl, const std::array<int,3>& nb_relation){
+void Voxel::descend(FloodStack& stack, const unsigned char id, const std::array<unsigned,3>& index, const int lvl, const std::array<int,3>& nb_relation, const bool interface_vxl){
   if (!isCore()){return;} // return immediatly if voxel isn't and doesn't contain core voxel
   if (!hasSubvoxel()){
     if (getID() == 0){
       // when reaching a voxel that has no children and is core, set ID and add voxel to stack
       setID(id);
       passIDtoChildren(index, lvl);
-      stack.push_back(VoxelLoc(index, lvl));
+      stack.pushBack(VoxelLoc(index, lvl, interface_vxl), interface_vxl);
     }
   }
   else {
@@ -490,14 +523,14 @@ void Voxel::descend(std::vector<VoxelLoc>& stack, const unsigned char id, const 
         sub_index[1] = index[1] * 2 + j;
         for (char k : loop_i[2]){
           sub_index[2] = index[2] * 2 + k;
-          s_cell->getVxlFromGrid(sub_index, lvl-1).descend(stack, id, sub_index, lvl-1, nb_relation);
+          s_cell->getVxlFromGrid(sub_index, lvl-1).descend(stack, id, sub_index, lvl-1, nb_relation, interface_vxl);
         }
       }
     }
   }
 }
 
-void Voxel::ascend(std::vector<VoxelLoc>& stack, const unsigned char id, const std::array<unsigned,3> index, const int lvl, std::array<unsigned,3> prev_index, const std::array<int,3>& nb_relation){
+void Voxel::ascend(FloodStack& stack, const unsigned char id, const std::array<unsigned,3> index, const int lvl, std::array<unsigned,3> prev_index, const std::array<int,3>& nb_relation, const bool interface_vxl){
   // compare index with index of previous voxel
   // if voxel and previous voxel dont't belong to the same parent and this is not top lvl vxl
   // then compare types of this voxel and parent voxel
@@ -519,14 +552,14 @@ void Voxel::ascend(std::vector<VoxelLoc>& stack, const unsigned char id, const s
     Voxel& parent = s_cell->getVxlFromGrid(parent_index, lvl+1);
     // if types are the same, then move to parent voxel
     if (parent.getType() == getType()){
-      parent.ascend(stack, id, parent_index, lvl+1, prev_index, nb_relation);
+      parent.ascend(stack, id, parent_index, lvl+1, prev_index, nb_relation, interface_vxl);
       return;
     }
   }
   if (getID() == 0){
     setID(id);
     passIDtoChildren(index, lvl);
-    stack.push_back(VoxelLoc(index, lvl));
+    stack.pushBack(VoxelLoc(index, lvl, interface_vxl),interface_vxl);
   }
 }
 
