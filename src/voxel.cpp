@@ -455,7 +455,7 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
     VoxelLoc vxl = stack.popOut();
 
     bool interface_vxl = isInterfaceVxl(vxl,neighbour_indices);
-    if (isInterfaceVxl && !vxl.has_interface_nb){
+    if (interface_vxl && !vxl.has_interface_nb){
       // TODO: happens even in single probe mode?
       n_interface++;
     }
@@ -474,7 +474,6 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
           continue;
         }
 
-        // TODO: guarantee that interface voxels are always processed consecutively!
         if (nb_vxl.hasSubvoxel()){
           // descend to all subvoxels that border this voxel and add to stack
           nb_vxl.descend(stack, id, nb_index, vxl.lvl, rel_index, interface_vxl);
@@ -486,7 +485,7 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
       }
     }
   }
-  //printBinary(n_interface);
+  printBinary(n_interface);
   return true;
 }
 
