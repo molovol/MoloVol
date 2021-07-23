@@ -18,6 +18,7 @@ struct SearchIndex{
     unsigned int getUppLim(unsigned int);
     unsigned int getSafeLim(unsigned int);
     std::vector<std::vector<std::array<int,3>>> computeIndices(unsigned int);
+    std::vector<std::vector<std::array<int,3>>> computeIndices(unsigned int, const bool);
   private:
     std::vector<std::vector<std::array<int,3>>> _index_list;
     std::vector<unsigned> _upp_lim;
@@ -94,8 +95,10 @@ class Voxel{
     // atom vs core
     bool isAtom(const Atom&, const Vector&, const double, const double);
     // cavity id
-    void descend(std::vector<VoxelLoc>&, const unsigned char, const std::array<unsigned,3>&, const int, const std::array<int,3>&, const bool);
-    void ascend(std::vector<VoxelLoc>&, const unsigned char, const std::array<unsigned,3>, const int, std::array<unsigned,3>, const std::array<int,3>&, const bool);
+    std::vector<VoxelLoc> findPureNeighbours(const VoxelLoc&);
+    std::vector<VoxelLoc> findPureNeighbors(const VoxelLoc&);
+    void descend(std::vector<VoxelLoc>&, const std::array<unsigned,3>&, const int, const std::array<int,3>&);
+    void ascend(std::vector<VoxelLoc>&, const std::array<unsigned,3>, const int, std::array<unsigned,3>, const std::array<int,3>&);
     void passIDtoChildren(const std::array<unsigned,3>&, const int);
     // shell vs void
     bool searchForCore(const std::array<unsigned int,3>&, const unsigned, bool=false);
