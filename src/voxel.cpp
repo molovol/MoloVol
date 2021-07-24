@@ -382,12 +382,12 @@ void Voxel::listFromTree(
 
 struct VoxelLoc{
   VoxelLoc() = default;
-  VoxelLoc(const std::array<unsigned,3>& index, const int lvl) : index(index), lvl(lvl), has_interface_nb(false) {}
-  VoxelLoc(const std::array<unsigned,3>& index, const int lvl, const bool has_interface_nb) 
-    : index(index), lvl(lvl), has_interface_nb(has_interface_nb) {}
+  VoxelLoc(const std::array<unsigned,3>& index, const int lvl) : index(index), lvl(lvl), interface_vxl(false) {}
+  VoxelLoc(const std::array<unsigned,3>& index, const int lvl, const bool interface_vxl)
+    : index(index), lvl(lvl), interface_vxl(interface_vxl) {}
   std::array<unsigned,3> index;
   int lvl;
-  bool has_interface_nb;
+  bool interface_vxl;
 };
 
 class FloodStack{
@@ -400,6 +400,7 @@ class FloodStack{
       VoxelLoc vxl;
       if (priority_lane.empty()){
         vxl = economy_lane.back();
+        vxl.interface_vxl = true;
         economy_lane.pop_back();
       }
       else {
@@ -411,6 +412,9 @@ class FloodStack{
     size_t size() const {
       return economy_lane.size() + priority_lane.size();
     }
+    size_t sizePriority() const {
+      return priority_lane.size();
+    }
     void pushBack(const VoxelLoc& vxl, const bool priority=false){
       (priority? priority_lane : economy_lane).push_back(vxl);
     }
@@ -420,44 +424,61 @@ class FloodStack{
 // true every time a new cavity has been processed
 bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& start_index, const int start_lvl){
   if(getID() != 0){return false;}
- 
+  // initialise flood fill stack
+  FloodStack stack;
+      
   // set the ID of the start voxel and all its children
   setID(id);
   passIDtoChildren(start_index, start_lvl);
+  // add first voxel to stack
+  stack.pushBack(VoxelLoc(start_index, start_lvl), isInterfaceVxl(VoxelLoc(start_index, start_lvl)));
 
-  // initialise flood fill stack and add first voxel
-  FloodStack stack;
-  stack.pushBack(VoxelLoc(start_index, start_lvl));
-
-  // adds neighbours to the stack, IDs are assigned before adding to the stack
-  unsigned char n_interface;
+  unsigned char n_interface = 0;
+  bool at_interface = false;
   while (stack.size() > 0){
     if (Ctrl::getInstance()->getAbortFlag()){return false;}
     Ctrl::getInstance()->updateCalculationStatus(); // checks for abort button click
-    VoxelLoc vxl = stack.popOut();
-    
-    // function: get all pure neighbours
-    std::vector<VoxelLoc> all_pure_nbs = findPureNeighbours(vxl);
-    
-    /*
-    bool interface_vxl = false;
-    for (const VoxelLoc& nb_loc : all_pure_nbs){
-      if (s_cell->getVxlFromGrid(nb_loc.index,nb_loc.lvl);
-    }
-    */
 
+    // determines whether we are at a core-outside interface
+    at_interface = stack.sizePriority();
+
+    // get the next voxel from the stack
+    VoxelLoc vxl = stack.popOut();
+
+    // get all pure neighbours of the current voxel. pure means the voxel is the highest
+    // level voxel that does not have mixed type
+    std::vector<VoxelLoc> all_pure_nbs = findPureNeighbours(vxl);
+   
+    // go through all neighbours
     for (const VoxelLoc& nb_loc : all_pure_nbs){
+      // get a reference to the neighbour voxel
       Voxel& nb_vxl = s_cell->getVxlFromGrid(nb_loc.index,nb_loc.lvl);
       if (!nb_vxl.isCore()){continue;} // skip non core voxels
-      if (nb_vxl.getID() == 0){
-        // when reaching a voxel that has no children and is core, set ID and add voxel to stack
-        nb_vxl.setID(id);
-        nb_vxl.passIDtoChildren(nb_loc.index, nb_loc.lvl);
-        stack.pushBack(nb_loc);
-      }
+      if (nb_vxl.getID()){continue;} // skip processed voxels
+      
+      nb_vxl.setID(id);
+      nb_vxl.passIDtoChildren(nb_loc.index, nb_loc.lvl);
+      stack.pushBack(nb_loc, isInterfaceVxl(nb_loc));
+    }
+
+    // increment interface count if we are entering interface mode
+    if (!at_interface && stack.sizePriority()){
+      n_interface++;
+    }
+
+  }
+  printBinary(n_interface);
+  return true;
+}
+
+bool Voxel::isInterfaceVxl(const VoxelLoc& vxl){
+  std::vector<VoxelLoc> nbs = s_cell->getVxlFromGrid(vxl.index, vxl.lvl).findPureNeighbours(vxl);
+  for (const VoxelLoc& nb : nbs) {
+    if (readBit(s_cell->getVxlFromGrid(nb.index, nb.lvl).getType(),6)){
+      return true;
     }
   }
-  return true;
+  return false;
 }
 
 // there are duplicates in the returned vector!

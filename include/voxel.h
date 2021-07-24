@@ -95,6 +95,7 @@ class Voxel{
     // atom vs core
     bool isAtom(const Atom&, const Vector&, const double, const double);
     // cavity id
+    bool isInterfaceVxl(const VoxelLoc&);
     std::vector<VoxelLoc> findPureNeighbours(const VoxelLoc&);
     std::vector<VoxelLoc> findPureNeighbors(const VoxelLoc&);
     void descend(std::vector<VoxelLoc>&, const std::array<unsigned,3>&, const int, const std::array<int,3>&);
