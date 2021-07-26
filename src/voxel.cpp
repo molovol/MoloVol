@@ -422,16 +422,17 @@ class FloodStack{
 
 // this function returns false when accessing an existing cavity and returns
 // true every time a new cavity has been processed
-bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& start_index, const int start_lvl){
+bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& start_index, const int start_lvl, const bool two_probe){
   if(getID() != 0){return false;}
   // initialise flood fill stack
   FloodStack stack;
-      
+
   // set the ID of the start voxel and all its children
   setID(id);
   passIDtoChildren(start_index, start_lvl);
   // add first voxel to stack
-  stack.pushBack(VoxelLoc(start_index, start_lvl), isInterfaceVxl(VoxelLoc(start_index, start_lvl)));
+  stack.pushBack(VoxelLoc(start_index, start_lvl), 
+      two_probe? isInterfaceVxl(VoxelLoc(start_index, start_lvl)) : false);
 
   unsigned char n_interface = 0;
   bool at_interface = false;
@@ -445,35 +446,33 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
     // get the next voxel from the stack
     VoxelLoc vxl = stack.popOut();
 
-    // get all pure neighbours of the current voxel. pure means the voxel is the highest
+    // get all pure small probe core neighbours of the current voxel. pure means the voxel is the highest
     // level voxel that does not have mixed type
-    std::vector<VoxelLoc> all_pure_nbs = findPureNeighbours(vxl);
+    std::vector<VoxelLoc> all_core_nbs = findPureNeighbours(vxl, mvTYPE_SP_CORE, false);
    
     // go through all neighbours
-    for (const VoxelLoc& nb_loc : all_pure_nbs){
+    for (const VoxelLoc& nb_loc : all_core_nbs){
       // get a reference to the neighbour voxel
       Voxel& nb_vxl = s_cell->getVxlFromGrid(nb_loc.index,nb_loc.lvl);
-      if (!nb_vxl.isCore()){continue;} // skip non core voxels
       if (nb_vxl.getID()){continue;} // skip processed voxels
       
       nb_vxl.setID(id);
       nb_vxl.passIDtoChildren(nb_loc.index, nb_loc.lvl);
-      stack.pushBack(nb_loc, isInterfaceVxl(nb_loc));
+      stack.pushBack(nb_loc, two_probe? isInterfaceVxl(nb_loc) : false);
     }
 
     // increment interface count if we are entering interface mode
     if (!at_interface && stack.sizePriority()){
       n_interface++;
     }
-
   }
-  printBinary(n_interface);
   return true;
 }
 
 bool Voxel::isInterfaceVxl(const VoxelLoc& vxl){
-  std::vector<VoxelLoc> nbs = s_cell->getVxlFromGrid(vxl.index, vxl.lvl).findPureNeighbours(vxl);
-  for (const VoxelLoc& nb : nbs) {
+  std::vector<VoxelLoc> outside_nbs = s_cell->getVxlFromGrid(vxl.index, vxl.lvl).findPureNeighbours(vxl, mvTYPE_LP_SHELL);
+  // if (nbs.size()){return true;}
+  for (const VoxelLoc& nb : outside_nbs) {
     if (readBit(s_cell->getVxlFromGrid(nb.index, nb.lvl).getType(),6)){
       return true;
     }
@@ -481,9 +480,12 @@ bool Voxel::isInterfaceVxl(const VoxelLoc& vxl){
   return false;
 }
 
-// there are duplicates in the returned vector!
-std::vector<VoxelLoc> Voxel::findPureNeighbors(const VoxelLoc& vxl){return findPureNeighbours(vxl);}
-std::vector<VoxelLoc> Voxel::findPureNeighbours(const VoxelLoc& central_vxl){
+// returns a vector of all pure neighbours 
+// contains duplicates due to ascend
+std::vector<VoxelLoc> Voxel::findPureNeighbors(const VoxelLoc& central_vxl, const unsigned char type_flag, const bool any_id){
+  return findPureNeighbours(central_vxl, type_flag, any_id);
+}
+std::vector<VoxelLoc> Voxel::findPureNeighbours(const VoxelLoc& central_vxl, const unsigned char type_flag, const bool any_id){
   // reusing SearchIndex to get a vector of all direct neighbour voxel indices, i.e.
   // (1,0,0); (1,0,1); (1,1,0), (1,1,1), etc.
   static const std::vector<std::vector<std::array<int,3>>> s_nb_indices = SearchIndex().computeIndices(3,false);
@@ -497,13 +499,15 @@ std::vector<VoxelLoc> Voxel::findPureNeighbours(const VoxelLoc& central_vxl){
       if (!s_cell->isInBounds(nb_index,central_vxl.lvl)){continue;}
 
       Voxel& nb_vxl = s_cell->getVxlFromGrid(nb_index,central_vxl.lvl);
+      if (!any_id && nb_vxl.getID()){continue;} // greatly accelerates flood fill
+      if (!(nb_vxl.getType() & type_flag)){continue;}
 
       if (nb_vxl.hasSubvoxel()){
-        // descend to all subvoxels that border this voxel and add to stack
-        nb_vxl.descend(all_pure_nbs, nb_index, central_vxl.lvl, rel_index);
+        // descend to all subvoxels that border this voxel and add to vector
+        nb_vxl.descend(all_pure_nbs, nb_index, central_vxl.lvl, rel_index, type_flag);
       }
       else {
-        // ascend to highest parent of pure type and add to stack
+        // ascend to highest parent of pure type and add to vector
         nb_vxl.ascend(all_pure_nbs, nb_index, central_vxl.lvl, central_vxl.index, rel_index);
       }
     }
@@ -511,9 +515,11 @@ std::vector<VoxelLoc> Voxel::findPureNeighbours(const VoxelLoc& central_vxl){
   return all_pure_nbs;
 }
 
-void Voxel::descend(std::vector<VoxelLoc>& all_pure_nbs, const std::array<unsigned,3>& index, const int lvl, const std::array<int,3>& nb_relation){
+void Voxel::descend(std::vector<VoxelLoc>& all_pure_nbs, const std::array<unsigned,3>& index, const int lvl, const std::array<int,3>& nb_relation, const unsigned char type_flag){
   if (!hasSubvoxel()){
-    all_pure_nbs.push_back(VoxelLoc(index, lvl));
+    if (getType() & type_flag){
+      all_pure_nbs.push_back(VoxelLoc(index, lvl));
+    }
   }
   else {
     // only loop over those voxels bordering the previous voxel
@@ -538,7 +544,7 @@ void Voxel::descend(std::vector<VoxelLoc>& all_pure_nbs, const std::array<unsign
         sub_index[1] = index[1] * 2 + j;
         for (char k : loop_i[2]){
           sub_index[2] = index[2] * 2 + k;
-          s_cell->getVxlFromGrid(sub_index, lvl-1).descend(all_pure_nbs, sub_index, lvl-1, nb_relation);
+          s_cell->getVxlFromGrid(sub_index, lvl-1).descend(all_pure_nbs, sub_index, lvl-1, nb_relation, type_flag);
         }
       }
     }

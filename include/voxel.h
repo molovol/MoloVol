@@ -5,6 +5,7 @@
 #include "vector.h"
 #include "atomtree.h"
 #include "container3d.h"
+#include "flags.h"
 #include <vector>
 #include <array>
 #include <unordered_map>
@@ -62,7 +63,7 @@ class Voxel{
     void splitVoxel(const std::array<unsigned,3>&, const Vector&, const double);
 
     // cavity id
-    bool floodFill(const unsigned char, const std::array<unsigned,3>&, const int);
+    bool floodFill(const unsigned char, const std::array<unsigned,3>&, const int, const bool=false);
 
     // shell vs void
     char evalRelationToVoxels(const std::array<unsigned int,3>&, const unsigned, bool=false);
@@ -96,9 +97,9 @@ class Voxel{
     bool isAtom(const Atom&, const Vector&, const double, const double);
     // cavity id
     bool isInterfaceVxl(const VoxelLoc&);
-    std::vector<VoxelLoc> findPureNeighbours(const VoxelLoc&);
-    std::vector<VoxelLoc> findPureNeighbors(const VoxelLoc&);
-    void descend(std::vector<VoxelLoc>&, const std::array<unsigned,3>&, const int, const std::array<int,3>&);
+    std::vector<VoxelLoc> findPureNeighbours(const VoxelLoc&, const unsigned char=mvTYPE_ALL, const bool=true);
+    std::vector<VoxelLoc> findPureNeighbors(const VoxelLoc&, const unsigned char=mvTYPE_ALL, const bool=true);
+    void descend(std::vector<VoxelLoc>&, const std::array<unsigned,3>&, const int, const std::array<int,3>&, const unsigned char);
     void ascend(std::vector<VoxelLoc>&, const std::array<unsigned,3>, const int, std::array<unsigned,3>, const std::array<int,3>&);
     void passIDtoChildren(const std::array<unsigned,3>&, const int);
     // shell vs void
