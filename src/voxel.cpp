@@ -422,7 +422,7 @@ class FloodStack{
 
 // this function returns false when accessing an existing cavity and returns
 // true every time a new cavity has been processed
-bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& start_index, const int start_lvl, const bool two_probe){
+bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& start_index, const int start_lvl, const bool cavity_type){
   if(getID() != 0){return false;}
   // initialise flood fill stack
   FloodStack stack;
@@ -432,7 +432,7 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
   passIDtoChildren(start_index, start_lvl);
   // add first voxel to stack
   stack.pushBack(VoxelLoc(start_index, start_lvl), 
-      two_probe? isInterfaceVxl(VoxelLoc(start_index, start_lvl)) : false);
+      cavity_type? isInterfaceVxl(VoxelLoc(start_index, start_lvl)) : false);
 
   unsigned char n_interface = 0;
   bool at_interface = false;
@@ -458,7 +458,7 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
       
       nb_vxl.setID(id);
       nb_vxl.passIDtoChildren(nb_loc.index, nb_loc.lvl);
-      stack.pushBack(nb_loc, two_probe? isInterfaceVxl(nb_loc) : false);
+      stack.pushBack(nb_loc, cavity_type? isInterfaceVxl(nb_loc) : false);
     }
 
     // increment interface count if we are entering interface mode

@@ -97,8 +97,8 @@ class Voxel{
     bool isAtom(const Atom&, const Vector&, const double, const double);
     // cavity id
     bool isInterfaceVxl(const VoxelLoc&);
-    std::vector<VoxelLoc> findPureNeighbours(const VoxelLoc&, const unsigned char=mvTYPE_ALL, const bool=true);
-    std::vector<VoxelLoc> findPureNeighbors(const VoxelLoc&, const unsigned char=mvTYPE_ALL, const bool=true);
+    std::vector<VoxelLoc> findPureNeighbours(const VoxelLoc&, const unsigned char=mvTYPE_ALL, const bool=false);
+    std::vector<VoxelLoc> findPureNeighbors(const VoxelLoc&, const unsigned char=mvTYPE_ALL, const bool=false);
     void descend(std::vector<VoxelLoc>&, const std::array<unsigned,3>&, const int, const std::array<int,3>&, const unsigned char);
     void ascend(std::vector<VoxelLoc>&, const std::array<unsigned,3>, const int, std::array<unsigned,3>, const std::array<int,3>&);
     void passIDtoChildren(const std::array<unsigned,3>&, const int);

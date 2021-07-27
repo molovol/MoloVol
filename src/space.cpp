@@ -121,7 +121,7 @@ void Space::assignTypeInGrid(std::vector<Atom>& atomlist, const double r_probe1,
   assignAtomVsCore();
 
   Ctrl::getInstance()->updateStatus("Identifying cavities...");
-  try{identifyCavities();}
+  try{identifyCavities(probe_mode);}
   catch (const std::overflow_error& e){cavities_exceeded = true;}
 
   Ctrl::getInstance()->updateStatus("Searching inaccessible areas...");
@@ -152,7 +152,7 @@ void Space::assignAtomVsCore(){
   }
 }
 
-void Space::identifyCavities(){
+void Space::identifyCavities(const bool cavity_types){
   if (Ctrl::getInstance()->getAbortFlag()){return;}
   std::array<unsigned int,3> vxl_index;
   unsigned char id = 1;
@@ -161,7 +161,7 @@ void Space::identifyCavities(){
       for(vxl_index[2] = 0; vxl_index[2] < getGridsteps()[2]; vxl_index[2]++){
         if (Ctrl::getInstance()->getAbortFlag()){return;}
         try{
-          descendToCore(id,vxl_index,getMaxDepth()); // id gets iterated inside this function
+          descendToCore(id,vxl_index,getMaxDepth(),cavity_types); // id gets iterated inside this function
         }
         catch (const std::overflow_error& e){
           throw;
@@ -176,11 +176,11 @@ void Space::identifyCavities(){
 
 // this function finds the lowest level core voxel. this voxel becomes the entry point
 // for the flood fill
-void Space::descendToCore(unsigned char& id, const std::array<unsigned,3> index, int lvl){
+void Space::descendToCore(unsigned char& id, const std::array<unsigned,3> index, int lvl, const bool cavity_types){
   Voxel& vxl = getVxlFromGrid(index,lvl);
   if (!vxl.isCore()){return;}
   if (!vxl.hasSubvoxel()){
-    if(vxl.floodFill(id, index, lvl)){
+    if(vxl.floodFill(id, index, lvl, cavity_types)){
       if (id == 0b11111111){
         throw std::overflow_error("Too many isolated cavities detected!");
       }
@@ -196,7 +196,7 @@ void Space::descendToCore(unsigned char& id, const std::array<unsigned,3> index,
         for (char k = 0; k < 2; ++k){
           subindex[2] = index[2]*2 + k;
           if (Ctrl::getInstance()->getAbortFlag()){return;}
-          try {descendToCore(id, subindex, lvl-1);}
+          try {descendToCore(id, subindex, lvl-1, cavity_types);}
           catch (const std::overflow_error& e){throw;}
         }
       }

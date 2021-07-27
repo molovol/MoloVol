@@ -80,8 +80,8 @@ class Space{
 
     const std::array<unsigned long int,3> getGridstepsOnLvl(const int) const;
     void assignAtomVsCore();
-    void identifyCavities();
-    void descendToCore(unsigned char&, const std::array<unsigned,3>, int);
+    void identifyCavities(const bool=false);
+    void descendToCore(unsigned char&, const std::array<unsigned,3>, int, const bool);
     void assignShellVsVoid();
 
     double tallySurface(const std::vector<char>&, std::array<unsigned int,3>&, std::array<unsigned int,3>&, const unsigned char=0, const bool=false);
