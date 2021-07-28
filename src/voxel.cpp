@@ -422,7 +422,7 @@ class FloodStack{
 
 // this function returns false when accessing an existing cavity and returns
 // true every time a new cavity has been processed
-bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& start_index, const int start_lvl, const bool cavity_type){
+bool Voxel::floodFill(std::vector<Cavity>& cavities, const unsigned char id, const std::array<unsigned,3>& start_index, const int start_lvl, const bool cavity_type){
   if(getID() != 0){return false;}
   // initialise flood fill stack
   FloodStack stack;
@@ -433,7 +433,7 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
   // add first voxel to stack
   stack.pushBack(VoxelLoc(start_index, start_lvl), 
       cavity_type? isInterfaceVxl(VoxelLoc(start_index, start_lvl)) : false);
-
+  
   unsigned char n_interface = 0;
   bool at_interface = false;
   while (stack.size() > 0){
@@ -466,6 +466,7 @@ bool Voxel::floodFill(const unsigned char id, const std::array<unsigned,3>& star
       n_interface++;
     }
   }
+  cavities.push_back(Cavity(id, n_interface));
   return true;
 }
 

@@ -9,9 +9,11 @@
 
 struct Cavity{
   Cavity() = default;
+  Cavity(unsigned char id, unsigned char n_entrances) : id(id), n_entrances(n_entrances), core_vol(0), shell_vol(0), surf_core(0), surf_shell(0){};
   Cavity(unsigned char id, double core_vol, double shell_vol, std::array<double,3> min_bound, std::array<double,3> max_bound, std::array<unsigned int,3> min_index, std::array<unsigned int,3> max_index) :
-    id(id), core_vol(core_vol), shell_vol(shell_vol), min_bound(min_bound), max_bound(max_bound), min_index(min_index), max_index(max_index), surf_core(0), surf_shell(0){};
+    id(id), n_entrances(0), core_vol(core_vol), shell_vol(shell_vol), min_bound(min_bound), max_bound(max_bound), min_index(min_index), max_index(max_index), surf_core(0), surf_shell(0){};
   unsigned char id; // the number assigned to core and shell voxels belonging to this cavity
+  unsigned char n_entrances;
   double core_vol;
   double shell_vol;
   std::array<double,3> min_bound;
@@ -26,6 +28,7 @@ struct Cavity{
   double getSurfCore() const;
   double getSurfShell() const;
   std::string getPosition() const;
+  void setVolumes(const double, const double, const std::array<double,3>&, const std::array<double,3>&, const std::array<unsigned int,3>&, const std::array<unsigned int,3>&);
 };
 
 bool compareVolume(const Cavity& a, const Cavity& b);

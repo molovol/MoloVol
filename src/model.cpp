@@ -114,10 +114,11 @@ CalcReportBundle Model::generateVolumeData(){
   prepareVolumeCalc();
   if (!_data.success){return _data;} // if there's been an error during preparation
 
+
   { // assign each voxel in grid a type
     auto start = std::chrono::steady_clock::now();
     bool cavities_exceeded = false;
-    _cell.assignTypeInGrid(_atoms, getProbeRad1(), getProbeRad2(), optionProbeMode(), cavities_exceeded);
+    _cell.assignTypeInGrid(_atoms, _data.cavities, getProbeRad1(), getProbeRad2(), optionProbeMode(), cavities_exceeded);
     if(Ctrl::getInstance()->getAbortFlag()){
       _data.success = false;
       return _data;

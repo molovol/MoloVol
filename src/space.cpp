@@ -105,7 +105,7 @@ void Space::initGrid(){
 /////////////////////
 
 // sets all voxel's types, determined by the input atoms
-void Space::assignTypeInGrid(std::vector<Atom>& atomlist, const double r_probe1, const double r_probe2, bool probe_mode, bool& cavities_exceeded){
+void Space::assignTypeInGrid(std::vector<Atom>& atomlist, std::vector<Cavity>& cavities, const double r_probe1, const double r_probe2, bool probe_mode, bool& cavities_exceeded){
   // save variable that all voxels need access to for their type determination as static members of Voxel class
   Voxel::prepareTypeAssignment(this, atomlist);
   if (probe_mode){
@@ -121,7 +121,7 @@ void Space::assignTypeInGrid(std::vector<Atom>& atomlist, const double r_probe1,
   assignAtomVsCore();
 
   Ctrl::getInstance()->updateStatus("Identifying cavities...");
-  try{identifyCavities(probe_mode);}
+  try{identifyCavities(cavities, probe_mode);}
   catch (const std::overflow_error& e){cavities_exceeded = true;}
 
   Ctrl::getInstance()->updateStatus("Searching inaccessible areas...");
@@ -152,7 +152,7 @@ void Space::assignAtomVsCore(){
   }
 }
 
-void Space::identifyCavities(const bool cavity_types){
+void Space::identifyCavities(std::vector<Cavity>& cavities, const bool cavity_types){
   if (Ctrl::getInstance()->getAbortFlag()){return;}
   std::array<unsigned int,3> vxl_index;
   unsigned char id = 1;
@@ -161,7 +161,7 @@ void Space::identifyCavities(const bool cavity_types){
       for(vxl_index[2] = 0; vxl_index[2] < getGridsteps()[2]; vxl_index[2]++){
         if (Ctrl::getInstance()->getAbortFlag()){return;}
         try{
-          descendToCore(id,vxl_index,getMaxDepth(),cavity_types); // id gets iterated inside this function
+          descendToCore(cavities, id,vxl_index,getMaxDepth(),cavity_types); // id gets iterated inside this function
         }
         catch (const std::overflow_error& e){
           throw;
@@ -170,17 +170,15 @@ void Space::identifyCavities(const bool cavity_types){
     }
     Ctrl::getInstance()->updateProgressBar(int(100*(double(vxl_index[0])+1)/double(getGridsteps()[0])));
   }
-  // TODO: create the list of Cavities here with all the info that is already available
-  // i.e. IDs and interface count
 }
 
 // this function finds the lowest level core voxel. this voxel becomes the entry point
 // for the flood fill
-void Space::descendToCore(unsigned char& id, const std::array<unsigned,3> index, int lvl, const bool cavity_types){
+void Space::descendToCore(std::vector<Cavity>& cavities, unsigned char& id, const std::array<unsigned,3> index, int lvl, const bool cavity_types){
   Voxel& vxl = getVxlFromGrid(index,lvl);
   if (!vxl.isCore()){return;}
   if (!vxl.hasSubvoxel()){
-    if(vxl.floodFill(id, index, lvl, cavity_types)){
+    if(vxl.floodFill(cavities, id, index, lvl, cavity_types)){
       if (id == 0b11111111){
         throw std::overflow_error("Too many isolated cavities detected!");
       }
@@ -196,7 +194,7 @@ void Space::descendToCore(unsigned char& id, const std::array<unsigned,3> index,
         for (char k = 0; k < 2; ++k){
           subindex[2] = index[2]*2 + k;
           if (Ctrl::getInstance()->getAbortFlag()){return;}
-          try {descendToCore(id, subindex, lvl-1, cavity_types);}
+          try {descendToCore(cavities, id, subindex, lvl-1, cavity_types);}
           catch (const std::overflow_error& e){throw;}
         }
       }
@@ -222,7 +220,6 @@ void Space::assignShellVsVoid(){
 void Space::getVolume(std::map<char,double>& volumes, std::vector<Cavity>& cavities){
   // clear all output variables
   volumes.clear();
-  cavities.clear();
   // create maps used for tallying voxels
   std::map<char, unsigned> type_tally;
   std::map<unsigned char, unsigned> id_core_tally;
@@ -255,8 +252,6 @@ void Space::getVolume(std::map<char,double>& volumes, std::vector<Cavity>& cavit
   for (auto& [type,tally] : type_tally) {
     volumes[type] = tally * unit_volume;
   }
-  // allocate memory
-  cavities = std::vector<Cavity> (id_core_tally.size()-1);
   // convert from units of bottom level voxels to units of volume
   // convert from index to spatial coordinates
   // copy values from map to vector for more efficient storage and access
@@ -279,7 +274,6 @@ void Space::getUnitCellVolume(std::map<char,double>& volumes,
                               std::vector<Cavity>& cavities){
   // clear all output variables
   volumes.clear();
-  cavities.clear();
   // create maps used for tallying voxels
   std::map<char, double> type_tally;
   std::map<unsigned char, double> id_core_tally;
@@ -351,13 +345,13 @@ void Space::getUnitCellVolume(std::map<char,double>& volumes,
       min_index_arr[i] = id_min[id][i];
       max_index_arr[i] = id_max[id][i];
     }
-    cavities.push_back(Cavity(id,
-                       tally*unit_volume,
-                       id_shell_tally[id] * unit_volume,
-                       min_arr,
-                       max_arr,
-                       min_index_arr,
-                       max_index_arr));
+    cavities[id-1].setVolumes(
+      tally*unit_volume,
+      id_shell_tally[id] * unit_volume,
+      min_arr,
+      max_arr,
+      min_index_arr,
+      max_index_arr);
   }
 }
 

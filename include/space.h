@@ -46,7 +46,7 @@ class Space{
     void printGrid();
 
     // type evaluation
-    void assignTypeInGrid(std::vector<Atom>&, const double, const double, bool, bool&);
+    void assignTypeInGrid(std::vector<Atom>&, std::vector<Cavity>&, const double, const double, bool, bool&);
     void getVolume(std::map<char,double>&, std::vector<Cavity>&);
     void getUnitCellVolume(std::map<char,double>&, std::vector<Cavity>&);
     void setUnitCellIndexes();
@@ -80,8 +80,8 @@ class Space{
 
     const std::array<unsigned long int,3> getGridstepsOnLvl(const int) const;
     void assignAtomVsCore();
-    void identifyCavities(const bool=false);
-    void descendToCore(unsigned char&, const std::array<unsigned,3>, int, const bool);
+    void identifyCavities(std::vector<Cavity>&, const bool=false);
+    void descendToCore(std::vector<Cavity>&, unsigned char&, const std::array<unsigned,3>, int, const bool);
     void assignShellVsVoid();
 
     double tallySurface(const std::vector<char>&, std::array<unsigned int,3>&, std::array<unsigned int,3>&, const unsigned char=0, const bool=false);

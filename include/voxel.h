@@ -6,6 +6,7 @@
 #include "atomtree.h"
 #include "container3d.h"
 #include "flags.h"
+#include "cavity.h"
 #include <vector>
 #include <array>
 #include <unordered_map>
@@ -63,7 +64,7 @@ class Voxel{
     void splitVoxel(const std::array<unsigned,3>&, const Vector&, const double);
 
     // cavity id
-    bool floodFill(const unsigned char, const std::array<unsigned,3>&, const int, const bool=false);
+    bool floodFill(std::vector<Cavity>&, const unsigned char, const std::array<unsigned,3>&, const int, const bool=false);
 
     // shell vs void
     char evalRelationToVoxels(const std::array<unsigned int,3>&, const unsigned, bool=false);
