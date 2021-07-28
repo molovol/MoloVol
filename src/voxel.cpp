@@ -434,7 +434,7 @@ bool Voxel::floodFill(std::vector<Cavity>& cavities, const unsigned char id, con
   stack.pushBack(VoxelLoc(start_index, start_lvl), 
       cavity_type? isInterfaceVxl(VoxelLoc(start_index, start_lvl)) : false);
   
-  unsigned char n_interface = 0;
+  int n_interface = 0;
   bool at_interface = false;
   while (stack.size() > 0){
     if (Ctrl::getInstance()->getAbortFlag()){return false;}
@@ -662,13 +662,14 @@ bool Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
 // TALLY //
 ///////////
 
-void Voxel::tallyVoxelsOfType(std::map<char,unsigned>& type_tally,
-    std::map<unsigned char,unsigned>& id_core_tally,
-    std::map<unsigned char,unsigned>& id_shell_tally,
+void Voxel::tallyVoxelsOfType(std::map<char,double>& type_tally,
+    std::map<unsigned char,double>& id_core_tally,
+    std::map<unsigned char,double>& id_shell_tally,
     std::map<unsigned char,std::array<unsigned,3>>& id_min,
     std::map<unsigned char,std::array<unsigned,3>>& id_max,
     const std::array<unsigned,3>& index,
-    const int lvl)
+    const int lvl,
+    const double vxl_fraction)
 {
   // if voxel is of type "mixed" (i.e. data vector is not empty)
   if(hasSubvoxel()){
@@ -680,19 +681,19 @@ void Voxel::tallyVoxelsOfType(std::map<char,unsigned>& type_tally,
         sub_index[1] = index[1]*2 + y;
         for(char z = 0; z < 2; ++z){
           sub_index[2] = index[2]*2 + z;
-          getSubvoxel(sub_index, lvl).tallyVoxelsOfType(type_tally, id_core_tally, id_shell_tally, id_min, id_max, sub_index, lvl-1);
+          getSubvoxel(sub_index, lvl).tallyVoxelsOfType(type_tally, id_core_tally, id_shell_tally, id_min, id_max, sub_index, lvl-1, vxl_fraction);
         }
       }
     }
   }
   else {
     // tally number of bottom level voxels
-    type_tally[getType()] += pow(pow2(lvl),3);
+    type_tally[getType()] += pow(pow2(lvl),3) * vxl_fraction;
     if(getType() == 0b00001001){
-      id_core_tally[getID()] += pow(pow2(lvl),3);
+      id_core_tally[getID()] += pow(pow2(lvl),3) * vxl_fraction;
     }
     else if(getType() == 0b00010001){
-      id_shell_tally[getID()] += pow(pow2(lvl),3);
+      id_shell_tally[getID()] += pow(pow2(lvl),3) * vxl_fraction;
     }
     // localise cavities
     std::array<unsigned,3> min;

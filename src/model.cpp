@@ -114,7 +114,6 @@ CalcReportBundle Model::generateVolumeData(){
   prepareVolumeCalc();
   if (!_data.success){return _data;} // if there's been an error during preparation
 
-
   { // assign each voxel in grid a type
     auto start = std::chrono::steady_clock::now();
     bool cavities_exceeded = false;
@@ -129,12 +128,7 @@ CalcReportBundle Model::generateVolumeData(){
   }
   { // sum total volume
     auto start = std::chrono::steady_clock::now();
-    if(_data.analyze_unit_cell){
-      _cell.getUnitCellVolume(_data.volumes, _data.cavities);
-    }
-    else{
-      _cell.getVolume(_data.volumes, _data.cavities);
-    }
+    _cell.sumVolume(_data.volumes, _data.cavities, _data.analyze_unit_cell);
 
     // sort cavities by volume from largest to smallest
     inverseSort(_data.cavities);

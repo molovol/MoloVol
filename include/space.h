@@ -47,16 +47,8 @@ class Space{
 
     // type evaluation
     void assignTypeInGrid(std::vector<Atom>&, std::vector<Cavity>&, const double, const double, bool, bool&);
-    void getVolume(std::map<char,double>&, std::vector<Cavity>&);
-    void getUnitCellVolume(std::map<char,double>&, std::vector<Cavity>&);
+    void sumVolume(std::map<char,double>&, std::vector<Cavity>&, const bool);
     void setUnitCellIndexes();
-    void tallyVoxelsUnitCell(std::array<unsigned int,3>,
-                            double,
-                            std::map<char, double>&,
-                            std::map<unsigned char, double>&,
-                            std::map<unsigned char, double>&,
-                            std::map<unsigned char, std::array<unsigned,3>>&,
-                            std::map<unsigned char, std::array<unsigned,3>>&);
 
     // surface area
     double calcSurfArea(const std::vector<char>&);
@@ -77,8 +69,12 @@ class Space{
     void setBoundaries(const std::vector<Atom>&, const double);
 
     void initGrid();
+    
+    template <typename T = unsigned long>
+    const std::array<T,3> getGridstepsOnLvl(const int lvl) const {
+      return _grid[lvl].getNumElements<T>();
+    }
 
-    const std::array<unsigned long int,3> getGridstepsOnLvl(const int) const;
     void assignAtomVsCore();
     void identifyCavities(std::vector<Cavity>&, const bool=false);
     void descendToCore(std::vector<Cavity>&, unsigned char&, const std::array<unsigned,3>, int, const bool);

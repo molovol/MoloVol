@@ -70,13 +70,14 @@ class Voxel{
     char evalRelationToVoxels(const std::array<unsigned int,3>&, const unsigned, bool=false);
 
     // volume
-    void tallyVoxelsOfType(std::map<char,unsigned>&,
-        std::map<unsigned char,unsigned>&,
-        std::map<unsigned char,unsigned>&,
+    void tallyVoxelsOfType(std::map<char,double>&,
+        std::map<unsigned char,double>&,
+        std::map<unsigned char,double>&,
         std::map<unsigned char,std::array<unsigned,3>>&,
         std::map<unsigned char,std::array<unsigned,3>>&,
         const std::array<unsigned,3>&,
-        const int);
+        const int,
+        const double=1);
 
     // unused but could become useful
     static void listFromTree(std::vector<int>&, const AtomNode*, const Vector&, const double&, const double&, const double&, const char=0);
