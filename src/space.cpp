@@ -302,6 +302,13 @@ void Space::sumVolume(std::map<char,double>& volumes, std::vector<Cavity>& cavit
       cavities[id-1].max_index[i] = id_max[id][i];
     }
   }
+  // remove cavities with volume equal to zero (artefacts from unit cell mode)
+  for (auto it = cavities.begin(); it != cavities.end(); it++)
+  {
+    if ((*it).getVolume() == 0){
+      cavities.erase(it--);
+    }
+  }
 }
 
 void Space::setUnitCellIndexes(){
