@@ -1,8 +1,8 @@
 #include "cavity.h"
 #include <sstream>
 
+int Cavity::getNumberEntrances() const {return n_entrances;}
 double Cavity::getVolume() const {return core_vol + shell_vol;}
-
 double Cavity::getSurfShell() const {return surf_shell;}
 double Cavity::getSurfCore() const {return surf_core;}
 

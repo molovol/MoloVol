@@ -146,6 +146,9 @@ void Model::prepareVolumeCalc(){
   _data.elapsed_seconds.clear();
   // reset the success value to avoid lingering errors from previous failed calculations
   _data.success = true;
+  // clear previous results
+  _data.volumes.clear();
+  _data.cavities.clear();
 
   // process atom data for unit cell analysis if the option is ticked
   if(optionAnalyzeUnitCell()){

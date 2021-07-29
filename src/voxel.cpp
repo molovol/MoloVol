@@ -466,6 +466,7 @@ bool Voxel::floodFill(std::vector<Cavity>& cavities, const unsigned char id, con
       n_interface++;
     }
   }
+  printBinary(n_interface);
   cavities.push_back(Cavity(id, n_interface));
   return true;
 }

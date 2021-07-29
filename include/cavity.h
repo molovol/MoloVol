@@ -24,6 +24,7 @@ struct Cavity{
   double surf_core;
   double surf_shell;
 
+  int getNumberEntrances() const;
   double getVolume() const;
   double getSurfCore() const;
   double getSurfShell() const;

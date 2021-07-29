@@ -181,7 +181,7 @@ void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>
 void MainFrame::displayCavityList(const std::vector<Cavity>& cavities, const std::array<bool,2> options_uc_pm){
   // delete all rows
   clearOutputGrid();
-  // add appropriate nuber of rows
+  // add appropriate number of rows
   outputGrid->AppendRows(cavities.size());
   for (int row = 0; row < outputGrid->GetNumberRows(); ++row){
     outputGrid->SetCellValue(row, 0, std::to_string(row+1));
@@ -196,6 +196,19 @@ void MainFrame::displayCavityList(const std::vector<Cavity>& cavities, const std
       outputGrid->SetCellValue(row, 3, std::to_string(cavities[row].getSurfShell()));
     }
     outputGrid->SetCellValue(row, 4, cavities[row].getPosition());
+    if (options_uc_pm[1]){
+      std::string cav_type = "Tunnel";
+      switch(cavities[row].getNumberEntrances()){
+        case 0 :
+          cav_type = "Isolated";
+          break;
+        case 1 :
+          cav_type = "Pocket";
+          break;
+      }
+
+      outputGrid->SetCellValue(row, 5, cav_type);
+    }
     // set all cells read only
     for (int col = 0; col < outputGrid->GetNumberCols(); ++col){
       outputGrid->SetReadOnly(row,col,true);
