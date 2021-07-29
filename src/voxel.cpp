@@ -440,9 +440,6 @@ bool Voxel::floodFill(std::vector<Cavity>& cavities, const unsigned char id, con
     if (Ctrl::getInstance()->getAbortFlag()){return false;}
     Ctrl::getInstance()->updateCalculationStatus(); // checks for abort button click
 
-    // determines whether we are at a core-outside interface
-    at_interface = stack.sizePriority();
-
     // get the next voxel from the stack
     VoxelLoc vxl = stack.popOut();
 
@@ -460,13 +457,15 @@ bool Voxel::floodFill(std::vector<Cavity>& cavities, const unsigned char id, con
       nb_vxl.passIDtoChildren(nb_loc.index, nb_loc.lvl);
       stack.pushBack(nb_loc, cavity_type? isInterfaceVxl(nb_loc) : false);
     }
-
+    
     // increment interface count if we are entering interface mode
     if (!at_interface && stack.sizePriority()){
       n_interface++;
     }
+    
+    // determines whether we are at a core-outside interface
+    at_interface = stack.sizePriority();
   }
-  printBinary(n_interface);
   cavities.push_back(Cavity(id, n_interface));
   return true;
 }
