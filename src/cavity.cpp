@@ -19,6 +19,19 @@ std::string Cavity::getPosition() const {
   return str + ")";
 }
 
+std::string Cavity::cavTypeDescriptor() const {
+  std::string cav_type = "Tunnel";
+  switch(n_entrances){
+    case 0 :
+      cav_type = "Isolated";
+      break;
+    case 1 :
+      cav_type = "Pocket";
+      break;
+  }
+  return cav_type;
+}
+
 bool compareVolume(const Cavity& a, const Cavity& b){
   return a.getVolume() < b.getVolume();
 }

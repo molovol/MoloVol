@@ -29,6 +29,7 @@ struct Cavity{
   double getSurfCore() const;
   double getSurfShell() const;
   std::string getPosition() const;
+  std::string cavTypeDescriptor() const;
 };
 
 bool compareVolume(const Cavity& a, const Cavity& b);

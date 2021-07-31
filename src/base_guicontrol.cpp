@@ -6,6 +6,7 @@
 
 #include "base.h"
 #include "special_chars.h"
+#include "misc.h"
 #include <string>
 #include <wx/msgdlg.h>
 
@@ -197,17 +198,7 @@ void MainFrame::displayCavityList(const std::vector<Cavity>& cavities, const std
     }
     outputGrid->SetCellValue(row, 4, cavities[row].getPosition());
     if (options_uc_pm[1]){
-      std::string cav_type = "Tunnel";
-      switch(cavities[row].getNumberEntrances()){
-        case 0 :
-          cav_type = "Isolated";
-          break;
-        case 1 :
-          cav_type = "Pocket";
-          break;
-      }
-
-      outputGrid->SetCellValue(row, 5, cav_type);
+      outputGrid->SetCellValue(row, 5, cavities[row].cavTypeDescriptor());
     }
     // set all cells read only
     for (int col = 0; col < outputGrid->GetNumberCols(); ++col){
