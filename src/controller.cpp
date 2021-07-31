@@ -6,6 +6,7 @@
 #include "misc.h"
 #include "exception.h"
 #include "special_chars.h"
+#include "griddata.h"
 #include <chrono>
 #include <utility>
 #include <map>
@@ -427,73 +428,6 @@ void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag
     s_gui->extDisplayCavityList(data.cavities, data.analyze_unit_cell, data.probe_mode);
   }
   else{
-    struct someText{
-      someText(std::string str, std::wstring wstr) : str(str), wstr(wstr){}
-      someText(std::string str) : someText(str, L"") {}
-      someText(std::wstring wstr) : someText("", wstr) {}
-      std::string str;
-      std::wstring wstr;
-    };
-
-    // GridCol
-    struct GridCol{
-      GridCol(const std::string header, const std::wstring unit) : header(header), unit(unit), hide_col(false){};
-      GridCol(const std::string header, const std::wstring unit, const bool hide_col) 
-        : header(header), unit(unit), hide_col(hide_col){};
-      std::string header;
-      std::wstring unit;
-      std::vector<std::string> values;
-      bool hide_col;
-
-      int getNumberRows(const bool include_header) const {
-        return values.size() + (include_header? 2 : 0);
-      }
-      someText getElem(const int row, const bool include_header) const {
-        if (include_header) {
-          if (row == 0){
-            return someText(header);
-          }
-          else if (row == 1){
-            return someText(unit);
-          }
-        }
-        return someText(values[row - (include_header? 2 : 0)]);
-      }
-      void pushBack(const std::string val){
-        values.push_back(val);
-      }
-    };
-
-    // GridData
-    struct GridData{
-      GridData(std::vector<GridCol> columns) : columns(columns){};
-      std::vector<GridCol> columns;
-
-      size_t getNumberRows(bool include_header) const {return columns[0].getNumberRows(include_header);}
-      void print() const {
-        constexpr int width = 20;
-        
-        for (size_t row = 0; row < getNumberRows(true); ++row){
-          for (const GridCol& col : columns) {
-            if (col.hide_col){continue;}
-            someText cell = col.getElem(row,true);
-            if (cell.str.empty()) {
-              Ctrl::getInstance()->notifyUser(wfield(width, cell.wstr));
-            }
-            else{
-              Ctrl::getInstance()->notifyUser(field(width, cell.str));
-            }
-          }
-          Ctrl::getInstance()->notifyUser("\n");
-        }
-      }
-      void storeValues(const std::vector<std::string> vals){
-        for (size_t col = 0; col < vals.size(); ++col){
-          columns[col].pushBack(vals[col]);
-        }
-      }
-    };
-
     // store headers and units
     const std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
     const std::wstring surf_unit = Symbol::angstrom() + Symbol::squared();
