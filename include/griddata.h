@@ -31,12 +31,15 @@ struct GridCol{
 // GridData
 struct GridData{
   GridData(std::vector<GridCol> columns) : columns(columns){};
-  std::vector<GridCol> columns;
 
   size_t getNumberRows(bool include_header) const;
+  bool hideCol(const int) const;
   void print() const;
   std::string getValue(const size_t, const size_t) const;
   void storeValues(const std::vector<std::string> vals);
+  
+  private:
+    std::vector<GridCol> columns;
 };
 
 #endif

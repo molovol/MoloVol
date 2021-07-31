@@ -26,6 +26,10 @@ void GridCol::pushBack(const std::string val){
 // GridData definitions
 size_t GridData::getNumberRows(bool include_header) const {return columns[0].getNumberRows(include_header);}
 
+bool GridData::hideCol(const int col) const{
+  return columns[col].hide_col;
+}
+
 void GridData::print() const {
   constexpr int width = 20;
   

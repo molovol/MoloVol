@@ -188,6 +188,10 @@ void MainFrame::displayCavityList(const GridData& table_data){
     for (int col = 0; col < outputGrid->GetNumberCols(); ++col){
       outputGrid->SetCellValue(row, col, table_data.getValue(row, col));
       outputGrid->SetReadOnly(row, col, true);
+      outputGrid->AutoSizeColumn(col);
+      if (table_data.hideCol(col)){
+        outputGrid->SetColSize(col, 0);
+      }
     }
   }
 }
