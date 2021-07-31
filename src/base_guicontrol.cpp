@@ -7,6 +7,7 @@
 #include "base.h"
 #include "special_chars.h"
 #include "misc.h"
+#include "flags.h"
 #include <string>
 #include <wx/msgdlg.h>
 
@@ -58,6 +59,9 @@ void MainFrame::clearOutputText(){
 void MainFrame::clearOutputGrid(){
   if (outputGrid->GetNumberRows() > 0){
     outputGrid->DeleteRows(0, outputGrid->GetNumberRows());
+  }
+  if (outputGrid->GetNumberCols() > 0){
+    outputGrid->DeleteCols(0, outputGrid->GetNumberCols());
   }
 }
 
@@ -180,18 +184,32 @@ void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>
 }
 
 void MainFrame::displayCavityList(const GridData& table_data){
-  // delete all rows
+  // delete all rows and columns
   clearOutputGrid();
-  // add appropriate number of rows
+  // add appropriate number of rows and columns
+  outputGrid->AppendCols(table_data.getNumberCols());
   outputGrid->AppendRows(table_data.getNumberRows(false));
-  for (int row = 0; row < outputGrid->GetNumberRows(); ++row){
-    for (int col = 0; col < outputGrid->GetNumberCols(); ++col){
+
+  for (int col = 0; col < outputGrid->GetNumberCols(); ++col){
+    // add grid values
+    for (int row = 0; row < outputGrid->GetNumberRows(); ++row){
       outputGrid->SetCellValue(row, col, table_data.getValue(row, col));
       outputGrid->SetReadOnly(row, col, true);
-      outputGrid->AutoSizeColumn(col);
-      if (table_data.hideCol(col)){
-        outputGrid->SetColSize(col, 0);
-      }
+    }
+    // add column labels
+    outputGrid->SetColLabelValue(col, wxString(table_data.getHeader(col)) + "\n" + wxString(table_data.getUnit(col)));
+    outputGrid->AutoSizeColumn(col);
+    if (table_data.hideCol(col)){
+      outputGrid->SetColSize(col, 0);
+    }
+    // set cell format
+    switch (table_data.getFormat(col)){
+      case mvFORMAT_NUMBER :
+        outputGrid->SetColFormatNumber(col);
+        break;
+      case mvFORMAT_FLOAT :
+        outputGrid->SetColFormatFloat(col, 5, 3);
+        break;
     }
   }
 }

@@ -435,45 +435,10 @@ void MainFrame::InitOutputPanel(){
   // with default width, the vertical scroll bar hides a part of the grid thus generating a horizontal scroll bar
   outputText = new wxTextCtrl(outputPanel, TEXT_Output, _("Output Dialog"), wxDefaultPosition, wxSize(420,100), wxTE_MULTILINE | wxTE_READONLY);
   
-  // columns
-  struct GridCol{
-    GridCol(wxString header, unsigned char format) : header(header), format(format){}; 
-
-    wxString header;
-    unsigned char format;
-  };
-
-  enum {
-    form_string = 0,
-    form_number,
-    form_float
-  };
-
-  static const std::vector<GridCol> s_columns = {
-    GridCol("Cavity ID", form_number),
-    GridCol("Volume (" + Symbol::angstrom() + Symbol::cubed() + ")", form_float),
-    GridCol("Core Surface\n(" + Symbol::angstrom() + Symbol::squared() + ")", form_float),
-    GridCol("Shell Surface\n(" + Symbol::angstrom() + Symbol::squared() + ")", form_float),
-    GridCol("Center Coord\nx, y, z ("+Symbol::angstrom()+")", form_string),
-    GridCol("Cavity Type", form_string)
-  };
-
   outputGrid = new wxGrid(outputPanel, GRID_Output);
+  outputGrid->CreateGrid(0, 0);
   outputGrid->SetRowLabelSize(0);
-  outputGrid->CreateGrid(0, s_columns.size(), wxGrid::wxGridSelectCells);
   outputGrid->SetDefaultCellAlignment (wxALIGN_CENTRE, wxALIGN_CENTRE);
-
-  for (int col = 0; col < s_columns.size(); ++col){
-    outputGrid->SetColLabelValue(col, s_columns[col].header);
-    switch (s_columns[col].format){
-      case form_number:
-        outputGrid->SetColFormatNumber(col);
-        break;
-      case form_float :
-        outputGrid->SetColFormatFloat(col, 5, 3);
-        break;
-    }
-  }
 
   wxBoxSizer *boxSizerH = new wxBoxSizer(wxHORIZONTAL);
   boxSizerH->Add(outputText, 1, wxRIGHT | wxEXPAND, 2);

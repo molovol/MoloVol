@@ -429,12 +429,12 @@ void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag
   const std::wstring surf_unit = Symbol::angstrom() + Symbol::squared();
   
   GridData table({
-    GridCol("Cavity ID", L""),
-    GridCol("Volume", L"(" + vol_unit + L")"),
-    GridCol("Core Surface", L"(" + surf_unit + L")", !data.calc_surface_areas),
-    GridCol("Shell Surface", L"(" + surf_unit + L")", !data.calc_surface_areas),
+    GridCol("Cavity ID", L"", false, mvFORMAT_NUMBER),
+    GridCol("Volume", L"(" + vol_unit + L")", false, mvFORMAT_FLOAT),
+    GridCol("Core Surface", L"(" + surf_unit + L")", !data.calc_surface_areas, mvFORMAT_FLOAT),
+    GridCol("Shell Surface", L"(" + surf_unit + L")", !data.calc_surface_areas, mvFORMAT_FLOAT),
     GridCol("Position", L"(" + Symbol::angstrom() + L"," + Symbol::angstrom() + L"," + Symbol::angstrom() + L")"),
-    GridCol("Cav Type", L"", !data.probe_mode)
+    GridCol("Cav Type", L"", !data.probe_mode, mvFORMAT_STRING)
   });
   
   // store data

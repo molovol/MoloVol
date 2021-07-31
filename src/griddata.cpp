@@ -25,6 +25,11 @@ void GridCol::pushBack(const std::string val){
 
 // GridData definitions
 size_t GridData::getNumberRows(bool include_header) const {return columns[0].getNumberRows(include_header);}
+size_t GridData::getNumberCols() const {return columns.size();}
+  
+unsigned char GridData::getFormat(const size_t col) const {
+  return columns[col].format;
+}
 
 bool GridData::hideCol(const int col) const{
   return columns[col].hide_col;
@@ -47,7 +52,14 @@ void GridData::print() const {
     Ctrl::getInstance()->notifyUser("\n");
   }
 }
-  
+ 
+std::string GridData::getHeader(const size_t col) const {
+  return columns[col].header;
+}
+std::wstring GridData::getUnit(const size_t col) const {
+  return columns[col].unit;
+}
+
 std::string GridData::getValue(const size_t row, const size_t col) const{
   return columns[col].getElem(row, false).str;
 }

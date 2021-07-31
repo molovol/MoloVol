@@ -54,4 +54,10 @@ enum mvTYPE : unsigned char {
   mvTYPE_ALL = 0b11111111
 };
 
+enum mvFORMAT : unsigned char {
+  mvFORMAT_STRING = 0,
+  mvFORMAT_NUMBER,
+  mvFORMAT_FLOAT
+};
+
 #endif
