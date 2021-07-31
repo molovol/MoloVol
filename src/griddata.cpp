@@ -7,16 +7,16 @@ int GridCol::getNumberRows(const bool include_header) const {
   return values.size() + (include_header? 2 : 0);
 }
 
-someText GridCol::getElem(const int row, const bool include_header) const {
+SomeText GridCol::getElem(const int row, const bool include_header) const {
   if (include_header) {
     if (row == 0){
-      return someText(header);
+      return SomeText(header);
     }
     else if (row == 1){
-      return someText(unit);
+      return SomeText(unit);
     }
   }
-  return someText(values[row - (include_header? 2 : 0)]);
+  return SomeText(values[row - (include_header? 2 : 0)]);
 }
 
 void GridCol::pushBack(const std::string val){
@@ -41,7 +41,8 @@ void GridData::print() const {
   for (size_t row = 0; row < getNumberRows(true); ++row){
     for (const GridCol& col : columns) {
       if (col.hide_col){continue;}
-      someText cell = col.getElem(row,true);
+      SomeText cell = col.getElem(row,true);
+      cell.replaceNewlines();
       if (cell.str.empty()) {
         Ctrl::getInstance()->notifyUser(wfield(width, cell.wstr));
       }
@@ -68,4 +69,10 @@ void GridData::storeValues(const std::vector<std::string> vals){
   for (size_t col = 0; col < vals.size(); ++col){
     columns[col].pushBack(vals[col]);
   }
+}
+
+// SomeText definitions
+void SomeText::replaceNewlines(){
+  std::replace( str.begin(), str.end(), '\n', ' ');
+  std::replace( wstr.begin(), wstr.end(), '\n', ' ');
 }

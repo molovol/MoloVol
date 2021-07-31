@@ -5,12 +5,13 @@
 #include <string>
 #include <vector>
 
-struct someText{
-  someText(std::string str, std::wstring wstr) : str(str), wstr(wstr){}
-  someText(std::string str) : someText(str, L"") {}
-  someText(std::wstring wstr) : someText("", wstr) {}
+struct SomeText{
+  SomeText(std::string str, std::wstring wstr) : str(str), wstr(wstr){}
+  SomeText(std::string str) : SomeText(str, L"") {}
+  SomeText(std::wstring wstr) : SomeText("", wstr) {}
   std::string str;
   std::wstring wstr;
+  void replaceNewlines();
 };
 
 // GridCol
@@ -26,7 +27,7 @@ struct GridCol{
   unsigned char format;
 
   int getNumberRows(const bool include_header) const;
-  someText getElem(const int row, const bool include_header) const;
+  SomeText getElem(const int row, const bool include_header) const;
   void pushBack(const std::string val);
 };
 
