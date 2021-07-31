@@ -414,10 +414,10 @@ void Ctrl::displayResults(CalcReportBundle& data, const unsigned display_flag){
         notifyUser("\n");
       }
     }
-    notifyUser("<INFORMATION>");
-    notifyUser("\n");
-    notifyUser("For full results, please export report below.");
-    notifyUser("\n");
+    if(_to_gui){
+      notifyUser("<INFORMATION>\n");
+      notifyUser("For complete results, please export report below.\n");
+    }
     if (display_flag & mvOUT_CAVITIES){
       if(!data.cavities.empty()){displayCavityList(data);}
     }
