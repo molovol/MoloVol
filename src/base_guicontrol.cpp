@@ -40,8 +40,8 @@ void MainFrame::extSetProgressBar(const int percentage){
   GetEventHandler()->CallAfter(&MainFrame::setProgressBar, percentage);
 }
 
-void MainFrame::extDisplayCavityList(const std::vector<Cavity>& cavities, const bool opt_uc, const bool opt_pm){
-  GetEventHandler()->CallAfter(&MainFrame::displayCavityList, cavities, std::array<bool,2>{opt_uc, opt_pm});
+void MainFrame::extDisplayCavityList(const GridData& table){
+  GetEventHandler()->CallAfter(&MainFrame::displayCavityList, table);
 }
 
 void MainFrame::extOpenErrorDialog(const int error_code, const std::string& error_message){
@@ -179,30 +179,15 @@ void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>
   }
 }
 
-void MainFrame::displayCavityList(const std::vector<Cavity>& cavities, const std::array<bool,2> options_uc_pm){
+void MainFrame::displayCavityList(const GridData& table_data){
   // delete all rows
   clearOutputGrid();
   // add appropriate number of rows
-  outputGrid->AppendRows(cavities.size());
+  outputGrid->AppendRows(table_data.getNumberRows(false));
   for (int row = 0; row < outputGrid->GetNumberRows(); ++row){
-    outputGrid->SetCellValue(row, 0, std::to_string(row+1));
-
-    // in single probe mode, the cavity with id 1 comprises outside empty space and is meaningless
-    std::string volume = (!options_uc_pm[0] && !options_uc_pm[1] && cavities[row].id == 1)? "outside" 
-      : std::to_string(cavities[row].getVolume());
-    
-    outputGrid->SetCellValue(row, 1, volume);
-    if(getCalcSurfaceAreas()){
-      outputGrid->SetCellValue(row, 2, std::to_string(cavities[row].getSurfCore()));
-      outputGrid->SetCellValue(row, 3, std::to_string(cavities[row].getSurfShell()));
-    }
-    outputGrid->SetCellValue(row, 4, cavities[row].getPosition());
-    if (options_uc_pm[1]){
-      outputGrid->SetCellValue(row, 5, cavities[row].cavTypeDescriptor());
-    }
-    // set all cells read only
     for (int col = 0; col < outputGrid->GetNumberCols(); ++col){
-      outputGrid->SetReadOnly(row,col,true);
+      outputGrid->SetCellValue(row, col, table_data.getValue(row, col));
+      outputGrid->SetReadOnly(row, col, true);
     }
   }
 }

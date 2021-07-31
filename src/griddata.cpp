@@ -43,6 +43,10 @@ void GridData::print() const {
     Ctrl::getInstance()->notifyUser("\n");
   }
 }
+  
+std::string GridData::getValue(const size_t row, const size_t col) const{
+  return columns[col].getElem(row, false).str;
+}
 
 void GridData::storeValues(const std::vector<std::string> vals){
   for (size_t col = 0; col < vals.size(); ++col){

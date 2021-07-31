@@ -35,6 +35,7 @@ struct GridData{
 
   size_t getNumberRows(bool include_header) const;
   void print() const;
+  std::string getValue(const size_t, const size_t) const;
   void storeValues(const std::vector<std::string> vals);
 };
 

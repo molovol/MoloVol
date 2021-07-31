@@ -424,41 +424,41 @@ void Ctrl::displayResults(CalcReportBundle& data, const unsigned display_flag){
 }
 
 void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag){
+  // store headers and units
+  const std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
+  const std::wstring surf_unit = Symbol::angstrom() + Symbol::squared();
+  
+  GridData table({
+    GridCol("Cavity ID", L""),
+    GridCol("Volume", L"(" + vol_unit + L")"),
+    GridCol("Core Surface", L"(" + surf_unit + L")", !data.calc_surface_areas),
+    GridCol("Shell Surface", L"(" + surf_unit + L")", !data.calc_surface_areas),
+    GridCol("Position", L"(" + Symbol::angstrom() + L"," + Symbol::angstrom() + L"," + Symbol::angstrom() + L")"),
+    GridCol("Cav Type", L"", !data.probe_mode)
+  });
+  
+  // store data
+  for (size_t i = 0; i < data.cavities.size(); ++i){
+    std::string volume = (!data.probe_mode && !data.analyze_unit_cell && data.cavities[i].id == 1)? "outside"
+      : std::to_string(data.cavities[i].getVolume());
+    
+    const std::vector<std::string> cav_values = {
+      std::to_string(i+1),
+      volume,
+      std::to_string(data.cavities[i].getSurfCore()),
+      std::to_string(data.cavities[i].getSurfShell()),
+      data.cavities[i].getPosition(),
+      data.probe_mode? data.cavities[i].cavTypeDescriptor() : ""
+    };
+      
+    table.storeValues(cav_values);
+  }
+
+  // display data
   if (_to_gui){
-    s_gui->extDisplayCavityList(data.cavities, data.analyze_unit_cell, data.probe_mode);
+    s_gui->extDisplayCavityList(table);
   }
   else{
-    // store headers and units
-    const std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
-    const std::wstring surf_unit = Symbol::angstrom() + Symbol::squared();
-    
-    GridData table({
-      GridCol("Cavity ID", L""),
-      GridCol("Volume", L"(" + vol_unit + L")"),
-      GridCol("Core Surface", L"(" + surf_unit + L")", !data.calc_surface_areas),
-      GridCol("Shell Surface", L"(" + surf_unit + L")", !data.calc_surface_areas),
-      GridCol("Position", L"(" + Symbol::angstrom() + L"," + Symbol::angstrom() + L"," + Symbol::angstrom() + L")"),
-      GridCol("Cav Type", L"", !data.probe_mode)
-    });
-   
-    // store data
-    for (size_t i = 0; i < data.cavities.size(); ++i){
-      std::string volume = (!data.probe_mode && !data.analyze_unit_cell && data.cavities[i].id == 1)? "outside"
-        : std::to_string(data.cavities[i].getVolume());
-      
-      const std::vector<std::string> cav_values = {
-        std::to_string(i+1),
-        volume,
-        std::to_string(data.cavities[i].getSurfCore()),
-        std::to_string(data.cavities[i].getSurfShell()),
-        data.cavities[i].getPosition(),
-        data.probe_mode? data.cavities[i].cavTypeDescriptor() : ""
-      };
-        
-      table.storeValues(cav_values);
-    }
-
-    // display data
     table.print();
   }
 }
