@@ -332,7 +332,7 @@ void Ctrl::displayResults(CalcReportBundle& data, const unsigned display_flag){
     std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
 
     if (display_flag & mvOUT_FORMULA){
-      notifyUser("Result for: ");
+      notifyUser("Result summary for: ");
       notifyUser(Symbol::generateChemicalFormulaUnicode(data.chemical_formula));
       notifyUser("\n");
     }
@@ -414,6 +414,10 @@ void Ctrl::displayResults(CalcReportBundle& data, const unsigned display_flag){
         notifyUser("\n");
       }
     }
+    notifyUser("<INFORMATION>");
+    notifyUser("\n");
+    notifyUser("For full results, please export report below.");
+    notifyUser("\n");
     if (display_flag & mvOUT_CAVITIES){
       if(!data.cavities.empty()){displayCavityList(data);}
     }
@@ -427,30 +431,30 @@ void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag
   // store headers and units
   const std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
   const std::wstring surf_unit = Symbol::angstrom() + Symbol::squared();
-  
+
   GridData table({
-    GridCol("Cavity ID", L"", false, mvFORMAT_NUMBER),
+    GridCol("Cavity\nID", L"", false, mvFORMAT_NUMBER),
     GridCol("Volume", L"(" + vol_unit + L")", false, mvFORMAT_FLOAT),
     GridCol("Core Surface", L"(" + surf_unit + L")", !data.calc_surface_areas, mvFORMAT_FLOAT),
     GridCol("Shell Surface", L"(" + surf_unit + L")", !data.calc_surface_areas, mvFORMAT_FLOAT),
-    GridCol("Position", L"(" + Symbol::angstrom() + L"," + Symbol::angstrom() + L"," + Symbol::angstrom() + L")"),
-    GridCol("Cav Type", L"", !data.probe_mode, mvFORMAT_STRING)
+    GridCol("Cavity\nType", L"", !data.probe_mode, mvFORMAT_STRING),
+    GridCol("Center Coord", L"x, y, z (" + Symbol::angstrom() + L")")
   });
-  
+
   // store data
   for (size_t i = 0; i < data.cavities.size(); ++i){
     std::string volume = (!data.probe_mode && !data.analyze_unit_cell && data.cavities[i].id == 1)? "outside"
       : std::to_string(data.cavities[i].getVolume());
-    
+
     const std::vector<std::string> cav_values = {
       std::to_string(i+1),
       volume,
       std::to_string(data.cavities[i].getSurfCore()),
       std::to_string(data.cavities[i].getSurfShell()),
-      data.cavities[i].getPosition(),
-      data.probe_mode? data.cavities[i].cavTypeDescriptor() : ""
+      data.probe_mode? data.cavities[i].cavTypeDescriptor() : "",
+      data.cavities[i].getPosition()
     };
-      
+
     table.storeValues(cav_values);
   }
 

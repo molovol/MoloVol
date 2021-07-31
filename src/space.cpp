@@ -231,7 +231,7 @@ void Space::sumVolume(std::map<char,double>& volumes, std::vector<Cavity>& cavit
   if(unit_cell){
     setUnitCellIndexes();
   }
-  
+
   int tally_lvl = unit_cell? 0 : _max_depth;
   std::array<unsigned,3> start_index = unit_cell? _unit_cell_start_index : std::array<unsigned,3>();
   std::array<unsigned,3> end_index = unit_cell? _unit_cell_end_index : getGridstepsOnLvl<unsigned>(tally_lvl);
@@ -245,8 +245,8 @@ void Space::sumVolume(std::map<char,double>& volumes, std::vector<Cavity>& cavit
       }
     }
   }
- 
-  if(unit_cell){ 
+
+  if(unit_cell){
     std::array<unsigned int,3> bot_lvl_index;
     double voxel_fraction;
     // for unit cells that are not proportional to _grid_size, it is necessary to only consider a partial voxel volume for the voxels partially overlapping with the unit cell
