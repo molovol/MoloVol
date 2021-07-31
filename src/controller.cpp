@@ -427,44 +427,105 @@ void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag
     s_gui->extDisplayCavityList(data.cavities, data.analyze_unit_cell, data.probe_mode);
   }
   else{
-    std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
-    std::wstring surf_unit = Symbol::angstrom() + Symbol::squared();
+    struct someText{
+      someText(std::string str, std::wstring wstr) : str(str), wstr(wstr){}
+      someText(std::string str) : someText(str, L"") {}
+      someText(std::wstring wstr) : someText("", wstr) {}
+      std::string str;
+      std::wstring wstr;
+    };
 
-    int width = 20;
+    // GridCol
+    struct GridCol{
+      GridCol(const std::string header, const std::wstring unit) : header(header), unit(unit), hide_col(false){};
+      GridCol(const std::string header, const std::wstring unit, const bool hide_col) 
+        : header(header), unit(unit), hide_col(hide_col){};
+      std::string header;
+      std::wstring unit;
+      std::vector<std::string> values;
+      bool hide_col;
 
-    std::string header[] = {"Cavity ID", "Volume", "Core Surface", "Shell Surface", "Position", "Cav Type"};
-    std::wstring units[] = {L"", L"(" + vol_unit + L")",L"(" + surf_unit + L")", L"(" + surf_unit + L")", L"(" + Symbol::angstrom() + L"," + Symbol::angstrom() + L"," + Symbol::angstrom() + L")", L""};
+      int getNumberRows(const bool include_header) const {
+        return values.size() + (include_header? 2 : 0);
+      }
+      someText getElem(const int row, const bool include_header) const {
+        if (include_header) {
+          if (row == 0){
+            return someText(header);
+          }
+          else if (row == 1){
+            return someText(unit);
+          }
+        }
+        return someText(values[row - (include_header? 2 : 0)]);
+      }
+      void pushBack(const std::string val){
+        values.push_back(val);
+      }
+    };
 
-    // HEADER
-    for (std::string elem : header){
-      notifyUser(field(width,elem));
-    }
-    notifyUser("\n");
-    // UNITS
-    for (std::wstring elem : units){
-      notifyUser(wfield(width,elem));
-    }
-    notifyUser("\n");
+    // GridData
+    struct GridData{
+      GridData(std::vector<GridCol> columns) : columns(columns){};
+      std::vector<GridCol> columns;
 
+      size_t getNumberRows(bool include_header) const {return columns[0].getNumberRows(include_header);}
+      void print() const {
+        constexpr int width = 20;
+        
+        for (size_t row = 0; row < getNumberRows(true); ++row){
+          for (const GridCol& col : columns) {
+            if (col.hide_col){continue;}
+            someText cell = col.getElem(row,true);
+            if (cell.str.empty()) {
+              Ctrl::getInstance()->notifyUser(wfield(width, cell.wstr));
+            }
+            else{
+              Ctrl::getInstance()->notifyUser(field(width, cell.str));
+            }
+          }
+          Ctrl::getInstance()->notifyUser("\n");
+        }
+      }
+      void storeValues(const std::vector<std::string> vals){
+        for (size_t col = 0; col < vals.size(); ++col){
+          columns[col].pushBack(vals[col]);
+        }
+      }
+    };
+
+    // store headers and units
+    const std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
+    const std::wstring surf_unit = Symbol::angstrom() + Symbol::squared();
+    
+    GridData table({
+      GridCol("Cavity ID", L""),
+      GridCol("Volume", L"(" + vol_unit + L")"),
+      GridCol("Core Surface", L"(" + surf_unit + L")", !data.calc_surface_areas),
+      GridCol("Shell Surface", L"(" + surf_unit + L")", !data.calc_surface_areas),
+      GridCol("Position", L"(" + Symbol::angstrom() + L"," + Symbol::angstrom() + L"," + Symbol::angstrom() + L")"),
+      GridCol("Cav Type", L"", !data.probe_mode)
+    });
+   
+    // store data
     for (size_t i = 0; i < data.cavities.size(); ++i){
-      // CAVITY VALUES
-      // in single probe mode, the first cavity with id 1 comprises outside empty space and is meaningless
       std::string volume = (!data.probe_mode && !data.analyze_unit_cell && data.cavities[i].id == 1)? "outside"
         : std::to_string(data.cavities[i].getVolume());
-      std::string values[] = {
+      
+      const std::vector<std::string> cav_values = {
         std::to_string(i+1),
         volume,
         std::to_string(data.cavities[i].getSurfCore()),
         std::to_string(data.cavities[i].getSurfShell()),
         data.cavities[i].getPosition(),
-        data.analyze_unit_cell? data.cavities[i].cavTypeDescriptor() : ""
+        data.probe_mode? data.cavities[i].cavTypeDescriptor() : ""
       };
-
-      for (std::string elem : values){
-        notifyUser(field(width,elem));
-      }
-      notifyUser("\n");
+        
+      table.storeValues(cav_values);
     }
+
+    // display data
+    table.print();
   }
 }
 
