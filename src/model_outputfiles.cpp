@@ -3,7 +3,9 @@
 #include "controller.h"
 #include "misc.h"
 #include "container3d.h"
+#include "griddata.h"
 #include <string>
+#include <sstream>
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -88,8 +90,15 @@ void Model::createReport(std::string path){
   }
 
   // layout function for individual rows
-  const int col_width[] = {33,14,6,21,8}; // last column gets as much as needed
-  auto row = [col_width,this](std::string cell0, double cell1, std::string cell2, std::string cell3="", double cell4=0, std::string cell5=""){
+  auto row = [this](
+      std::string cell0, 
+      double cell1, 
+      std::string cell2, 
+      std::string cell3="", 
+      double cell4=0, 
+      std::string cell5=""
+      ){
+    const int col_width[] = {33,14,6,21,8}; // last column gets as much as needed
     std::string str = "";
     str += field(col_width[0],cell0) + " ";
     str += field(col_width[1],std::to_string(cell1),'r') + " ";
@@ -115,8 +124,10 @@ void Model::createReport(std::string path){
 
   output_report << vol_block("Van der Waals volume", _data.volumes[0b00000011]);
   output_report << vol_block("Excluded void volume", _data.volumes[0b00000101]);
-  output_report << vol_block("Molecular volume", _data.volumes[0b00000011] + _data.volumes[0b00000101], "(vdw + probe inaccessible)");
-  output_report << vol_block("Molecular volume", _data.volumes[0b00000011] + _data.volumes[0b00000101] + cav_vol_per_type[0], "with isolated cavities");
+  output_report << vol_block("Molecular volume",
+      _data.volumes[0b00000011] + _data.volumes[0b00000101], "(vdw + probe inaccessible)");
+  output_report << vol_block("Molecular volume",
+      _data.volumes[0b00000011] + _data.volumes[0b00000101] + cav_vol_per_type[0], "with isolated cavities");
   if(!_data.probe_mode && !_data.analyze_unit_cell){
     output_report << small_p << " core volume: No physical meaning, contains all volume outside the structure.\n\n";
   }
@@ -184,41 +195,67 @@ void Model::createReport(std::string path){
     output_report << "Note 6:\tFor a detailed shape of each cavity, check the surface maps.\n\n";
 
     // TODO: change output when cavity types are features for unit cell analysis
-    output_report << "Cavity\t" << "Occupied\t" << "Accessible\t" << (_data.calc_surface_areas ? "Excluded\tAccessible\t" : "")
-                  << (_data.analyze_unit_cell ? "" : "Cavity\t\t") << "Cavity center coordinates (A)\n";
-    output_report << "ID\t" << "Volume (A^3)\t" << "Volume (A^3)\t" << (_data.calc_surface_areas ? "Surface (A^2)\tSurface (A^2)\t" : "")
-                  << (_data.analyze_unit_cell ? "" : "type\t\t") << "x\ty\tz\n";
+    // store data in GridData
+    GridData cavity_data({
+      GridCol("Cavity ID", ""),
+      GridCol("Occupied", "Volume (A^3)"),
+      GridCol("Accessible", "Volume (A^3)"),
+      GridCol("Excluded", "Surface (A^2)", !_data.calc_surface_areas, 0),
+      GridCol("Accessible", "Surface (A^2)", !_data.calc_surface_areas, 0),
+      GridCol("Cavity Type", "", !_data.probe_mode, 0),
+      GridCol("Cavity center coordinates (A)", "x"),
+      GridCol("\n", "y"), // the newline character is not printed, used here to skip the line
+      GridCol("", "z")
+    });
+
+    auto toStringFixedPrecision = [](const double value){
+      std::stringstream ss;
+      ss << std::setprecision(optimalPrecision(value)) << value;
+      return ss.str();
+    };
+
     for(unsigned int i = 0; i < _data.cavities.size(); i++){
       std::array<double,3> cav_center = _data.getCavCenter(i);
-      // default precision is 6, which means that double values will take less than a tab space
-      output_report << i+1 << "\t";
-      // in single probe mode, the first cavity with id 1 comprises outside empty space and is meaningless
-      if(!_data.probe_mode && !_data.analyze_unit_cell && _data.cavities[i].id == 1){
-        output_report << "outside\t\t"
-                      << "outside\t\t";
-      }
-      else{
-        // setprecision keeps the columns aligned when values < 1 with many digits are reported
-        output_report << std::setprecision(optimalPrecision(_data.cavities[i].getVolume())) << _data.cavities[i].getVolume() << "\t\t"
-                      << std::setprecision(optimalPrecision(_data.cavities[i].core_vol)) << _data.cavities[i].core_vol << "\t\t";
-      }
-      if(_data.calc_surface_areas){
-        output_report << std::setprecision(optimalPrecision(_data.cavities[i].surf_shell)) << _data.cavities[i].surf_shell << "\t\t"
-                      << std::setprecision(optimalPrecision(_data.cavities[i].surf_core)) << _data.cavities[i].surf_core << "\t\t";
-      }
-      if(!_data.analyze_unit_cell){
-        if(_data.probe_mode){
-          output_report << _data.cavities[i].cavTypeDescriptor() << "  \t";
-        }
-        else if(_data.cavities[i].id == 1){
-          output_report << "Outside \t";
-        }
-        else{
-          output_report << "Isolated\t";
-        }
-      }
-      output_report << cav_center[0] << "\t" << cav_center[1] << "\t" << cav_center[2] << "\n";
+    
+      std::string occ_vol = (!_data.probe_mode && !_data.analyze_unit_cell && _data.cavities[i].id == 1)? "output"
+        : toStringFixedPrecision(_data.cavities[i].getVolume());
+      std::string access_vol = (!_data.probe_mode && !_data.analyze_unit_cell && _data.cavities[i].id == 1)? "output"
+        : toStringFixedPrecision(_data.cavities[i].core_vol);
+      
+      cavity_data.storeValues({
+        std::to_string(i+1),
+        occ_vol,
+        access_vol,
+        toStringFixedPrecision(_data.cavities[i].surf_shell),
+        toStringFixedPrecision(_data.cavities[i].surf_core),
+        _data.cavities[i].cavTypeDescriptor(),
+        toStringFixedPrecision(cav_center[0]),
+        toStringFixedPrecision(cav_center[1]),
+        toStringFixedPrecision(cav_center[2]),
+      });
     }
+    
+    // function that writes table to file
+    auto writeTable = [](std::ofstream& output_report, const GridData& cavity_data){
+      const std::vector<int> col_width = {10,14,14,14,14,14,8,8};
+
+      std::vector<std::vector<std::string>> table_rows = {cavity_data.getHeaders(), cavity_data.getSubheaders()};
+      for (size_t row = 0; row < cavity_data.getNumberRows(false); ++row){
+        table_rows.push_back(cavity_data.getRow(row));
+      }
+      
+      for (const auto& row : table_rows){
+        for (size_t i = 0; i < col_width.size(); ++i){
+          // newline character is used here as a hack to skip printing only whitespaces
+          if (cavity_data.hideCol(i) || row[i] == "\n"){continue;}
+          output_report << field(col_width[i], row[i]);
+        }
+        output_report << row[cavity_data.getNumberCols()-1] << "\n";
+      }
+    };
+
+    // call function
+    writeTable(output_report, cavity_data);
   }
   output_report << "\n\n\t/////////////////////////////\n";
   output_report << "\t// Surface map information //\n";

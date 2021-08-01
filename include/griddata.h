@@ -16,11 +16,16 @@ struct SomeText{
 
 // GridCol
 struct GridCol{
+  GridCol(const std::string header, const std::string subheader, const bool hide_col, const unsigned char format)
+    : header(header), subheader(subheader), hide_col(hide_col), format(format){};
+  GridCol(const std::string header, const std::string subheader)
+    : GridCol(header, subheader, false, 0) {};
   GridCol(const std::string header, const std::wstring unit, const bool hide_col, const unsigned char format)
     : header(header), unit(unit), hide_col(hide_col), format(format){};
   GridCol(const std::string header, const std::wstring unit)
     : GridCol(header, unit, false, 0) {};
   std::string header;
+  std::string subheader;
   std::wstring unit;
   std::vector<std::string> values;
   bool hide_col;
@@ -41,7 +46,11 @@ struct GridData{
   bool hideCol(const int) const;
   void print() const;
   std::string getValue(const size_t, const size_t) const;
+  std::vector<std::string> getRow(const size_t) const;
   std::string getHeader(const size_t) const;
+  std::vector<std::string> getHeaders() const;
+  std::string getSubheader(const size_t) const;
+  std::vector<std::string> getSubheaders() const;
   std::wstring getUnit(const size_t) const;
   void storeValues(const std::vector<std::string> vals);
   

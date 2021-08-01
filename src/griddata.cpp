@@ -57,12 +57,41 @@ void GridData::print() const {
 std::string GridData::getHeader(const size_t col) const {
   return columns[col].header;
 }
+
+std::vector<std::string> GridData::getHeaders() const {
+  std::vector<std::string> headers;
+  for (size_t i = 0; i < getNumberCols(); ++i){
+    headers.push_back(getHeader(i));
+  }
+  return headers;
+}
+
+std::string GridData::getSubheader(const size_t col) const {
+  return columns[col].subheader;
+}
+
+std::vector<std::string> GridData::getSubheaders() const {
+  std::vector<std::string> subheaders;
+  for (size_t i = 0; i < getNumberCols(); ++i){
+    subheaders.push_back(getSubheader(i));
+  }
+  return subheaders;
+}
+
 std::wstring GridData::getUnit(const size_t col) const {
   return columns[col].unit;
 }
 
-std::string GridData::getValue(const size_t row, const size_t col) const{
+std::string GridData::getValue(const size_t row, const size_t col) const {
   return columns[col].getElem(row, false).str;
+}
+
+std::vector<std::string> GridData::getRow(const size_t row) const {
+  std::vector<std::string> row_values;
+  for (size_t i = 0; i < getNumberCols(); ++i){
+    row_values.push_back(getValue(row, i));
+  }
+  return row_values;
 }
 
 void GridData::storeValues(const std::vector<std::string> vals){
