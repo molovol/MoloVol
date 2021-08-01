@@ -35,5 +35,6 @@ struct Cavity{
 bool compareVolume(const Cavity& a, const Cavity& b);
 
 void inverseSort(std::vector<Cavity>& cavities);
+std::array<double, 3> getTotalVolPerType(const std::vector<Cavity>& cavities, const bool probe_mode);
 
 #endif

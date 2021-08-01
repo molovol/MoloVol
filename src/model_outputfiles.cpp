@@ -14,6 +14,9 @@
 ///////////////////
 
 std::string makeExportFileName(const std::string, const CalcReportBundle&, const char, const unsigned char=0);
+
+int optimalPrecision(const double value);
+
 void Model::createReport(){
   createReport(makeExportFileName(_output_folder, _data, 'r'));
 }
@@ -75,6 +78,7 @@ void Model::createReport(std::string path){
   // factor to convert A^3 to cm^3/g
   double volume_macro_factor = AVOGADRO * 1e-24 / _data.molar_mass;
   double unit_cell_vol = 0;
+  std::array<double, 3> cav_vol_per_type = getTotalVolPerType(_data.cavities, _data.probe_mode);
 
   if(_data.analyze_unit_cell){
     output_report << "Orthogonal(ized) unit cell axes: " << _cart_matrix[0][0] << " A, " << _cart_matrix[1][1] << " A, " << _cart_matrix[2][2] << " A\n";
@@ -112,6 +116,7 @@ void Model::createReport(std::string path){
   output_report << vol_block("Van der Waals volume", _data.volumes[0b00000011]);
   output_report << vol_block("Excluded void volume", _data.volumes[0b00000101]);
   output_report << vol_block("Molecular volume", _data.volumes[0b00000011] + _data.volumes[0b00000101], "(vdw + probe inaccessible)");
+  output_report << vol_block("Molecular volume", _data.volumes[0b00000011] + _data.volumes[0b00000101] + cav_vol_per_type[0], "with isolated cavities");
   if(!_data.probe_mode && !_data.analyze_unit_cell){
     output_report << small_p << " core volume: No physical meaning, contains all volume outside the structure.\n\n";
   }
@@ -160,28 +165,29 @@ void Model::createReport(std::string path){
   }
 
   if(!_data.cavities.empty()){
-    output_report << "\n\n\t///////////////////////////////\n";
-    output_report << "\t// Cavities and pockets data //\n";
-    output_report << "\t///////////////////////////////\n\n";
+    output_report << "\n\n\t///////////////////\n";
+    output_report << "\t// Cavities data //\n";
+    output_report << "\t///////////////////\n\n";
 
     if(_data.cavities.size() >= 255){
       output_report << "!!! WARNING !!!\n";
       output_report << "Maximum number of cavities reached. Some cavities might be missing.\n";
       output_report << "To solve this issue, change probe radii (e.g. smaller large probe and/or larger small probe).\n\n";
     }
-    output_report << "Note 1:\tPockets and isolated cavities are not differentiated yet.\n";
-    output_report << "\tThis feature might be added in future versions.\n";
-    output_report << "Note 2:\tSeparate cavities are defined by space accessible to the core of the small probe.\n";
+    output_report << "Note 1:\tSeparate cavities are defined by space accessible to the core of the small probe.\n";
     output_report << "\tTwo cavities can be in contact but if a probe cannot pass from one to the other, they are considered separated.\n";
-    output_report << "Note 3:\tIn single probe mode, pockets are counted in the 'outside space'.\n";
-    output_report << "Note 4:\tSome very small isolated chunks of small probe cores can be detected and lead to small cavities.\n";
-    output_report << "Note 5:\tProbe occupied volume correspond to empty space as defined by the molecular surface (similar to the Connolly surface).\n";
-    output_report << "Note 6:\tProbe accessible volume correspond to empty space as defined\n";
+    output_report << "Note 2:\tIn single probe mode, pockets and tunnels are counted in the 'outside space'.\n";
+    output_report << "Note 3:\tSome very small isolated chunks of small probe cores can be detected and lead to small cavities.\n";
+    output_report << "Note 4:\tProbe occupied volume correspond to empty space as defined by the molecular surface (similar to the Connolly surface).\n";
+    output_report << "Note 5:\tProbe accessible volume correspond to empty space as defined\n";
     output_report << "\tby the surface accessible to its core (similar to the Lee-Richards surface).\n";
-    output_report << "Note 7:\tFor a detailed shape of each cavity, check the surface maps.\n\n";
+    output_report << "Note 6:\tFor a detailed shape of each cavity, check the surface maps.\n\n";
 
-    output_report << "Cavity\tOccupied\tAccessible\t" << (_data.calc_surface_areas ? "Excluded\tAccessible\t" : "") << "Cavity center coordinates (A)\n";
-    output_report << "ID\tVolume (A^3)\tVolume (A^3)\t" << (_data.calc_surface_areas ? "Surface (A^2)\tSurface (A^2)\t" : "") << "x\ty\tz\n";
+    // TODO: change output when cavity types are features for unit cell analysis
+    output_report << "Cavity\t" << "Occupied\t" << "Accessible\t" << (_data.calc_surface_areas ? "Excluded\tAccessible\t" : "")
+                  << (_data.analyze_unit_cell ? "" : "Cavity\t\t") << "Cavity center coordinates (A)\n";
+    output_report << "ID\t" << "Volume (A^3)\t" << "Volume (A^3)\t" << (_data.calc_surface_areas ? "Surface (A^2)\tSurface (A^2)\t" : "")
+                  << (_data.analyze_unit_cell ? "" : "type\t\t") << "x\ty\tz\n";
     for(unsigned int i = 0; i < _data.cavities.size(); i++){
       std::array<double,3> cav_center = _data.getCavCenter(i);
       // default precision is 6, which means that double values will take less than a tab space
@@ -192,12 +198,24 @@ void Model::createReport(std::string path){
                       << "outside\t\t";
       }
       else{
-        output_report << _data.cavities[i].getVolume() << "\t\t"
-                      << _data.cavities[i].core_vol << "\t\t";
+        // setprecision keeps the columns aligned when values < 1 with many digits are reported
+        output_report << std::setprecision(optimalPrecision(_data.cavities[i].getVolume())) << _data.cavities[i].getVolume() << "\t\t"
+                      << std::setprecision(optimalPrecision(_data.cavities[i].core_vol)) << _data.cavities[i].core_vol << "\t\t";
       }
       if(_data.calc_surface_areas){
-        output_report << _data.cavities[i].surf_shell << "\t\t"
-                      << _data.cavities[i].surf_core << "\t\t";
+        output_report << std::setprecision(optimalPrecision(_data.cavities[i].surf_shell)) << _data.cavities[i].surf_shell << "\t\t"
+                      << std::setprecision(optimalPrecision(_data.cavities[i].surf_core)) << _data.cavities[i].surf_core << "\t\t";
+      }
+      if(!_data.analyze_unit_cell){
+        if(_data.probe_mode){
+          output_report << _data.cavities[i].cavTypeDescriptor() << "  \t";
+        }
+        else if(_data.cavities[i].id == 1){
+          output_report << "Outside \t";
+        }
+        else{
+          output_report << "Isolated\t";
+        }
       }
       output_report << cav_center[0] << "\t" << cav_center[1] << "\t" << cav_center[2] << "\n";
     }
@@ -211,7 +229,7 @@ void Model::createReport(std::string path){
   output_report << "Level 0.5 : Van der Waals surface\n";
   if(_data.probe_mode){
     output_report << "Level 1.5 : Molecular surface (both probes excluded, similar to the Connolly surface)\n";
-    output_report << "Level 3.0 : Internal cavities and pockets (small probe excluded, similar to the Connolly surface but only 'inside')\n";
+    output_report << "Level 3.0 : Isolated cavities, pockets and tunnels (small probe excluded, similar to the Connolly surface but only 'inside')\n";
     output_report << "Level 5.0 : Small probe accessible surface (similar to Lee-Richards molecular surface but only 'inside')\n";
   }
   else{
@@ -471,7 +489,9 @@ static const std::map<char,std::string> s_file_extension{
 };
 
 bool fileExists(const std::string&);
+
 std::string rstripZeros(const std::string str);
+
 std::string makeExportFileName(const std::string dir, const CalcReportBundle& data, const char filetype, const unsigned char n_cav){
   assert(s_file_descriptor.count(filetype));
   std::string filename = "";
@@ -504,4 +524,22 @@ bool fileExists(const std::string& path){
     return true;
   }
   else {return false;}
+}
+
+///////////////////
+// AUX FUNCTIONS //
+///////////////////
+
+// default precision is 6 which shows as up to 7 characters when decimals are present for values >= 1
+// for values < 1 with many digits, the default precision can lead to more than 7 characters
+// which is larger than a tabulation and can mess up layout in the report
+// thus the precision is adjusted to insure a maximum of 7 characters
+int optimalPrecision(const double value){
+  if(value < 1e-5){
+    return 1;
+  }
+  else if(value < 1){
+    return (int)(6.0 + log(value));
+  }
+  return 6;
 }
