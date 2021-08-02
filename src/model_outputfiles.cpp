@@ -91,11 +91,11 @@ void Model::createReport(std::string path){
 
   // layout function for individual rows
   auto row = [this](
-      std::string cell0, 
-      double cell1, 
-      std::string cell2, 
-      std::string cell3="", 
-      double cell4=0, 
+      std::string cell0,
+      double cell1,
+      std::string cell2,
+      std::string cell3="",
+      double cell4=0,
       std::string cell5=""
       ){
     const int col_width[] = {33,14,6,21,8}; // last column gets as much as needed
@@ -126,8 +126,11 @@ void Model::createReport(std::string path){
   output_report << vol_block("Excluded void volume", _data.volumes[0b00000101]);
   output_report << vol_block("Molecular volume",
       _data.volumes[0b00000011] + _data.volumes[0b00000101], "(vdw + probe inaccessible)");
-  output_report << vol_block("Molecular volume",
-      _data.volumes[0b00000011] + _data.volumes[0b00000101] + cav_vol_per_type[0], "with isolated cavities");
+  // TODO: for unit cell analysis when pores are defined, add molecular volume with isolated cavities and total pore volume
+  if(!_data.analyze_unit_cell){
+    output_report << vol_block("Molecular volume",
+        _data.volumes[0b00000011] + _data.volumes[0b00000101] + cav_vol_per_type[0], "with isolated cavities");
+  }
   if(!_data.probe_mode && !_data.analyze_unit_cell){
     output_report << small_p << " core volume: No physical meaning, contains all volume outside the structure.\n\n";
   }
@@ -171,12 +174,16 @@ void Model::createReport(std::string path){
     output_report << surf_block(small_p + " excluded surface", _data.surf_probe_excluded, "(similar to Connolly surface)");
     output_report << surf_block(small_p + " accessible surface", _data.surf_probe_accessible, "(similar to Lee-Richards surface)");
     if(_data.probe_mode){
-      output_report << surf_block("Molecular outer surface", _data.surf_molecular, "(both probes excluded surface)");
+      output_report << surf_block("Molecular surface", _data.surf_molecular, "(both probes excluded surface)");
     }
+    else if(!_data.analyze_unit_cell){
+      output_report << "Molecular open surface (reachable from outside): see outside space surface data in cavities list below.\n\n";
+    }
+    // TODO: for unit cell analysis when pores are defined, add total pore excluded and accessible surfaces
   }
 
   if(!_data.cavities.empty()){
-    output_report << "\n\n\t///////////////////\n";
+    output_report << "\n\t///////////////////\n";
     output_report << "\t// Cavities data //\n";
     output_report << "\t///////////////////\n\n";
 
@@ -189,8 +196,8 @@ void Model::createReport(std::string path){
     output_report << "\tTwo cavities can be in contact but if a probe cannot pass from one to the other, they are considered separated.\n";
     output_report << "Note 2:\tIn single probe mode, pockets and tunnels are counted in the 'outside space'.\n";
     output_report << "Note 3:\tSome very small isolated chunks of small probe cores can be detected and lead to small cavities.\n";
-    output_report << "Note 4:\tProbe occupied volume correspond to empty space as defined by the molecular surface (similar to the Connolly surface).\n";
-    output_report << "Note 5:\tProbe accessible volume correspond to empty space as defined\n";
+    output_report << "Note 4:\tProbe occupied volume corresponds to empty space as defined by the molecular surface (similar to the Connolly surface).\n";
+    output_report << "Note 5:\tProbe accessible volume corresponds to empty space as defined\n";
     output_report << "\tby the surface accessible to its core (similar to the Lee-Richards surface).\n";
     output_report << "Note 6:\tFor a detailed shape of each cavity, check the surface maps.\n\n";
 
@@ -216,12 +223,12 @@ void Model::createReport(std::string path){
 
     for(unsigned int i = 0; i < _data.cavities.size(); i++){
       std::array<double,3> cav_center = _data.getCavCenter(i);
-    
+      
       std::string occ_vol = (!_data.probe_mode && !_data.analyze_unit_cell && _data.cavities[i].id == 1)? "Outside"
         : toStringFixedPrecision(_data.cavities[i].getVolume());
       std::string access_vol = (!_data.probe_mode && !_data.analyze_unit_cell && _data.cavities[i].id == 1)? "Outside"
         : toStringFixedPrecision(_data.cavities[i].core_vol);
-      
+
       cavity_data.storeValues({
         std::to_string(i+1),
         occ_vol,
@@ -234,7 +241,7 @@ void Model::createReport(std::string path){
         toStringFixedPrecision(cav_center[2]),
       });
     }
-    
+
     // function that writes table to file
     auto writeTable = [](std::ofstream& output_report, const GridData& cavity_data){
       const std::vector<int> col_width = {10,14,14,14,14,14,8,8};
@@ -243,7 +250,7 @@ void Model::createReport(std::string path){
       for (size_t row = 0; row < cavity_data.getNumberRows(false); ++row){
         table_rows.push_back(cavity_data.getRow(row));
       }
-      
+
       for (const auto& row : table_rows){
         for (size_t i = 0; i < col_width.size(); ++i){
           // newline character is used here as a hack to skip printing only whitespaces
