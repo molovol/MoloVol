@@ -202,7 +202,7 @@ void Model::createReport(std::string path){
       GridCol("Accessible", "Volume (A^3)"),
       GridCol("Excluded", "Surface (A^2)", !_data.calc_surface_areas, 0),
       GridCol("Accessible", "Surface (A^2)", !_data.calc_surface_areas, 0),
-      GridCol("Cavity Type", "", !_data.probe_mode, 0),
+      GridCol("Cavity Type", ""),
       GridCol("Cavity center coordinates (A)", "x"),
       GridCol("\n", "y"), // the newline character is not printed, used here to skip the line
       GridCol("", "z")
@@ -217,9 +217,9 @@ void Model::createReport(std::string path){
     for(unsigned int i = 0; i < _data.cavities.size(); i++){
       std::array<double,3> cav_center = _data.getCavCenter(i);
     
-      std::string occ_vol = (!_data.probe_mode && !_data.analyze_unit_cell && _data.cavities[i].id == 1)? "output"
+      std::string occ_vol = (!_data.probe_mode && !_data.analyze_unit_cell && _data.cavities[i].id == 1)? "Outside"
         : toStringFixedPrecision(_data.cavities[i].getVolume());
-      std::string access_vol = (!_data.probe_mode && !_data.analyze_unit_cell && _data.cavities[i].id == 1)? "output"
+      std::string access_vol = (!_data.probe_mode && !_data.analyze_unit_cell && _data.cavities[i].id == 1)? "Outside"
         : toStringFixedPrecision(_data.cavities[i].core_vol);
       
       cavity_data.storeValues({
@@ -228,7 +228,7 @@ void Model::createReport(std::string path){
         access_vol,
         toStringFixedPrecision(_data.cavities[i].surf_shell),
         toStringFixedPrecision(_data.cavities[i].surf_core),
-        _data.cavities[i].cavTypeDescriptor(),
+        _data.cavities[i].cavTypeDescriptor(_data.probe_mode),
         toStringFixedPrecision(cav_center[0]),
         toStringFixedPrecision(cav_center[1]),
         toStringFixedPrecision(cav_center[2]),

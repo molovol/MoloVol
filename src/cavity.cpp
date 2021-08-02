@@ -19,17 +19,22 @@ std::string Cavity::getPosition() const {
   return str + ")";
 }
 
-std::string Cavity::cavTypeDescriptor() const {
-  std::string cav_type = "Tunnel";
-  switch(n_entrances){
-    case 0 :
-      cav_type = "Isolated";
-      break;
-    case 1 :
-      cav_type = "Pocket";
-      break;
+std::string Cavity::cavTypeDescriptor(const bool probe_mode) const {
+  if (probe_mode){
+    std::string cav_type = "Tunnel";
+    switch(n_entrances){
+      case 0 :
+        cav_type = "Isolated";
+        break;
+      case 1 :
+        cav_type = "Pocket";
+        break;
+    }
+    return cav_type;
   }
-  return cav_type;
+  else {
+    return (id == 1)? "Outside" : "Isolated";
+  }
 }
 
 
