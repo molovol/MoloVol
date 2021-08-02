@@ -209,7 +209,7 @@ void Model::createReport(std::string path){
       GridCol("Accessible", "Volume (A^3)"),
       GridCol("Excluded", "Surface (A^2)", !_data.calc_surface_areas, 0),
       GridCol("Accessible", "Surface (A^2)", !_data.calc_surface_areas, 0),
-      GridCol("Cavity Type", ""),
+      GridCol("Cavity Type", "", _data.analyze_unit_cell, 0),
       GridCol("Cavity center coordinates (A)", "x"),
       GridCol("\n", "y"), // the newline character is not printed, used here to skip the line
       GridCol("", "z")
