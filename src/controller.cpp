@@ -437,13 +437,13 @@ void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag
     GridCol("Volume", L"(" + vol_unit + L")", false, mvFORMAT_FLOAT),
     GridCol("Core Surface", L"(" + surf_unit + L")", !data.calc_surface_areas, mvFORMAT_FLOAT),
     GridCol("Shell Surface", L"(" + surf_unit + L")", !data.calc_surface_areas, mvFORMAT_FLOAT),
-    GridCol("Cavity\nType", L"", !data.probe_mode, mvFORMAT_STRING),
+    GridCol("Cavity\nType", L"", data.analyze_unit_cell, mvFORMAT_STRING),
     GridCol("Center Coord", L"x, y, z (" + Symbol::angstrom() + L")")
   });
 
   // store data
   for (size_t i = 0; i < data.cavities.size(); ++i){
-    std::string volume = (!data.probe_mode && !data.analyze_unit_cell && data.cavities[i].id == 1)? "outside"
+    std::string volume = (!data.probe_mode && !data.analyze_unit_cell && data.cavities[i].id == 1)? "Outside"
       : std::to_string(data.cavities[i].getVolume());
 
     const std::vector<std::string> cav_values = {
@@ -451,7 +451,7 @@ void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag
       volume,
       std::to_string(data.cavities[i].getSurfCore()),
       std::to_string(data.cavities[i].getSurfShell()),
-      data.probe_mode? data.cavities[i].cavTypeDescriptor() : "",
+      data.cavities[i].cavTypeDescriptor(data.probe_mode),
       data.cavities[i].getPosition()
     };
 
