@@ -5,6 +5,8 @@
 #include "vector.h"
 #include "atomtree.h"
 #include "container3d.h"
+#include "flags.h"
+#include "cavity.h"
 #include <vector>
 #include <array>
 #include <unordered_map>
@@ -18,6 +20,7 @@ struct SearchIndex{
     unsigned int getUppLim(unsigned int);
     unsigned int getSafeLim(unsigned int);
     std::vector<std::vector<std::array<int,3>>> computeIndices(unsigned int);
+    std::vector<std::vector<std::array<int,3>>> computeIndices(unsigned int, const bool);
   private:
     std::vector<std::vector<std::array<int,3>>> _index_list;
     std::vector<unsigned> _upp_lim;
@@ -26,6 +29,7 @@ struct SearchIndex{
 
 class Space;
 class AtomTree;
+class FloodStack;
 struct Atom;
 struct AtomNode;
 struct VoxelLoc;
@@ -60,19 +64,20 @@ class Voxel{
     void splitVoxel(const std::array<unsigned,3>&, const Vector&, const double);
 
     // cavity id
-    bool floodFill(const unsigned char, const std::array<unsigned,3>&, const int);
+    bool floodFill(std::vector<Cavity>&, const unsigned char, const std::array<unsigned,3>&, const int, const bool=false);
 
     // shell vs void
     char evalRelationToVoxels(const std::array<unsigned int,3>&, const unsigned, bool=false);
 
     // volume
-    void tallyVoxelsOfType(std::map<char,unsigned>&,
-        std::map<unsigned char,unsigned>&,
-        std::map<unsigned char,unsigned>&,
+    void tallyVoxelsOfType(std::map<char,double>&,
+        std::map<unsigned char,double>&,
+        std::map<unsigned char,double>&,
         std::map<unsigned char,std::array<unsigned,3>>&,
         std::map<unsigned char,std::array<unsigned,3>>&,
         const std::array<unsigned,3>&,
-        const int);
+        const int,
+        const double=1);
 
     // unused but could become useful
     static void listFromTree(std::vector<int>&, const AtomNode*, const Vector&, const double&, const double&, const double&, const char=0);
@@ -93,8 +98,11 @@ class Voxel{
     // atom vs core
     bool isAtom(const Atom&, const Vector&, const double, const double);
     // cavity id
-    void descend(std::vector<VoxelLoc>&, const unsigned char, const std::array<unsigned,3>&, const int, const std::array<int,3>&);
-    void ascend(std::vector<VoxelLoc>&, const unsigned char, const std::array<unsigned,3>, const int, std::array<unsigned,3>, const std::array<int,3>&);
+    bool isInterfaceVxl(const VoxelLoc&);
+    std::vector<VoxelLoc> findPureNeighbours(const VoxelLoc&, const unsigned char=mvTYPE_ALL, const bool=false);
+    std::vector<VoxelLoc> findPureNeighbors(const VoxelLoc&, const unsigned char=mvTYPE_ALL, const bool=false);
+    void descend(std::vector<VoxelLoc>&, const std::array<unsigned,3>&, const int, const std::array<int,3>&, const unsigned char);
+    void ascend(std::vector<VoxelLoc>&, const std::array<unsigned,3>, const int, std::array<unsigned,3>, const std::array<int,3>&);
     void passIDtoChildren(const std::array<unsigned,3>&, const int);
     // shell vs void
     bool searchForCore(const std::array<unsigned int,3>&, const unsigned, bool=false);

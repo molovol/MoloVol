@@ -3,6 +3,7 @@
 #define BASE_H
 
 #include "cavity.h"
+#include "griddata.h"
 #include <wx/filectrl.h>
 #include <wx/filepicker.h>
 #include <wx/wfstream.h>
@@ -50,7 +51,7 @@ class MainFrame: public wxFrame, public wxThreadHelper
 
     void extSetStatus(const std::string);
     void extSetProgressBar(const int);
-    void extDisplayCavityList(const std::vector<Cavity>&, const bool, const bool);
+    void extDisplayCavityList(const GridData&);
     bool receivedAbortCommand();
 
     void extOpenErrorDialog(const int, const std::string&);
@@ -90,7 +91,7 @@ class MainFrame: public wxFrame, public wxThreadHelper
 
     void setStatus(const std::string);
     void setProgressBar(const int);
-    void displayCavityList(const std::vector<Cavity>&, const std::array<bool,2>);
+    void displayCavityList(const GridData&);
 
     void openErrorDialog(const std::pair<int,std::string>&);
 

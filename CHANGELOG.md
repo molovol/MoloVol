@@ -3,8 +3,15 @@
 This changelog keeps track of changes in a user-friendly way. It is based on [keep a changelog](https://keepachangelog.com/en/1.0.0/) by Olivier Lacan.
 
 ## Unreleased
+### Added
 * Allow CIF files for structure input.
 * Add variants of selected space groups with rhombohedral/hexagonal or Origin-2 settings in the space_groups definition file.
+* In two probe mode, cavity types such as Tunnels, Pockets, and Isolated Cavities can now be distinguished.
+* Molecular volume including isolated cavities is now provided in the report.
+
+### Changed
+* Cavity list output now hides unneeded columns, both in GUI and CLI.
+* Default grid resolution is now 0.2 A instead of 0.1 A.
 
 ## [v0.2.0](https://github.com/jmaglic/MoloVol/releases/tag/v0.2.0) - 2021-07-11
 

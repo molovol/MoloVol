@@ -40,4 +40,24 @@ enum mvOUT : unsigned {
   mvOUT_ALL = 0xFFFFFFFF
 };
 
+// type flags
+enum mvTYPE : unsigned char {
+  mvTYPE_NONE = 0,
+  mvTYPE_ASSIGNED = 1 << 0,
+  mvTYPE_ATOM = 1 << 1,
+  mvTYPE_INACCESSIBLE = 1 << 2,
+  mvTYPE_SP_CORE = 1 << 3,
+  mvTYPE_SP_SHELL = 1 << 4,
+  mvTYPE_LP_CORE = 1 << 5,
+  mvTYPE_LP_SHELL = 1 << 6,
+  mvTYPE_MIXED = 1 << 7,
+  mvTYPE_ALL = 0b11111111
+};
+
+enum mvFORMAT : unsigned char {
+  mvFORMAT_STRING = 0,
+  mvFORMAT_NUMBER,
+  mvFORMAT_FLOAT
+};
+
 #endif

@@ -6,6 +6,8 @@
 
 #include "base.h"
 #include "special_chars.h"
+#include "misc.h"
+#include "flags.h"
 #include <string>
 #include <wx/msgdlg.h>
 
@@ -39,8 +41,8 @@ void MainFrame::extSetProgressBar(const int percentage){
   GetEventHandler()->CallAfter(&MainFrame::setProgressBar, percentage);
 }
 
-void MainFrame::extDisplayCavityList(const std::vector<Cavity>& cavities, const bool opt_uc, const bool opt_pm){
-  GetEventHandler()->CallAfter(&MainFrame::displayCavityList, cavities, std::array<bool,2>{opt_uc, opt_pm});
+void MainFrame::extDisplayCavityList(const GridData& table){
+  GetEventHandler()->CallAfter(&MainFrame::displayCavityList, table);
 }
 
 void MainFrame::extOpenErrorDialog(const int error_code, const std::string& error_message){
@@ -57,6 +59,9 @@ void MainFrame::clearOutputText(){
 void MainFrame::clearOutputGrid(){
   if (outputGrid->GetNumberRows() > 0){
     outputGrid->DeleteRows(0, outputGrid->GetNumberRows());
+  }
+  if (outputGrid->GetNumberCols() > 0){
+    outputGrid->DeleteCols(0, outputGrid->GetNumberCols());
   }
 }
 
@@ -178,27 +183,33 @@ void MainFrame::displayAtomList(std::vector<std::tuple<std::string, int, double>
   }
 }
 
-void MainFrame::displayCavityList(const std::vector<Cavity>& cavities, const std::array<bool,2> options_uc_pm){
-  // delete all rows
+void MainFrame::displayCavityList(const GridData& table_data){
+  // delete all rows and columns
   clearOutputGrid();
-  // add appropriate nuber of rows
-  outputGrid->AppendRows(cavities.size());
-  for (int row = 0; row < outputGrid->GetNumberRows(); ++row){
-    outputGrid->SetCellValue(row, 0, std::to_string(row+1));
+  // add appropriate number of rows and columns
+  outputGrid->AppendCols(table_data.getNumberCols());
+  outputGrid->AppendRows(table_data.getNumberRows(false));
 
-    // in single probe mode, the cavity with id 1 comprises outside empty space and is meaningless
-    std::string volume = (!options_uc_pm[0] && !options_uc_pm[1] && cavities[row].id == 1)? "outside" 
-      : std::to_string(cavities[row].getVolume());
-    
-    outputGrid->SetCellValue(row, 1, volume);
-    if(getCalcSurfaceAreas()){
-      outputGrid->SetCellValue(row, 2, std::to_string(cavities[row].getSurfCore()));
-      outputGrid->SetCellValue(row, 3, std::to_string(cavities[row].getSurfShell()));
+  for (int col = 0; col < outputGrid->GetNumberCols(); ++col){
+    // add grid values
+    for (int row = 0; row < outputGrid->GetNumberRows(); ++row){
+      outputGrid->SetCellValue(row, col, table_data.getValue(row, col));
+      outputGrid->SetReadOnly(row, col, true);
     }
-    outputGrid->SetCellValue(row, 4, cavities[row].getPosition());
-    // set all cells read only
-    for (int col = 0; col < outputGrid->GetNumberCols(); ++col){
-      outputGrid->SetReadOnly(row,col,true);
+    // add column labels
+    outputGrid->SetColLabelValue(col, wxString(table_data.getHeader(col)) + "\n" + wxString(table_data.getUnit(col)));
+    outputGrid->AutoSizeColumn(col);
+    if (table_data.hideCol(col)){
+      outputGrid->SetColSize(col, 0);
+    }
+    // set cell format
+    switch (table_data.getFormat(col)){
+      case mvFORMAT_NUMBER :
+        outputGrid->SetColFormatNumber(col);
+        break;
+      case mvFORMAT_FLOAT :
+        outputGrid->SetColFormatFloat(col, 5, 3);
+        break;
     }
   }
 }

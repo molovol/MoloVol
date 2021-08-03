@@ -343,7 +343,7 @@ void MainFrame::InitProbe2Panel(){
 void MainFrame::InitGridPanel(){
 
   gridsizeText = new wxStaticText(gridsizePanel, TEXT_Grid, "Grid resolution:");
-  gridsizeInputText = new wxTextCtrl(gridsizePanel, TEXT_Gridinput, "0.1");
+  gridsizeInputText = new wxTextCtrl(gridsizePanel, TEXT_Gridinput, "0.2");
   gridsizeUnitText = new wxStaticText(gridsizePanel, TEXT_Gridunit, L" \u212B"); // unicode for angstrom
 
   wxBoxSizer *gridsizeSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -431,32 +431,14 @@ void MainFrame::InitCommunicationPanel(){
 }
 
 void MainFrame::InitOutputPanel(){
-  outputText = new wxTextCtrl(outputPanel, TEXT_Output, _("Output Dialog"), wxDefaultPosition, wxSize(420,100), wxTE_MULTILINE | wxTE_READONLY);
   // the width of 420 pixels gives enough room for the vertical scroll bar when multiple cavities are listed
   // with default width, the vertical scroll bar hides a part of the grid thus generating a horizontal scroll bar
+  outputText = new wxTextCtrl(outputPanel, TEXT_Output, _("Output Dialog"), wxDefaultPosition, wxSize(420,100), wxTE_MULTILINE | wxTE_READONLY);
 
   outputGrid = new wxGrid(outputPanel, GRID_Output);
+  outputGrid->CreateGrid(0, 0);
   outputGrid->SetRowLabelSize(0);
-  outputGrid->CreateGrid(0, 5, wxGrid::wxGridSelectCells);
   outputGrid->SetDefaultCellAlignment (wxALIGN_CENTRE, wxALIGN_CENTRE);
-
-  // columns
-  const std::vector<wxString> col_headers =
-    {"Cavity ID",
-      "Volume (" + Symbol::angstrom() + Symbol::cubed() + ")",
-      "Core Surface\n(" + Symbol::angstrom() + Symbol::squared() + ")",
-      "Shell Surface\n(" + Symbol::angstrom() + Symbol::squared() + ")",
-      "Center Coord\nx, y, z ("+Symbol::angstrom()+")"};
-  for (size_t row = 0; row < col_headers.size(); ++row){
-    outputGrid->SetColLabelValue(row, col_headers[row]);
-    if (row == 0){
-      outputGrid->SetColFormatNumber(row);
-    }
-    else if (row != 4) {
-      outputGrid->SetColFormatFloat(row);
-      outputGrid->SetColFormatFloat(row, 5, 3);
-    }
-  }
 
   wxBoxSizer *boxSizerH = new wxBoxSizer(wxHORIZONTAL);
   boxSizerH->Add(outputText, 1, wxRIGHT | wxEXPAND, 2);

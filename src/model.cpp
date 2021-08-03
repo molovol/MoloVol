@@ -117,7 +117,7 @@ CalcReportBundle Model::generateVolumeData(){
   { // assign each voxel in grid a type
     auto start = std::chrono::steady_clock::now();
     bool cavities_exceeded = false;
-    _cell.assignTypeInGrid(_atoms, getProbeRad1(), getProbeRad2(), optionProbeMode(), cavities_exceeded);
+    _cell.assignTypeInGrid(_atoms, _data.cavities, getProbeRad1(), getProbeRad2(), optionProbeMode(), cavities_exceeded);
     if(Ctrl::getInstance()->getAbortFlag()){
       _data.success = false;
       return _data;
@@ -128,12 +128,7 @@ CalcReportBundle Model::generateVolumeData(){
   }
   { // sum total volume
     auto start = std::chrono::steady_clock::now();
-    if(_data.analyze_unit_cell){
-      _cell.getUnitCellVolume(_data.volumes, _data.cavities);
-    }
-    else{
-      _cell.getVolume(_data.volumes, _data.cavities);
-    }
+    _cell.sumVolume(_data.volumes, _data.cavities, _data.analyze_unit_cell);
 
     // sort cavities by volume from largest to smallest
     inverseSort(_data.cavities);
@@ -151,6 +146,9 @@ void Model::prepareVolumeCalc(){
   _data.elapsed_seconds.clear();
   // reset the success value to avoid lingering errors from previous failed calculations
   _data.success = true;
+  // clear previous results
+  _data.volumes.clear();
+  _data.cavities.clear();
 
   // process atom data for unit cell analysis if the option is ticked
   if(optionAnalyzeUnitCell()){
@@ -574,16 +572,20 @@ void Model::generateSupercell(double radius_limit){
 
 // 6) create atom map based on cell limits + radius= gridstep + largest_atom radius + 2*largest probe radius
 void Model::generateUsefulAtomMapFromSupercell(double radius_limit){
+  // for large crystal structures, it is much faster to create a new temporary vector
+  // than to erase elements in the original vector
+  std::vector<std::tuple<std::string, double, double, double>> limited_atom_list;
   for(size_t i = 0; i < _processed_atom_coordinates.size(); i++){
-    if(std::get<1>(_processed_atom_coordinates[i]) < -radius_limit ||
-       std::get<2>(_processed_atom_coordinates[i]) < -radius_limit ||
-       std::get<3>(_processed_atom_coordinates[i]) < -radius_limit ||
-       std::get<1>(_processed_atom_coordinates[i]) > _cart_matrix[0][0]+radius_limit ||
-       std::get<2>(_processed_atom_coordinates[i]) > _cart_matrix[1][1]+radius_limit ||
-       std::get<3>(_processed_atom_coordinates[i]) > _cart_matrix[2][2]+radius_limit
+    if(std::get<1>(_processed_atom_coordinates[i]) >= -radius_limit &&
+       std::get<2>(_processed_atom_coordinates[i]) >= -radius_limit &&
+       std::get<3>(_processed_atom_coordinates[i]) >= -radius_limit &&
+       std::get<1>(_processed_atom_coordinates[i]) <= _cart_matrix[0][0]+radius_limit &&
+       std::get<2>(_processed_atom_coordinates[i]) <= _cart_matrix[1][1]+radius_limit &&
+       std::get<3>(_processed_atom_coordinates[i]) <= _cart_matrix[2][2]+radius_limit
     ){
-      _processed_atom_coordinates.erase(_processed_atom_coordinates.begin() + i);
-           i--;
+      limited_atom_list.emplace_back(_processed_atom_coordinates[i]);
     }
   }
+  _processed_atom_coordinates = limited_atom_list;
 }
+

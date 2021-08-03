@@ -6,6 +6,7 @@
 #include "misc.h"
 #include "exception.h"
 #include "special_chars.h"
+#include "griddata.h"
 #include <chrono>
 #include <utility>
 #include <map>
@@ -331,7 +332,7 @@ void Ctrl::displayResults(CalcReportBundle& data, const unsigned display_flag){
     std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
 
     if (display_flag & mvOUT_FORMULA){
-      notifyUser("Result for: ");
+      notifyUser("Result summary for: ");
       notifyUser(Symbol::generateChemicalFormulaUnicode(data.chemical_formula));
       notifyUser("\n");
     }
@@ -413,6 +414,10 @@ void Ctrl::displayResults(CalcReportBundle& data, const unsigned display_flag){
         notifyUser("\n");
       }
     }
+    if(_to_gui){
+      notifyUser("<INFORMATION>\n");
+      notifyUser("For complete results, please export report below.\n");
+    }
     if (display_flag & mvOUT_CAVITIES){
       if(!data.cavities.empty()){displayCavityList(data);}
     }
@@ -423,41 +428,42 @@ void Ctrl::displayResults(CalcReportBundle& data, const unsigned display_flag){
 }
 
 void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag){
+  // store headers and units
+  const std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
+  const std::wstring surf_unit = Symbol::angstrom() + Symbol::squared();
+
+  GridData table({
+    GridCol("Cavity\nID", L"", false, mvFORMAT_NUMBER),
+    GridCol("Volume", L"(" + vol_unit + L")", false, mvFORMAT_FLOAT),
+    GridCol("Core Surface", L"(" + surf_unit + L")", !data.calc_surface_areas, mvFORMAT_FLOAT),
+    GridCol("Shell Surface", L"(" + surf_unit + L")", !data.calc_surface_areas, mvFORMAT_FLOAT),
+    GridCol("Cavity\nType", L"", data.analyze_unit_cell, mvFORMAT_STRING),
+    GridCol("Center Coord", L"x, y, z (" + Symbol::angstrom() + L")")
+  });
+
+  // store data
+  for (size_t i = 0; i < data.cavities.size(); ++i){
+    std::string volume = (!data.probe_mode && !data.analyze_unit_cell && data.cavities[i].id == 1)? "Outside"
+      : std::to_string(data.cavities[i].getVolume());
+
+    const std::vector<std::string> cav_values = {
+      std::to_string(i+1),
+      volume,
+      std::to_string(data.cavities[i].getSurfCore()),
+      std::to_string(data.cavities[i].getSurfShell()),
+      data.cavities[i].cavTypeDescriptor(data.probe_mode),
+      data.cavities[i].getPosition()
+    };
+
+    table.storeValues(cav_values);
+  }
+
+  // display data
   if (_to_gui){
-    s_gui->extDisplayCavityList(data.cavities, data.analyze_unit_cell, data.probe_mode);
+    s_gui->extDisplayCavityList(table);
   }
   else{
-    std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
-    std::wstring surf_unit = Symbol::angstrom() + Symbol::squared();
-
-    int width = 20;
-
-    std::string header[] = {"Cavity ID", "Volume", "Core Surface", "Shell Surface", "Position"};
-    std::wstring units[] = {L"", L"(" + vol_unit + L")",L"(" + surf_unit + L")", L"(" + surf_unit + L")", L"(" + Symbol::angstrom() + L"," + Symbol::angstrom() + L"," + Symbol::angstrom() + L")"};
-
-    // HEADER
-    for (std::string elem : header){
-      notifyUser(field(width,elem));
-    }
-    notifyUser("\n");
-    // UNITS
-    for (std::wstring elem : units){
-      notifyUser(wfield(width,elem));
-    }
-    notifyUser("\n");
-
-    for (size_t i = 0; i < data.cavities.size(); ++i){
-      // CAVITY VALUES
-      // in single probe mode, the first cavity with id 1 comprises outside empty space and is meaningless
-      std::string volume = (!data.probe_mode && !data.analyze_unit_cell && data.cavities[i].id == 1)? "outside"
-        : std::to_string(data.cavities[i].getVolume());
-      std::string values[] = {std::to_string(i+1), volume, std::to_string(data.cavities[i].getSurfCore()), std::to_string(data.cavities[i].getSurfShell()), data.cavities[i].getPosition()};
-
-      for (std::string elem : values){
-        notifyUser(field(width,elem));
-      }
-      notifyUser("\n");
-    }
+    table.print();
   }
 }
 
