@@ -7,6 +7,7 @@ This changelog keeps track of changes in a user-friendly way. It is based on [ke
 * Allow CIF files for structure input.
 * Add variants of selected space groups with rhombohedral/hexagonal or Origin-2 settings in the space_groups definition file.
 * In two probe mode, cavity types such as Tunnels, Pockets, and Isolated Cavities can now be distinguished.
+* Molecular volume including isolated cavities is now provided in the report.
 
 ### Changed
 * Cavity list output now hides unneeded columns, both in GUI and CLI.
