@@ -343,7 +343,7 @@ void MainFrame::InitProbe2Panel(){
 void MainFrame::InitGridPanel(){
 
   gridsizeText = new wxStaticText(gridsizePanel, TEXT_Grid, "Grid resolution:");
-  gridsizeInputText = new wxTextCtrl(gridsizePanel, TEXT_Gridinput, "0.1");
+  gridsizeInputText = new wxTextCtrl(gridsizePanel, TEXT_Gridinput, "0.2");
   gridsizeUnitText = new wxStaticText(gridsizePanel, TEXT_Gridunit, L" \u212B"); // unicode for angstrom
 
   wxBoxSizer *gridsizeSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -434,7 +434,7 @@ void MainFrame::InitOutputPanel(){
   // the width of 420 pixels gives enough room for the vertical scroll bar when multiple cavities are listed
   // with default width, the vertical scroll bar hides a part of the grid thus generating a horizontal scroll bar
   outputText = new wxTextCtrl(outputPanel, TEXT_Output, _("Output Dialog"), wxDefaultPosition, wxSize(420,100), wxTE_MULTILINE | wxTE_READONLY);
-  
+
   outputGrid = new wxGrid(outputPanel, GRID_Output);
   outputGrid->CreateGrid(0, 0);
   outputGrid->SetRowLabelSize(0);
