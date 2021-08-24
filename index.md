@@ -1,37 +1,21 @@
-## Welcome to GitHub Pages
+# MoloVol<img src="https://user-images.githubusercontent.com/65410083/99060370-3a6ab980-25a0-11eb-8f39-92e7af993223.png" width="250" ALIGN="right">
 
-You can use the [editor on GitHub](https://github.com/molovol/MoloVol/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+MoloVol is a free, cross-plattform, scientific software for volume and surface computations of single molecules and crystallographic unit cells.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+## Utility
+With the MoloVol software we aim to combine an intuitive and easy-to-use user interface with powerful computing algorithms. We want the software to serve a broad range of scientist by being easily accessible on all common platforms.
 
-### Markdown
+The MoloVol software, along with many of its features, is currently in pre-release. The software is being actively developed on Windows 10, macOS Big Sur, and Ubuntu.
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+## Download
 
-```markdown
-Syntax highlighted code block
+Compiled binaries of current and previous versions for Windows, macOS and Linux as well as a quick-start guide and the user manual can be found at https://github.com/molovol/MoloVol/releases 
 
-# Header 1
-## Header 2
-### Header 3
+The source code can be found at https://github.com/molovol/MoloVol
 
-- Bulleted
-- List
+## Getting Help
+If you wish to report a bug or request a feature go to the project's GitHub:
+https://github.com/jmaglic/MoloVol/issues
 
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/molovol/MoloVol/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+## Development Team
+The development is currently lead by Jasmin B. Maglic and Roy Lavendomme. You may reach us via email through molovol@outlook.com
