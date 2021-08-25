@@ -11,6 +11,8 @@ The MoloVol software, along with many of its features, is currently in pre-relea
 
 Compiled binaries of current and previous versions for Windows, macOS and Linux as well as a quick-start guide and the user manual can be found at [Download installers](https://github.com/molovol/MoloVol/releases)
 
+The changes for all previous and the current release can be found at [Changelog](https://github.com/molovol/MoloVol/blob/master/CHANGELOG.md)
+
 The source code can be found at [Github Repository](https://github.com/molovol/MoloVol)
 
 ## Getting Help
