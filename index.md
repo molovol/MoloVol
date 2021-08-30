@@ -9,14 +9,15 @@ The MoloVol software, along with many of its features, is currently in pre-relea
 
 ## Download
 
-Compiled binaries of current and previous versions for Windows, macOS and Linux as well as a quick-start guide and the user manual can be found at [Download installers](https://github.com/molovol/MoloVol/releases)
+Compiled binaries of current and previous versions for Windows, macOS and Linux as well as a quick-start guide and the user manual can be found in the [Download installers](https://github.com/molovol/MoloVol/releases) section.
 
-The changes for all previous and the current release can be found at [Changelog](https://github.com/molovol/MoloVol/blob/master/CHANGELOG.md)
+The changes for all previous and the current release can be found in the [Changelog](https://github.com/molovol/MoloVol/blob/master/CHANGELOG.md).
 
-The source code can be found at [Github Repository](https://github.com/molovol/MoloVol)
+The source code of the current development build can be found in the [Github Repository](https://github.com/molovol/MoloVol). 
+The source code for each stable release can be found with the installers (see above).
 
 ## Getting Help
-If you wish to report a bug or request a feature go to the project's GitHub: [Issues](https://github.com/jmaglic/MoloVol/issues)
+If you wish to report a bug or request a feature go to the project's GitHub [Issues](https://github.com/jmaglic/MoloVol/issues) page.
 
 ## Development Team
 The development is currently lead by Jasmin B. Maglic and Roy Lavendomme. You may reach us via email through [molovol@outlook.com](mailto:molovol@outlook.com)
