@@ -1,5 +1,8 @@
-molvol (0.2) unstable; urgency=low
-  * Added command line interface
-  * General improvements to the GUI
-  * Added macroscopic volume/surface values to report
- -- Jasmin B. Maglic <jmaglic@outlook.de>  Fri, 9 Jul 2021 12:13:00 +0200
+molvol (1.0) unstable; urgency=low
+  * Added support for CIF files
+  * Added support for space group variants
+  * Added automatic cavity type evaluation
+  * Changed default grid resolution from 0.1 to 0.2
+  * Changed output to hide unnecessary columns in cavity list
+  * Added molecular volume to report
+ -- Jasmin B. Maglic <jmaglic@outlook.de>  Fri, 10 Sep 2021 11:46:00 +0200
