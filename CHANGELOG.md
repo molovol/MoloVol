@@ -2,7 +2,7 @@
 
 This changelog keeps track of changes in a user-friendly way. It is based on [keep a changelog](https://keepachangelog.com/en/1.0.0/) by Olivier Lacan.
 
-## Unreleased
+## v1.0.0
 ### Added
 * Allow CIF files for structure input.
 * Add variants of selected space groups with rhombohedral/hexagonal or Origin-2 settings in the space_groups definition file.
