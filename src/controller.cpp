@@ -349,7 +349,7 @@ void Ctrl::displayResults(CalcReportBundle& data, const unsigned display_flag){
       notifyUser("\n");
     }
     if (display_flag & mvOUT_VOL_INACCESSIBLE){
-      notifyUser("Probe inaccessible volume: " + std::to_string(data.volumes[0b00000101]) + " ");
+      notifyUser("Probe excluded void volume: " + std::to_string(data.volumes[0b00000101]) + " ");
       notifyUser(vol_unit);
       notifyUser("\n");
     }
@@ -434,9 +434,9 @@ void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag
 
   GridData table({
     GridCol("Cavity\nID", L"", false, mvFORMAT_NUMBER),
-    GridCol("Volume", L"(" + vol_unit + L")", false, mvFORMAT_FLOAT),
-    GridCol("Core Surface", L"(" + surf_unit + L")", !data.calc_surface_areas, mvFORMAT_FLOAT),
-    GridCol("Shell Surface", L"(" + surf_unit + L")", !data.calc_surface_areas, mvFORMAT_FLOAT),
+    GridCol("Occupied", L"Volume (" + vol_unit + L")", false, mvFORMAT_FLOAT),
+    GridCol("Accessible", L"Surface (" + surf_unit + L")", !data.calc_surface_areas, mvFORMAT_FLOAT),
+    GridCol("Excluded", L"Surface (" + surf_unit + L")", !data.calc_surface_areas, mvFORMAT_FLOAT),
     GridCol("Cavity\nType", L"", data.analyze_unit_cell, mvFORMAT_STRING),
     GridCol("Center Coord", L"x, y, z (" + Symbol::angstrom() + L")")
   });
