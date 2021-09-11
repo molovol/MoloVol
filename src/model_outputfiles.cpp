@@ -39,7 +39,7 @@ void Model::createReport(std::string path){
   output_report << "   MM    MMM    MM   OO  OO   LL   OO  OO        VVV        OO  OO   LL   \n";
   output_report << "   MM     M     MM    OOOO    LL    OOOO          V          OOOO    LL   \n\n";
   output_report << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n";
-  output_report << "Source code available at https://github.com/jmaglic/MoloVol under the MIT licence\n";
+  output_report << "Source code available at https://github.com/molovol/MoloVol under the MIT licence\n";
   output_report << "Copyright © 2020-2021 Jasmin B. Maglic, Roy Lavendomme\n\n";
   output_report << "MoloVol program: calculation results report\n";
   output_report << "version: " + Ctrl::getVersion() + "\n\n";
@@ -123,9 +123,9 @@ void Model::createReport(std::string path){
   };
 
   output_report << vol_block("Van der Waals volume", _data.volumes[0b00000011]);
-  output_report << vol_block("Excluded void volume", _data.volumes[0b00000101]);
+  output_report << vol_block("Probe excluded void volume", _data.volumes[0b00000101]);
   output_report << vol_block("Molecular volume",
-      _data.volumes[0b00000011] + _data.volumes[0b00000101], "(vdw + probe inaccessible)");
+      _data.volumes[0b00000011] + _data.volumes[0b00000101], "(vdw + probe excluded void)");
   // TODO: for unit cell analysis when pores are defined, add molecular volume with isolated cavities and total pore volume
   if(!_data.analyze_unit_cell){
     output_report << vol_block("Molecular volume",
@@ -223,7 +223,7 @@ void Model::createReport(std::string path){
 
     for(unsigned int i = 0; i < _data.cavities.size(); i++){
       std::array<double,3> cav_center = _data.getCavCenter(i);
-      
+
       std::string occ_vol = (!_data.probe_mode && !_data.analyze_unit_cell && _data.cavities[i].id == 1)? "Outside"
         : toStringFixedPrecision(_data.cavities[i].getVolume());
       std::string access_vol = (!_data.probe_mode && !_data.analyze_unit_cell && _data.cavities[i].id == 1)? "Outside"
