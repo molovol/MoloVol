@@ -5,7 +5,7 @@ BINDIR := bin
 LINUXRES := res/linux
 SRCEXT := cpp
 APP := MoloVol
-VERSION := v0.2
+VERSION := v1.0
 DMGNAME := $(APP)_macOS-10.11+_$(VERSION)
 DEBNAME := $(APP)_debian_$(VERSION)
 
@@ -181,4 +181,4 @@ cleanall:
 	@echo " $(RM) -r $(BUILDDIR) $(BINDIR)"; $(RM) -r $(BUILDDIR) $(BINDIR)
 
 
-.PHONY: all, clean, cleanall, release, universal_app, x86_app, arm64_app, appbundle, appbundle_entry, dmg, dmg_entry, deb, test, cleantest, probetest, protein
+.PHONY: all, clean, cleanall, release, universal_app, x86_app, arm64_app, appbundle, appbundle_entry, appbundle_universal, dmg, dmg_entry, dmg_universal, deb, test, cleantest, probetest, protein
