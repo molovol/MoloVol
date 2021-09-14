@@ -16,7 +16,7 @@ For detailed installation guides visit the MoloVol wiki (https://github.com/molo
 
 ## Getting Help
 If you wish to report a bug or request a feature go to the project's GitHub:
-https://github.com/jmaglic/MoloVol/issues
+https://github.com/molovol/MoloVol/issues
 
 ## Development Team
 The development is currently lead by Jasmin B. Maglic and Roy Lavendomme. You may reach us via email through molovol@outlook.com
