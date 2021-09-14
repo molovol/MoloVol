@@ -12,7 +12,7 @@ The MoloVol software, along with many of its features, is currently in pre-relea
 Dependencies:
 - wxWidgets 3.1.5 (https://www.wxwidgets.org)
 
-For detailed installation guides visit the MoloVol wiki (https://github.com/jmaglic/MoloVol/wiki).
+For detailed installation guides visit the MoloVol wiki (https://github.com/molovol/MoloVol/wiki).
 
 ## Getting Help
 If you wish to report a bug or request a feature go to the project's GitHub:
