@@ -14,6 +14,7 @@ Compiled binaries of current and previous versions for Windows, macOS and Linux 
 The changes for all previous and the current release can be found in the [Changelog](https://github.com/molovol/MoloVol/blob/master/CHANGELOG.md).
 
 The source code of the current development build can be found in the [Github Repository](https://github.com/molovol/MoloVol). 
+
 The source code for each stable release can be found with the installers (see above).
 
 ## Getting Help
@@ -21,3 +22,10 @@ If you wish to report a bug or request a feature go to the project's GitHub [Iss
 
 ## Development Team
 The development is currently lead by Jasmin B. Maglic and Roy Lavendomme. You may reach us via email through [molovol@outlook.com](mailto:molovol@outlook.com)
+
+## Scientific reference
+MoloVol v1.0.0 features and algorithms are presented in detail in a scientific publication. 
+
+The preprint is currently available on ChemRxiv DOI: [10.33774/chemrxiv-2021-dss1j](https://doi.org/10.33774/chemrxiv-2021-dss1j)
+
+The paper will be published in a peer-reviewed journal as soon as possible.
