@@ -17,6 +17,12 @@ The source code of the current development build can be found in the [Github Rep
 
 The source code for each stable release can be found with the installers (see above).
 
+## Installation
+### macOS
+You can download the application binary as .dmg file. Opening that file will mount it and open a window containing the application and your system's application folder. To install the application, simply drag it into the application folder.
+
+When opening MoloVol for the first time, a warning may appear saying that the application is from an unknown developer. This is because Apple requires a fee to registered as trusted developer. To get around the warning, you can navigate to your "Applications" folder and find the MoloVol executable. Right-click on the executable and select "Open". You will be prompted with a dialog box where you will need to select "Open".
+
 ## Getting Help
 If you wish to report a bug or request a feature go to the project's GitHub [Issues](https://github.com/jmaglic/MoloVol/issues) page.
 
