@@ -30,7 +30,7 @@ $ dpkg -i bin/MoloVol_debian_version.deb
 
 Please note that we currently only provide the .deb file for arm64 CPU architectures. A such, it is possible that the installer will not work for you. In that case you could compile the application yourself by following [this guide](https://github.com/molovol/MoloVol/wiki/Getting-started-on-Linux).
 ### Windows
-On windows, the application does not require an actual setup. The executable file and input files are all provided in a zip folder. Extract all files in any desired directory (note that "MoloVol.exe" and the "inputfile" folder should remaing in the same directory). Then start the program by running MoloVol.exe.
+On windows, the application does not require an actual setup. The executable file and input files are all provided in a zip folder. Extract all files in any desired directory (note that "MoloVol.exe" and the "inputfile" folder should remain in the same directory) then start the program by running MoloVol.exe.
 
 Depending on the version of windows and the security settings, a security warning might appear because MoloVol does not have a registered certificat (they are costly). You may proceed safely (unless you obtained the program from another source than here).
 ## Getting Help
