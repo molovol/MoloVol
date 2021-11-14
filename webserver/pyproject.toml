@@ -6,7 +6,7 @@ description = "A REST interface for molovol."
 authors = ["Benedikt S. Vogler <developer@benediktsvogler.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = ">=3.8"
 Flask = "^2.0.2"
 
 [tool.poetry.dev-dependencies]
