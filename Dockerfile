@@ -23,4 +23,5 @@ WORKDIR /src/bin/
 COPY launch_headless.sh launch.sh
 RUN chmod +x launch.sh
 ENTRYPOINT ["/src/bin/launch.sh"]
+CMD ["--help"]
 #you can connect and run with "podman run -it <image id> /bin/sh"
