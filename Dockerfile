@@ -31,4 +31,5 @@ COPY webserver/ /webserver/
 WORKDIR /webserver/
 
 RUN POETRY_VIRTUALENVS_CREATE=false poetry install --no-dev
+COPY launch_headless.sh /webserver/launch_headless.sh
 CMD ["flask", "run", "--host=0.0.0.0"]
