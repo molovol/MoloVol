@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>MoloVol Web GUI</title>
+    <style>#outputbox {
+        border: 1px solid #ccc;
+    }</style>
+</head>
+<body>
+<h1>MoloVol</h1>
+<h2>Input</h2>
+<form id="inputs" action="." method="post">
+    <input type="text" id="radius" name="radius" size="4" value="1.2"/><label for="radius">(Small) probe
+    radius</label><br>
+    <input type="text" id="grid" name="grid" size="4" value="0.2"><label for="grid">Spatial resolution of the underlying
+    grid</label><br>
+    <input type="text" id="file-structure" name="file-structure" placeholder="path"><label for="file-structure">Path to the
+    structure file</label><br>
+    <input type="text" id="file-elements" name="file-elements" placeholder="path"><label for="file-elements">Path to the elements
+    file</label><br>
+    <input type="text" id="dir-output" name="dir-output" placeholder="path -do"><label for="dir-output">Path to the directory
+    output</label><br>
+    <input type="checkbox" id="hetatm" name="hetatm"><label for="hetatm">Include HETATM from pdb file</label><br>
+    <input type="checkbox" id="unitcell" name="unitcell"><label for="unitcell">Analyze unit cell</label><br>
+    <input type="checkbox" id="surface" name="surface"><label for="surface">Calculate surface areas</label><br>
+    <input type="checkbox" id="export-report" name="export-report"><label for="export-report">Export report
+    (requires:-do)</label><br>
+    <input type="checkbox" id="export-total" name="export-total"><label for="export-total">Export total surface map
+    (requires:-do)</label><br>
+    <input type="checkbox" id="export-cavities" name="export-cavities"><label for="export-cavities">Export surface maps
+    for all cavities (requires:-do)</label><br>
+    <input type="checkbox" id="output" name="output"><label for="output">Control what parts of the output to display
+    (default:all)</label><br>
+    <input type="checkbox" id="quiet" name="quiet"><label for="quiet">Silence progress resporting none</label><br>
+    <input type="checkbox" id="unicode" name="unicode"><label for="unicode">Allow unicode in output</label><br>
+    <input type="submit"/>
+</form>
+
+{% if returnvalues is not none %}
+<h2>Output</h2>
+<div id="outputbox">
+    <output name="result" for="inputs">{{returnvalues}}</output>
+</div>
+{% endif %}
+</body>
+</html>
+
