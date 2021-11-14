@@ -29,5 +29,6 @@ RUN apt-get install python3-pip -y
 RUN pip install poetry
 COPY webserver/ /webserver/
 WORKDIR /webserver/
-RUN poetry install
+
+RUN POETRY_VIRTUALENVS_CREATE=false poetry install --no-dev
 CMD ["flask", "run", "--host=0.0.0.0"]
