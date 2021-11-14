@@ -12,16 +12,22 @@ RUN make install
 RUN apt-get install xvfb -y
 ENV DISPLAY=:1.0
 
-
+#compile molovol
 WORKDIR /
 COPY Makefile Makefile
 COPY src/ src/
 COPY include/ include/
 RUN make
 
+COPY inputfile/ inputfile/
 WORKDIR /src/bin/
 COPY launch_headless.sh launch.sh
 RUN chmod +x launch.sh
-ENTRYPOINT ["/src/bin/launch.sh"]
-CMD ["--help"]
-#you can connect and run with "podman run -it <image id> /bin/sh"
+
+#add flask webserver
+RUN apt-get install python3-pip -y
+RUN pip install poetry
+COPY webserver/ /webserver/
+WORKDIR /webserver/
+RUN poetry install
+CMD ["flask", "run", "--host=0.0.0.0"]
