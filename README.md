@@ -20,7 +20,7 @@ For detailed installation guides visit the MoloVol wiki (https://github.com/molo
 MoloVol also includes provides a REST-API with a web front-end built on-top of the desktop application.
 Instead of using the desktop front-end, you can deploy it using docker or podman. 
 To start the container use docker or podman on port 5001 `podman run -dt -p 5001:5000/tcp <image>`. The web front-end is then available at http://localhost:5001.
-The default port is 5000. Internally flask is used as an interface to the CLI.
+The default port is 5000. Internally flask is used as an interface to the CLI. You can also pass the CLI arguments in the run command for a short-lived container.
 
 
 ## Getting Help
