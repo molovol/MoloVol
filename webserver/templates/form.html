@@ -13,15 +13,15 @@
 <h1>MoloVol</h1>
 <h2>Input</h2>
 <form id="inputs" action="." method="post">
-    <input type="text" id="radius" name="radius" size="4" value="1.2"/><label for="radius">(Small) probe
+    <input type="text" id="radius" name="radius" size="4" value="{{inputdict.get('radius', '1.2') if inputdict is defined else '1.2'}}"/><label for="radius">(Small) probe
     radius</label><br>
-    <input type="text" id="grid" name="grid" size="4" value="0.2"><label for="grid">Spatial resolution of the underlying
+    <input type="text" id="grid" name="grid" size="4" value="{{inputdict.get('grid','0.2') if inputdict is defined else '0.2'}}"><label for="grid">Spatial resolution of the underlying
     grid</label><br>
-    <input type="text" id="file-structure" name="file-structure" placeholder="path"><label for="file-structure">Path to the
+    <input type="text" id="file-structure" name="file-structure" placeholder="path" value="{{inputdict.get('file-strucutre','')}}"><label for="file-structure">Path to the
     structure file</label><br>
-    <input type="text" id="file-elements" name="file-elements" placeholder="path"><label for="file-elements">Path to the elements
+    <input type="text" id="file-elements" name="file-elements" placeholder="path" value="{{inputdict.get('file-elements','')}}"><label for="file-elements">Path to the elements
     file</label><br>
-    <input type="text" id="dir-output" name="dir-output" placeholder="path -do"><label for="dir-output">Path to the directory
+    <input type="text" id="dir-output" name="dir-output" placeholder="path -do" value="{{inputdict.get('dir-output','')}}"><label for="dir-output">Path to the directory
     output</label><br>
     <input type="checkbox" id="hetatm" name="hetatm"><label for="hetatm">Include HETATM from pdb file</label><br>
     <input type="checkbox" id="unitcell" name="unitcell"><label for="unitcell">Analyze unit cell</label><br>
