@@ -18,3 +18,5 @@ output/
 test/
 surface_map.dx
 apptests/
+.idea/
+*.pyc
