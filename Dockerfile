@@ -18,18 +18,15 @@ COPY Makefile Makefile
 COPY src/ src/
 COPY include/ include/
 RUN make
-
 COPY inputfile/ inputfile/
-WORKDIR /src/bin/
-COPY launch_headless.sh launch.sh
-RUN chmod +x launch.sh
 
 #add flask webserver
 RUN apt-get install python3-pip -y
-RUN pip install poetry
+RUN pip install flask
 COPY webserver/ /webserver/
-WORKDIR /webserver/
+WORKDIR /
 
-RUN POETRY_VIRTUALENVS_CREATE=false poetry install --no-dev
-COPY launch_headless.sh /webserver/launch_headless.sh
+COPY launch_headless.sh /launch_headless.sh
+RUN chmod +x launch_headless.sh
+ENV FLASK_APP=/webserver/app.py
 CMD ["flask", "run", "--host=0.0.0.0"]
