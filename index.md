@@ -21,7 +21,10 @@ The source code for each stable release can be found with the installers (see ab
 ### macOS
 You can download the application binary as .dmg file. Opening that file will mount it and open a window containing the application and your system's application folder. To install the application, simply drag it into the application folder.
 
-When opening MoloVol for the first time, a warning may appear saying that the application is from an unknown developer. This is because Apple requires a fee to registered as trusted developer. To get around the warning, you can navigate to your "Applications" folder and find the MoloVol executable. Right-click on the executable and select "Open". You will be prompted with a dialog box where you will need to select "Open".
+When opening MoloVol for the first time, a warning may appear saying that the application is from an unknown developer. This is because Apple requires a fee to registered as trusted developer. To get around the warning, you can navigate to your "Applications" folder and find the MoloVol executable. Right-click or control-click the executable and select "Open". You will be prompted with a dialog box where you will need to select "Open". [Apple's support website](https://support.apple.com/en-ie/guide/mac-help/mh40616/mac) provides a more detailed guide.
+
+<img src="/docs/assets/images/macOS_error.png" width="200">
+
 ### Linux
 You can donwload an installation file as .deb file. This file format is used on Debian and Ubuntu. Installation for these systems should be as simple as opening the file; however, if you run into issues you can also run the installation from the command line.
 ```
