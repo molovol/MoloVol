@@ -158,7 +158,7 @@
 			buildPhases = (
 			);
 			buildToolPath = /usr/bin/make;
-			buildWorkingDirectory = /Users/benediktvogler/Projekte/ballpit;
+			buildWorkingDirectory = ./;
 			dependencies = (
 			);
 			name = makefile;

@@ -2,7 +2,7 @@
 
 This changelog keeps track of changes in a user-friendly way. It is based on [keep a changelog](https://keepachangelog.com/en/1.0.0/) by Olivier Lacan.
 
-## v1.0.0
+## [v1.0.0](https://github.com/molovol/MoloVol/releases/tag/v1.0.0) - 2021-09-14
 ### Added
 * Allow CIF files for structure input.
 * Add variants of selected space groups with rhombohedral/hexagonal or Origin-2 settings in the space_groups definition file.
