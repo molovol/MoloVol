@@ -175,6 +175,7 @@ CalcReportBundle Model::generateSurfaceData(){
   Ctrl::getInstance()->updateStatus("Calculating surface areas...");
   Ctrl::getInstance()->updateProgressBar(0);
 
+  // TODO: make this variable static
   std::vector<std::vector<char>> solid_types =
   { {0b00000011},
     {0b00000011, 0b00000101},

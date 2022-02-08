@@ -330,7 +330,7 @@ bool Voxel::isAtom(const Atom& atom, const Vector& pos_vxl, const double rad_vxl
     return true;
   }
   else if (dist < atom.getRad() + rad_vxl){ // if partially inside atom
-    if (readBit(_type,1)){return false;} // if inside atom
+    if (readBit(_type,1)){return false;} // if inside atom // TODO: this line may be unnecessary
     _type = 0b10000010;
   }
   else if ((dist < atom.getRad() + rad_probe - rad_vxl) && (0 < atom.getRad() + rad_probe - rad_vxl)){ // if outside atom but not touching potential probe core
@@ -636,7 +636,7 @@ bool Voxel::searchForCore(const std::array<unsigned int,3>& index, const unsigne
         // if the neighbour is within a safe distance
         if (n <= Voxel::s_search_indices.getSafeLim(lvl)){
           next_search_from_0 = true;
-          setType(shell_type);
+          setType(shell_type); // TODO: type is set only to be potentially reset
           if (!s_masking_mode && nb_vxl.getType() != 0b00001001){
             setType(0b10000000);
           }
