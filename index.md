@@ -3,35 +3,35 @@
 MoloVol is a free, cross-plattform, scientific software for volume and surface computations of single molecules and crystallographic unit cells.
 
 ## Utility
-With the MoloVol software we aim to combine an intuitive and easy-to-use user interface with powerful computing algorithms. We want the software to serve a broad range of scientist by being easily accessible on all common platforms.
+With MoloVol we aim to combine an intuitive and easy-to-use user interface with powerful computing algorithms. We want the software to serve a broad range of scientist by being easily accessible on all common platforms.
 
 The MoloVol software has been released. The software is being maintained and developed on Windows 10, macOS Big Sur, and Ubuntu.
 
 ## Download
 
-Compiled binaries of current and previous versions for Windows, macOS and Linux as well as a quick-start guide and the user manual can be found in the [Download installers](https://github.com/molovol/MoloVol/releases) section.
+Compiled binaries of current and previous versions for Windows, macOS and Linux as well as a quick-start guide and the user manual can be found in the [Download Installers](https://github.com/molovol/MoloVol/releases) section.
 
 New features and changes the current and all previous releases can be found in the [Changelog](https://github.com/molovol/MoloVol/blob/master/CHANGELOG.md).
 
 The source code of the current development build can be found in the [Github Repository](https://github.com/molovol/MoloVol).
 
-The source code for each stable release can be found with the installers (see above).
+The source code for each stable release can be found [with the installers](https://github.com/molovol/MoloVol/releases) as .zip or .tar.gz archives.
 
 ## Installation
 ### macOS
 You can download the application binary as .dmg file. Opening that file will mount it and open a window containing the application and your system's application folder. To install the application, simply drag it into the application folder.
 
-When opening MoloVol for the first time, a warning may appear saying that the application is from an unknown developer. This is because Apple requires a fee to registered as trusted developer. To get around the warning, you can navigate to your "Applications" folder and find the MoloVol executable. Right-click or control-click the executable and select "Open". You will be prompted with a dialog box where you will need to select "Open". [Apple's support website](https://support.apple.com/en-ie/guide/mac-help/mh40616/mac) provides a more detailed guide.
+When opening MoloVol for the first time, a warning may appear saying that the application is from an unknown developer. This is because Apple requires a fee to registered as trusted developer. To get around the warning, you can navigate to your "Applications" folder and find the MoloVol executable. Right-click or control-click the executable and select "Open". You will be prompted with a dialog box where you will need to select "Open" and add MoloVol as an exception. [Apple's support website](https://support.apple.com/en-ie/guide/mac-help/mh40616/mac) provides a more detailed guide.
 
 <img src="/docs/assets/images/macOS_error.png" width="200">
 
 ### Linux
-You can donwload an installation file as .deb file. This file format is used on Debian and Ubuntu. Installation for these systems should be as simple as opening the file; however, if you run into issues you can also run the installation from the command line.
+You can download an installation file as .deb file. This file format is used on Debian and Ubuntu. Installation for these systems should be as simple as opening the file; however, if you run into issues you can also run the installation from the command line.
 ```
 $ dpkg -i bin/MoloVol_debian_version.deb 
 ```
 
-Please note that we currently only provide the .deb file for arm64 CPU architectures. A such, it is possible that the installer will not work for you. In that case you could compile the application yourself by following [this guide](https://github.com/molovol/MoloVol/wiki/Getting-started-on-Linux).
+Please note that for older versions we only provide the .deb file for arm64 CPU architectures. As such, it is possible that the installer will not work for you. In that case you could compile the application yourself by following [this guide](https://github.com/molovol/MoloVol/wiki/Getting-started-on-Linux).
 ### Windows
 On windows, the application does not require an actual setup. The executable file and input files are all provided in a zip folder. Extract all files in any desired directory (note that "MoloVol.exe" and the "inputfile" folder should remain in the same directory) then start the program by running MoloVol.exe.
 
