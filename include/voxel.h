@@ -30,8 +30,8 @@ struct SearchIndex{
 class Space;
 class AtomTree;
 class FloodStack;
+class AtomNode;
 struct Atom;
-struct AtomNode;
 struct VoxelLoc;
 class Voxel{
   public:

@@ -1,3 +1,5 @@
+# THIS FILE WILL BE PHASED OUT IN FAVOUR OF CMAKE
+
 CC := g++
 SRCDIR := src
 BUILDDIR := build
@@ -28,8 +30,7 @@ TESTOBJECTS := $(patsubst $(TESTDIR)/%,$(TESTBUILDDIR)/%,$(TESTSOURCES:.$(SRCEXT
 
 DEBUGFLAGS := -O3 -g -D DEBUG
 RELEASEFLAGS := -O3
-CXXFLAGS := -std=c++17 -Wall -Werror 
-CFLAGS := -std=c++17 -Wno-unused-command-line-argument -Wno-invalid-source-encoding
+CXXFLAGS := -Xclang -fopenmp -lomp -std=c++17 -Wall -Werror -Wno-unused-command-line-argument -Wno-invalid-source-encoding
 
 WXCONFIGLIBS := $(shell wx-config --libs)
 WXCONFIGLIBS := $(WXCONFIGLIBS:-ltiff=/usr/local/opt/libtiff/lib/libtiff.a)
@@ -42,7 +43,6 @@ INC := -I include
 
 # DEVELOPMENT BUILD
 all: CXXFLAGS += $(DEBUGFLAGS)
-all: CFLAGS += $(DEBUGFLAGS)
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
@@ -52,11 +52,10 @@ $(TARGET): $(OBJECTS)
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	mkdir -p $(BUILDDIR)
-	$(CC) $(CFLAGS) $(INC) $(ARCHFLAG) -c `wx-config --cxxflags` -o $@ $<
+	$(CC) $(CXXFLAGS) $(INC) $(ARCHFLAG) -c `wx-config --cxxflags` -o $@ $<
 
 # RELEASE BUILD - SHOULD BE PLACED IN INSTALLER PACKAGE
 release: CXXFLAGS += $(RELEASEFLAGS)
-release: CFLAGS += $(RELEASEFLAGS)
 release: $(TARGET)
 
 # FOR UNIVERSAL BINARY ON MACOS
@@ -69,7 +68,7 @@ arm64_app: $(OBJECTS_ARM64)
 $(BUILDDIR_ARM64)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	@mkdir -p $(BUILDDIR)
 	@mkdir -p $(BUILDDIR_ARM64)
-	$(CC) $(CFLAGS) $(INC) $(ARCHFLAG) -c `wx-config --cxxflags` -o $@ $<
+	$(CC) $(CXXFLAGS) $(INC) $(ARCHFLAG) -c `wx-config --cxxflags` -o $@ $<
 
 x86_app: ARCHFLAG = $(X86FLAG)
 x86_app: $(OBJECTS_X86)
@@ -80,10 +79,9 @@ x86_app: $(OBJECTS_X86)
 $(BUILDDIR_X86)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	@mkdir -p $(BUILDDIR)
 	@mkdir -p $(BUILDDIR_X86)
-	$(CC) $(CFLAGS) $(INC) $(ARCHFLAG) -c `wx-config --cxxflags` -o $@ $<
+	$(CC) $(CXXFLAGS) $(INC) $(ARCHFLAG) -c `wx-config --cxxflags` -o $@ $<
 
 universal_app: CXXFLAGS += $(RELEASEFLAGS)
-universal_app: CFLAGS += $(RELEASEFLAGS)
 universal_app: x86_app arm64_app
 	@lipo -create -output $(TARGET) $(BINDIR)/x86_app $(BINDIR)/arm64_app
 
@@ -95,7 +93,6 @@ dmg_universal: dmg_entry
 
 # INSTALLER FOR MACOS
 appbundle: CXXFLAGS += $(MACOS_VERSIONFLAG)
-appbundle: CFLAGS += $(MACOS_VERSIONFLAG)
 appbundle: release
 appbundle: appbundle_entry
 appbundle_entry:
@@ -156,7 +153,7 @@ test: $(TESTOBJECTS)
 
 $(TESTBUILDDIR)/%.o: $(TESTDIR)/%.$(SRCEXT)
 	@mkdir -p $(TESTBUILDDIR)
-	$(CC) $(CFLAGS) $(INC) -c -o $@ $<
+	$(CC) $(CXXFLAGS) $(INC) -c -o $@ $<
 
 # REMOVE TEST DIRECTORY BINARIES
 cleantest:
