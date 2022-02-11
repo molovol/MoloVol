@@ -45,5 +45,9 @@ set(SOURCES
 )
 
 add_executable(MoloVol ${SOURCES})
-target_link_libraries(MoloVol PRIVATE ${wxWidgets_LIBRARIES})
-set_property(TARGET MoloVol PROPERTY CXX_STANDARD 20)
+
+string(REPLACE "-ltiff" "/usr/local/opt/libtiff//lib/libtiff.a" wxWidgets_LIBRARIES "${wxWidgets_LIBRARIES}")
+target_link_libraries(MoloVol ${wxWidgets_LIBRARIES})
+
+set_property(TARGET MoloVol PROPERTY CXX_STANDARD 17)
+
