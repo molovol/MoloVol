@@ -20,6 +20,8 @@ endif (CMAKE_BUILD_TYPE EQUAL "RELEASE")
 find_package(wxWidgets REQUIRED gl core base OPTIONAL_COMPONENTS net)
 include(${wxWidgets_USE_FILE})
 
+find_package(OpenMP)
+
 # Add include path, so that header files can be found
 include_directories(include)
 
@@ -49,10 +51,17 @@ set(SOURCES
   src/voxel.cpp
 )
 
+set(TEST_SOURCES
+  test/main.cpp
+)
+
 add_executable(MoloVol ${SOURCES})
+add_executable(test ${TEST_SOURCES})
 
 string(REPLACE "-ltiff" "/usr/local/opt/libtiff/lib/libtiff.a" wxWidgets_LIBRARIES "${wxWidgets_LIBRARIES}")
 target_link_libraries(MoloVol ${wxWidgets_LIBRARIES})
 
-set_property(TARGET MoloVol PROPERTY CXX_STANDARD 17)
+if(OpenMP_CXX_FOUND)
+  target_link_libraries(test PUBLIC OpenMP::OpenMP_CXX)
+endif()
 
