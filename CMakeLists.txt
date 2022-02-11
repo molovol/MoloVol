@@ -11,6 +11,11 @@ project(MoloVol VERSION 1.0.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+# Make universal binary
+if (CMAKE_BUILD_TYPE EQUAL "RELEASE")
+  set(CMAKE_OSX_ARCHITECTURES arm64;x86_64)
+endif (CMAKE_BUILD_TYPE EQUAL "RELEASE")
+
 # wxWidgets
 find_package(wxWidgets REQUIRED gl core base OPTIONAL_COMPONENTS net)
 include(${wxWidgets_USE_FILE})
@@ -19,7 +24,7 @@ include(${wxWidgets_USE_FILE})
 include_directories(include)
 
 # Compiler flag for development build
-add_compile_options("$<$<CONFIG:DEBUG>:-DDEBUG>")
+add_compile_options("$<$<NOT:$<CONFIG:RELEASE>>:-DDEBUG>")
 
 # List of source files
 set(SOURCES
@@ -46,7 +51,7 @@ set(SOURCES
 
 add_executable(MoloVol ${SOURCES})
 
-string(REPLACE "-ltiff" "/usr/local/opt/libtiff//lib/libtiff.a" wxWidgets_LIBRARIES "${wxWidgets_LIBRARIES}")
+string(REPLACE "-ltiff" "/usr/local/opt/libtiff/lib/libtiff.a" wxWidgets_LIBRARIES "${wxWidgets_LIBRARIES}")
 target_link_libraries(MoloVol ${wxWidgets_LIBRARIES})
 
 set_property(TARGET MoloVol PROPERTY CXX_STANDARD 17)
