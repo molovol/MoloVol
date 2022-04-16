@@ -60,14 +60,18 @@ def io():
             # read elements file
             if request.form.get("use_default_elements", "") != "on":
                 print("using custom elements file")
-                elements_path = manage_uploaded_file(request, "elements"):
+                elements_path = manage_uploaded_file(request, "elements")
                 args.append("-fe")
                 args.append(elements_path)
 
         else:
             args = request.args.get('cli-arguments', '').split(" ")
             inputdict = request.args
+        # with no parameters it will launch the gui
+        if len(args) == 0:
+            args.append("-h")
         try:
+            print("Starting process with args:", args)
             out = subprocess.check_output(["./launch_headless.sh"] + args, stderr=subprocess.STDOUT).decode(
                 "utf-8")
         except Exception as e:
