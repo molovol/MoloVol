@@ -14,13 +14,23 @@
 <h2>Input</h2>
 <form id="inputs" action="." method="post">
     <input type="text" id="radius" name="radius" size="4"
-           value="{{inputdict.get('radius', '1.2') if inputdict is defined else '1.2'}}"/><label for="radius">
+           value="{{ inputdict.get('radius', '1.2') if inputdict is defined else '1.2' }}"/><label for="radius">
     (Small) probe radius</label><br>
     <input type="text" id="grid" name="grid" size="4"
-           value="{{inputdict.get('grid','0.2') if inputdict is defined else '0.2'}}"><label for="grid">
+           value="{{ inputdict.get('grid','0.2') if inputdict is defined else '0.2' }}"><label for="grid">
     Spatial resolution of the underlying grid</label><br>
-    <input type="file" name="structure" id="structure"><label for="structure">Structure file</label>
-    <input type="file" name="elements" id="elements"><label for="elements">Elements file</label>
+    <label for="structure">Structure file</label><input type="file" name="structure" id="structure"><br>
+
+    <label for="elements">Elements file</label>
+    <input type="file" name="elements" id="elements">
+    <input type="hidden" name="lastelements" id="lastelements"
+           value="{{ inputdict.get('lastelements', '') if inputdict is defined else '' }}">
+    <input type="checkbox" id="use_default_elements" checked="checked" name="use_default_elements"/>
+    <label
+        for="use_default_elements">Use default elements file.</label><br>
+
+    <input type="hidden" name="laststructure" id="laststructure"
+           value="{{ inputdict.get('laststructure', '') if inputdict is defined else '' }}">
     <!-- Todo add dropdown to reuse last uploaded file
     <input type="text" id="path-structure" name="file-structure" placeholder="path" value="{{inputdict.get('file-strucutre','')}}"><label for="path-structure">Path to the
     structure file</label><br>
@@ -29,27 +39,27 @@
     <!--<input type="text" id="dir-output" name="dir-output" placeholder="path -do"
            value="{{inputdict.get('dir-output','')}}"><label for="dir-output">Path to the directory
     output</label><br>-->
-    <input type="checkbox" id="hetatm" name="hetatm"><label for="hetatm">Include HETATM from pdb file</label><br>
-    <input type="checkbox" id="unitcell" name="unitcell"><label for="unitcell">Analyze unit cell</label><br>
-    <input type="checkbox" id="surface" name="surface"><label for="surface">Calculate surface areas</label><br>
-    <input type="checkbox" id="export-report" name="export-report"><label for="export-report">Export report
+    <input type="checkbox" id="hetatm" name="cli_hetatm"><label for="hetatm">Include HETATM from pdb file</label><br>
+    <input type="checkbox" id="unitcell" name="cli_unitcell"><label for="unitcell">Analyze unit cell</label><br>
+    <input type="checkbox" id="surface" name="cli_surface"><label for="surface">Calculate surface areas</label><br>
+    <input type="checkbox" id="export-report" name="cli_export-report"><label for="export-report">Export report
     (requires:-do)</label><br>
-    <input type="checkbox" id="export-total" name="export-total"><label for="export-total">Export total surface map
+    <input type="checkbox" id="export-total" name="cli_export-total"><label for="export-total">Export total surface map
     (requires:-do)</label><br>
-    <input type="checkbox" id="export-cavities" name="export-cavities"><label for="export-cavities">Export surface maps
+    <input type="checkbox" id="export-cavities" name="cli_export-cavities"><label for="export-cavities">Export surface maps
     for all cavities (requires:-do)</label><br>
-    <input type="checkbox" id="output" name="output"><label for="output">Control what parts of the output to display
-    (default:all)</label><br>
-    <input type="checkbox" id="quiet" name="quiet"><label for="quiet">Silence progress reporting</label><br>
-    <input type="checkbox" id="unicode" name="unicode"><label for="unicode">Allow unicode in output</label><br>
+    <!--<input type="text" id="output" name="cli_output"><label for="output">Control what parts of the output to display
+    (default:all)</label><br>-->
+    <input type="checkbox" id="quiet" name="cli_quiet"><label for="quiet">Silence progress reporting</label><br>
+    <input type="checkbox" id="unicode" name="cli_unicode"><label for="unicode">Allow unicode in output</label><br>
     <input type="submit"/>
 </form>
 
 {% if returnvalues is not none %}
-<h2>Output</h2>
-<div id="outputbox">
-    <output name="result" for="inputs">{{returnvalues}}</output>
-</div>
+    <h2>Output</h2>
+    <div id="outputbox">
+        <output name="result" for="inputs">{{ returnvalues }}</output>
+    </div>
 {% endif %}
 </body>
 </html>
