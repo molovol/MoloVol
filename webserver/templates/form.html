@@ -12,9 +12,10 @@
 <body>
 <h1>MoloVol</h1>
 <h2>Input</h2>
-<form id="inputs" action="." method="post">
+<form id="inputs" action="." method="post" enctype=multipart/form-data>
 
-    <label for="structure">Structure file</label><input type="file" name="structure" id="structure"><br>
+    <label for="structure">Structure file</label>
+    <input type="file" name="structure" id="structure"><br>
 
     <label for="elements">Elements file</label>
     <input type="file" name="elements" id="elements">
@@ -34,10 +35,10 @@
            value="{{inputdict.get('dir-output','')}}"><label for="dir-output">Path to the directory
     output</label><br>-->
 
-    <input type="text" id="radius" name="radius" size="4"
+    <input type="text" id="radius" name="cli_radius" size="4"
            value="{{ inputdict.get('radius', '1.2') if inputdict is defined else '1.2' }}"/><label for="radius">
     (Small) probe radius</label><br>
-    <input type="text" id="grid" name="grid" size="4"
+    <input type="text" id="grid" name="cli_grid" size="4"
            value="{{ inputdict.get('grid','0.2') if inputdict is defined else '0.2' }}"><label for="grid">
     Spatial resolution of the underlying grid</label><br>
     <input type="checkbox" id="hetatm" name="cli_hetatm"><label for="hetatm">Include HETATM from pdb file</label><br>

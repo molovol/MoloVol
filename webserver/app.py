@@ -7,6 +7,12 @@ import subprocess
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+UPLOAD_FOLDER = './userupload/'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# check if upload folder exists and create if missing
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 ALLOWED_EXTENSIONS = {'xyz', 'pdb', 'txt', 'cif'}
 
@@ -25,8 +31,9 @@ def manage_uploaded_file(request, filetype="structure"):
         if structure_file.filename == '':
             out += "No selected file\n"
         if structure_file and allowed_file(structure_file.filename):
-            path = secure_filename(structure_file.filename)
-            structure_file.save(os.path.join(app.config['UPLOAD_FOLDER'], path))
+            path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(structure_file.filename))
+            structure_file.save(path)
+            return path
     if path is None:
         path = request.form.get(f"last{filetype}", None)
         if path is None:
@@ -46,7 +53,7 @@ def io():
             for key, value in request.form.items():
                 if not key.startswith("cli_"):
                     continue
-                key.removeprefix("cli_")
+                key = key.removeprefix("cli_")
                 args.append(f"--{key}")
                 if value != "":
                     args.append(str(value))
@@ -61,14 +68,17 @@ def io():
             if request.form.get("use_default_elements", "") != "on":
                 print("using custom elements file")
                 elements_path = manage_uploaded_file(request, "elements")
-                args.append("-fe")
-                args.append(elements_path)
+            else:
+                elements_path = "./inputfile/elements.txt"
+            args.append("-fe")
+            args.append(elements_path)
 
         else:
             args = request.args.get('cli-arguments', '').split(" ")
             inputdict = request.args
         # with no parameters it will launch the gui
         if len(args) == 0:
+            out += "No arguments given\n You must specify at least the structure file\n"
             args.append("-h")
         try:
             print("Starting process with args:", args)
