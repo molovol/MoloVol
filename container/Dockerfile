@@ -17,7 +17,7 @@ WORKDIR /
 COPY Makefile Makefile
 COPY src/ src/
 COPY include/ include/
-RUN make
+RUN make release
 COPY inputfile/ inputfile/
 
 #add flask webserver
