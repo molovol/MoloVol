@@ -1,4 +1,7 @@
-# THIS FILE WILL BE PHASED OUT IN FAVOUR OF CMAKE
+
+###################################################
+# THIS FILE WILL BE PHASED OUT IN FAVOUR OF CMAKE #
+###################################################
 
 CC := g++
 SRCDIR := src
