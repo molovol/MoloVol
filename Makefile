@@ -28,8 +28,8 @@ OBJECTS_X86 := $(patsubst $(SRCDIR)/%,$(BUILDDIR_X86)/%,$(SOURCES:.$(SRCEXT)=.o)
 TESTSOURCES := $(shell find $(TESTDIR) -type f -name *.$(SRCEXT))
 TESTOBJECTS := $(patsubst $(TESTDIR)/%,$(TESTBUILDDIR)/%,$(TESTSOURCES:.$(SRCEXT)=.o))
 
-DEBUGFLAGS := -O3 -g -D DEBUG
-RELEASEFLAGS := -O3
+DEBUGFLAGS := -O3 -g -DDEBUG
+RELEASEFLAGS := -O3 -DABS_PATH
 CXXFLAGS := -std=c++17 -Wall -Werror -Wno-unused-command-line-argument -Wno-invalid-source-encoding
 
 WXCONFIGLIBS := $(shell wx-config --libs)
