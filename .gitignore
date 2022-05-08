@@ -27,7 +27,6 @@ tags
 
 # Directory for quickly testing ideas
 test/
-!test/main.cpp
 
 # Directory containing script files for apptests
 apptests/

@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.20)
 # Custom options
 option(ABS_RESOURCE_PATH "Set a platform-dependant, absolute path to the resource directory" OFF)
 option(OSX_FAT_FILE "Make executable a fat file with architectures x86_64 and arm64" OFF)
+option(ENABLE_TEST "Add target 'test' to allow quick compilation of test/main.cpp" OFF)
 
 # Minimum macOS version, ignored on other platforms
 # Must be set before project()
@@ -57,10 +58,6 @@ set(SOURCES
   src/voxel.cpp
 )
 
-set(TEST_SOURCES
-  test/main.cpp
-)
-
 # Target MoloVol
 add_executable(MoloVol ${SOURCES})
 string(REPLACE "-ltiff" "/usr/local/opt/libtiff/lib/libtiff.a" wxWidgets_LIBRARIES "${wxWidgets_LIBRARIES}")
@@ -70,8 +67,14 @@ if(ABS_RESOURCE_PATH)
 endif()
 
 # Target test
-add_executable(test EXCLUDE_FROM_ALL ${TEST_SOURCES})
-if(OpenMP_CXX_FOUND)
-  target_link_libraries(test PUBLIC OpenMP::OpenMP_CXX)
+if(ENABLE_TEST)
+  set(TEST_SOURCES
+    test/main.cpp
+  )
+  
+  add_executable(test EXCLUDE_FROM_ALL ${TEST_SOURCES})
+  if(OpenMP_CXX_FOUND)
+    target_link_libraries(test PUBLIC OpenMP::OpenMP_CXX)
+  endif()
 endif()
 
