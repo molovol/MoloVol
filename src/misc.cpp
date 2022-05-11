@@ -5,7 +5,7 @@
 
 // access the resource folder containing elements.txt and space_groups.txt
 std::string getResourcesDir(){
-#if defined(__APPLE__) && !defined(DEBUG)
+#if defined(__APPLE__) && defined(ABS_PATH)
   CFURLRef resource_url = CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle());
   char resource_path[PATH_MAX];
   if (CFURLGetFileSystemRepresentation(resource_url, true, (UInt8 *)resource_path, PATH_MAX)){
@@ -15,7 +15,7 @@ std::string getResourcesDir(){
     return resource_path;
   }
   return "";
-#elif defined(__linux__) && !defined(DEBUG)
+#elif defined(__linux__) && defined(ABS_PATH)
   return "/usr/share/molovol";
 #else
   return "./inputfile";
