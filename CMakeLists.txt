@@ -23,7 +23,7 @@ endif()
 
 # wxWidgets
 set(wxWidgets_USE_STATIC=ON)
-find_package(wxWidgets REQUIRED gl core base OPTIONAL_COMPONENTS net)
+find_package(wxWidgets REQUIRED core base OPTIONAL_COMPONENTS net)
 include(${wxWidgets_USE_FILE})
 
 find_package(OpenMP)
