@@ -612,17 +612,16 @@ static const std::map<int, std::string> s_error_codes = {
   {903, "Elements file import failed. Calculation aborted."}
 };
 
+// Either print error message to GUI or command line
 void Ctrl::displayErrorMessage(const int error_code){
+  std::string msg = getErrorMessage(error_code);
+
   if (_to_gui){
-    s_gui->extOpenErrorDialog(error_code, getErrorMessage(error_code));
+    s_gui->extOpenErrorDialog(error_code, msg);
   }
   else{
-    printErrorMessage(error_code);
+    std::cout << error_code << ": " << msg << std::endl;
   }
-}
-
-void Ctrl::printErrorMessage(const int error_code){
-  std::cout << error_code << ": " << getErrorMessage(error_code) << std::endl;
 }
 
 std::string Ctrl::getErrorMessage(const int error_code){

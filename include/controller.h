@@ -48,7 +48,6 @@ class Ctrl{
     void updateCalculationStatus();
 
     void displayErrorMessage(const int);
-    void printErrorMessage(const int);
     // unit tests
     bool unittestExcluded();
     bool unittestProtein();

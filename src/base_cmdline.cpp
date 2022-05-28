@@ -90,7 +90,7 @@ void MainApp::evalCmdLine(){
     return;
   }
   // check if all required arguments are available
-  for (auto& arg_name : s_required_args){
+  for (const std::string& arg_name : s_required_args){
     if (!parser.Found(arg_name)){
       Ctrl::getInstance()->displayErrorMessage(901);
       return;
