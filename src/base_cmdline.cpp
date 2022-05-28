@@ -39,7 +39,7 @@ static const wxCmdLineEntryDesc s_cmd_line_desc[] =
   { wxCMD_LINE_NONE }
 };
 
-static const std::vector<std::string> s_required_args = {"r", "g", "fs"};
+static const std::vector<std::string> s_required_args = {"radius", "grid", "file-structure"};
 
 bool validateProbes(const double, const double, const bool);
 bool validateExport(const std::string, const std::vector<bool>);
