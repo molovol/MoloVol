@@ -47,8 +47,7 @@ class Ctrl{
     bool getAbortFlag();
     void updateCalculationStatus();
 
-    void displayErrorMessage(const int);
-    void printErrorMessage(const int);
+    void displayErrorMessage(const int, const std::vector<std::string>& =std::vector<std::string>());
     // unit tests
     bool unittestExcluded();
     bool unittestProtein();

@@ -39,7 +39,7 @@ static const wxCmdLineEntryDesc s_cmd_line_desc[] =
   { wxCMD_LINE_NONE }
 };
 
-static const std::vector<std::string> s_required_args = {"r", "g", "fs"};
+static const std::vector<std::string> s_required_args = {"radius", "grid", "file-structure"};
 
 bool validateProbes(const double, const double, const bool);
 bool validateExport(const std::string, const std::vector<bool>);
@@ -89,13 +89,33 @@ void MainApp::evalCmdLine(){
     }
     return;
   }
-  // check if all required arguments are available
-  for (auto& arg_name : s_required_args){
+  
+  // Check if all required arguments are available
+  std::vector<std::string> missing_args;
+  
+  for (const std::string& arg_name : s_required_args){
     if (!parser.Found(arg_name)){
-      Ctrl::getInstance()->displayErrorMessage(901);
-      return;
+      missing_args.push_back(arg_name);
     }
   }
+  
+  switch (missing_args.size()){
+    case (0):
+      break;
+    case (1):
+      Ctrl::getInstance()->displayErrorMessage(911, missing_args);
+      return;
+    case (2):
+      Ctrl::getInstance()->displayErrorMessage(912, missing_args);
+      return;
+    case (3):
+      Ctrl::getInstance()->displayErrorMessage(913, missing_args);
+      return;
+    default:
+      Ctrl::getInstance()->displayErrorMessage(914, missing_args);
+      return;
+  }
+  // All required arguments are available
 
   Ctrl::getInstance()->hush(parser.Found("q"));
 
