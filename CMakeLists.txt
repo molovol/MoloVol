@@ -17,7 +17,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Make universal binary
-if (OSX_FAT_FILE)
+if(OSX_FAT_FILE)
   set(CMAKE_OSX_ARCHITECTURES arm64;x86_64)
 endif()
 
@@ -57,10 +57,30 @@ set(SOURCES
   src/voxel.cpp
 )
 
+# Resource files
+if(NOT ABS_RESOURCE_PATH)
+  add_custom_target(copy-resource-files ALL
+    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --blue "Copying resource files to build directory"
+    COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_CURRENT_SOURCE_DIR}/inputfile/elements.txt
+      ${CMAKE_CURRENT_BINARY_DIR}/inputfile/elements.txt
+    COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_CURRENT_SOURCE_DIR}/inputfile/space_groups.txt
+      ${CMAKE_CURRENT_BINARY_DIR}/inputfile/space_groups.txt
+  )
+endif()
+
 # Target MoloVol
 add_executable(MoloVol ${SOURCES})
+  # XCode compatibility
+set_target_properties(MoloVol PROPERTIES
+  XCODE_GENERATE_SCHEME TRUE
+  XCODE_SCHEME_WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+)
+  # Library shenanigans
 string(REPLACE "-ltiff" "/usr/local/opt/libtiff/lib/libtiff.a" wxWidgets_LIBRARIES "${wxWidgets_LIBRARIES}")
 target_link_libraries(MoloVol ${wxWidgets_LIBRARIES})
+  # Add custom flag
 if(ABS_RESOURCE_PATH)
   target_compile_definitions(MoloVol PUBLIC -DABS_PATH)
 endif()
