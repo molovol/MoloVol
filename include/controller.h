@@ -48,13 +48,6 @@ class Ctrl{
     void updateCalculationStatus();
 
     void displayErrorMessage(const int, const std::vector<std::string>& =std::vector<std::string>());
-    // unit tests
-    bool unittestExcluded();
-    bool unittestProtein();
-    bool unittestRadius();
-    bool unittest2Probe();
-    bool unittestSurface();
-    bool unittestFloodfill();
 
   private:
     // consider making static pointer for model

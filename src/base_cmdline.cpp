@@ -34,7 +34,6 @@ static const wxCmdLineEntryDesc s_cmd_line_desc[] =
   { wxCMD_LINE_OPTION, "o", "output", "Control what parts of the output to display (default:all)", wxCMD_LINE_VAL_STRING},
   { wxCMD_LINE_SWITCH, "q", "quiet", "Silence progress reporting", wxCMD_LINE_VAL_NONE, 0},
   { wxCMD_LINE_SWITCH, "un", "unicode", "Allow unicode output", wxCMD_LINE_VAL_NONE},
-  { wxCMD_LINE_OPTION, "u", "unittest", "Run a pre-programmed unit test", wxCMD_LINE_VAL_STRING},
   { wxCMD_LINE_SWITCH, "v", "version", "Display the app version", wxCMD_LINE_VAL_NONE},
   { wxCMD_LINE_NONE }
 };
@@ -60,33 +59,6 @@ void MainApp::evalCmdLine(){
   // version
   if(parser.Found("v")){
     Ctrl::getInstance()->version();
-    return;
-  }
-  // unit tests
-  wxString unittest_id;
-  if (parser.Found("u",&unittest_id)){
-    std::cout << "Selected unit test: " << unittest_id << std::endl;
-    if (unittest_id=="excluded"){
-      Ctrl::getInstance()->unittestExcluded();
-    }
-    else if (unittest_id=="protein"){
-      Ctrl::getInstance()->unittestProtein();
-    }
-    else if (unittest_id=="radius"){
-      Ctrl::getInstance()->unittestRadius();
-    }
-    else if (unittest_id=="2probe"){
-      Ctrl::getInstance()->unittest2Probe();
-    }
-    else if (unittest_id=="surface"){
-      Ctrl::getInstance()->unittestSurface();
-    }
-    else if (unittest_id=="floodfill"){
-      Ctrl::getInstance()->unittestFloodfill();
-    }
-    else {
-      std::cout << "Invalid selection" << std::endl;
-    }
     return;
   }
   
