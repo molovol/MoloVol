@@ -140,8 +140,8 @@ class Model{
     std::unordered_map<std::string, double> _radius_map;
     std::unordered_map<std::string, double> _elem_weight;
     std::unordered_map<std::string, int> _elem_Z;
-    std::map<std::string, int> _atom_amounts;
-    std::map<std::string, int> _unit_cell_atom_amounts; // stores atoms of unit cell to generate chemical formula
+    std::map<std::string, int> _atom_count;
+    std::map<std::string, int> _unit_cell_atom_count; // stores atoms of unit cell to generate chemical formula
     std::vector<Atom> _atoms;
     Space _cell;
     double _max_atom_radius = 0;

@@ -137,7 +137,7 @@ bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
 }
 
 void Model::clearAtomData(){
-  _atom_amounts.clear();
+  _atom_count.clear();
   _raw_atom_coordinates.clear();
   _space_group = "";
   _sym_matrix_XYZ.clear();
@@ -163,7 +163,7 @@ void Model::readFileXYZ(const std::string& filepath){
       first_atom_line_encountered = true;
 
       const std::string valid_symbol = strToValidSymbol(substrings[0]);
-      _atom_amounts[valid_symbol]++; // adds one to counter for this symbol
+      _atom_count[valid_symbol]++; // adds one to counter for this symbol
 
       // Stores the full list of atom coordinates from the input file
       _raw_atom_coordinates.push_back(std::make_tuple(valid_symbol, std::stod(substrings[1]), std::stod(substrings[2]), std::stod(substrings[3])));
@@ -243,7 +243,7 @@ void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
         invalid_symbol_detected = true;
         continue;
       }
-      _atom_amounts[symbol]++; // adds one to counter for this symbol
+      _atom_count[symbol]++; // adds one to counter for this symbol
 
       // stores the full list of atom coordinates from the input file
       _raw_atom_coordinates.emplace_back(symbol, atom_line.ortho_coord[0], atom_line.ortho_coord[1], atom_line.ortho_coord[2]);
@@ -452,7 +452,7 @@ void Model::readFileCIF(const std::string& filepath){
 // used in unittest
 std::vector<std::string> Model::listElementsInStructure(){
   std::vector<std::string> list;
-  for (auto elem : _atom_amounts){
+  for (auto elem : _atom_count){
     list.push_back(elem.first);
   }
   return list;
@@ -558,7 +558,7 @@ bool Model::convertCifAtomsList(const std::vector<std::string> &atom_headers, co
 
     // get the element symbol and keep track of their number
     const std::string symbol = strToValidSymbol(substrings[param_pos[0]]);
-    _atom_amounts[symbol]++;
+    _atom_count[symbol]++;
 
     // store the full list of atom coordinates from the input file
     _raw_atom_coordinates.push_back(std::make_tuple(symbol, xyz[0], xyz[1], xyz[2]));

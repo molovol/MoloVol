@@ -163,8 +163,8 @@ void Model::prepareVolumeCalc(){
   // set size of the box containing all atoms
   defineCell();
 
-  _data.molar_mass = calcMolarMass(optionAnalyzeUnitCell()? _unit_cell_atom_amounts : _atom_amounts, _elem_weight);
-  _data.chemical_formula = generateChemicalFormula(optionAnalyzeUnitCell()? _unit_cell_atom_amounts : _atom_amounts, _data.included_elements);
+  _data.molar_mass = calcMolarMass(optionAnalyzeUnitCell()? _unit_cell_atom_count : _atom_count, _elem_weight);
+  _data.chemical_formula = generateChemicalFormula(optionAnalyzeUnitCell()? _unit_cell_atom_count : _atom_count, _data.included_elements);
   auto end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
 }
@@ -256,7 +256,7 @@ std::vector<std::tuple<std::string, int, double>> Model::generateAtomList(){
   // Element0: Element symbol
   // Element1: Number of Atoms with that symbol
   // Element2: Radius
-  for(auto elem : _atom_amounts){
+  for(auto elem : _atom_count){
     atoms_for_list.push_back(std::make_tuple(elem.first, elem.second, findRadiusOfAtom(elem.first)));
   }
   return atoms_for_list;
@@ -514,10 +514,10 @@ void Model::removeDuplicateAtoms(){
 
 // 4b) create chemical formula of a unit cell for report
 void Model::countAtomsInUnitCell(){
-  _unit_cell_atom_amounts.clear();
+  _unit_cell_atom_count.clear();
   for(size_t i = 0; i < _processed_atom_coordinates.size(); i++){
     std::string symbol = std::get<0>(_processed_atom_coordinates[i]);
-    _unit_cell_atom_amounts[symbol]++;
+    _unit_cell_atom_count[symbol]++;
   }
 }
 
