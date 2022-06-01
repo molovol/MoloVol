@@ -114,7 +114,12 @@ bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
   try{
     
     if (fileExtension(filepath) == "xyz"){
-      readFileXYZ(filepath);
+      const SPList sp_list = readFileXYZ(filepath);
+      for (const SymbolPositionPair& elem : sp_list){
+        _atom_count[elem.first]++;
+        _raw_atom_coordinates.push_back(
+            std::make_tuple(elem.first, elem.second[0], elem.second[1], elem.second[2]));
+      }
     }
     else if (fileExtension(filepath) == "pdb"){
       readFilePDB(filepath, include_hetatm);
@@ -146,20 +151,18 @@ void Model::clearAtomData(){
   }
 }
 
-void Model::readFileXYZ(const std::string& filepath){
-
+const typename Model::SPList Model::readFileXYZ(const std::string& filepath){
   // Validate and read atom line
   // If invalid, returns a pair, whose first value is an empty string
   auto readAtomLine = [](const std::string& line){
-    typedef std::pair<std::string,std::array<double,3>> symbol_pos_pair;
     
     // Atom lines have four entries, separated by one or more white spaces.
     const std::vector<std::string> substrings = splitLine(line);
-    if (substrings.size() != 4) {return symbol_pos_pair();}
+    if (substrings.size() != 4) {return SymbolPositionPair();}
     
     // If first item cannot be converted to a valid element symbol return false
     std::string symbol = strToValidSymbol(substrings[0]);
-    if (symbol.empty()){return symbol_pos_pair();}
+    if (symbol.empty()){return SymbolPositionPair();}
 
     // Validate second to fourth item are numeric
     std::array<double,3> position;
@@ -167,9 +170,9 @@ void Model::readFileXYZ(const std::string& filepath){
       try {
         size_t str_pos = 0; // Last string position successfully evaluated by std::stod()
         position[i-1] = std::stod(substrings[i], &str_pos);
-        if (substrings[i].size() != str_pos) {return symbol_pos_pair();}
+        if (substrings[i].size() != str_pos) {return SymbolPositionPair();}
       } 
-      catch (const std::invalid_argument& e) {return symbol_pos_pair();}
+      catch (const std::invalid_argument& e) {return SymbolPositionPair();}
     }
     return std::make_pair(symbol, position);
   };
@@ -179,10 +182,12 @@ void Model::readFileXYZ(const std::string& filepath){
 
   bool invalid_entry_encountered = false;
   bool first_atom_line_encountered = false;
+
+  SPList sp_list;
   while(getline(inp_file,line)){
     if (line.empty()){} // Skip blank lines in any case
-    const auto symbol_pos = readAtomLine(line);
-    if (symbol_pos.first.empty()){
+    const auto sp_pair = readAtomLine(line);
+    if (sp_pair.first.empty()){
       // Display an error if the atom lines are interrupted by a non-blank, non-atom line
       if (first_atom_line_encountered){
         invalid_entry_encountered = true;
@@ -191,14 +196,11 @@ void Model::readFileXYZ(const std::string& filepath){
     }
     first_atom_line_encountered = true;
 
-    _atom_count[symbol_pos.first]++; // Adds one to counter for this symbol
-
-    // Store the full list of atom coordinates from the input file
-    _raw_atom_coordinates.push_back(
-        std::make_tuple(symbol_pos.first, symbol_pos.second[0], symbol_pos.second[1], symbol_pos.second[2]));
+    sp_list.push_back(sp_pair);
   }
   inp_file.close();
   if (invalid_entry_encountered){Ctrl::getInstance()->displayErrorMessage(105);}
+  return sp_list;
 }
 
 void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
