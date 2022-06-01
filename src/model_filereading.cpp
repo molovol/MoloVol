@@ -113,9 +113,21 @@ bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
   clearAtomData();
 
   try{
-    readAtomFile(filepath, include_hetatm);
+    
+    if (fileExtension(filepath) == "xyz"){
+      readFileXYZ(filepath);
+    }
+    else if (fileExtension(filepath) == "pdb"){
+      readFilePDB(filepath, include_hetatm);
+    }
+    else if (fileExtension(filepath) == "cif"){
+      try{readFileCIF(filepath);}
+      catch (const ExceptInvalidCellParams& e){throw;}
+    }
+    else {throw ExceptIllegalFileExtension();}
+    return true;
+
   }
-  catch(const ExceptIllegalFileExtension& e) {throw;}
   catch(const ExceptInvalidCellParams& e) {throw;}
 
   if (_raw_atom_coordinates.size() == 0){ // If no atom is detected in the input file, the file is deemed invalid
@@ -133,22 +145,6 @@ void Model::clearAtomData(){
   for(int i = 0; i < 6; i++){
     _cell_param[i] = 0;
   }
-}
-
-bool Model::readAtomFile(const std::string& filepath, bool include_hetatm){
-
-  if (fileExtension(filepath) == "xyz"){
-    readFileXYZ(filepath);
-  }
-  else if (fileExtension(filepath) == "pdb"){
-    readFilePDB(filepath, include_hetatm);
-  }
-  else if (fileExtension(filepath) == "cif"){
-    try{readFileCIF(filepath);}
-    catch (const ExceptInvalidCellParams& e){throw;}
-  }
-  else {throw ExceptIllegalFileExtension();}
-  return true;
 }
 
 void Model::readFileXYZ(const std::string& filepath){
