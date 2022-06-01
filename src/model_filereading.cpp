@@ -17,7 +17,6 @@
 // AUX FUNCTION DECLARATIONS //
 ///////////////////////////////
 
-bool isAtomLine(const std::vector<std::string>& substrings);
 std::string strToValidSymbol(std::string str);
 static inline std::vector<std::string> splitLine(const std::string& line);
 
@@ -148,31 +147,55 @@ void Model::clearAtomData(){
 }
 
 void Model::readFileXYZ(const std::string& filepath){
+
+  // Validate and read atom line
+  // If invalid, returns a pair, whose first value is an empty string
+  auto readAtomLine = [](const std::string& line){
+    typedef std::pair<std::string,std::array<double,3>> symbol_pos_pair;
+    
+    // Atom lines have four entries, separated by one or more white spaces.
+    const std::vector<std::string> substrings = splitLine(line);
+    if (substrings.size() != 4) {return symbol_pos_pair();}
+    
+    // If first item cannot be converted to a valid element symbol return false
+    std::string symbol = strToValidSymbol(substrings[0]);
+    if (symbol.empty()){return symbol_pos_pair();}
+
+    // Validate second to fourth item are numeric
+    std::array<double,3> position;
+    for (size_t i=1; i<4; ++i){
+      try {
+        size_t str_pos = 0; // Last string position successfully evaluated by std::stod()
+        position[i-1] = std::stod(substrings[i], &str_pos);
+        if (substrings[i].size() != str_pos) {return symbol_pos_pair();}
+      } 
+      catch (const std::invalid_argument& e) {return symbol_pos_pair();}
+    }
+    return std::make_pair(symbol, position);
+  };
+
   std::string line;
   std::ifstream inp_file(filepath);
 
   bool invalid_entry_encountered = false;
   bool first_atom_line_encountered = false;
   while(getline(inp_file,line)){
-    std::vector<std::string> substrings = splitLine(line);
-    // substrings[0]: Element Symbol
-    // substrings[1,2,3]: Coordinates
-    // create new atom and add to storage vector if line format corresponds to Element_Symbol x y z
-    if (substrings.empty()){} // skip blank lines
-    else if (isAtomLine(substrings)) {
-      first_atom_line_encountered = true;
-
-      const std::string valid_symbol = strToValidSymbol(substrings[0]);
-      _atom_count[valid_symbol]++; // adds one to counter for this symbol
-
-      // Stores the full list of atom coordinates from the input file
-      _raw_atom_coordinates.push_back(std::make_tuple(valid_symbol, std::stod(substrings[1]), std::stod(substrings[2]), std::stod(substrings[3])));
+    if (line.empty()){} // Skip blank lines in any case
+    const auto symbol_pos = readAtomLine(line);
+    if (symbol_pos.first.empty()){
+      // Display an error if the atom lines are interrupted by a non-blank, non-atom line
+      if (first_atom_line_encountered){
+        invalid_entry_encountered = true;
+      }
+      continue;
     }
-    else {
-      // due to the .xyz format the first few lines may not be atom entries. an error should only be detected,
-      // after the first valid atom entry has been encountered
-      if (first_atom_line_encountered){invalid_entry_encountered = true;}
-    }
+    first_atom_line_encountered = true;
+
+    _atom_count[symbol_pos.first]++; // Adds one to counter for this symbol
+
+    // Store the full list of atom coordinates from the input file
+    _raw_atom_coordinates.push_back(
+        std::make_tuple(symbol_pos.first, symbol_pos.second[0], symbol_pos.second[1], symbol_pos.second[2]));
   }
   inp_file.close();
   if (invalid_entry_encountered){Ctrl::getInstance()->displayErrorMessage(105);}
@@ -637,44 +660,15 @@ static inline std::vector<std::string> splitLine(const std::string& line){
   return substrings;
 }
 
-// check if a vector of substrings has the format of an atom line
-bool isAtomLine(const std::vector<std::string>& substrings) {
-  // atom lines must have four items
-  if (substrings.size() != 4) {return false;}
-  // if first item cannot be converted to a valid element symbol return false
-  if (strToValidSymbol(substrings[0]).empty()){return false;}
-  for (char i=1; i<4; i++){
-    // check whether subsequent items can be converted to a number
-    try {
-      size_t str_pos = 0; // will contain the last position in the string that was successfully evaluated by std::stod()
-      std::stod(substrings[i], &str_pos);
-      if (substrings[i].size() != str_pos) {return false;}
-    }
-    catch (const std::invalid_argument& e) {return false;}
-  }
-  return true;
-}
-
-// reads a string and converts it to valid atom symbol: first character uppercase followed by lowercase characters
+// Reads a string and converts it to valid atom symbol: first character uppercase followed by lowercase characters
 std::string strToValidSymbol(std::string str){
-  // return empty if str is empty
-  if (str.size() == 0){return "";}
-  else{
-    // return empty if str begins with non-alphabetic character
-    if (!isalpha(str[0])){return "";}
-    // only for first character in sequence, convert to uppercase
-    else {str[0] = toupper(str[0]);}
-  }
-  // iterate over all characters in string
+  // Return empty if str is empty or begins with non-alphabetic character
+  if (str.size() == 0 || !isalpha(str[0])){return "";}
+  // Only for first character in sequence, convert to uppercase
+  str[0] = toupper(str[0]);
   for (size_t i = 1; i < str.size(); i++) {
-    // convert to lowercase
     if (isalpha(str[i])) {
       str[i] = tolower(str[i]);
-    }
-    // allow underscores inside element symbols for custom symbols
-    //else if (str[i] == '_') {}
-    else { // Remove number or charges from atoms so that "Pd2+" becomes "Pd"
-      str.erase(i, str.size());
     }
   }
   return str;
