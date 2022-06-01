@@ -114,11 +114,11 @@ bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
   try{
     
     if (fileExtension(filepath) == "xyz"){
-      const SPList sp_list = readFileXYZ(filepath);
-      for (const SymbolPositionPair& elem : sp_list){
-        _atom_count[elem.first]++;
+      const std::vector<Atom> atom_list = readFileXYZ(filepath);
+      for (const Atom& elem : atom_list){
+        _atom_count[elem.symbol]++;
         _raw_atom_coordinates.push_back(
-            std::make_tuple(elem.first, elem.second[0], elem.second[1], elem.second[2]));
+            std::make_tuple(elem.symbol, elem.pos_x, elem.pos_y, elem.pos_z));
       }
     }
     else if (fileExtension(filepath) == "pdb"){
@@ -151,7 +151,7 @@ void Model::clearAtomData(){
   }
 }
 
-const typename Model::SPList Model::readFileXYZ(const std::string& filepath){
+const std::vector<Atom> Model::readFileXYZ(const std::string& filepath){
   // Validate and read atom line
   // If invalid, returns a pair, whose first value is an empty string
   auto readAtomLine = [](const std::string& line){
@@ -183,7 +183,7 @@ const typename Model::SPList Model::readFileXYZ(const std::string& filepath){
   bool invalid_entry_encountered = false;
   bool first_atom_line_encountered = false;
 
-  SPList sp_list;
+  std::vector<Atom> atom_list;
   while(getline(inp_file,line)){
     if (line.empty()){} // Skip blank lines in any case
     const auto sp_pair = readAtomLine(line);
@@ -196,11 +196,11 @@ const typename Model::SPList Model::readFileXYZ(const std::string& filepath){
     }
     first_atom_line_encountered = true;
 
-    sp_list.push_back(sp_pair);
+    atom_list.push_back(Atom(sp_pair));
   }
   inp_file.close();
   if (invalid_entry_encountered){Ctrl::getInstance()->displayErrorMessage(105);}
-  return sp_list;
+  return atom_list;
 }
 
 void Model::readFilePDB(const std::string& filepath, bool include_hetatm){

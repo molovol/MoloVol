@@ -67,7 +67,6 @@ struct Atom;
 class Space;
 class Model{
   typedef std::pair<std::string,std::array<double,3>> SymbolPositionPair;
-  typedef std::vector<SymbolPositionPair> SPList;
   public:
     // elements file import
     bool importElemFile(const std::string&);
@@ -75,7 +74,7 @@ class Model{
     // atom file import
     bool readAtomsFromFile(const std::string&, bool);
     void clearAtomData();
-    const SPList readFileXYZ(const std::string&);
+    const std::vector<Atom> readFileXYZ(const std::string&);
     void readFilePDB(const std::string&, bool);
     void readFileCIF(const std::string&);
 
