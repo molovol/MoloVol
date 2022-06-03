@@ -122,7 +122,12 @@ bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
       }
     }
     else if (fileExtension(filepath) == "pdb"){
-      readFilePDB(filepath, include_hetatm);
+      const std::vector<Atom> atom_list = readFilePDB(filepath, include_hetatm);
+      for (const Atom& elem : atom_list){
+        _atom_count[elem.symbol]++;
+        _raw_atom_coordinates.push_back(
+            std::make_tuple(elem.symbol, elem.pos_x, elem.pos_y, elem.pos_z));
+      }
     }
     else if (fileExtension(filepath) == "cif"){
       try{readFileCIF(filepath);}
@@ -151,7 +156,7 @@ void Model::clearAtomData(){
   }
 }
 
-const std::vector<Atom> Model::readFileXYZ(const std::string& filepath){
+std::vector<Atom> Model::readFileXYZ(const std::string& filepath){
   // Validate and read atom line
   // If invalid, returns a pair, whose first value is an empty string
   auto readAtomLine = [](const std::string& line){
@@ -203,36 +208,59 @@ const std::vector<Atom> Model::readFileXYZ(const std::string& filepath){
   return atom_list;
 }
 
-void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
-  // struct for extracting data from lines. defined here, because it is only needed here
-  struct AtomLinePDB {
-    AtomLinePDB() = default;
-    AtomLinePDB(const std::string& line){
+std::vector<Atom> Model::readFilePDB(const std::string& filepath, bool include_hetatm){
+  // Struct for parsing and storing data from ATOM and HETATM lines in PDB files.
+  // Follows the official specifications for PDB files as detailed in "Protein 
+  // Data Bank Contents Guide: Atomic Coordinate Entry Format Description" Version 3.3
+  // http://www.wwpdb.org/documentation/file-format-content/format33/v3.3.html
+  struct AtomLineInfo {
+    AtomLineInfo() = default;
+    AtomLineInfo(const std::string& line){
+      // Validate line
+      if (line.size() < 80){
+        valid = false;
+        return;
+      }
+      valid = true;
+      // Record name
       record_name = line.substr(0,6);
       assert (record_name == "ATOM  " || record_name == "HETATM");
+      // Atom serial number
       try{serial_no = std::stoi(line.substr(6,5));}
       catch (const std::invalid_argument& e){serial_no=0;}
+      // Atom name
       name = line.substr(12,4);
+      // Alternate location indicator
       alt_loc = line[16];
+      // Residue sequence number
       res_name = line.substr(17,3);
+      // Chain identifier
       chain_id = line[21];
+      // Residue sequence number
       try{res_seq = std::stoi(line.substr(22,4));}
       catch (const std::invalid_argument& e){res_seq=0;}
+      // Code for insertion of residues
       insert_code = line[26];
+      // Orthogonal coordinates X, Y, and Z in AAngstrom
       for (int i = 0; i < 3; ++i){
         ortho_coord[i] = std::stod(line.substr(30+i*8,8));
       }
+      // Occupancy
       try{occupancy = std::stod(line.substr(54,6));}
       catch (const std::invalid_argument& e){occupancy=0;}
+      // Temperature factor
       try{temp_factor = std::stod(line.substr(60,6));}
       catch (const std::invalid_argument& e){temp_factor=0;}
+      // Element symbol, right justified
       element_symbol = line.substr(76,2);
-      // some software generate pdb files with symbol left-justified instead of right-justified
-      // therefore, it is better to check both characters and erase any white space
+      // Some software generate pdb files with symbol left-justified instead of right-justified
+      // Therefore, it is better to erase any white space
       removeWhiteSpaces(element_symbol);
+      // Charge on the Atom
       charge = line.substr(78,2);
       removeEOL(charge);
     }
+    bool valid;
     std::string record_name;
     int serial_no;
     std::string name;
@@ -248,32 +276,43 @@ void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
     std::string charge;
   };
 
+  auto extractRecordName = [](std::string line){
+    line = line.substr(0,6);
+    removeWhiteSpaces(line);
+    return line;
+  };
+
   std::string line;
   std::ifstream inp_file(filepath);
   bool invalid_symbol_detected = false;
   bool invalid_cell_params = false;
   bool invalid_atom_line = false;
-  // iterate through lines
+  
+  std::vector<Atom> atom_list;
   while(getline(inp_file,line)){
-    const std::string record_name = line.substr(0,6);
-    if (record_name == "ATOM  " || (include_hetatm && record_name == "HETATM")){
-      AtomLinePDB atom_line;
-      try {atom_line = AtomLinePDB(line);} // extract all information from line
-      catch (const std::invalid_argument& e){ // detect invalid line
+    if (extractRecordName(line) == "ATOM" || (include_hetatm && extractRecordName(line) == "HETATM")){
+      
+      AtomLineInfo atom_line;
+      try {
+        atom_line = AtomLineInfo(line);
+      }
+      catch (const std::invalid_argument& e){
+        // No error should ever occur here
         invalid_atom_line = true;
         continue;
       }
+      if (!atom_line.valid){continue;}
+
       std::string symbol = strToValidSymbol(atom_line.element_symbol);
       if (symbol.empty()) {
         invalid_symbol_detected = true;
         continue;
       }
-      _atom_count[symbol]++; // adds one to counter for this symbol
+  
+      atom_list.push_back(Atom(std::make_pair(symbol, atom_line.ortho_coord)));
 
-      // stores the full list of atom coordinates from the input file
-      _raw_atom_coordinates.emplace_back(symbol, atom_line.ortho_coord[0], atom_line.ortho_coord[1], atom_line.ortho_coord[2]);
     }
-    else if (record_name == "CRYST1"){
+    else if (extractRecordName(line) == "CRYST1"){
       // for the last substring (space group) mercury recognizes only 10 chars but official PDB format is 11 chars
       std::vector<std::string> substrings = {line.substr(6,9), line.substr(15,9), line.substr(24,9), line.substr(33,7), line.substr(40,7), line.substr(47,7), line.substr(55,11)};
       removeEOL(substrings[6]);
@@ -290,6 +329,7 @@ void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
   if (invalid_symbol_detected){Ctrl::getInstance()->displayErrorMessage(105);}
   if (invalid_cell_params){Ctrl::getInstance()->displayErrorMessage(112);}
   if (invalid_atom_line){Ctrl::getInstance()->displayErrorMessage(114);}
+  return atom_list;
 }
 
 // this function will successfully extract data from standard cif files such as those generated by Mercury program

@@ -74,8 +74,8 @@ class Model{
     // atom file import
     bool readAtomsFromFile(const std::string&, bool);
     void clearAtomData();
-    const std::vector<Atom> readFileXYZ(const std::string&);
-    void readFilePDB(const std::string&, bool);
+    std::vector<Atom> readFileXYZ(const std::string&);
+    std::vector<Atom> readFilePDB(const std::string&, bool);
     void readFileCIF(const std::string&);
 
     // export
