@@ -224,11 +224,10 @@ std::vector<Atom> Model::readFilePDB(const std::string& filepath, bool include_h
     {"beta", {40, 7}}, {"gamma", {47, 7}}, {"sGroup", {55, 11}}, {"z", {66, 4}}};
 
   auto sectionFields = [](std::string line, const FieldColumns& field_map){
-    removeEOL(line);
     // line may be shorter than specified by the PDB standard, but still valid if
     // only whitespace characters are missing. Append whitespaces to line until it
     // has the correct length and valid date the content later
-    extendToLength(line,field_map.at("lineLength").second);
+    StrMngr::extendToLength(line,field_map.at("lineLength").second);
 
     std::map<std::string,std::string> fields;
     for (const auto& entry : field_map){
@@ -240,9 +239,9 @@ std::vector<Atom> Model::readFilePDB(const std::string& filepath, bool include_h
 
   auto extractRecordName = [](std::string line){
     // Make sure line is at least 6 characters long
-    extendToLength(line, 6);
+    StrMngr::extendToLength(line, 6);
     line = line.substr(0,6);
-    removeWhiteSpaces(line);
+    StrMngr::removeWhiteSpaces(line);
     return line;
   };
 
@@ -254,7 +253,7 @@ std::vector<Atom> Model::readFilePDB(const std::string& filepath, bool include_h
 
   std::vector<Atom> atom_list;
   while(getline(inp_file,line)){
-    removeEOL(line);
+    StrMngr::removeEOL(line);
     if (extractRecordName(line) == "ATOM" || (include_hetatm && extractRecordName(line) == "HETATM")){
       // Partition line according to the fields specified by the PDB file standard
       const std::map<std::string,std::string> fields = sectionFields(line, atom_fields);
@@ -296,7 +295,7 @@ std::vector<Atom> Model::readFilePDB(const std::string& filepath, bool include_h
         ++i;
       }
       _space_group = fields.at("sGroup");
-      removeWhiteSpaces(_space_group);
+      StrMngr::removeWhiteSpaces(_space_group);
     }
   }
   // file has been read
@@ -338,8 +337,8 @@ void Model::readFileCIF(const std::string& filepath){
     // in cif files white_space are sometimes meaningful, sometimes not
     // thus, it is convenient to have a copy of a cif line with no white_space
     no_ws_line = line;
-    removeWhiteSpaces(no_ws_line);
-    removeEOL(no_ws_line);
+    StrMngr::removeWhiteSpaces(no_ws_line);
+    StrMngr::removeEOL(no_ws_line);
 
     if(no_ws_line[0] == '#' || no_ws_line.empty()){continue;} // skip comment and empty lines
 
@@ -679,8 +678,8 @@ static inline std::vector<std::string> splitLine(const std::string& line){
 
 // Reads a string and converts it to valid atom symbol: first character uppercase followed by lowercase characters
 std::string strToValidSymbol(std::string str){
-  removeWhiteSpaces(str);
-  removeEOL(str);
+  StrMngr::removeWhiteSpaces(str);
+  StrMngr::removeEOL(str);
   // Return empty if str is empty or begins with non-alphabetic character
   if (str.size() == 0 || !isalpha(str[0])){return "";}
   // Only for first character in sequence, convert to uppercase
