@@ -71,6 +71,11 @@ void removeWhiteSpaces(std::string& str){
   str.erase(std::remove(str.begin(), str.end(), ' '), str.end());
 }
 
+void extendToLength(std::string& str, size_t len){
+  if (len <= str.size()){return;}
+  str += std::string(len - str.size(), ' ');
+}
+
 std::string field(int n_ws, std::string text, char alignment){
   std::stringstream ss;
   if (alignment == 'r'){

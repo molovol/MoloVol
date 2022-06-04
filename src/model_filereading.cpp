@@ -209,74 +209,38 @@ std::vector<Atom> Model::readFileXYZ(const std::string& filepath){
 }
 
 std::vector<Atom> Model::readFilePDB(const std::string& filepath, bool include_hetatm){
-  // Struct for parsing and storing data from ATOM and HETATM lines in PDB files.
   // Follows the official specifications for PDB files as detailed in "Protein 
   // Data Bank Contents Guide: Atomic Coordinate Entry Format Description" Version 3.3
   // http://www.wwpdb.org/documentation/file-format-content/format33/v3.3.html
-  struct AtomLineInfo {
-    AtomLineInfo() = default;
-    AtomLineInfo(const std::string& line){
-      // Validate line
-      if (line.size() < 80){
-        valid = false;
-        return;
-      }
-      valid = true;
-      // Record name
-      record_name = line.substr(0,6);
-      assert (record_name == "ATOM  " || record_name == "HETATM");
-      // Atom serial number
-      try{serial_no = std::stoi(line.substr(6,5));}
-      catch (const std::invalid_argument& e){serial_no=0;}
-      // Atom name
-      name = line.substr(12,4);
-      // Alternate location indicator
-      alt_loc = line[16];
-      // Residue sequence number
-      res_name = line.substr(17,3);
-      // Chain identifier
-      chain_id = line[21];
-      // Residue sequence number
-      try{res_seq = std::stoi(line.substr(22,4));}
-      catch (const std::invalid_argument& e){res_seq=0;}
-      // Code for insertion of residues
-      insert_code = line[26];
-      // Orthogonal coordinates X, Y, and Z in AAngstrom
-      for (int i = 0; i < 3; ++i){
-        ortho_coord[i] = std::stod(line.substr(30+i*8,8));
-      }
-      // Occupancy
-      try{occupancy = std::stod(line.substr(54,6));}
-      catch (const std::invalid_argument& e){occupancy=0;}
-      // Temperature factor
-      try{temp_factor = std::stod(line.substr(60,6));}
-      catch (const std::invalid_argument& e){temp_factor=0;}
-      // Element symbol, right justified
-      element_symbol = line.substr(76,2);
-      // Some software generate pdb files with symbol left-justified instead of right-justified
-      // Therefore, it is better to erase any white space
-      removeWhiteSpaces(element_symbol);
-      // Charge on the Atom
-      charge = line.substr(78,2);
-      removeEOL(charge);
+  typedef std::map<std::string,std::pair<int,int>> FieldColumns;
+  const FieldColumns atom_fields = {
+    {"lineLength", {0,80}}, {"record", {0, 6}}, {"serial", {6, 5}}, {"name", {12, 4}}, {"altLoc", {16, 1}}, 
+    {"resName", {17, 3}}, {"chainID", {21, 1}}, {"resSeq", {22, 4}}, {"iCode", {26, 1}}, 
+    {"x", {30, 8}}, {"y", {38, 8}}, {"z", {46, 8}}, {"occupancy", {54, 6}}, {"tempFactor", {60, 6}}, 
+    {"element", {76, 2}}, {"charge", {78, 2}}};
+
+  const FieldColumns cryst1_fields = {
+    {"lineLength", {0, 70}}, {"record", {0, 6}}, {"a", {6, 9}}, {"b", {15, 9}}, {"c", {24, 9}}, {"alpha", {33, 7}},
+    {"beta", {40, 7}}, {"gamma", {47, 7}}, {"sGroup", {55, 11}}, {"z", {66, 4}}};
+
+  auto sectionFields = [](std::string line, const FieldColumns& field_map){
+    removeEOL(line);
+    // line may be shorter than specified by the PDB standard, but still valid if
+    // only whitespace characters are missing. Append whitespaces to line until it
+    // has the correct length and valid date the content later
+    extendToLength(line,field_map.at("lineLength").second);
+
+    std::map<std::string,std::string> fields;
+    for (const auto& entry : field_map){
+      if (entry.first == "lineLength"){continue;}
+      fields[entry.first] = line.substr(entry.second.first, entry.second.second);
     }
-    bool valid;
-    std::string record_name;
-    int serial_no;
-    std::string name;
-    char alt_loc;
-    std::string res_name;
-    char chain_id;
-    int res_seq;
-    char insert_code;
-    std::array<double,3> ortho_coord;
-    double occupancy;
-    double temp_factor;
-    std::string element_symbol;
-    std::string charge;
+    return fields;
   };
 
   auto extractRecordName = [](std::string line){
+    // Make sure line is at least 6 characters long
+    extendToLength(line, 6);
     line = line.substr(0,6);
     removeWhiteSpaces(line);
     return line;
@@ -287,40 +251,51 @@ std::vector<Atom> Model::readFilePDB(const std::string& filepath, bool include_h
   bool invalid_symbol_detected = false;
   bool invalid_cell_params = false;
   bool invalid_atom_line = false;
-  
+
   std::vector<Atom> atom_list;
   while(getline(inp_file,line)){
+    removeEOL(line);
     if (extractRecordName(line) == "ATOM" || (include_hetatm && extractRecordName(line) == "HETATM")){
-      
-      AtomLineInfo atom_line;
-      try {
-        atom_line = AtomLineInfo(line);
-      }
-      catch (const std::invalid_argument& e){
-        // No error should ever occur here
-        invalid_atom_line = true;
-        continue;
-      }
-      if (!atom_line.valid){continue;}
+      // Partition line according to the fields specified by the PDB file standard
+      const std::map<std::string,std::string> fields = sectionFields(line, atom_fields);
 
-      std::string symbol = strToValidSymbol(atom_line.element_symbol);
-      if (symbol.empty()) {
+      // Evaluate atom symbol
+      std::string symbol = strToValidSymbol(fields.at("name"));
+      if (symbol.empty()){
         invalid_symbol_detected = true;
         continue;
       }
-  
-      atom_list.push_back(Atom(std::make_pair(symbol, atom_line.ortho_coord)));
+      
+      // Evaluate atom coordinates
+      std::array<double,3> coord;
+      size_t i = 0;
+      bool invalid_coord = false;
+      for (std::string k : {"x", "y", "z"}){
+        try{coord[i] = std::stod(fields.at(k));}
+        catch (const std::invalid_argument& e){
+          invalid_coord = true;
+          invalid_atom_line = true;
+          break;
+        }
+        ++i;
+      }
+      if (invalid_coord){continue;}
 
+      // Store symbol and coordinates
+      atom_list.push_back(Atom(std::make_pair(symbol, coord)));
     }
     else if (extractRecordName(line) == "CRYST1"){
-      // for the last substring (space group) mercury recognizes only 10 chars but official PDB format is 11 chars
-      std::vector<std::string> substrings = {line.substr(6,9), line.substr(15,9), line.substr(24,9), line.substr(33,7), line.substr(40,7), line.substr(47,7), line.substr(55,11)};
-      removeEOL(substrings[6]);
-      for (size_t i = 0; i < substrings.size()-1; ++i){
-        try{_cell_param[i] = std::stod(substrings[i]);}
+      // Partition line according to the fields specified by the PDB file standard
+      const std::map<std::string,std::string> fields = sectionFields(line, cryst1_fields);
+
+      // Evaluate unit cell parameters
+      size_t i = 0;
+      for (std::string k : {"a", "b", "c", "alpha", "beta", "gamma"}){
+        try{_cell_param[i] = std::stod(fields.at(k));}
         catch (const std::invalid_argument& e){invalid_cell_params = true;}
+        ++i;
       }
-      _space_group = substrings[6];
+      _space_group = fields.at("sGroup");
       removeWhiteSpaces(_space_group);
     }
   }
@@ -704,6 +679,8 @@ static inline std::vector<std::string> splitLine(const std::string& line){
 
 // Reads a string and converts it to valid atom symbol: first character uppercase followed by lowercase characters
 std::string strToValidSymbol(std::string str){
+  removeWhiteSpaces(str);
+  removeEOL(str);
   // Return empty if str is empty or begins with non-alphabetic character
   if (str.size() == 0 || !isalpha(str[0])){return "";}
   // Only for first character in sequence, convert to uppercase

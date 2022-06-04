@@ -57,6 +57,7 @@ int pow2(int);
 
 void removeEOL(std::string& str);
 void removeWhiteSpaces(std::string& str);
+void extendToLength(std::string& str, size_t);
 
 inline double custom_fmod(double numer, double denom){
   return (numer - int((numer/denom)) * denom);
