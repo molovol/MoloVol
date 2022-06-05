@@ -225,13 +225,13 @@ std::pair<std::vector<Atom>,UnitCell> Model::readFilePDB(const std::string& file
   // Data Bank Contents Guide: Atomic Coordinate Entry Format Description" Version 3.3
   // http://www.wwpdb.org/documentation/file-format-content/format33/v3.3.html
   typedef std::map<std::string,std::pair<int,int>> FieldColumns;
-  const FieldColumns atom_fields = {
+  static const FieldColumns atom_fields = {
     {"lineLength", {0,80}}, {"record", {0, 6}}, {"serial", {6, 5}}, {"name", {12, 4}}, {"altLoc", {16, 1}}, 
     {"resName", {17, 3}}, {"chainID", {21, 1}}, {"resSeq", {22, 4}}, {"iCode", {26, 1}}, 
     {"x", {30, 8}}, {"y", {38, 8}}, {"z", {46, 8}}, {"occupancy", {54, 6}}, {"tempFactor", {60, 6}}, 
     {"element", {76, 2}}, {"charge", {78, 2}}};
 
-  const FieldColumns cryst1_fields = {
+  static const FieldColumns cryst1_fields = {
     {"lineLength", {0, 70}}, {"record", {0, 6}}, {"a", {6, 9}}, {"b", {15, 9}}, {"c", {24, 9}}, {"alpha", {33, 7}},
     {"beta", {40, 7}}, {"gamma", {47, 7}}, {"sGroup", {55, 11}}, {"z", {66, 4}}};
 
@@ -323,7 +323,6 @@ std::pair<std::vector<Atom>,UnitCell> Model::readFilePDB(const std::string& file
       StrMngr::removeWhiteSpaces(uc.space_group);
     }
   }
-  // file has been read
   inp_file.close();
   if (invalid_symbol_detected){Ctrl::getInstance()->displayErrorMessage(105);}
   if (invalid_cell_params){Ctrl::getInstance()->displayErrorMessage(112);}
