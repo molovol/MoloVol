@@ -152,7 +152,7 @@ class Model{
 
     // cif file processing
     bool convertCifSymmetryElements(const std::vector<std::string>&);
-    bool convertCifAtomsList(const std::vector<std::string>&, const std::vector<std::string>&);
+    bool convertCifAtomsList(const std::vector<std::map<std::string,std::string>>&);
 
     // crystal unit cell related functions
     bool getSymmetryElements(std::string, std::vector<int>&, std::vector<double>&);

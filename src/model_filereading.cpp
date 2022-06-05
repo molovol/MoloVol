@@ -300,7 +300,7 @@ std::pair<std::vector<Atom>,UnitCell> Model::readFilePDB(const std::string& file
       StrMngr::removeWhiteSpaces(str_charge);
       if (!str_charge.empty()){
         try{
-          std::cout << fields.at("charge") << std::endl;
+          charge = std::stoi(fields.at("charge"));
         }
         catch (const std::invalid_argument& e){}
       }
@@ -345,6 +345,7 @@ void Model::readFileCIF(const std::string& filepath){
   std::vector<std::string> symop_list;
   std::vector<std::string> atom_headers;
   std::vector<std::string> atom_list;
+  std::vector<std::map<std::string,std::string>> atom_data;
 
   auto containsKeyword = [](const std::string& line, const std::string& keyword=""){
     // default: contains any keyword
@@ -354,6 +355,7 @@ void Model::readFileCIF(const std::string& filepath){
   };
 
   while(getline(inp_file,line)){ // read file line by line
+    StrMngr::removeEOL(line);
     // the information we need is case insensitive
     // therefore, it is safer to directly convert the lines to lower case
     std::for_each(line.begin(), line.end(), [](char& c){c = ::tolower(c);});
@@ -362,7 +364,6 @@ void Model::readFileCIF(const std::string& filepath){
     // thus, it is convenient to have a copy of a cif line with no white_space
     no_ws_line = line;
     StrMngr::removeWhiteSpaces(no_ws_line);
-    StrMngr::removeEOL(no_ws_line);
 
     if(no_ws_line[0] == '#' || no_ws_line.empty()){continue;} // skip comment and empty lines
 
@@ -400,6 +401,7 @@ void Model::readFileCIF(const std::string& filepath){
     }
 
     // LOOP
+    // Using if instead of switch because the individual if statements are evaluated sequencially
     if (loop){
       // identify whether this loop contains interesting data
       if(loop == 1){
@@ -427,6 +429,7 @@ void Model::readFileCIF(const std::string& filepath){
           loop = 3;
         }
       }
+
       if(loop == 3){
         // in list of symmetry operations
         // if a data name is found, the list of symmetry operation value ended
@@ -444,6 +447,7 @@ void Model::readFileCIF(const std::string& filepath){
           continue;
         }
       }
+
       if(loop == 4){
         // in list of headers (data name) for atoms
         // if no data name is found, the list of atom parameters started
@@ -453,10 +457,11 @@ void Model::readFileCIF(const std::string& filepath){
         else{
           // store atom headers in order of appearance because only certain types of atom data is useful
           // and it is necessary to know in what order they appear
-          atom_headers.emplace_back(line);
+          atom_headers.emplace_back(no_ws_line);
           continue;
         }
       }
+
       if(loop == 5){
         // in list of atom parameters
         // if a data name is found, the list of atom parameters ended
@@ -471,6 +476,17 @@ void Model::readFileCIF(const std::string& filepath){
         else{
           // store the line containing atom parameters for later processing
           atom_list.emplace_back(line);
+          { // Save atom line data as map
+            std::vector<std::string> values = splitLine(line);
+            std::map<std::string,std::string> map;
+            if (atom_headers.size() != values.size()){
+              // TODO: exception, invalid atom line
+            }
+            for (size_t i = 0; i < values.size(); ++i){
+              map[atom_headers[i]] = values[i];
+            }
+            atom_data.push_back(map);
+          }
           continue;
         }
       }
@@ -507,7 +523,7 @@ void Model::readFileCIF(const std::string& filepath){
   else{
     convertCifSymmetryElements(symop_list);
   }
-  if (!convertCifAtomsList(atom_headers, atom_list)){
+  if (!convertCifAtomsList(atom_data)){
     Ctrl::getInstance()->displayErrorMessage(105); // at least one atom line could not be read
   }
 }
@@ -563,52 +579,29 @@ bool Model::convertCifSymmetryElements(const std::vector<std::string> &symop_lis
   return true;
 }
 
-bool Model::convertCifAtomsList(const std::vector<std::string> &atom_headers, const std::vector<std::string> &atom_list){
+bool Model::convertCifAtomsList(const std::vector<std::map<std::string,std::string>>& atom_data){
+  //const std::vector<std::string> &atom_headers, const std::vector<std::string> &atom_list){
   bool all_lines_valid = true;
   // in cif files the order of data values is not fixed
   // atom_headers contains the info on the order of data values stored in atom_list
   // fields that we're interested in:
   static const std::vector<std::string> s_keywords = {
-    "_atom_site_type_symbol",
-    "_atom_site_fract_x",
-    "_atom_site_fract_y",
-    "_atom_site_fract_z"
-  };
-  std::vector<size_t> param_pos;
-
-  // save what position the data values can be found
-  for (const std::string& keyword : s_keywords){
-    for(size_t i = 0; i < atom_headers.size(); ++i){
-      if (atom_headers[i].find(keyword) != std::string::npos){
-        param_pos.push_back(i);
-        break;
-      }
-    }
-  }
-
-  // if not all keywords have been found
-  if (s_keywords.size() != param_pos.size()){return false;}
-
-  for(const std::string& line : atom_list){
-    std::vector<std::string> substrings = splitLine(line);
-
-    // check if substring has enough elements
-    if (substrings.size() <= *std::max_element(param_pos.begin(), param_pos.end())){
-      all_lines_valid = false;
-      continue;
-    }
-
+    "_atom_site_type_symbol", "_atom_site_fract_x", "_atom_site_fract_y", "_atom_site_fract_z"};
+  
+  for(const std::map<std::string,std::string>& entry : atom_data){
+    
     // save the fractional positional data from atom_list
     std::array<double,3> abc_frac;
-    for(int i = 0; i < 3; i++){
-      // check whether the values can be converted to doubles
-      try{
-        abc_frac[i] = std::stod(substrings[param_pos[i+1]]);
+    size_t i = 0;
+    for (std::string key : {"_atom_site_fract_x", "_atom_site_fract_y", "_atom_site_fract_z"}){
+      try {
+        abc_frac[i] = std::stod(entry.at(key));
       }
       catch (std::invalid_argument& e){
         all_lines_valid = false;
-        continue;
+        //break;
       }
+      ++i;
     }
 
     // apply the matrix to the fractional coordinates to get cartesian coordinates
@@ -620,7 +613,7 @@ bool Model::convertCifAtomsList(const std::vector<std::string> &atom_headers, co
     }
 
     // get the element symbol and keep track of their number
-    const std::string symbol = strToValidSymbol(substrings[param_pos[0]]);
+    const std::string symbol = strToValidSymbol(entry.at("_atom_site_type_symbol"));
     _atom_count[symbol]++;
 
     // store the full list of atom coordinates from the input file
