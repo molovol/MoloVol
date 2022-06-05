@@ -65,6 +65,7 @@ struct CalcReportBundle{
 class AtomTree;
 struct Atom;
 class Space;
+struct UnitCell;
 class Model{
   typedef std::pair<std::string,std::array<double,3>> SymbolPositionPair;
   public:
@@ -75,7 +76,7 @@ class Model{
     bool readAtomsFromFile(const std::string&, bool);
     void clearAtomData();
     std::vector<Atom> readFileXYZ(const std::string&);
-    std::vector<Atom> readFilePDB(const std::string&, bool);
+    std::pair<std::vector<Atom>,UnitCell> readFilePDB(const std::string&, bool);
     void readFileCIF(const std::string&);
 
     // export
@@ -133,7 +134,7 @@ class Model{
     std::string _output_folder = "."; // default folder is the program folder but it is changed with the output file routine
     std::vector<std::tuple<std::string, double, double, double>> _raw_atom_coordinates;
     std::vector<std::tuple<std::string, double, double, double>> _processed_atom_coordinates;
-    double _cell_param[6]; // unit cell parameters in order: A, B, C, alpha, beta, gamma
+    std::array<double,6> _cell_param; // unit cell parameters in order: A, B, C, alpha, beta, gamma
     double _cart_matrix[3][3]; // cartesian coordinates of vectors A, B, C
     std::string _space_group;
     std::vector<int> _sym_matrix_XYZ;
