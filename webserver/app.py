@@ -55,7 +55,7 @@ def io():
                     continue
                 key = key.removeprefix("cli_")
                 args.append(f"--{key}")
-                if value != "":
+                if value != "" and value != "on":
                     args.append(str(value))
             inputdict = request.form
 
