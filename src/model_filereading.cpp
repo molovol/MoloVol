@@ -293,8 +293,20 @@ std::pair<std::vector<Atom>,UnitCell> Model::readFilePDB(const std::string& file
       }
       if (invalid_coord){continue;}
 
+      // Evaluate charge
+      signed charge = 0;
+      // Avoid exception due to empty string
+      std::string str_charge = fields.at("charge");
+      StrMngr::removeWhiteSpaces(str_charge);
+      if (!str_charge.empty()){
+        try{
+          std::cout << fields.at("charge") << std::endl;
+        }
+        catch (const std::invalid_argument& e){}
+      }
+
       // Store symbol and coordinates
-      atom_list.push_back(Atom(std::make_pair(symbol, coord)));
+      atom_list.push_back(Atom(std::make_pair(symbol, coord), charge));
     }
     else if (extractRecordName(line) == "CRYST1"){
       // Partition line according to the fields specified by the PDB file standard

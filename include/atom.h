@@ -14,6 +14,9 @@ struct Atom{
   Atom(const std::pair<std::string,std::array<double,3>>& symbol_position)
     : pos_x(symbol_position.second[0]), pos_y(symbol_position.second[1]), pos_z(symbol_position.second[2]),
       rad(-1), number(0), charge(0), symbol(symbol_position.first) {}
+  Atom(const std::pair<std::string,std::array<double,3>>& symbol_position, signed charge)
+    : pos_x(symbol_position.second[0]), pos_y(symbol_position.second[1]), pos_z(symbol_position.second[2]),
+      rad(-1), number(0), charge(charge), symbol(symbol_position.first) {}
   Atom(double x, double y, double z, const std::string& symbol, double rad, unsigned atomic_num)
     : pos_x(x), pos_y(y), pos_z(z), rad(rad), number(atomic_num), charge(0), symbol(symbol) {}
   Atom(double x, double y, double z, const std::string& symbol, double rad, unsigned atomic_num, signed charge)
