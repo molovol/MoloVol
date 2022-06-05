@@ -58,10 +58,14 @@
     <input type="submit"/>
 </form>
 
-{% if returnvalues is not none %}
+{% if returnvalues is not none and returnvalues!=""%}
     <h2>Output</h2>
     <div id="outputbox">
-        <output name="result" for="inputs">{{ returnvalues }}</output>
+        <output name="result" for="inputs">
+            {% for row in returnvalues %}
+                {{ row }}<br>
+            {% endfor %}
+        </output>
     </div>
 {% endif %}
 </body>

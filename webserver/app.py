@@ -84,9 +84,10 @@ def io():
             print("Starting process with args:", args)
             out = subprocess.check_output(["./launch_headless.sh"] + args, stderr=subprocess.STDOUT).decode(
                 "utf-8")
+            print(out)
         except Exception as e:
             out = "Exception: " + str(e)
     if request.accept_mimetypes['text/html']:
-        return render_template('form.html', inputdict=inputdict, returnvalues=out)
+        return render_template('form.html', inputdict=inputdict, returnvalues=out.split("\n"))
     elif request.accept_mimetypes['application/json']:
         return jsonify({"output": out})
