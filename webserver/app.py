@@ -96,6 +96,8 @@ def io():
             except Exception as e:
                 out = "Exception: " + str(e)
     if request.accept_mimetypes['text/html']:
-        return render_template('form.html', inputdict=inputdict, returnvalues=out.split("\n"))
+        if out is not None:
+            out = out.split("\n")
+        return render_template('form.html', inputdict=inputdict, returnvalues=out)
     elif request.accept_mimetypes['application/json']:
         return jsonify({"output": out})
