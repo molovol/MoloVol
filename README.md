@@ -61,11 +61,10 @@ For hosting it on a web server check out the next section.
 Instead of compiling or running the binaries you can also use a containerized version (using e.g. docker or podman) to
 access the CLI or web interface.
 In order to create a container you first need to obtain a Docker image for your operating system. A build can be found
-at [dockerhub](https://hub.docker.com/r/bsvogler/molovol) or be built locally. Dockerfiles are in the 'container' directory.
+at [dockerhub](https://hub.docker.com/r/bsvogler/molovol) or be built locally. Dockerfiles are in the 'container' directory. If you build locally replace the `bsvogler/molovol` with your local image name.
 
-
-- For a short-lived container: Pass the CLI arguments in the run command: `docker run -it launch_headless.sh <yourMolovolArguments>`
-- To run web application http://localhost:5001: run `docker run -dt -p 5001:5000/tcp <image>`. When not otherwise specified the default port is 5000.
+- For a short-lived container: Pass the CLI arguments in the run command:  `docker run -it bsvogler/molovol ./launch_headless.sh <yourMolovolArguments>`
+- To run web application http://localhost:5001: run `docker run -dt -p 5001:5000 bsvogler/molovol`. When not otherwise specified the default port is 5000.
 
 ## Getting Help
 
