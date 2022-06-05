@@ -21,8 +21,15 @@ RUN make release
 COPY inputfile/ inputfile/
 
 #add flask webserver
-RUN apt-get install python3-pip -y
-RUN pip install flask
+RUN apt update && apt upgrade -y
+RUN apt install software-properties-common -y
+RUN add-apt-repository ppa:deadsnakes/ppa -y
+RUN apt install python3.10 -y
+# install pip
+RUN apt install python3.10-distutils -y
+RUN apt install curl -y
+RUN curl https://bootstrap.pypa.io/get-pip.py | python3.10
+RUN python3.10 -m pip install flask
 COPY webserver/ /webserver/
 WORKDIR /
 
