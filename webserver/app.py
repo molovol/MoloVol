@@ -22,6 +22,9 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+out = None
+
+
 def manage_uploaded_file(request, filetype="structure"):
     global out
     path: Optional[str] = None
@@ -29,21 +32,26 @@ def manage_uploaded_file(request, filetype="structure"):
         # try using last value
         structure_file = request.files['structure']
         if structure_file.filename == '':
-            out += "No selected file\n"
+            if out is None:
+                out = "No structure file selected"
+            else:
+                out += "No structure file selected\n"
         if structure_file and allowed_file(structure_file.filename):
             path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(structure_file.filename))
             structure_file.save(path)
             return path
     if path is None:
         path = request.form.get(f"last{filetype}", None)
-        if path is None:
+        if path is None or path == "":
+            path = None
             out += "error as no file was uploaded and last one could not be reused\n"
+    print(out)
     return path
 
 
 @app.route('/', methods=['GET', 'POST'])
 def io():
-    out = None
+    global out
     inputdict = {}
     if request.method == 'POST':
         # when arguments ignore form data
@@ -72,21 +80,21 @@ def io():
                 elements_path = "./inputfile/elements.txt"
             args.append("-fe")
             args.append(elements_path)
-
         else:
             args = request.args.get('cli-arguments', '').split(" ")
             inputdict = request.args
         # with no parameters it will launch the gui
-        if len(args) == 0:
+        if len(args) == 0 or structure_path is None:
             out += "No arguments given\n You must specify at least the structure file\n"
             args.append("-h")
-        try:
-            print("Starting process with args:", args)
-            out = subprocess.check_output(["./launch_headless.sh"] + args, stderr=subprocess.STDOUT).decode(
-                "utf-8")
-            print(out)
-        except Exception as e:
-            out = "Exception: " + str(e)
+        else:
+            try:
+                print("Starting process with args:", args)
+                out = subprocess.check_output(["./launch_headless.sh"] + args, stderr=subprocess.STDOUT).decode(
+                    "utf-8")
+                print(out)
+            except Exception as e:
+                out = "Exception: " + str(e)
     if request.accept_mimetypes['text/html']:
         return render_template('form.html', inputdict=inputdict, returnvalues=out.split("\n"))
     elif request.accept_mimetypes['application/json']:
