@@ -344,8 +344,7 @@ void Model::readFileCIF(const std::string& filepath){
   char loop = 0; // 0: out of list, 1: in list, 2: symop headers list, 3: symop value list, 4: atom headers list, 5: atom data list
   std::vector<std::string> symop_list;
   std::vector<std::string> atom_headers;
-  std::vector<std::string> atom_list;
-  std::vector<std::map<std::string,std::string>> atom_data;
+  std::map<std::string,std::vector<std::string>> atom_data;
 
   auto containsKeyword = [](const std::string& line, const std::string& keyword=""){
     // default: contains any keyword
@@ -457,7 +456,8 @@ void Model::readFileCIF(const std::string& filepath){
         else{
           // store atom headers in order of appearance because only certain types of atom data is useful
           // and it is necessary to know in what order they appear
-          atom_headers.emplace_back(no_ws_line);
+          atom_headers.push_back(no_ws_line);
+          atom_data[no_ws_line] = {};
           continue;
         }
       }
@@ -474,18 +474,14 @@ void Model::readFileCIF(const std::string& filepath){
           atom_data_acquired = true;
         }
         else{
-          // store the line containing atom parameters for later processing
-          atom_list.emplace_back(line);
           { // Save atom line data as map
             std::vector<std::string> values = splitLine(line);
-            std::map<std::string,std::string> map;
             if (atom_headers.size() != values.size()){
               // TODO: exception, invalid atom line
             }
             for (size_t i = 0; i < values.size(); ++i){
-              map[atom_headers[i]] = values[i];
+              atom_data.at(atom_headers[i]).push_back(values[i]);
             }
-            atom_data.push_back(map);
           }
           continue;
         }
@@ -579,29 +575,34 @@ bool Model::convertCifSymmetryElements(const std::vector<std::string> &symop_lis
   return true;
 }
 
-bool Model::convertCifAtomsList(const std::vector<std::map<std::string,std::string>>& atom_data){
-  //const std::vector<std::string> &atom_headers, const std::vector<std::string> &atom_list){
-  bool all_lines_valid = true;
-  // in cif files the order of data values is not fixed
-  // atom_headers contains the info on the order of data values stored in atom_list
-  // fields that we're interested in:
+bool Model::convertCifAtomsList(const std::map<std::string,std::vector<std::string>>& atom_data){
+  // The following keywords contain the information that were interested in
   static const std::vector<std::string> s_keywords = {
     "_atom_site_type_symbol", "_atom_site_fract_x", "_atom_site_fract_y", "_atom_site_fract_z"};
   
-  for(const std::map<std::string,std::string>& entry : atom_data){
+  bool all_lines_valid = true;
+
+  // Make sure all atom information is available
+  for (auto& kw : s_keywords){
+    all_lines_valid &= atom_data.count(kw);
+  }
+  if (!all_lines_valid){return all_lines_valid;}
+
+  // Go through all atom entries
+  for (size_t i = 0; i < atom_data.begin()->second.size(); ++i){
     
     // save the fractional positional data from atom_list
     std::array<double,3> abc_frac;
-    size_t i = 0;
-    for (std::string key : {"_atom_site_fract_x", "_atom_site_fract_y", "_atom_site_fract_z"}){
-      try {
-        abc_frac[i] = std::stod(entry.at(key));
+    size_t j = 0;
+    try {
+      for (std::string key : {"_atom_site_fract_x", "_atom_site_fract_y", "_atom_site_fract_z"}){
+        abc_frac[j] = std::stod(atom_data.at(key)[i]);
+        ++j;
       }
-      catch (std::invalid_argument& e){
-        all_lines_valid = false;
-        //break;
-      }
-      ++i;
+    }
+    catch (std::invalid_argument& e){
+      all_lines_valid = false;
+      continue; // Skip atom line
     }
 
     // apply the matrix to the fractional coordinates to get cartesian coordinates
@@ -613,7 +614,7 @@ bool Model::convertCifAtomsList(const std::vector<std::map<std::string,std::stri
     }
 
     // get the element symbol and keep track of their number
-    const std::string symbol = strToValidSymbol(entry.at("_atom_site_type_symbol"));
+    const std::string symbol = strToValidSymbol(atom_data.at("_atom_site_type_symbol")[i]);
     _atom_count[symbol]++;
 
     // store the full list of atom coordinates from the input file
