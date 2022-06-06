@@ -385,7 +385,8 @@ typename Model::MatR3 Model::orthogonalizeUnitCell(const std::array<double,6>& c
   B is always on the cartesian xy plane with a positive y component (By > 0)
   C is the only axis containing a cartesian z component (Cz > 0)
   */
-  const double PI = 3.14159265358979323846;
+  constexpr double PI = 3.14159265358979323846;
+  constexpr double TO_RAD = PI/180;
 
   MatR3 cart_matrix;
   for (size_t i = 0; i < 3; ++i){
@@ -393,30 +394,29 @@ typename Model::MatR3 Model::orthogonalizeUnitCell(const std::array<double,6>& c
       cart_matrix[i][j] = 0;
     }
   }
-  // convert unit cell angles from degree to radian
-  double alpha = cell_param[3]*PI/180;
-  double beta = cell_param[4]*PI/180;
-  double gamma = cell_param[5]*PI/180;
-  cart_matrix[0][0] = cell_param[0]; // A is always along x axis => Ax = X
+
+  // A is always along x axis => Ax = X
+  cart_matrix[0][0] = cell_param[0];
   
-  // if B is along y axis, no need to do calculations that could result in approximations
-  if(cell_param[5] == 90){
-    cart_matrix[1][1] = cell_param[1];
-  }
-  else{
-    cart_matrix[1][0] = cell_param[1]*std::cos(gamma);
-    cart_matrix[1][1] = cell_param[1]*std::sin(gamma);
+  // Convert angles from degree to radian
+  double gamma = cell_param[5] * TO_RAD;
+  
+  // Avoid floating point issues, if beta is 90 degrees
+  cart_matrix[1][0] = cell_param[1] * (cell_param[5] == 90? 0 : std::cos(gamma));
+  cart_matrix[1][1] = cell_param[1] * (cell_param[5] == 90? 1 : std::sin(gamma));
 
-  }
-
-  // if C is along z axis, no need to do calculations that could result in approximations
+  // Avoid floating point issues, if alpha and gamma are 90 degrees
   if(cell_param[3] == 90 && cell_param[4] == 90 ){
     cart_matrix[2][2] = cell_param[2];
   }
   else{
-    cart_matrix[2][0] = cell_param[2]*std::cos(beta);
-    cart_matrix[2][1] = cell_param[2]*((std::cos(alpha)*std::sin(gamma)) + 
-        ((std::cos(beta)-(std::cos(alpha)*std::cos(gamma)))*std::sin(gamma-(PI/2))/std::cos(gamma-(PI/2))));
+    // Convert angles from degree to radian
+    double alpha = cell_param[3] * TO_RAD;
+    double beta  = cell_param[4] * TO_RAD;
+
+    cart_matrix[2][0] = cell_param[2] * std::cos(beta);
+    cart_matrix[2][1] = cell_param[2] * ((std::cos(alpha) * std::sin(gamma)) + 
+        ((std::cos(beta) - (std::cos(alpha) * std::cos(gamma))) * std::sin(gamma-(PI/2)) / std::cos(gamma-(PI/2))));
     cart_matrix[2][2] = std::sqrt(pow(cell_param[2],2)-pow(_cart_matrix[2][0],2)-pow(_cart_matrix[2][1],2));
   }
   return cart_matrix;
