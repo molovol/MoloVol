@@ -593,11 +593,9 @@ bool Model::convertCifAtomsList(const std::map<std::string,std::vector<std::stri
     
     // save the fractional positional data from atom_list
     std::array<double,3> abc_frac;
-    size_t j = 0;
     try {
-      for (std::string key : {"_atom_site_fract_x", "_atom_site_fract_y", "_atom_site_fract_z"}){
-        abc_frac[j] = std::stod(atom_data.at(key)[i]);
-        ++j;
+      for (size_t j = 0; j < 3; ++j){
+        abc_frac[j] = std::stod(atom_data.at(s_keywords[1+j])[i]);
       }
     }
     catch (std::invalid_argument& e){
