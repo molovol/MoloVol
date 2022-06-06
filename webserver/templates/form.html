@@ -60,6 +60,9 @@
 
 {% if returnvalues is not none and returnvalues!=""%}
     <h2>Output</h2>
+    {%  if loglink is not none %}
+        <a href="{{ loglink }}">Download result</a><br>
+    {% endif %}
     <div id="outputbox">
         <output name="result" for="inputs">
             {% for row in returnvalues %}

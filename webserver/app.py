@@ -1,7 +1,8 @@
 import os
 from typing import Optional
+from uuid import uuid4
 
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, Response
 import subprocess
 
 from werkzeug.utils import secure_filename
@@ -23,7 +24,7 @@ def allowed_file(filename):
 
 
 out = None
-
+logdir = "./logs/"
 
 def manage_uploaded_file(request, filetype="structure"):
     global out
@@ -49,9 +50,29 @@ def manage_uploaded_file(request, filetype="structure"):
     return path
 
 
+@app.route("/logs/<id>", methods=["GET"])
+def get_logs(id):
+    """id is the filename of the log file"""
+    with open(f"{logdir}/{id}") as f:
+        return Response(response=f.read(), status=200, mimetype="text/plain")
+
+
+def save_log(log) -> str:
+    # generate random filename
+    # check if directory exists and create if missing
+    if not os.path.exists(logdir):
+        os.makedirs(logdir)
+    filename = f"{logdir}{uuid4()}.log"
+    with open(filename, "w") as f:
+        f.write(log)
+    return filename
+
+
 @app.route('/', methods=['GET', 'POST'])
 def io():
     global out
+    out = None
+    loglink = None
     inputdict = {}
     if request.method == 'POST':
         # when arguments ignore form data
@@ -93,18 +114,13 @@ def io():
                 out = subprocess.check_output(["./launch_headless.sh"] + args, stderr=subprocess.STDOUT).decode(
                     "utf-8")
                 print(out)
+                loglink = f"{request.url_root}{save_log(out)}"
             except Exception as e:
                 out = "Exception: " + str(e)
     if request.accept_mimetypes['text/html']:
-        if out is not None:
+        if type(out) is str:
             out = out.split("\n")
-        return render_template('form.html', inputdict=inputdict, returnvalues=out)
+        return render_template('form.html', inputdict=inputdict, returnvalues=out,
+                               loglink=loglink)
     elif request.accept_mimetypes['application/json']:
         return jsonify({"output": out})
-
-
-@app.errorhandler(Exception)
-def exception_handler(error):
-    return "error:" + str(error), 500
-
-
