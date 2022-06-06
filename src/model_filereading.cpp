@@ -225,13 +225,13 @@ std::pair<std::vector<Atom>,UnitCell> Model::readFilePDB(const std::string& file
   // Data Bank Contents Guide: Atomic Coordinate Entry Format Description" Version 3.3
   // http://www.wwpdb.org/documentation/file-format-content/format33/v3.3.html
   typedef std::map<std::string,std::pair<int,int>> FieldColumns;
-  static const FieldColumns atom_fields = {
+  static const FieldColumns s_atom_fields = {
     {"lineLength", {0,80}}, {"record", {0, 6}}, {"serial", {6, 5}}, {"name", {12, 4}}, {"altLoc", {16, 1}}, 
     {"resName", {17, 3}}, {"chainID", {21, 1}}, {"resSeq", {22, 4}}, {"iCode", {26, 1}}, 
     {"x", {30, 8}}, {"y", {38, 8}}, {"z", {46, 8}}, {"occupancy", {54, 6}}, {"tempFactor", {60, 6}}, 
     {"element", {76, 2}}, {"charge", {78, 2}}};
 
-  static const FieldColumns cryst1_fields = {
+  static const FieldColumns s_cryst1_fields = {
     {"lineLength", {0, 70}}, {"record", {0, 6}}, {"a", {6, 9}}, {"b", {15, 9}}, {"c", {24, 9}}, {"alpha", {33, 7}},
     {"beta", {40, 7}}, {"gamma", {47, 7}}, {"sGroup", {55, 11}}, {"z", {66, 4}}};
 
@@ -269,7 +269,7 @@ std::pair<std::vector<Atom>,UnitCell> Model::readFilePDB(const std::string& file
     StrMngr::removeEOL(line);
     if (extractRecordName(line) == "ATOM" || (include_hetatm && extractRecordName(line) == "HETATM")){
       // Partition line according to the fields specified by the PDB file standard
-      const std::map<std::string,std::string> fields = sectionFields(line, atom_fields);
+      const std::map<std::string,std::string> fields = sectionFields(line, s_atom_fields);
 
       // Evaluate atom symbol
       std::string symbol = strToValidSymbol(fields.at("name"));
@@ -310,7 +310,7 @@ std::pair<std::vector<Atom>,UnitCell> Model::readFilePDB(const std::string& file
     }
     else if (extractRecordName(line) == "CRYST1"){
       // Partition line according to the fields specified by the PDB file standard
-      const std::map<std::string,std::string> fields = sectionFields(line, cryst1_fields);
+      const std::map<std::string,std::string> fields = sectionFields(line, s_cryst1_fields);
 
       // Evaluate unit cell parameters
       size_t i = 0;
@@ -381,13 +381,9 @@ void Model::readFileCIF(const std::string& filepath){
     }
     else {
       static const std::array<std::string,6> s_cell_data_keywords = {
-        "_cell_length_a",
-        "_cell_length_b",
-        "_cell_length_c",
-        "_cell_angle_alpha",
-        "_cell_angle_beta",
-        "_cell_angle_gamma"
-      };
+        "_cell_length_a", "_cell_length_b", "_cell_length_c",
+        "_cell_angle_alpha", "_cell_angle_beta", "_cell_angle_gamma"};
+
       std::vector<std::string> substrings = splitLine(line);
       for (size_t i = 0; i < s_cell_data_keywords.size(); ++i){
         if (containsKeyword(line,s_cell_data_keywords[i])){
