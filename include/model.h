@@ -158,7 +158,7 @@ class Model{
 
     // crystal unit cell related functions
     bool getSymmetryElements(std::string, std::vector<int>&, std::vector<double>&);
-    void orthogonalizeUnitCell();
+    MatR3 orthogonalizeUnitCell();
     bool symmetrizeUnitCell();
     void moveAtomsInsideCell();
     void removeDuplicateAtoms();

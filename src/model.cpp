@@ -349,7 +349,7 @@ bool Model::processUnitCell(){
   }
   _processed_atom_coordinates.clear();
   _processed_atom_coordinates = _raw_atom_coordinates;
-  orthogonalizeUnitCell();
+  _cart_matrix = orthogonalizeUnitCell();
   if(!symmetrizeUnitCell()){
     return false;
   }
@@ -364,7 +364,7 @@ bool Model::processUnitCell(){
 }
 
 // 1) find orthogonal unit cell matrix = cartesian coordinates of the unit cell axes
-void Model::orthogonalizeUnitCell(){
+typename Model::MatR3 Model::orthogonalizeUnitCell(){
   /*
   Formulae to find the cartesian coordinates of axes A, B, C:
   Ax , Ay , Az
@@ -385,35 +385,41 @@ void Model::orthogonalizeUnitCell(){
   B is always on the cartesian xy plane with a positive y component (By > 0)
   C is the only axis containing a cartesian z component (Cz > 0)
   */
-  const double pi = 3.14159265358979323846;
+  const double PI = 3.14159265358979323846;
+
+  MatR3 cart_matrix;
+  for (size_t i = 0; i < 3; ++i){
+    for (size_t j = 0; j < 3; ++j){
+      cart_matrix[i][j] = 0;
+    }
+  }
   // convert unit cell angles from degree to radian
-  double alpha = _cell_param[3]*pi/180;
-  double beta = _cell_param[4]*pi/180;
-  double gamma = _cell_param[5]*pi/180;
-  _cart_matrix[0][0] = _cell_param[0]; // A is always along x axis => Ax = X
-  _cart_matrix[0][1] = 0; // A is always along x axis => Ay = 0
-  _cart_matrix[0][2] = 0; // A is always along x axis => Az = 0
-  _cart_matrix[1][2] = 0; // B is always on xy plane => Bz = 0
-  if(_cell_param[5] == 90){ // if B is along y axis, no need to do calculations that could result in approximations
-    _cart_matrix[1][0] = 0;
-    _cart_matrix[1][1] = _cell_param[1];
+  double alpha = _cell_param[3]*PI/180;
+  double beta = _cell_param[4]*PI/180;
+  double gamma = _cell_param[5]*PI/180;
+  cart_matrix[0][0] = _cell_param[0]; // A is always along x axis => Ax = X
+  
+  // if B is along y axis, no need to do calculations that could result in approximations
+  if(_cell_param[5] == 90){
+    cart_matrix[1][1] = _cell_param[1];
   }
   else{
-    _cart_matrix[1][0] = _cell_param[1]*std::cos(gamma);
-    _cart_matrix[1][1] = _cell_param[1]*std::sin(gamma);
+    cart_matrix[1][0] = _cell_param[1]*std::cos(gamma);
+    cart_matrix[1][1] = _cell_param[1]*std::sin(gamma);
 
   }
-  if(_cell_param[3] == 90 && _cell_param[4] == 90 ){ // if C is along z axis, no need to do calculations that could result in approximations
-    _cart_matrix[2][0] = 0;
-    _cart_matrix[2][1] = 0;
-    _cart_matrix[2][2] = _cell_param[2];
+
+  // if C is along z axis, no need to do calculations that could result in approximations
+  if(_cell_param[3] == 90 && _cell_param[4] == 90 ){
+    cart_matrix[2][2] = _cell_param[2];
   }
   else{
-    _cart_matrix[2][0] = _cell_param[2]*std::cos(beta);
-    _cart_matrix[2][1] = _cell_param[2]*((std::cos(alpha)*std::sin(gamma))+((std::cos(beta)-(std::cos(alpha)*std::cos(gamma)))*std::sin(gamma-(pi/2))/std::cos(gamma-(pi/2))));
-    _cart_matrix[2][2] = std::sqrt(pow(_cell_param[2],2)-pow(_cart_matrix[2][0],2)-pow(_cart_matrix[2][1],2));
+    cart_matrix[2][0] = _cell_param[2]*std::cos(beta);
+    cart_matrix[2][1] = _cell_param[2]*((std::cos(alpha)*std::sin(gamma)) + 
+        ((std::cos(beta)-(std::cos(alpha)*std::cos(gamma)))*std::sin(gamma-(PI/2))/std::cos(gamma-(PI/2))));
+    cart_matrix[2][2] = std::sqrt(pow(_cell_param[2],2)-pow(_cart_matrix[2][0],2)-pow(_cart_matrix[2][1],2));
   }
-  return;
+  return cart_matrix;
 }
 
 // 2) create symmetry elements from base structure
