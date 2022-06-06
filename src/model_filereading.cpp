@@ -505,14 +505,9 @@ std::vector<Atom> Model::readFileCIF(const std::string& filepath){
   if(space_group_P1){ // set identity symmetry element
     for(int i = 0; i < 3; i++){
       for(int j = 0; j < 3; j++){
-        if(i == j){
-          _sym_matrix_XYZ.emplace_back(1);
-        }
-        else{
-          _sym_matrix_XYZ.emplace_back(0);
-        }
+        _sym_matrix_XYZ.push_back(i==j? 1 : 0);
       }
-      _sym_matrix_fraction.emplace_back(0);
+      _sym_matrix_fraction.push_back(0);
     }
   }
   else{
