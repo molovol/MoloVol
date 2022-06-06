@@ -500,7 +500,7 @@ std::vector<Atom> Model::readFileCIF(const std::string& filepath){
   // Ax [0][0], Ay [0][1], Az [0][2]
   // Bx [1][0], By [1][1], Bz [1][2]
   // Cx [2][0], Cy [2][1], Cz [2][2]
-  _cart_matrix = orthogonalizeUnitCell();
+  _cart_matrix = orthogonalizeUnitCell(_cell_param);
 
   if(space_group_P1){ // set identity symmetry element
     for(int i = 0; i < 3; i++){

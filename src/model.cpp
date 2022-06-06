@@ -349,7 +349,7 @@ bool Model::processUnitCell(){
   }
   _processed_atom_coordinates.clear();
   _processed_atom_coordinates = _raw_atom_coordinates;
-  _cart_matrix = orthogonalizeUnitCell();
+  _cart_matrix = orthogonalizeUnitCell(_cell_param);
   if(!symmetrizeUnitCell()){
     return false;
   }
@@ -364,7 +364,7 @@ bool Model::processUnitCell(){
 }
 
 // 1) find orthogonal unit cell matrix = cartesian coordinates of the unit cell axes
-typename Model::MatR3 Model::orthogonalizeUnitCell(){
+typename Model::MatR3 Model::orthogonalizeUnitCell(const std::array<double,6>& cell_param){
   /*
   Formulae to find the cartesian coordinates of axes A, B, C:
   Ax , Ay , Az
@@ -394,30 +394,30 @@ typename Model::MatR3 Model::orthogonalizeUnitCell(){
     }
   }
   // convert unit cell angles from degree to radian
-  double alpha = _cell_param[3]*PI/180;
-  double beta = _cell_param[4]*PI/180;
-  double gamma = _cell_param[5]*PI/180;
-  cart_matrix[0][0] = _cell_param[0]; // A is always along x axis => Ax = X
+  double alpha = cell_param[3]*PI/180;
+  double beta = cell_param[4]*PI/180;
+  double gamma = cell_param[5]*PI/180;
+  cart_matrix[0][0] = cell_param[0]; // A is always along x axis => Ax = X
   
   // if B is along y axis, no need to do calculations that could result in approximations
-  if(_cell_param[5] == 90){
-    cart_matrix[1][1] = _cell_param[1];
+  if(cell_param[5] == 90){
+    cart_matrix[1][1] = cell_param[1];
   }
   else{
-    cart_matrix[1][0] = _cell_param[1]*std::cos(gamma);
-    cart_matrix[1][1] = _cell_param[1]*std::sin(gamma);
+    cart_matrix[1][0] = cell_param[1]*std::cos(gamma);
+    cart_matrix[1][1] = cell_param[1]*std::sin(gamma);
 
   }
 
   // if C is along z axis, no need to do calculations that could result in approximations
-  if(_cell_param[3] == 90 && _cell_param[4] == 90 ){
-    cart_matrix[2][2] = _cell_param[2];
+  if(cell_param[3] == 90 && cell_param[4] == 90 ){
+    cart_matrix[2][2] = cell_param[2];
   }
   else{
-    cart_matrix[2][0] = _cell_param[2]*std::cos(beta);
-    cart_matrix[2][1] = _cell_param[2]*((std::cos(alpha)*std::sin(gamma)) + 
+    cart_matrix[2][0] = cell_param[2]*std::cos(beta);
+    cart_matrix[2][1] = cell_param[2]*((std::cos(alpha)*std::sin(gamma)) + 
         ((std::cos(beta)-(std::cos(alpha)*std::cos(gamma)))*std::sin(gamma-(PI/2))/std::cos(gamma-(PI/2))));
-    cart_matrix[2][2] = std::sqrt(pow(_cell_param[2],2)-pow(_cart_matrix[2][0],2)-pow(_cart_matrix[2][1],2));
+    cart_matrix[2][2] = std::sqrt(pow(cell_param[2],2)-pow(_cart_matrix[2][0],2)-pow(_cart_matrix[2][1],2));
   }
   return cart_matrix;
 }
