@@ -51,7 +51,7 @@ struct Atom{
     throw std::invalid_argument("");
   }
 
-  void print(){
+  void print() const {
     printf("Atom {%s, (%1.3f, %1.3f, %1.3f)}", symbol.c_str(), pos_x, pos_y, pos_z);
   }
 

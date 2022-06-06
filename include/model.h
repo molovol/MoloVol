@@ -78,7 +78,7 @@ class Model{
     void clearAtomData();
     std::vector<Atom> readFileXYZ(const std::string&);
     std::pair<std::vector<Atom>,UnitCell> readFilePDB(const std::string&, bool);
-    void readFileCIF(const std::string&);
+    std::vector<Atom> readFileCIF(const std::string&);
 
     // export
     void createReport();
@@ -154,7 +154,7 @@ class Model{
 
     // cif file processing
     bool convertCifSymmetryElements(const std::vector<std::string>&);
-    bool convertCifAtomsList(const std::map<std::string,std::vector<std::string>>&, const MatR3&);
+    std::pair<bool,std::vector<Atom>> convertCifAtomsList(const std::map<std::string,std::vector<std::string>>&, const MatR3&);
 
     // crystal unit cell related functions
     bool getSymmetryElements(std::string, std::vector<int>&, std::vector<double>&);
