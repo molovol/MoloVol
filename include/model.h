@@ -68,6 +68,7 @@ class Space;
 struct UnitCell;
 class Model{
   typedef std::pair<std::string,std::array<double,3>> SymbolPositionPair;
+  typedef std::array<std::array<double,3>,3> MatR3;
   public:
     // elements file import
     bool importElemFile(const std::string&);
@@ -135,7 +136,8 @@ class Model{
     std::vector<std::tuple<std::string, double, double, double>> _raw_atom_coordinates;
     std::vector<std::tuple<std::string, double, double, double>> _processed_atom_coordinates;
     std::array<double,6> _cell_param; // unit cell parameters in order: A, B, C, alpha, beta, gamma
-    double _cart_matrix[3][3]; // cartesian coordinates of vectors A, B, C
+    //double _cart_matrix[3][3]; // cartesian coordinates of vectors A, B, C
+    MatR3 _cart_matrix; // cartesian coordinates of vectors A, B, C
     std::string _space_group;
     std::vector<int> _sym_matrix_XYZ;
     std::vector<double> _sym_matrix_fraction;
@@ -152,7 +154,7 @@ class Model{
 
     // cif file processing
     bool convertCifSymmetryElements(const std::vector<std::string>&);
-    bool convertCifAtomsList(const std::map<std::string,std::vector<std::string>>&);
+    bool convertCifAtomsList(const std::map<std::string,std::vector<std::string>>&, const MatR3&);
 
     // crystal unit cell related functions
     bool getSymmetryElements(std::string, std::vector<int>&, std::vector<double>&);

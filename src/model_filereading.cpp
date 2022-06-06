@@ -515,7 +515,7 @@ void Model::readFileCIF(const std::string& filepath){
   else{
     convertCifSymmetryElements(symop_list);
   }
-  if (!convertCifAtomsList(atom_data)){
+  if (!convertCifAtomsList(atom_data, _cart_matrix)){
     Ctrl::getInstance()->displayErrorMessage(105); // at least one atom line could not be read
   }
 }
@@ -571,7 +571,7 @@ bool Model::convertCifSymmetryElements(const std::vector<std::string> &symop_lis
   return true;
 }
 
-bool Model::convertCifAtomsList(const std::map<std::string,std::vector<std::string>>& atom_data){
+bool Model::convertCifAtomsList(const std::map<std::string,std::vector<std::string>>& atom_data, const MatR3& cart_matrix){
   // The following keywords contain the information that were interested in
   static const std::vector<std::string> s_keywords = {
     "_atom_site_type_symbol", "_atom_site_fract_x", "_atom_site_fract_y", "_atom_site_fract_z"};
@@ -603,7 +603,7 @@ bool Model::convertCifAtomsList(const std::map<std::string,std::vector<std::stri
     std::array<double,3> xyz = {0,0,0};
     for(int i = 0; i < 3; ++i){ // loop for x, y ,z
       for(int j = 0; j < 3; ++j){ // loop for a, b ,c
-        xyz[i] += abc_frac[j] * _cart_matrix[j][i];
+        xyz[i] += abc_frac[j] * cart_matrix[j][i];
       }
     }
 
