@@ -101,3 +101,10 @@ def io():
         return render_template('form.html', inputdict=inputdict, returnvalues=out)
     elif request.accept_mimetypes['application/json']:
         return jsonify({"output": out})
+
+
+@app.errorhandler(Exception)
+def exception_handler(error):
+    return "error:" + str(error), 500
+
+
