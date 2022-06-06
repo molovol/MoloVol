@@ -512,7 +512,9 @@ std::vector<Atom> Model::readFileCIF(const std::string& filepath){
     }
   }
   else{
-    auto[_sym_matrix_XYZ, _sym_matrix_fraction] = convertCifSymmetryElements(symop_list);
+    auto sm = convertCifSymmetryElements(symop_list);
+    _sym_matrix_XYZ = sm.first;
+    _sym_matrix_fraction = sm.second;
   }
 
   auto atom_list_result = convertCifAtomsList(atom_data, _cart_matrix);
