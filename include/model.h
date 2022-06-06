@@ -69,6 +69,7 @@ struct UnitCell;
 class Model{
   typedef std::pair<std::string,std::array<double,3>> SymbolPositionPair;
   typedef std::array<std::array<double,3>,3> MatR3;
+  typedef std::pair<std::vector<int>,std::vector<double>> SymMatData;
   public:
     // elements file import
     bool importElemFile(const std::string&);
@@ -153,8 +154,9 @@ class Model{
     void prepareVolumeCalc();
 
     // cif file processing
-    bool convertCifSymmetryElements(const std::vector<std::string>&);
-    std::pair<bool,std::vector<Atom>> convertCifAtomsList(const std::map<std::string,std::vector<std::string>>&, const MatR3&);
+    SymMatData convertCifSymmetryElements(const std::vector<std::string>&);
+    std::pair<bool,std::vector<Atom>> convertCifAtomsList(
+        const std::map<std::string,std::vector<std::string>>&, const MatR3&);
 
     // crystal unit cell related functions
     bool getSymmetryElements(std::string, std::vector<int>&, std::vector<double>&);

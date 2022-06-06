@@ -441,7 +441,7 @@ std::vector<Atom> Model::readFileCIF(const std::string& filepath){
         }
         else{
           // store the line containing symmetry operation data for later processing
-          symop_list.emplace_back(line);
+          symop_list.push_back(line);
           continue;
         }
       }
@@ -477,6 +477,7 @@ std::vector<Atom> Model::readFileCIF(const std::string& filepath){
             std::vector<std::string> values = splitLine(line);
             if (atom_headers.size() != values.size()){
               // TODO: exception, invalid atom line
+              continue;
             }
             for (size_t i = 0; i < values.size(); ++i){
               atom_data.at(atom_headers[i]).push_back(values[i]);
@@ -511,8 +512,9 @@ std::vector<Atom> Model::readFileCIF(const std::string& filepath){
     }
   }
   else{
-    convertCifSymmetryElements(symop_list);
+    auto[_sym_matrix_XYZ, _sym_matrix_fraction] = convertCifSymmetryElements(symop_list);
   }
+
   auto atom_list_result = convertCifAtomsList(atom_data, _cart_matrix);
   if (!atom_list_result.first){
     Ctrl::getInstance()->displayErrorMessage(105); // at least one atom line could not be read
@@ -531,13 +533,14 @@ std::vector<std::string> Model::listElementsInStructure(){
 
 // symmetry elements in cif files are stored as strings that are not convenient for calculations
 // this function converts the list of strings in convenient matrix
-bool Model::convertCifSymmetryElements(const std::vector<std::string> &symop_list){
+typename Model::SymMatData Model::convertCifSymmetryElements(const std::vector<std::string> &symop_list){
   auto evalToken = [](const std::string& token, const char coord){
     if (token.find({'-',coord}) != std::string::npos){
       return -1;
     }
     return (token.find(coord) != std::string::npos)? 1 : 0;
   };
+
   auto extractFrac = [](const std::string& line){
     size_t divide_pos = line.find('/');
     // prevent accessing positions in string that are out of range
@@ -554,6 +557,7 @@ bool Model::convertCifSymmetryElements(const std::vector<std::string> &symop_lis
     return double(0);
   };
 
+  SymMatData sym_matrix_data;
   for(size_t i = 0; i < symop_list.size(); i++){
     // stringstream class check1
     std::stringstream check1(symop_list[i]);
@@ -561,14 +565,14 @@ bool Model::convertCifSymmetryElements(const std::vector<std::string> &symop_lis
     std::string token;
     for (int j = 0; getline(check1, token, ','); j++){
       for (char coord : {'x','y','z'}){
-        _sym_matrix_XYZ.push_back(evalToken(token, coord));
+        sym_matrix_data.first.push_back(evalToken(token, coord));
       }
 
       // if there is a fraction in the substring, convert to double
-      _sym_matrix_fraction.push_back(extractFrac(token));
+      sym_matrix_data.second.push_back(extractFrac(token));
     }
   }
-  return true;
+  return sym_matrix_data;
 }
 
 std::pair<bool,std::vector<Atom>> Model::convertCifAtomsList(
