@@ -417,7 +417,7 @@ typename Model::MatR3 Model::orthogonalizeUnitCell(const std::array<double,6>& c
     cart_matrix[2][0] = cell_param[2] * std::cos(beta);
     cart_matrix[2][1] = cell_param[2] * ((std::cos(alpha) * std::sin(gamma)) + 
         ((std::cos(beta) - (std::cos(alpha) * std::cos(gamma))) * std::sin(gamma-(PI/2)) / std::cos(gamma-(PI/2))));
-    cart_matrix[2][2] = std::sqrt(pow(cell_param[2],2)-pow(_cart_matrix[2][0],2)-pow(_cart_matrix[2][1],2));
+    cart_matrix[2][2] = std::sqrt(pow(cell_param[2],2)-pow(cart_matrix[2][0],2)-pow(cart_matrix[2][1],2));
   }
   return cart_matrix;
 }

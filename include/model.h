@@ -79,7 +79,7 @@ class Model{
     void clearAtomData();
     std::vector<Atom> readFileXYZ(const std::string&);
     std::pair<std::vector<Atom>,UnitCell> readFilePDB(const std::string&, bool);
-    std::vector<Atom> readFileCIF(const std::string&);
+    std::pair<std::vector<Atom>,UnitCell> readFileCIF(const std::string&);
 
     // export
     void createReport();
