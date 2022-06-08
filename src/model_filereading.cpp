@@ -125,50 +125,47 @@ bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
   clearAtomData();
 
   std::vector<Atom> atom_list;
-  try{
-
-    // XYZ file import
-    if (fileExtension(filepath) == "xyz"){
-      atom_list = readFileXYZ(filepath);
-    }  
-    // PDB file import
-    else if (fileExtension(filepath) == "pdb"){
-      const std::pair<std::vector<Atom>,UnitCell> import_data = readFilePDB(filepath, include_hetatm);
-      atom_list = import_data.first;
-      
-      _space_group = import_data.second.space_group;
-      for (size_t i = 0; i < _cell_param.size(); ++i){
-        _cell_param[i] = import_data.second.parameters[i];
-      }
+  
+  // XYZ file import
+  if (fileExtension(filepath) == "xyz"){
+    atom_list = readFileXYZ(filepath);
+  }  
+  // PDB file import
+  else if (fileExtension(filepath) == "pdb"){
+    const std::pair<std::vector<Atom>,UnitCell> import_data = readFilePDB(filepath, include_hetatm);
+    atom_list = import_data.first;
+    
+    _space_group = import_data.second.space_group;
+    for (size_t i = 0; i < _cell_param.size(); ++i){
+      _cell_param[i] = import_data.second.parameters[i];
     }
-    // CIF file import
-    else if (fileExtension(filepath) == "cif"){
-      try{
-        const std::pair<std::vector<Atom>,UnitCell> import_data = readFileCIF(filepath);
-        atom_list = import_data.first;
-        _cell_param = import_data.second.parameters;
-        _cart_matrix = import_data.second.cart_matrix;
-        _sym_matrix_XYZ = import_data.second.sym_matrix_XYZ;
-        _sym_matrix_fraction = import_data.second.sym_matrix_fraction;
-      }
-      catch (const ExceptInvalidCellParams& e){throw;}
-    }
-    // Invalid file 
-    else {throw ExceptIllegalFileExtension();}
-   
   }
-  catch(const ExceptInvalidCellParams& e) {throw;}
-
-  // Collect data
+  // CIF file import
+  else if (fileExtension(filepath) == "cif"){
+    try{
+      const std::pair<std::vector<Atom>,UnitCell> import_data = readFileCIF(filepath);
+      atom_list = import_data.first;
+      _cell_param = import_data.second.parameters;
+      _cart_matrix = import_data.second.cart_matrix;
+      _sym_matrix_XYZ = import_data.second.sym_matrix_XYZ;
+      _sym_matrix_fraction = import_data.second.sym_matrix_fraction;
+    }
+    catch (const ExceptInvalidCellParams& e){throw;}
+  }
+  // Invalid file 
+  else {throw ExceptIllegalFileExtension();}
+  
+  // Assemble atom data
   for (const Atom& elem : atom_list){
     _atom_count[elem.symbol]++;
     _raw_atom_coordinates.push_back(
         std::make_tuple(elem.symbol, elem.pos_x, elem.pos_y, elem.pos_z));
   }
 
-  if (_raw_atom_coordinates.size() == 0){ // If no atom is detected in the input file, the file is deemed invalid
+  if (_raw_atom_coordinates.empty()){ // If no atom is detected in the input file, the file is deemed invalid
     throw ExceptInvalidInputFile();
   }
+
   return true;
 }
 
