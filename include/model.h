@@ -63,14 +63,16 @@ struct CalcReportBundle{
   double getTime();
 };
 
+namespace FileMngr{struct UnitCell;}
+
 class AtomTree;
 struct Atom;
 class Space;
-struct UnitCell;
 class Model{
-  typedef FileMngr::SymbolPositionPair SymbolPositionPair;
   typedef std::array<std::array<double,3>,3> MatR3;
   typedef std::pair<std::vector<int>,std::vector<double>> SymMatData;
+  typedef FileMngr::SymbolPositionPair SymbolPositionPair;
+  typedef FileMngr::UnitCell UnitCell;
   public:
     // elements file import
     bool importElemFile(const std::string&);
@@ -78,7 +80,6 @@ class Model{
     // atom file import
     bool readAtomsFromFile(const std::string&, bool);
     void clearAtomData();
-    std::pair<std::vector<Atom>,UnitCell> readFilePDB(const std::string&, bool);
     std::pair<std::vector<Atom>,UnitCell> readFileCIF(const std::string&);
 
     // export
