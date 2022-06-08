@@ -17,9 +17,6 @@
 // AUX FUNCTION DECLARATIONS //
 ///////////////////////////////
 
-std::string strToValidSymbol(std::string str);
-static inline std::vector<std::string> splitLine(const std::string& line);
-
 struct ElementsFileBundle{ // data bundle for elements file import
   std::unordered_map<std::string, double> rad_map;
   std::unordered_map<std::string, double> weight_map;
@@ -79,13 +76,13 @@ ElementsFileBundle extractDataFromElemFile(const std::string& elem_path){
   bool invalid_radius_value = false;
   bool invalid_weight_value = false;
   while(getline(inp_file,line)){
-    std::vector<std::string> substrings = splitLine(line);
+    std::vector<std::string> substrings = FileMngr::splitLine(line);
     // substrings[0]: Atomic Number
     // substrings[1]: Element Symbol
     // substrings[2]: Radius
     // substrings[3]: Weight
     if(hasCorrectFormat(substrings)){
-      substrings[1] = strToValidSymbol(substrings[1]);
+      substrings[1] = FileMngr::strToValidSymbol(substrings[1]);
       // skip entry if element symbol invalid
       if (substrings[1].empty()){
         invalid_symbol_detected = true;
@@ -128,7 +125,7 @@ bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
   
   // XYZ file import
   if (fileExtension(filepath) == "xyz"){
-    atom_list = readFileXYZ(filepath);
+    atom_list = FileMngr::readFileXYZ(filepath);
   }  
   // PDB file import
   else if (fileExtension(filepath) == "pdb"){
@@ -180,57 +177,6 @@ void Model::clearAtomData(){
   }
 }
 
-std::vector<Atom> Model::readFileXYZ(const std::string& filepath){
-  // Validate and read atom line
-  // If invalid, returns a pair, whose first value is an empty string
-  auto readAtomLine = [](const std::string& line){
-    
-    // Atom lines have four entries, separated by one or more white spaces.
-    const std::vector<std::string> substrings = splitLine(line);
-    if (substrings.size() != 4) {return SymbolPositionPair();}
-    
-    // If first item cannot be converted to a valid element symbol return false
-    std::string symbol = strToValidSymbol(substrings[0]);
-    if (symbol.empty()){return SymbolPositionPair();}
-
-    // Validate second to fourth item are numeric
-    std::array<double,3> position;
-    for (size_t i=1; i<4; ++i){
-      try {
-        size_t str_pos = 0; // Last string position successfully evaluated by std::stod()
-        position[i-1] = std::stod(substrings[i], &str_pos);
-        if (substrings[i].size() != str_pos) {return SymbolPositionPair();}
-      } 
-      catch (const std::invalid_argument& e) {return SymbolPositionPair();}
-    }
-    return std::make_pair(symbol, position);
-  };
-
-  std::string line;
-  std::ifstream inp_file(filepath);
-
-  bool invalid_entry_encountered = false;
-  bool first_atom_line_encountered = false;
-
-  std::vector<Atom> atom_list;
-  while(getline(inp_file,line)){
-    if (line.empty()){} // Skip blank lines in any case
-    const auto sp_pair = readAtomLine(line);
-    if (sp_pair.first.empty()){
-      // Display an error if the atom lines are interrupted by a non-blank, non-atom line
-      if (first_atom_line_encountered){
-        invalid_entry_encountered = true;
-      }
-      continue;
-    }
-    first_atom_line_encountered = true;
-
-    atom_list.push_back(Atom(sp_pair));
-  }
-  inp_file.close();
-  if (invalid_entry_encountered){Ctrl::getInstance()->displayErrorMessage(105);}
-  return atom_list;
-}
 
 std::pair<std::vector<Atom>,UnitCell> Model::readFilePDB(const std::string& filepath, bool include_hetatm){
   // Follows the official specifications for PDB files as detailed in "Protein 
@@ -284,7 +230,7 @@ std::pair<std::vector<Atom>,UnitCell> Model::readFilePDB(const std::string& file
       const std::map<std::string,std::string> fields = sectionFields(line, s_atom_fields);
 
       // Evaluate atom symbol
-      std::string symbol = strToValidSymbol(fields.at("name"));
+      std::string symbol = FileMngr::strToValidSymbol(fields.at("name"));
       if (symbol.empty()){
         invalid_symbol_detected = true;
         continue;
@@ -398,7 +344,7 @@ std::pair<std::vector<Atom>,UnitCell> Model::readFileCIF(const std::string& file
         "_cell_length_a", "_cell_length_b", "_cell_length_c",
         "_cell_angle_alpha", "_cell_angle_beta", "_cell_angle_gamma"};
 
-      std::vector<std::string> substrings = splitLine(line);
+      std::vector<std::string> substrings = FileMngr::splitLine(line);
       for (size_t i = 0; i < s_cell_data_keywords.size(); ++i){
         if (containsKeyword(line,s_cell_data_keywords[i])){
           try{uc.parameters[i] = std::stod(substrings[1]);}
@@ -485,7 +431,7 @@ std::pair<std::vector<Atom>,UnitCell> Model::readFileCIF(const std::string& file
         }
         else{
           { // Save atom line data as map
-            std::vector<std::string> values = splitLine(line);
+            std::vector<std::string> values = FileMngr::splitLine(line);
             if (atom_headers.size() != values.size()){
               // TODO: exception, invalid atom line
               continue;
@@ -627,7 +573,7 @@ std::pair<bool,std::vector<Atom>> Model::convertCifAtomsList(
     }
 
     // get the element symbol and keep track of their number
-    const std::string symbol = strToValidSymbol(atom_data.at("_atom_site_type_symbol")[i]);
+    const std::string symbol = FileMngr::strToValidSymbol(atom_data.at("_atom_site_type_symbol")[i]);
 
     atom_list.emplace_back(std::make_pair(symbol, xyz));
 
@@ -651,7 +597,7 @@ bool Model::getSymmetryElements(std::string group, std::vector<int> &sym_matrix_
         return true; // end function when all symmetry elements of the matching space group are stored in vectors
       }
       else{
-        std::vector<std::string> sym_matrix_line = splitLine(sym_line); // store 12 parameters of the symmetry matrix
+        std::vector<std::string> sym_matrix_line = FileMngr::splitLine(sym_line); // store 12 parameters of the symmetry matrix
         std::stringstream ss;
         if(sym_matrix_line.size() == 12){
           for (int i = 0; i < 9; i++){
@@ -700,26 +646,4 @@ double Model::findWeightOfAtom(const std::string& symbol){
 // AUX FUNCTIONS //
 ///////////////////
 
-// split line into substrings when separated by whitespaces
-static inline std::vector<std::string> splitLine(const std::string& line){
-  std::istringstream iss(line);
-  std::vector<std::string> substrings((std::istream_iterator<std::string>(iss)), std::istream_iterator<std::string>());
-  return substrings;
-}
-
-// Reads a string and converts it to valid atom symbol: first character uppercase followed by lowercase characters
-std::string strToValidSymbol(std::string str){
-  StrMngr::removeWhiteSpaces(str);
-  StrMngr::removeEOL(str);
-  // Return empty if str is empty or begins with non-alphabetic character
-  if (str.size() == 0 || !isalpha(str[0])){return "";}
-  // Only for first character in sequence, convert to uppercase
-  str[0] = toupper(str[0]);
-  for (size_t i = 1; i < str.size(); i++) {
-    if (isalpha(str[i])) {
-      str[i] = tolower(str[i]);
-    }
-  }
-  return str;
-}
 

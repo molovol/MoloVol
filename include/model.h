@@ -6,6 +6,7 @@
 #include "atomtree.h"
 #include "space.h"
 #include "cavity.h"
+#include "filemanager.h"
 #include <iostream>
 #include <vector>
 #include <map>
@@ -67,7 +68,7 @@ struct Atom;
 class Space;
 struct UnitCell;
 class Model{
-  typedef std::pair<std::string,std::array<double,3>> SymbolPositionPair;
+  typedef FileMngr::SymbolPositionPair SymbolPositionPair;
   typedef std::array<std::array<double,3>,3> MatR3;
   typedef std::pair<std::vector<int>,std::vector<double>> SymMatData;
   public:
@@ -77,7 +78,6 @@ class Model{
     // atom file import
     bool readAtomsFromFile(const std::string&, bool);
     void clearAtomData();
-    std::vector<Atom> readFileXYZ(const std::string&);
     std::pair<std::vector<Atom>,UnitCell> readFilePDB(const std::string&, bool);
     std::pair<std::vector<Atom>,UnitCell> readFileCIF(const std::string&);
 

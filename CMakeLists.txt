@@ -46,6 +46,7 @@ set(SOURCES
   src/base_init.cpp
   src/cavity.cpp
   src/controller.cpp
+  src/filemanager.cpp
   src/griddata.cpp
   src/misc.cpp
   src/model.cpp
