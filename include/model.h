@@ -6,7 +6,7 @@
 #include "atomtree.h"
 #include "space.h"
 #include "cavity.h"
-#include "filemanager.h"
+#include "importmanager.h"
 #include <iostream>
 #include <vector>
 #include <map>
@@ -63,7 +63,7 @@ struct CalcReportBundle{
   double getTime();
 };
 
-namespace FileMngr{struct UnitCell;}
+namespace ImportMngr{struct UnitCell;}
 
 class AtomTree;
 struct Atom;
@@ -71,8 +71,8 @@ class Space;
 class Model{
   typedef std::array<std::array<double,3>,3> MatR3;
   typedef std::pair<std::vector<int>,std::vector<double>> SymMatData;
-  typedef FileMngr::SymbolPositionPair SymbolPositionPair;
-  typedef FileMngr::UnitCell UnitCell;
+  typedef ImportMngr::SymbolPositionPair SymbolPositionPair;
+  typedef ImportMngr::UnitCell UnitCell;
   public:
     // elements file import
     bool importElemFile(const std::string&);

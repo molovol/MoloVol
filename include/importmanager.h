@@ -8,7 +8,7 @@
 
 // The file manager is an external component that compartmentalises the code used for
 // importing data. It works for the Model class.
-namespace FileMngr{
+namespace ImportMngr{
   typedef std::pair<std::string,std::array<double,3>> SymbolPositionPair;
 
   // Return struct

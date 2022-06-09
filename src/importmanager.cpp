@@ -1,5 +1,5 @@
 
-#include "filemanager.h"
+#include "importmanager.h"
 #include "controller.h"
 #include "misc.h"
 #include <map>
@@ -11,7 +11,7 @@
 ////////////////
 // XYZ IMPORT //
 ////////////////
-std::vector<Atom> FileMngr::readFileXYZ(const std::string& filepath){
+std::vector<Atom> ImportMngr::readFileXYZ(const std::string& filepath){
   // Validate and read atom line
   // If invalid, returns a pair, whose first value is an empty string
   auto readAtomLine = [](const std::string& line){
@@ -66,7 +66,7 @@ std::vector<Atom> FileMngr::readFileXYZ(const std::string& filepath){
 ////////////////
 // PDB IMPORT //
 ////////////////
-std::pair<std::vector<Atom>,FileMngr::UnitCell> FileMngr::readFilePDB(const std::string& filepath, bool include_hetatm){
+std::pair<std::vector<Atom>,ImportMngr::UnitCell> ImportMngr::readFilePDB(const std::string& filepath, bool include_hetatm){
   // LAMBDA DEFINITIONS
   // Follows the official specifications for PDB files as detailed in "Protein 
   // Data Bank Contents Guide: Atomic Coordinate Entry Format Description" Version 3.3
@@ -182,14 +182,14 @@ std::pair<std::vector<Atom>,FileMngr::UnitCell> FileMngr::readFilePDB(const std:
 // AUX FUNCTIONS //
 ///////////////////
 // split line into substrings when separated by whitespaces
-std::vector<std::string> FileMngr::splitLine(const std::string& line){
+std::vector<std::string> ImportMngr::splitLine(const std::string& line){
   std::istringstream iss(line);
   std::vector<std::string> substrings((std::istream_iterator<std::string>(iss)), std::istream_iterator<std::string>());
   return substrings;
 }
 
 // Reads a string and converts it to valid atom symbol: first character uppercase followed by lowercase characters
-std::string FileMngr::strToValidSymbol(std::string str){
+std::string ImportMngr::strToValidSymbol(std::string str){
   StrMngr::removeWhiteSpaces(str);
   StrMngr::removeEOL(str);
   // Return empty if str is empty or begins with non-alphabetic character

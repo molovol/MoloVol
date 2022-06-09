@@ -64,13 +64,13 @@ ElementsFileBundle extractDataFromElemFile(const std::string& elem_path){
   bool invalid_radius_value = false;
   bool invalid_weight_value = false;
   while(getline(inp_file,line)){
-    std::vector<std::string> substrings = FileMngr::splitLine(line);
+    std::vector<std::string> substrings = ImportMngr::splitLine(line);
     // substrings[0]: Atomic Number
     // substrings[1]: Element Symbol
     // substrings[2]: Radius
     // substrings[3]: Weight
     if(hasCorrectFormat(substrings)){
-      substrings[1] = FileMngr::strToValidSymbol(substrings[1]);
+      substrings[1] = ImportMngr::strToValidSymbol(substrings[1]);
       // skip entry if element symbol invalid
       if (substrings[1].empty()){
         invalid_symbol_detected = true;
@@ -113,11 +113,11 @@ bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
   
   // XYZ file import
   if (fileExtension(filepath) == "xyz"){
-    atom_list = FileMngr::readFileXYZ(filepath);
+    atom_list = ImportMngr::readFileXYZ(filepath);
   }  
   // PDB file import
   else if (fileExtension(filepath) == "pdb"){
-    const std::pair<std::vector<Atom>,UnitCell> import_data = FileMngr::readFilePDB(filepath, include_hetatm);
+    const std::pair<std::vector<Atom>,UnitCell> import_data = ImportMngr::readFilePDB(filepath, include_hetatm);
     atom_list = import_data.first;
     
     _space_group = import_data.second.space_group;
@@ -222,7 +222,7 @@ std::pair<std::vector<Atom>,typename Model::UnitCell> Model::readFileCIF(const s
         "_cell_length_a", "_cell_length_b", "_cell_length_c",
         "_cell_angle_alpha", "_cell_angle_beta", "_cell_angle_gamma"};
 
-      std::vector<std::string> substrings = FileMngr::splitLine(line);
+      std::vector<std::string> substrings = ImportMngr::splitLine(line);
       for (size_t i = 0; i < s_cell_data_keywords.size(); ++i){
         if (containsKeyword(line,s_cell_data_keywords[i])){
           try{uc.parameters[i] = std::stod(substrings[1]);}
@@ -309,7 +309,7 @@ std::pair<std::vector<Atom>,typename Model::UnitCell> Model::readFileCIF(const s
         }
         else{
           { // Save atom line data as map
-            std::vector<std::string> values = FileMngr::splitLine(line);
+            std::vector<std::string> values = ImportMngr::splitLine(line);
             if (atom_headers.size() != values.size()){
               // TODO: exception, invalid atom line
               continue;
@@ -451,7 +451,7 @@ std::pair<bool,std::vector<Atom>> Model::convertCifAtomsList(
     }
 
     // get the element symbol and keep track of their number
-    const std::string symbol = FileMngr::strToValidSymbol(atom_data.at("_atom_site_type_symbol")[i]);
+    const std::string symbol = ImportMngr::strToValidSymbol(atom_data.at("_atom_site_type_symbol")[i]);
 
     atom_list.emplace_back(std::make_pair(symbol, xyz));
 
@@ -475,7 +475,7 @@ bool Model::getSymmetryElements(std::string group, std::vector<int> &sym_matrix_
         return true; // end function when all symmetry elements of the matching space group are stored in vectors
       }
       else{
-        std::vector<std::string> sym_matrix_line = FileMngr::splitLine(sym_line); // store 12 parameters of the symmetry matrix
+        std::vector<std::string> sym_matrix_line = ImportMngr::splitLine(sym_line); // store 12 parameters of the symmetry matrix
         std::stringstream ss;
         if(sym_matrix_line.size() == 12){
           for (int i = 0; i < 9; i++){
