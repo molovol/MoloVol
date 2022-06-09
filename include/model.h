@@ -70,7 +70,6 @@ struct Atom;
 class Space;
 class Model{
   typedef std::array<std::array<double,3>,3> MatR3;
-  typedef std::pair<std::vector<int>,std::vector<double>> SymMatData;
   typedef ImportMngr::SymbolPositionPair SymbolPositionPair;
   typedef ImportMngr::UnitCell UnitCell;
   public:
@@ -80,7 +79,6 @@ class Model{
     // atom file import
     bool readAtomsFromFile(const std::string&, bool);
     void clearAtomData();
-    std::pair<std::vector<Atom>,UnitCell> readFileCIF(const std::string&);
 
     // export
     void createReport();
@@ -154,14 +152,8 @@ class Model{
 
     void prepareVolumeCalc();
 
-    // cif file processing
-    SymMatData convertCifSymmetryElements(const std::vector<std::string>&);
-    std::pair<bool,std::vector<Atom>> convertCifAtomsList(
-        const std::map<std::string,std::vector<std::string>>&, const MatR3&);
-
     // crystal unit cell related functions
     bool getSymmetryElements(std::string, std::vector<int>&, std::vector<double>&);
-    MatR3 orthogonalizeUnitCell(const std::array<double,6>&);
     bool symmetrizeUnitCell();
     void moveAtomsInsideCell();
     void removeDuplicateAtoms();

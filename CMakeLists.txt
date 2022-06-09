@@ -46,6 +46,7 @@ set(SOURCES
   src/base_init.cpp
   src/cavity.cpp
   src/controller.cpp
+  src/crystallographer.cpp
   src/griddata.cpp
   src/importmanager.cpp
   src/misc.cpp
