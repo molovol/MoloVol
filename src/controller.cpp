@@ -98,20 +98,7 @@ bool Ctrl::loadAtomFile(){
   }
 
   bool successful_import;
-  try{successful_import = _current_calculation->readAtomsFromFile(s_gui->getAtomFilepath(), s_gui->getIncludeHetatm());}
-
-  catch (const ExceptIllegalFileExtension& e){
-    displayErrorMessage(103);
-    successful_import = false;
-  }
-  catch (const ExceptInvalidInputFile& e){
-    displayErrorMessage(102);
-    successful_import = false;
-  }
-  catch (const ExceptInvalidCellParams& e){
-    displayErrorMessage(109);
-    successful_import = false;
-  }
+  successful_import = _current_calculation->readAtomsFromFile(s_gui->getAtomFilepath(), s_gui->getIncludeHetatm());
 
   s_gui->displayAtomList(_current_calculation->generateAtomList()); // update gui
 

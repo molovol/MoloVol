@@ -105,9 +105,6 @@ ElementsFileBundle extractDataFromElemFile(const std::string& elem_path){
 //////////////////////
 
 bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
-  // it is very hard to tell what this function does, because of the heavy use of global variables.
-  // this function should ideally end in a set function, and the other functions should have return
-  // values -JM
   clearAtomData();
 
   std::vector<Atom> atom_list;
@@ -136,20 +133,28 @@ bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
       _sym_matrix_XYZ = import_data.second.sym_matrix_XYZ;
       _sym_matrix_fraction = import_data.second.sym_matrix_fraction;
     }
-    catch (const ExceptInvalidCellParams& e){throw;}
+    catch (const ExceptInvalidCellParams& e){
+      Ctrl::getInstance()->displayErrorMessage(112);
+      return false;
+    }
   }
-  // Invalid file 
-  else {throw ExceptIllegalFileExtension();}
-  
+  // File extension not supported 
+  else {
+    Ctrl::getInstance()->displayErrorMessage(103);
+    return false;
+  }
+
   // Assemble atom data
   for (const Atom& elem : atom_list){
     _atom_count[elem.symbol]++;
     _raw_atom_coordinates.push_back(
         std::make_tuple(elem.symbol, elem.pos_x, elem.pos_y, elem.pos_z));
   }
-
-  if (_raw_atom_coordinates.empty()){ // If no atom is detected in the input file, the file is deemed invalid
-    throw ExceptInvalidInputFile();
+  
+  // If no atom is detected in the input file, the file is deemed invalid
+  if (_raw_atom_coordinates.empty()){
+    Ctrl::getInstance()->displayErrorMessage(102);
+    return false;
   }
 
   return true;
