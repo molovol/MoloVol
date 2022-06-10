@@ -43,8 +43,8 @@ If you encounter a bug or have a request for a feature, you are more than welcom
 The development is currently lead by Jasmin B. Maglic and Roy Lavendomme. You may reach us via email through [molovol@outlook.com](mailto:molovol@outlook.com)
 
 ## Scientific Reference
-MoloVol v1.0.0 features and algorithms are presented in detail in a scientific publication. 
+MoloVol v1.0.0 features and algorithms are presented in detail in a scientific publication.
 
-The preprint is currently available on ChemRxiv DOI: [10.33774/chemrxiv-2021-dss1j](https://doi.org/10.33774/chemrxiv-2021-dss1j)
+The paper has been accepted for publication in the Journal for Applied Crystallography. Please use the following or an equivalent citation (the DOI may remain inactive until printing):
 
-The paper will be published in a peer-reviewed journal as soon as possible.
+> Maglic, J.B. & Lavendomme, R. (2022). J. Appl. Cryst. 55, https://doi.org/10.1107/S1600576722004988.
