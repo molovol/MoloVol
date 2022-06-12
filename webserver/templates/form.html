@@ -8,7 +8,7 @@
     <style>#outputbox {
         border: 1px solid #ccc;
     }</style>
-    <link rel="stylesheet"  type="text/css" href="{{url_for('.static', filename='simple.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('.static', filename='simple.min.css') }}">
 </head>
 <body>
 <h1>MoloVol</h1>
@@ -36,33 +36,33 @@
            value="{{inputdict.get('dir-output','')}}"><label for="dir-output">Path to the directory
     output</label><br>-->
 
-    <input type="text" id="radius" name="cli_radius" size="4"
+    <input type="text" id="radius" name="cli_radius" size="2" style="width: 20%"
            value="{{ inputdict.get('radius', '1.2') if inputdict is defined else '1.2' }}"/><label for="radius">
     (Small) probe radius</label><br>
-    <input type="text" id="grid" name="cli_grid" size="4"
+    <input type="text" id="grid" name="cli_grid" size="2" style="width: 20%"
            value="{{ inputdict.get('grid','0.2') if inputdict is defined else '0.2' }}"><label for="grid">
     Spatial resolution of the underlying grid</label><br>
     <input type="checkbox" id="hetatm" name="cli_hetatm"><label for="hetatm">Include HETATM from pdb file</label><br>
     <input type="checkbox" id="unitcell" name="cli_unitcell"><label for="unitcell">Analyze unit cell</label><br>
-    <input type="checkbox" id="surface" name="cli_surface"><label for="surface">Calculate surface areas</label><br>
-    <input type="checkbox" id="export-report" name="cli_export-report"><label for="export-report">Export report
-    (requires:-do)</label><br>
-    <input type="checkbox" id="export-total" name="cli_export-total"><label for="export-total">Export total surface map
-    (requires:-do)</label><br>
+    <input type="checkbox" id="surface" name="cli_surface" checked="checked"><label for="surface">Calculate surface
+    areas</label><br>
+    <br>
+    <!--all three options require -do for the path to output directory -->
+    <input type="checkbox" id="export-report" name="cli_export-report"><label for="export-report">Export
+    report</label><br>
+    <input type="checkbox" id="export-total" name="cli_export-total"><label for="export-total">Export total surface
+    map</label><br>
     <input type="checkbox" id="export-cavities" name="cli_export-cavities"><label for="export-cavities">Export surface
-    maps
-    for all cavities (requires:-do)</label><br>
+    maps for all cavities</label><br>
     <!--<input type="text" id="output" name="cli_output"><label for="output">Control what parts of the output to display
     (default:all)</label><br>-->
-    <input type="checkbox" id="quiet" name="cli_quiet"><label for="quiet">Silence progress reporting</label><br>
-    <input type="checkbox" id="unicode" name="cli_unicode"><label for="unicode">Allow unicode in output</label><br>
     <input type="submit"/>
 </form>
 
-{% if returnvalues is not none and returnvalues!=""%}
+{% if returnvalues is not none and returnvalues!="" %}
     <h2>Output</h2>
-    {%  if loglink is not none %}
-        <a href="{{ loglink }}">Download result</a><br>
+    {% if resultslink is not none %}
+        <a href="{{ resultslink }}">Download results</a><br><br>
     {% endif %}
     <div id="outputbox">
         <output name="result" for="inputs">
@@ -72,6 +72,12 @@
         </output>
     </div>
 {% endif %}
+
+<footer>
+    (C) 2022
+    Molovol Web was brought to you by <a href="https://benediktsvogler.com">Benedikt S. Vogler</a> based on <a
+        href="https://molovol.com">Molovol Desktop</a> by Jasmin B. Maglic and Roy Lavendomme.
+</footer>
 </body>
 </html>
 

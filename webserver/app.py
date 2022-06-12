@@ -1,4 +1,5 @@
 import os
+import zipfile
 from typing import Optional
 from uuid import uuid4
 
@@ -24,7 +25,9 @@ def allowed_file(filename):
 
 
 out = None
-logdir = "./logs/"
+log_dir = "./logs/"
+export_dir = "./export/"
+
 
 def manage_uploaded_file(request, filetype="structure"):
     global out
@@ -53,16 +56,37 @@ def manage_uploaded_file(request, filetype="structure"):
 @app.route("/logs/<id>", methods=["GET"])
 def get_logs(id):
     """id is the filename of the log file"""
-    with open(f"{logdir}/{id}") as f:
+    with open(f"{log_dir}/{id}") as f:
         return Response(response=f.read(), status=200, mimetype="text/plain")
+
+
+@app.route("/export/<id>/", methods=["GET"])
+def get_export(id):
+    zip_export(f"{export_dir}{id}/")
+    if not os.path.exists(f"{export_dir}{id}/results.zip"):
+        return Response(response="No export found", status=404, mimetype="text/plain")
+    with open(f"{export_dir}{id}/results.zip", "rb") as f:
+        return Response(response=f.read(), status=200, mimetype="application/zip")
+
+
+def zip_export(path) -> str:
+    # zip files in path
+    zip_file = f"{path}results.zip"
+    dir_content = os.listdir(path)
+    print(f"Found these files in path: {dir_content}. Zipping them")
+    with zipfile.ZipFile(zip_file, 'w') as zip:
+        for file in dir_content:
+            print("Zipping file: " +path+ file)
+            zip.write(path+file, arcname=file)
+    return zip_file
 
 
 def save_log(log) -> str:
     # generate random filename
     # check if directory exists and create if missing
-    if not os.path.exists(logdir):
-        os.makedirs(logdir)
-    filename = f"{logdir}{uuid4()}.log"
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+    filename = f"{log_dir}{uuid4()}.log"
     with open(filename, "w") as f:
         f.write(log)
     return filename
@@ -72,8 +96,10 @@ def save_log(log) -> str:
 def io():
     global out
     out = None
-    loglink = None
+    resultslink = None
     inputdict = {}
+    export = None
+    tmp_outdir = None
     if request.method == 'POST':
         # when arguments ignore form data
         # split cli string so that it can be passed to subprocess
@@ -86,6 +112,17 @@ def io():
                 args.append(f"--{key}")
                 if value != "" and value != "on":
                     args.append(str(value))
+
+                # when export is requested add -do option
+                if export is None and key.startswith("export") and value == "on":
+                    export = uuid4()
+                    tmp_outdir = f"{export_dir}{export}/"
+                    # check if directory exists and create if missing
+                    print(f"Exporting in zip in {tmp_outdir}")
+                    if not os.path.exists(tmp_outdir):
+                        os.makedirs(tmp_outdir)
+                    args.append(f"-do")
+                    args.append(tmp_outdir)
             inputdict = request.form
 
             # read structure file
@@ -101,6 +138,10 @@ def io():
                 elements_path = "./inputfile/elements.txt"
             args.append("-fe")
             args.append(elements_path)
+
+            # we only print it out in the end so we can put it to quiet
+            args.append("-q")
+
         else:
             args = request.args.get('cli-arguments', '').split(" ")
             inputdict = request.args
@@ -114,13 +155,16 @@ def io():
                 out = subprocess.check_output(["./launch_headless.sh"] + args, stderr=subprocess.STDOUT).decode(
                     "utf-8")
                 print(out)
-                loglink = f"{request.url_root}{save_log(out)}"
+                if export:
+                    resultslink = f"/{tmp_outdir}"
+                else:
+                    resultslink = f"/{save_log(out)}"
             except Exception as e:
                 out = "Exception: " + str(e)
     if request.accept_mimetypes['text/html']:
         if type(out) is str:
             out = out.split("\n")
         return render_template('form.html', inputdict=inputdict, returnvalues=out,
-                               loglink=loglink)
+                               resultslink=resultslink)
     elif request.accept_mimetypes['application/json']:
         return jsonify({"output": out})
