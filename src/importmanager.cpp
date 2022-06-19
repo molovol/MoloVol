@@ -117,13 +117,6 @@ std::pair<std::vector<Atom>,ImportMngr::UnitCell> ImportMngr::readFilePDB(const 
       // Partition line according to the fields specified by the PDB file standard
       const std::map<std::string,std::string> fields = sectionFields(line, s_atom_fields);
 
-      // Evaluate atom symbol
-      std::string symbol = strToValidSymbol(fields.at("element"));
-      if (symbol.empty()){
-        invalid_symbol_detected = true;
-        continue;
-      }
-      
       // Evaluate atom coordinates
       std::array<double,3> coord;
       size_t i = 0;
@@ -149,6 +142,13 @@ std::pair<std::vector<Atom>,ImportMngr::UnitCell> ImportMngr::readFilePDB(const 
           charge = std::stoi(fields.at("charge"));
         }
         catch (const std::invalid_argument& e){}
+      }
+
+      // Evaluate atom symbol
+      std::string symbol = strToValidSymbol(fields.at("element"), charge);
+      if (symbol.empty()){
+        invalid_symbol_detected = true;
+        continue;
       }
 
       // Store symbol and coordinates
@@ -383,7 +383,7 @@ std::vector<std::string> ImportMngr::splitLine(const std::string& line){
 }
 
 // Reads a string and converts it to valid atom symbol: first character uppercase followed by lowercase characters
-std::string ImportMngr::strToValidSymbol(std::string str){
+std::string ImportMngr::strToValidSymbol(std::string str, signed charge){
   StrMngr::removeWhiteSpaces(str);
   StrMngr::removeEOL(str);
   // Return empty if str is empty or begins with non-alphabetic character
@@ -395,6 +395,11 @@ std::string ImportMngr::strToValidSymbol(std::string str){
       str[i] = tolower(str[i]);
     }
   }
+  // Add charge at the end
+  if (charge){
+    str += std::to_string(abs(charge)) + (charge > 0? "+" : "-");
+  }
+
   return str;
 }
 

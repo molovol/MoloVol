@@ -36,7 +36,7 @@ namespace ImportMngr{
   std::pair<std::vector<Atom>,UnitCell> readFileCIF(const std::string&);
   
   // Aux functions
-  std::string strToValidSymbol(std::string str);
+  std::string strToValidSymbol(std::string str, signed=0);
   std::vector<std::string> splitLine(const std::string& line);
   SymMatData convertCifSymmetryElements(const std::vector<std::string>&);
   std::pair<bool,std::vector<Atom>> convertCifAtomsList(const AtomDataTable&, const MatR3&);
