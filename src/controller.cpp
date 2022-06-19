@@ -100,7 +100,7 @@ bool Ctrl::loadAtomFile(){
   bool successful_import;
   successful_import = _current_calculation->readAtomsFromFile(s_gui->getAtomFilepath(), s_gui->getIncludeHetatm());
 
-  s_gui->displayAtomList(_current_calculation->generateAtomList()); // update gui
+  s_gui->displayAtomList(_current_calculation->generateAtomList());
 
   return successful_import;
 }

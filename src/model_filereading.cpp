@@ -145,6 +145,8 @@ bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
 
   // Assemble atom data
   for (const Atom& elem : atom_list){
+    // TODO: a vector of Atoms is constructed later on using the data that is extracted here. It would be
+    // better to directly store this vector of atoms
     _atom_count[elem.symbol]++;
     _raw_atom_coordinates.push_back(
         std::make_tuple(elem.symbol, elem.pos_x, elem.pos_y, elem.pos_z));

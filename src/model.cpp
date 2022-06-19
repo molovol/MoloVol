@@ -250,8 +250,8 @@ void Model::setAtomListForCalculation(){
   }
 }
 
-// generates a simple table to be displayed by the GUI. only uses standard library and base types in order to
-// avoid dependency issues
+// Update GUI with the list of imported atoms. Look up the radii from the previously imported 
+// elements file. Uses only standard library containers, to avoid dependency issues.
 std::vector<std::tuple<std::string, int, double>> Model::generateAtomList(){
   std::vector<std::tuple<std::string, int, double>> atoms_for_list;
   // Element0: Element symbol

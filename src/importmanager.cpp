@@ -118,7 +118,7 @@ std::pair<std::vector<Atom>,ImportMngr::UnitCell> ImportMngr::readFilePDB(const 
       const std::map<std::string,std::string> fields = sectionFields(line, s_atom_fields);
 
       // Evaluate atom symbol
-      std::string symbol = strToValidSymbol(fields.at("name"));
+      std::string symbol = strToValidSymbol(fields.at("element"));
       if (symbol.empty()){
         invalid_symbol_detected = true;
         continue;
