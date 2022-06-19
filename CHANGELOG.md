@@ -2,6 +2,13 @@
 
 This changelog keeps track of changes in a user-friendly way. It is based on [keep a changelog](https://keepachangelog.com/en/1.0.0/) by Olivier Lacan.
 
+## Unreleased
+### Improved
+* The error message that occurs when an incomplete list of input arguments are provided in the CLI is now more descriptive
+
+### Fixed
+* Fix an issue where the application would crash, when an invalid elements file was provided while attempting to load a structure file.
+
 ## [v1.0.0](https://github.com/molovol/MoloVol/releases/tag/v1.0.0) - 2021-09-14
 ### Added
 * Allow CIF files for structure input.

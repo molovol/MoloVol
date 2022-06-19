@@ -33,12 +33,11 @@ ElementsFileBundle extractDataFromElemFile(const std::string& elem_path);
 // sets the maps to members of the model class
 bool Model::importElemFile(const std::string& elem_path){
   ElementsFileBundle data = extractDataFromElemFile(elem_path);
-  if (data.rad_map.size() == 0) {return false;}
-
   setRadiusMap(data.rad_map);
   _elem_weight = data.weight_map;
   _elem_Z = data.atomic_num_map;
-  return true;
+  
+  return (data.rad_map.size());
 }
 
 // used for importing only the radius map from the radius file
