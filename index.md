@@ -45,6 +45,6 @@ The development is currently lead by Jasmin B. Maglic and Roy Lavendomme. You ma
 ## Scientific Reference
 MoloVol v1.0.0 features and algorithms are presented in detail in a scientific publication.
 
-The paper has been accepted for publication in the Journal for Applied Crystallography. Please use the following or an equivalent citation (the DOI may remain inactive until printing):
+The paper has been accepted for publication in the Journal for Applied Crystallography. Please use the following or an equivalent citation:
 
-> Maglic, J.B. & Lavendomme, R. (2022). J. Appl. Cryst. 55, https://doi.org/10.1107/S1600576722004988.
+> Maglic, J.B. & Lavendomme, R. (2022). J. Appl. Cryst. 55, DOI: [10.1107/S1600576722004988](https://doi.org/10.1107/S1600576722004988).
