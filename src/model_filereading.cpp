@@ -3,6 +3,7 @@
 #include "controller.h"
 #include "misc.h"
 #include "exception.h"
+#include "importmanager.h"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -229,12 +230,25 @@ bool Model::getSymmetryElements(std::string group, std::vector<int> &sym_matrix_
 // METHOD DEFINITIONS //
 ////////////////////////
 
-// returns the radius of an atom with a given symbol
-double Model::findRadiusOfAtom(const std::string& symbol){
-  return _radius_map[symbol];
+// Returns the radius of an atom with a given symbol
+// If the symbol is not intially found, the function strips everything after the first
+// non-letter character and tries to look up the radius again. If the symbol is still not
+// found, defaults to 0
+double Model::findRadiusOfAtom(std::string symbol) const {
+  if (_radius_map.count(symbol)){
+    return _radius_map.at(symbol);
+  }
+
+  symbol = ImportMngr::stripCharge(symbol);
+
+  if (_radius_map.count(symbol)){
+    return _radius_map.at(symbol);
+  }
+  
+  return 0;
 }
 
-double Model::findRadiusOfAtom(const Atom& at){
+double Model::findRadiusOfAtom(const Atom& at) const {
   return findRadiusOfAtom(at.symbol);
 }
 

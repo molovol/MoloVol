@@ -97,8 +97,8 @@ class Model{
     // crystal unit cell related functions
     bool processUnitCell();
 
-    double findRadiusOfAtom(const std::string&);
-    double findRadiusOfAtom(const Atom&);
+    double findRadiusOfAtom(std::string) const;
+    double findRadiusOfAtom(const Atom&) const;
     double findWeightOfAtom(const std::string&);
 
     // controller-model communication

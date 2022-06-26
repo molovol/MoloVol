@@ -5,6 +5,8 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
+#include <cctype>
 
 ////////////////
 // XYZ IMPORT //
@@ -401,6 +403,11 @@ std::string ImportMngr::strToValidSymbol(std::string str, signed charge){
   }
 
   return str;
+}
+
+std::string ImportMngr::stripCharge(const std::string& symbol){
+  auto it = find_if_not(symbol.begin(), symbol.end(), isalpha);
+  return std::string(symbol.begin(), it);
 }
 
 // symmetry elements in cif files are stored as strings that are not convenient for calculations
