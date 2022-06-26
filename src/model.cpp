@@ -274,19 +274,25 @@ std::unordered_map<std::string,double> Model::getRadiusMap(){
 std::string generateChemicalFormula(const std::map<std::string,int>& n_atoms, const std::vector<std::string>& included_elem){
   std::string chemical_formula = "";
   std::string prefix = "";
+
+  // Create a new map, but ignore charges and skip excluded elements
+  std::map<std::string, int> n_atoms_ignore_charges;
+  for (auto elem : n_atoms){
+    if (!isIncluded(elem.first, included_elem)){continue;}
+    n_atoms_ignore_charges[ImportMngr::stripCharge(elem.first)] += elem.second;
+  }
+
   // iterate through map in lexographic order
-  for (auto elem: n_atoms){
+  for (auto elem : n_atoms_ignore_charges){
     std::string symbol = elem.first;
     std::string subscript = std::to_string(elem.second);
-    if (isIncluded(symbol, included_elem)){
-      // by convention: carbon comes first, then hydrogen, then in alphabetical order
-      if (symbol == "C" || symbol == "H"){
-        prefix += symbol + subscript;
-      }
-      else {
-        chemical_formula += symbol + subscript;
-      }
+    // by convention: carbon comes first, then hydrogen, then in alphabetical order
+    if (symbol == "C" || symbol == "H"){
+      prefix += symbol + (subscript != "1"? subscript : "");
     }
+    else {
+      chemical_formula += symbol + (subscript != "1"? subscript : "");
+    } 
   }
   return prefix + chemical_formula;
 }
