@@ -1,7 +1,12 @@
 #include "importmanager.h"
 #include "crystallographer.h"
-#include "controller.h"
 #include "misc.h"
+
+// This is a temporary fix so that we can wite unit tests for sections of the code
+#ifndef LIBRARY_BUILD
+#include "controller.h"
+#endif
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -59,7 +64,11 @@ std::vector<Atom> ImportMngr::readFileXYZ(const std::string& filepath){
     atom_list.push_back(Atom(sp_pair));
   }
   inp_file.close();
-  if (invalid_entry_encountered){Ctrl::getInstance()->displayErrorMessage(105);}
+  if (invalid_entry_encountered){
+    #ifndef LIBRARY_BUILD
+    Ctrl::getInstance()->displayErrorMessage(105);
+    #endif
+    }
   return atom_list;
 }
 
@@ -172,9 +181,21 @@ std::pair<std::vector<Atom>,ImportMngr::UnitCell> ImportMngr::readFilePDB(const 
     }
   }
   inp_file.close();
-  if (invalid_symbol_detected){Ctrl::getInstance()->displayErrorMessage(105);}
-  if (invalid_cell_params){Ctrl::getInstance()->displayErrorMessage(112);}
-  if (invalid_atom_line){Ctrl::getInstance()->displayErrorMessage(114);}
+  if (invalid_symbol_detected){
+    #ifndef LIBRARY_BUILD
+    Ctrl::getInstance()->displayErrorMessage(105);
+    #endif
+  }
+  if (invalid_cell_params){
+    #ifndef LIBRARY_BUILD
+    Ctrl::getInstance()->displayErrorMessage(112);
+    #endif
+  }
+  if (invalid_atom_line){
+    #ifndef LIBRARY_BUILD
+    Ctrl::getInstance()->displayErrorMessage(114);
+    #endif
+  }
   return std::make_pair(atom_list,uc);
 }
 
@@ -369,7 +390,9 @@ std::pair<std::vector<Atom>,ImportMngr::UnitCell> ImportMngr::readFileCIF(const 
 
   auto atom_list_result = convertCifAtomsList(atom_data, uc.cart_matrix);
   if (!atom_list_result.first){
+    #ifndef LIBRARY_BUILD
     Ctrl::getInstance()->displayErrorMessage(105); // at least one atom line could not be read
+    #endif
   }
   return std::make_pair(atom_list_result.second, uc);
 }
