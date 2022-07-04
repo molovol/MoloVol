@@ -44,7 +44,7 @@ typename Cryst::MatR3 Cryst::orthogonalizeUnitCell(const std::array<double,6>& c
   cart_matrix[1][0] = cell_param[1] * (cell_param[5] == 90? 0 : std::cos(gamma));
   cart_matrix[1][1] = cell_param[1] * (cell_param[5] == 90? 1 : std::sin(gamma));
 
-  // Avoid floating point issues, if alpha and gamma are 90 degrees
+  // Avoid floating point issues, if alpha and beta are 90 degrees
   if(cell_param[3] == 90 && cell_param[4] == 90 ){
     cart_matrix[2][2] = cell_param[2];
   }
