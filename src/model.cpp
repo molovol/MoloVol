@@ -141,6 +141,7 @@ CalcReportBundle Model::generateVolumeData(){
 
 double calcMolarMass(const std::map<std::string,int>&, const std::unordered_map<std::string,double>&);
 std::string generateChemicalFormula(const std::map<std::string,int>&, const std::vector<std::string>&);
+
 void Model::prepareVolumeCalc(){
   auto start = std::chrono::steady_clock::now();
   // clear calculation times from previous runs
@@ -160,7 +161,9 @@ void Model::prepareVolumeCalc(){
   }
 
   // determine which atoms will be taken into account
-  setAtomListForCalculation();
+  _atoms = setAtomListForCalculation(_data.analyze_unit_cell ? _processed_atom_coordinates : _raw_atom_coordinates);
+  _atom_count = atomCount(_atoms);
+
   // set size of the box containing all atoms
   defineCell();
 
@@ -233,10 +236,9 @@ CalcReportBundle Model::generateSurfaceData(){
   return _data;
 }
 
-void Model::setAtomListForCalculation(){
-  std::vector<std::tuple<std::string,double,double,double>>& atom_coordinates = (_data.analyze_unit_cell) ? _processed_atom_coordinates : _raw_atom_coordinates;
-  _atoms.clear();
+std::vector<Atom> Model::setAtomListForCalculation(const RawAtomData& atom_coordinates){
 
+  std::vector<Atom> included_atom_list;
   for(size_t i = 0; i < atom_coordinates.size(); i++){
     if(isIncluded(std::get<0>(atom_coordinates[i]), _data.included_elements)){
       Atom at = Atom(std::get<1>(atom_coordinates[i]),
@@ -245,22 +247,39 @@ void Model::setAtomListForCalculation(){
                      std::get<0>(atom_coordinates[i]),
                      findRadiusOfAtom(std::get<0>(atom_coordinates[i])),
                      _elem_Z[std::get<0>(atom_coordinates[i])]);
-      _atoms.push_back(at);
+      included_atom_list.push_back(at);
     }
   }
+  return included_atom_list;
 }
 
 // Update GUI with the list of imported atoms. Look up the radii from the previously imported 
 // elements file. Uses only standard library containers, to avoid dependency issues.
 std::vector<std::tuple<std::string, int, double>> Model::generateAtomList(){
   std::vector<std::tuple<std::string, int, double>> atoms_for_list;
-  // Element0: Element symbol
-  // Element1: Number of Atoms with that symbol
-  // Element2: Radius
-  for(auto elem : _atom_count){
+ 
+  std::map<std::string, int> atom_count = atomCount(_raw_atom_coordinates);
+  for(auto elem : atom_count){
     atoms_for_list.push_back(std::make_tuple(elem.first, elem.second, findRadiusOfAtom(elem.first)));
   }
+  
   return atoms_for_list;
+}
+
+std::map<std::string, int> Model::atomCount(const RawAtomData& raw_atom_data){
+  std::map<std::string, int> atom_count;
+  for (auto elem : raw_atom_data){
+    atom_count[std::get<0>(elem)]++;
+  }
+  return atom_count;
+}
+
+std::map<std::string, int> Model::atomCount(const std::vector<Atom>& raw_atom_data){
+  std::map<std::string, int> atom_count;
+  for (auto elem : raw_atom_data){
+    atom_count[elem.symbol]++;
+  }
+  return atom_count;
 }
 
 void Model::setRadiusMap(std::unordered_map<std::string, double> map){
@@ -357,7 +376,9 @@ bool Model::processUnitCell(){
   }
   _processed_atom_coordinates.clear();
   _processed_atom_coordinates = _raw_atom_coordinates;
+
   _cart_matrix = Cryst::orthogonalizeUnitCell(_cell_param);
+
   if(!symmetrizeUnitCell()){
     return false;
   }

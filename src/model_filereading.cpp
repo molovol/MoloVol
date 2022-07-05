@@ -108,7 +108,6 @@ bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
   clearAtomData();
 
   std::vector<Atom> atom_list;
-  
   // XYZ file import
   if (fileExtension(filepath) == "xyz"){
     atom_list = ImportMngr::readFileXYZ(filepath);
@@ -144,17 +143,16 @@ bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
     return false;
   }
 
-  // Assemble atom data
   for (const Atom& elem : atom_list){
-    // TODO: a vector of Atoms is constructed later on using the data that is extracted here. It would be
-    // better to directly store this vector of atoms
-    _atom_count[elem.symbol]++;
-    _raw_atom_coordinates.push_back(
-        std::make_tuple(elem.symbol, elem.pos_x, elem.pos_y, elem.pos_z));
+    _raw_atom_coordinates.emplace_back(elem.symbol, elem.pos_x, elem.pos_y, elem.pos_z);
   }
   
+  // TODO: the information contained in _atom_count is already contained inside of
+  // _raw_atom_coordinates. it would be better to avoid redundancy by always using atomCount
+  _atom_count = atomCount(_raw_atom_coordinates);
+  
   // If no atom is detected in the input file, the file is deemed invalid
-  if (_raw_atom_coordinates.empty()){
+  if (atom_list.empty()){
     Ctrl::getInstance()->displayErrorMessage(102);
     return false;
   }

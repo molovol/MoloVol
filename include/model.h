@@ -72,6 +72,7 @@ class Model{
   typedef std::array<std::array<double,3>,3> MatR3;
   typedef ImportMngr::SymbolPositionPair SymbolPositionPair;
   typedef ImportMngr::UnitCell UnitCell;
+  typedef std::vector<std::tuple<std::string, double, double, double>> RawAtomData;
   public:
     // elements file import
     bool importElemFile(const std::string&);
@@ -85,7 +86,7 @@ class Model{
     void createReport(std::string);
     void writeCrystStruct();
     void writeCrystStruct(std::string);
-    void writeXYZfile(const std::vector<std::tuple<std::string, double, double, double>>&, const std::string, const std::string);
+    void writeXYZfile(const RawAtomData&, const std::string, const std::string);
     void writeTotalSurfaceMap();
     void writeTotalSurfaceMap(const std::string);
     void writeCavitiesMaps();
@@ -107,7 +108,7 @@ class Model{
     CalcReportBundle generateSurfaceData();
     // calls the Space constructor and creates a cell containing all atoms. Cell size is defined by atom positions
     void defineCell();
-    void setAtomListForCalculation();
+    std::vector<Atom> setAtomListForCalculation(const RawAtomData&);
     void linkAtomsToAdjacentAtoms(const double&);
     void linkToAdjacentAtoms(const double&, Atom&);
     bool setParameters(const std::string, const std::string, const bool, const bool, const bool, const bool, const double, const double, const double, const int, const bool, const bool, const bool, const std::unordered_map<std::string, double>, const std::vector<std::string>);
@@ -133,8 +134,8 @@ class Model{
     CalcReportBundle _data;
     std::string _time_stamp; // stores the time when the calculation was run for output folder and report
     std::string _output_folder = "."; // default folder is the program folder but it is changed with the output file routine
-    std::vector<std::tuple<std::string, double, double, double>> _raw_atom_coordinates;
-    std::vector<std::tuple<std::string, double, double, double>> _processed_atom_coordinates;
+    RawAtomData _raw_atom_coordinates;
+    RawAtomData _processed_atom_coordinates;
     std::array<double,6> _cell_param; // unit cell parameters in order: A, B, C, alpha, beta, gamma
     //double _cart_matrix[3][3]; // cartesian coordinates of vectors A, B, C
     MatR3 _cart_matrix; // cartesian coordinates of vectors A, B, C
@@ -151,6 +152,8 @@ class Model{
     double _max_atom_radius = 0;
 
     void prepareVolumeCalc();
+    std::map<std::string, int> atomCount(const RawAtomData&);
+    std::map<std::string, int> atomCount(const std::vector<Atom>&);
 
     // crystal unit cell related functions
     bool getSymmetryElements(std::string, std::vector<int>&, std::vector<double>&);

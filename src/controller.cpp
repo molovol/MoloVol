@@ -81,7 +81,8 @@ bool Ctrl::loadElementsFile(){
   }
 
   std::string elements_filepath = s_gui->getElementsFilepath();
-  // even if there is no valid radii file, the program can be used by manually setting radii in the GUI after loading a structure
+  // even if there is no valid radii file, the program can be used
+  // by manually setting radii in the GUI after loading a structure
   if(!_current_calculation->importElemFile(elements_filepath)){
     displayErrorMessage(101);
   }
