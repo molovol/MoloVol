@@ -108,7 +108,7 @@ class Model{
     CalcReportBundle generateSurfaceData();
     // calls the Space constructor and creates a cell containing all atoms. Cell size is defined by atom positions
     void defineCell();
-    std::vector<Atom> setAtomListForCalculation(const RawAtomData&);
+    std::vector<Atom> convertAtomCoordinates(const RawAtomData&, const std::vector<std::string>&);
     void linkAtomsToAdjacentAtoms(const double&);
     void linkToAdjacentAtoms(const double&, Atom&);
     bool setParameters(const std::string, const std::string, const bool, const bool, const bool, const bool, const double, const double, const double, const int, const bool, const bool, const bool, const std::unordered_map<std::string, double>, const std::vector<std::string>);
@@ -145,8 +145,6 @@ class Model{
     std::unordered_map<std::string, double> _radius_map;
     std::unordered_map<std::string, double> _elem_weight;
     std::unordered_map<std::string, int> _elem_Z;
-    std::map<std::string, int> _atom_count;
-    std::map<std::string, int> _unit_cell_atom_count; // stores atoms of unit cell to generate chemical formula
     std::vector<Atom> _atoms;
     Space _cell;
     double _max_atom_radius = 0;
@@ -160,7 +158,6 @@ class Model{
     bool symmetrizeUnitCell();
     void moveAtomsInsideCell();
     void removeDuplicateAtoms();
-    void countAtomsInUnitCell();
     void generateSupercell(double);
     void generateUsefulAtomMapFromSupercell(double);
 };

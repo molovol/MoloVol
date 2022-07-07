@@ -160,15 +160,25 @@ void Model::prepareVolumeCalc(){
     }
   }
 
-  // determine which atoms will be taken into account
-  _atoms = setAtomListForCalculation(_data.analyze_unit_cell ? _processed_atom_coordinates : _raw_atom_coordinates);
-  _atom_count = atomCount(_atoms);
+  // Convert raw atom coordinates into vector of Atom structures and exclude elements
+  _atoms = convertAtomCoordinates(
+      _data.analyze_unit_cell ? _processed_atom_coordinates : _raw_atom_coordinates,
+      _data.included_elements);
 
   // set size of the box containing all atoms
   defineCell();
 
-  _data.molar_mass = calcMolarMass(optionAnalyzeUnitCell()? _unit_cell_atom_count : _atom_count, _elem_weight);
-  _data.chemical_formula = generateChemicalFormula(optionAnalyzeUnitCell()? _unit_cell_atom_count : _atom_count, _data.included_elements);
+  // Generate chemical formula and calculate molar mass
+  std::map<std::string, int> atom_count;
+  if (_data.analyze_unit_cell){
+    atom_count = atomCount(convertAtomCoordinates(_data.orth_cell, _data.included_elements));
+  }
+  else{
+    atom_count = atomCount(_atoms);
+  }
+  _data.molar_mass = calcMolarMass(atom_count, _elem_weight);
+  _data.chemical_formula = generateChemicalFormula(atom_count, _data.included_elements);
+  
   auto end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
 }
@@ -236,11 +246,12 @@ CalcReportBundle Model::generateSurfaceData(){
   return _data;
 }
 
-std::vector<Atom> Model::setAtomListForCalculation(const RawAtomData& atom_coordinates){
+std::vector<Atom> Model::convertAtomCoordinates(const RawAtomData& atom_coordinates, 
+    const std::vector<std::string>& included_elements){
 
   std::vector<Atom> included_atom_list;
   for(size_t i = 0; i < atom_coordinates.size(); i++){
-    if(isIncluded(std::get<0>(atom_coordinates[i]), _data.included_elements)){
+    if(isIncluded(std::get<0>(atom_coordinates[i]), included_elements)){
       Atom at = Atom(std::get<1>(atom_coordinates[i]),
                      std::get<2>(atom_coordinates[i]),
                      std::get<3>(atom_coordinates[i]),
@@ -374,7 +385,6 @@ bool Model::processUnitCell(){
       return false;
     }
   }
-  _processed_atom_coordinates.clear();
   _processed_atom_coordinates = _raw_atom_coordinates;
 
   _cart_matrix = Cryst::orthogonalizeUnitCell(_cell_param);
@@ -384,8 +394,8 @@ bool Model::processUnitCell(){
   }
   moveAtomsInsideCell();
   removeDuplicateAtoms();
-  countAtomsInUnitCell(); // for report
   _data.orth_cell = _processed_atom_coordinates;
+  
   generateSupercell(radius_limit);
   generateUsefulAtomMapFromSupercell(radius_limit);
   _data.supercell = _processed_atom_coordinates;
@@ -488,15 +498,6 @@ void Model::removeDuplicateAtoms(){
            j--;
       }
     }
-  }
-}
-
-// 4b) create chemical formula of a unit cell for report
-void Model::countAtomsInUnitCell(){
-  _unit_cell_atom_count.clear();
-  for(size_t i = 0; i < _processed_atom_coordinates.size(); i++){
-    std::string symbol = std::get<0>(_processed_atom_coordinates[i]);
-    _unit_cell_atom_count[symbol]++;
   }
 }
 

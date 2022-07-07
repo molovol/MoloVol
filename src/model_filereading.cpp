@@ -147,10 +147,6 @@ bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
     _raw_atom_coordinates.emplace_back(elem.symbol, elem.pos_x, elem.pos_y, elem.pos_z);
   }
   
-  // TODO: the information contained in _atom_count is already contained inside of
-  // _raw_atom_coordinates. it would be better to avoid redundancy by always using atomCount
-  _atom_count = atomCount(_raw_atom_coordinates);
-  
   // If no atom is detected in the input file, the file is deemed invalid
   if (atom_list.empty()){
     Ctrl::getInstance()->displayErrorMessage(102);
@@ -161,7 +157,6 @@ bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
 }
 
 void Model::clearAtomData(){
-  _atom_count.clear();
   _raw_atom_coordinates.clear();
   _space_group = "";
   _sym_matrix_XYZ.clear();
@@ -174,7 +169,9 @@ void Model::clearAtomData(){
 // used in unittest
 std::vector<std::string> Model::listElementsInStructure(){
   std::vector<std::string> list;
-  for (auto elem : _atom_count){
+
+  auto atom_count = atomCount(_raw_atom_coordinates);
+  for (auto elem : atom_count){
     list.push_back(elem.first);
   }
   return list;
