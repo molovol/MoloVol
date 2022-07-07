@@ -94,7 +94,7 @@ std::pair<std::vector<Atom>,ImportMngr::UnitCell> ImportMngr::readFilePDB(const 
   auto sectionFields = [](std::string line, const FieldColumns& field_map){
     // line may be shorter than specified by the PDB standard, but still valid if
     // only whitespace characters are missing. Append whitespaces to line until it
-    // has the correct length and valid date the content later
+    // has the correct length and validate the content later
     StrMngr::extendToLength(line,field_map.at("lineLength").second);
 
     std::map<std::string,std::string> fields;

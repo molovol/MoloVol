@@ -3,6 +3,9 @@
 This changelog keeps track of changes in a user-friendly way. It is based on [keep a changelog](https://keepachangelog.com/en/1.0.0/) by Olivier Lacan.
 
 ## Unreleased
+### Added
+* Added full support for charged atoms in structures, along with default ionic radii for common ions.
+
 ### Improved
 * The error message that occurs when an incomplete list of input arguments are provided in the CLI is now more descriptive.
 * Chemical formulas no longer contain the subscript "1" when an atom only occurs once.

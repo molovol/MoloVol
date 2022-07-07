@@ -137,7 +137,6 @@ class Model{
     RawAtomData _raw_atom_coordinates;
     RawAtomData _processed_atom_coordinates;
     std::array<double,6> _cell_param; // unit cell parameters in order: A, B, C, alpha, beta, gamma
-    //double _cart_matrix[3][3]; // cartesian coordinates of vectors A, B, C
     MatR3 _cart_matrix; // cartesian coordinates of vectors A, B, C
     std::string _space_group;
     std::vector<int> _sym_matrix_XYZ;
