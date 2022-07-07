@@ -247,7 +247,3 @@ double Model::findRadiusOfAtom(const Atom& at) const {
   return findRadiusOfAtom(at.symbol);
 }
 
-double Model::findWeightOfAtom(const std::string& symbol){
-  return _elem_weight[symbol];
-}
-

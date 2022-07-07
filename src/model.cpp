@@ -328,11 +328,24 @@ std::string generateChemicalFormula(const std::map<std::string,int>& n_atoms, co
 }
 
 double calcMolarMass(const std::map<std::string,int>& atom_list, const std::unordered_map<std::string,double>& elem_weight){
+
+  auto findWeightOfAtom = [elem_weight](std::string symbol){
+    if (elem_weight.count(symbol)){
+      return elem_weight.at(symbol);
+    }
+
+    symbol = ImportMngr::stripCharge(symbol);
+
+    if (elem_weight.count(symbol)){
+      return elem_weight.at(symbol);
+    }
+
+    return double(0);
+  };
+
   double molar_mass = 0;
   for(auto elem : atom_list){
-    if (elem_weight.find(elem.first) != elem_weight.end()){ // skip if element weight was not given
-      molar_mass += elem_weight.at(elem.first) * elem.second;
-    }
+    molar_mass += findWeightOfAtom(elem.first) * elem.second;
   }
   return molar_mass;
 }

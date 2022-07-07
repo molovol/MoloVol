@@ -100,7 +100,6 @@ class Model{
 
     double findRadiusOfAtom(std::string) const;
     double findRadiusOfAtom(const Atom&) const;
-    double findWeightOfAtom(const std::string&);
 
     // controller-model communication
     CalcReportBundle generateData();
