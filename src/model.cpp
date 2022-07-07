@@ -9,6 +9,7 @@
 #include <array>
 #include <string>
 #include <vector>
+#include <cmath>
 
 //////////////////////
 // CALCRESULTBUNDLE //
@@ -329,7 +330,7 @@ std::string generateChemicalFormula(const std::map<std::string,int>& n_atoms, co
 
 double calcMolarMass(const std::map<std::string,int>& atom_list, const std::unordered_map<std::string,double>& elem_weight){
 
-  auto findWeightOfAtom = [elem_weight](std::string symbol){
+  auto atomicWeight = [elem_weight](std::string symbol){
     if (elem_weight.count(symbol)){
       return elem_weight.at(symbol);
     }
@@ -345,7 +346,13 @@ double calcMolarMass(const std::map<std::string,int>& atom_list, const std::unor
 
   double molar_mass = 0;
   for(auto elem : atom_list){
-    molar_mass += findWeightOfAtom(elem.first) * elem.second;
+    double atomic_w = atomicWeight(elem.first);
+    if (!atomic_w){
+      // If any atom's weight cannot be determined, default molecular weight to not-a-number (nan)
+      return std::nan("");
+    }
+
+    molar_mass += atomic_w * elem.second;
   }
   return molar_mass;
 }
