@@ -6,6 +6,7 @@
 #include "atomtree.h"
 #include "space.h"
 #include "cavity.h"
+#include "importmanager.h"
 #include <iostream>
 #include <vector>
 #include <map>
@@ -62,10 +63,16 @@ struct CalcReportBundle{
   double getTime();
 };
 
+namespace ImportMngr{struct UnitCell;}
+
 class AtomTree;
 struct Atom;
 class Space;
 class Model{
+  typedef std::array<std::array<double,3>,3> MatR3;
+  typedef ImportMngr::SymbolPositionPair SymbolPositionPair;
+  typedef ImportMngr::UnitCell UnitCell;
+  typedef std::vector<std::tuple<std::string, double, double, double>> RawAtomData;
   public:
     // elements file import
     bool importElemFile(const std::string&);
@@ -73,17 +80,13 @@ class Model{
     // atom file import
     bool readAtomsFromFile(const std::string&, bool);
     void clearAtomData();
-    bool readAtomFile(const std::string&, bool);
-    void readFileXYZ(const std::string&);
-    void readFilePDB(const std::string&, bool);
-    void readFileCIF(const std::string&);
 
     // export
     void createReport();
     void createReport(std::string);
     void writeCrystStruct();
     void writeCrystStruct(std::string);
-    void writeXYZfile(const std::vector<std::tuple<std::string, double, double, double>>&, const std::string, const std::string);
+    void writeXYZfile(const RawAtomData&, const std::string, const std::string);
     void writeTotalSurfaceMap();
     void writeTotalSurfaceMap(const std::string);
     void writeCavitiesMaps();
@@ -95,9 +98,8 @@ class Model{
     // crystal unit cell related functions
     bool processUnitCell();
 
-    double findRadiusOfAtom(const std::string&);
-    double findRadiusOfAtom(const Atom&);
-    double findWeightOfAtom(const std::string&);
+    double findRadiusOfAtom(std::string) const;
+    double findRadiusOfAtom(const Atom&) const;
 
     // controller-model communication
     CalcReportBundle generateData();
@@ -105,7 +107,7 @@ class Model{
     CalcReportBundle generateSurfaceData();
     // calls the Space constructor and creates a cell containing all atoms. Cell size is defined by atom positions
     void defineCell();
-    void setAtomListForCalculation();
+    std::vector<Atom> convertAtomCoordinates(const RawAtomData&, const std::vector<std::string>&);
     void linkAtomsToAdjacentAtoms(const double&);
     void linkToAdjacentAtoms(const double&, Atom&);
     bool setParameters(const std::string, const std::string, const bool, const bool, const bool, const bool, const double, const double, const double, const int, const bool, const bool, const bool, const std::unordered_map<std::string, double>, const std::vector<std::string>);
@@ -131,35 +133,29 @@ class Model{
     CalcReportBundle _data;
     std::string _time_stamp; // stores the time when the calculation was run for output folder and report
     std::string _output_folder = "."; // default folder is the program folder but it is changed with the output file routine
-    std::vector<std::tuple<std::string, double, double, double>> _raw_atom_coordinates;
-    std::vector<std::tuple<std::string, double, double, double>> _processed_atom_coordinates;
-    double _cell_param[6]; // unit cell parameters in order: A, B, C, alpha, beta, gamma
-    double _cart_matrix[3][3]; // cartesian coordinates of vectors A, B, C
+    RawAtomData _raw_atom_coordinates;
+    RawAtomData _processed_atom_coordinates;
+    std::array<double,6> _cell_param; // unit cell parameters in order: A, B, C, alpha, beta, gamma
+    MatR3 _cart_matrix; // cartesian coordinates of vectors A, B, C
     std::string _space_group;
     std::vector<int> _sym_matrix_XYZ;
     std::vector<double> _sym_matrix_fraction;
     std::unordered_map<std::string, double> _radius_map;
     std::unordered_map<std::string, double> _elem_weight;
     std::unordered_map<std::string, int> _elem_Z;
-    std::map<std::string, int> _atom_amounts;
-    std::map<std::string, int> _unit_cell_atom_amounts; // stores atoms of unit cell to generate chemical formula
     std::vector<Atom> _atoms;
     Space _cell;
     double _max_atom_radius = 0;
 
     void prepareVolumeCalc();
-
-    // cif file processing
-    bool convertCifSymmetryElements(const std::vector<std::string>&);
-    bool convertCifAtomsList(const std::vector<std::string>&, const std::vector<std::string>&);
+    std::map<std::string, int> atomCount(const RawAtomData&);
+    std::map<std::string, int> atomCount(const std::vector<Atom>&);
 
     // crystal unit cell related functions
     bool getSymmetryElements(std::string, std::vector<int>&, std::vector<double>&);
-    void orthogonalizeUnitCell();
     bool symmetrizeUnitCell();
     void moveAtomsInsideCell();
     void removeDuplicateAtoms();
-    void countAtomsInUnitCell();
     void generateSupercell(double);
     void generateUsefulAtomMapFromSupercell(double);
 };

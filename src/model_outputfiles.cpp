@@ -47,7 +47,13 @@ void Model::createReport(std::string path){
   output_report << "Duration of the calculation: " << _data.getTime() << " s\n\n";
   output_report << "Structure file analyzed: " << _data.atom_file_path << "\n";
   output_report << "Chemical formula: " + _data.chemical_formula << "\n";
-  output_report << "Molar mass: " << _data.molar_mass << " g/mol\n";
+  output_report << "Molar mass: ";
+  output_report << _data.molar_mass << " g/mol";
+  if (isnan(_data.molar_mass)){
+    output_report << " - Structure contains atoms with unknown atomic weights.";
+  }
+  output_report << "\n";
+  
 
   output_report << "\n\n\t////////////////////////////\n";
   output_report << "\t// Calculation parameters //\n";
@@ -77,8 +83,6 @@ void Model::createReport(std::string path){
   output_report << "\n\n\t//////////////////////////////\n";
   output_report << "\t// Total Volumes calculated //\n";
   output_report << "\t//////////////////////////////\n\n";
-  // factor to convert A^3 to cm^3/g
-  double volume_macro_factor = AVOGADRO * 1e-24 / _data.molar_mass;
   double unit_cell_vol = 0;
   std::array<double, 3> cav_vol_per_type = getTotalVolPerType(_data.cavities, _data.probe_mode);
 
@@ -109,10 +113,13 @@ void Model::createReport(std::string path){
       str += cell5;
     }
     else{
-    str += cell2;
+      str += cell2;
     }
     return str + "\n";
   };
+
+  // factor to convert A^3 to cm^3/g
+  double volume_macro_factor = AVOGADRO * 1e-24 / _data.molar_mass;
 
   // layout function for volume data display
   auto vol_block = [row, unit_cell_vol, volume_macro_factor](std::string text, double vol, std::string subtext=""){

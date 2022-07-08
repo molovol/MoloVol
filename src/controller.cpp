@@ -81,7 +81,8 @@ bool Ctrl::loadElementsFile(){
   }
 
   std::string elements_filepath = s_gui->getElementsFilepath();
-  // even if there is no valid radii file, the program can be used by manually setting radii in the GUI after loading a structure
+  // even if there is no valid radii file, the program can be used
+  // by manually setting radii in the GUI after loading a structure
   if(!_current_calculation->importElemFile(elements_filepath)){
     displayErrorMessage(101);
   }
@@ -98,22 +99,9 @@ bool Ctrl::loadAtomFile(){
   }
 
   bool successful_import;
-  try{successful_import = _current_calculation->readAtomsFromFile(s_gui->getAtomFilepath(), s_gui->getIncludeHetatm());}
+  successful_import = _current_calculation->readAtomsFromFile(s_gui->getAtomFilepath(), s_gui->getIncludeHetatm());
 
-  catch (const ExceptIllegalFileExtension& e){
-    displayErrorMessage(103);
-    successful_import = false;
-  }
-  catch (const ExceptInvalidInputFile& e){
-    displayErrorMessage(102);
-    successful_import = false;
-  }
-  catch (const ExceptInvalidCellParams& e){
-    displayErrorMessage(109);
-    successful_import = false;
-  }
-
-  s_gui->displayAtomList(_current_calculation->generateAtomList()); // update gui
+  s_gui->displayAtomList(_current_calculation->generateAtomList());
 
   return successful_import;
 }

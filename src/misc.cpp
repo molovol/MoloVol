@@ -62,13 +62,20 @@ int pow2(int exp){
   return (1 << exp);
 }
 
-void removeEOL(std::string& str){
-  str.erase(std::remove(str.begin(), str.end(), '\r'), str.end());
-  str.erase(std::remove(str.begin(), str.end(), '\n'), str.end());
-}
-
-void removeWhiteSpaces(std::string& str){
-  str.erase(std::remove(str.begin(), str.end(), ' '), str.end());
+namespace StrMngr {
+  void removeEOL(std::string& str){
+    str.erase(std::remove(str.begin(), str.end(), '\r'), str.end());
+    str.erase(std::remove(str.begin(), str.end(), '\n'), str.end());
+  }
+  
+  void removeWhiteSpaces(std::string& str){
+    str.erase(std::remove(str.begin(), str.end(), ' '), str.end());
+  }
+  
+  void extendToLength(std::string& str, size_t len){
+    if (len <= str.size()){return;}
+    str += std::string(len - str.size(), ' ');
+  }
 }
 
 std::string field(int n_ws, std::string text, char alignment){

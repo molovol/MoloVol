@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.20)
 # Custom options
 option(ABS_RESOURCE_PATH "Set a platform-dependant, absolute path to the resource directory" OFF)
 option(OSX_FAT_FILE "Make executable a fat file with architectures x86_64 and arm64" OFF)
-option(ENABLE_TEST "Add target 'test' to allow quick compilation of test/main.cpp" OFF)
+option(MOLOVOL_BUILD_TESTING "Enables unit tests so that test source files are compiled along with executable" OFF)
 
 # Minimum macOS version, ignored on other platforms
 # Must be set before project()
@@ -46,7 +46,9 @@ set(SOURCES
   src/base_init.cpp
   src/cavity.cpp
   src/controller.cpp
+  src/crystallographer.cpp
   src/griddata.cpp
+  src/importmanager.cpp
   src/misc.cpp
   src/model.cpp
   src/model_filereading.cpp
@@ -85,15 +87,30 @@ if(ABS_RESOURCE_PATH)
   target_compile_definitions(MoloVol PUBLIC -DABS_PATH)
 endif()
 
-# Target test
-if(ENABLE_TEST)
-  set(TEST_SOURCES
-    test/main.cpp
-  )
-  
-  add_executable(test EXCLUDE_FROM_ALL ${TEST_SOURCES})
-  if(OpenMP_CXX_FOUND)
-    target_link_libraries(test PUBLIC OpenMP::OpenMP_CXX)
-  endif()
-endif()
+# Keeping this around just so I don't forget the syntax
+#  if(OpenMP_CXX_FOUND)
+#    target_link_libraries(target PUBLIC OpenMP::OpenMP_CXX)
+#  endif()
 
+# Tests
+if (MOLOVOL_BUILD_TESTING AND BUILD_TESTING)
+  enable_testing()
+  # Create a MoloVol library for the test sources to use
+  set(TEST_SOURCES
+    src/importmanager.cpp
+    src/crystallographer.cpp
+    src/misc.cpp
+  )
+  add_library(mvl SHARED ${TEST_SOURCES})
+  target_include_directories(mvl PUBLIC ./)
+  target_compile_definitions(mvl PRIVATE LIBRARY_BUILD)
+
+  set(TEST_NAME cut_off_string)
+  set(TEST_SRC_NAME ${TEST_NAME}.cpp)
+  set(TEST_EXE_NAME t_${TEST_NAME})
+  add_executable(${TEST_EXE_NAME} test/${TEST_SRC_NAME})
+  target_include_directories(${TEST_EXE_NAME} PUBLIC ./test)
+  target_link_libraries(${TEST_EXE_NAME} mvl)
+  add_test(NAME "Should cut off string after non-letter" COMMAND ${TEST_EXE_NAME})
+
+endif()
