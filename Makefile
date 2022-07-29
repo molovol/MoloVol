@@ -30,7 +30,7 @@ TESTOBJECTS := $(patsubst $(TESTDIR)/%,$(TESTBUILDDIR)/%,$(TESTSOURCES:.$(SRCEXT
 
 DEBUGFLAGS := -O3 -g -D DEBUG
 RELEASEFLAGS := -O3
-CXXFLAGS := -fopenmp -std=c++17 -Wall -Werror -Wno-unused-command-line-argument -Wno-invalid-source-encoding
+CXXFLAGS := -std=c++17 -Wall -Werror -Wno-unused-command-line-argument -Wno-invalid-source-encoding
 
 WXCONFIGLIBS := $(shell wx-config --libs)
 WXCONFIGLIBS := $(WXCONFIGLIBS:-ltiff=/usr/local/opt/libtiff/lib/libtiff.a)

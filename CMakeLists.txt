@@ -17,6 +17,7 @@ if (CMAKE_BUILD_TYPE EQUAL "RELEASE")
 endif (CMAKE_BUILD_TYPE EQUAL "RELEASE")
 
 # wxWidgets
+set(wxWidgets_USE_STATIC=ON)
 find_package(wxWidgets REQUIRED gl core base OPTIONAL_COMPONENTS net)
 include(${wxWidgets_USE_FILE})
 
