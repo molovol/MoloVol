@@ -11,7 +11,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('.static', filename='simple.min.css') }}">
 </head>
 <body>
-<h1>MoloVol</h1>
+<h1>MoloVol vX.X.X</h1>
 <h2>Input</h2>
 <form id="inputs" action="." method="post" enctype=multipart/form-data>
 
@@ -37,16 +37,22 @@
     output</label><br>-->
 
     <input type="text" id="radius" name="cli_radius" size="2" style="width: 20%"
-           value="{{ inputdict.get('radius', '1.2') if inputdict is defined else '1.2' }}"/><label for="radius">
-    (Small) probe radius</label><br>
+           value="{{ inputdict.get('radius', '1.2') if inputdict is defined else '1.2' }}"/>
+    <label for="radius">(Small) probe radius</label><br>
     <input type="text" id="grid" name="cli_grid" size="2" style="width: 20%"
-           value="{{ inputdict.get('grid','0.2') if inputdict is defined else '0.2' }}"><label for="grid">
-    Spatial resolution of the underlying grid</label><br>
-    <input type="checkbox" id="hetatm" name="cli_hetatm"><label for="hetatm">Include HETATM from pdb file</label><br>
-    <input type="checkbox" id="unitcell" name="cli_unitcell"><label for="unitcell">Analyze unit cell</label><br>
-    <input type="checkbox" id="surface" name="cli_surface" checked="checked"><label for="surface">Calculate surface
-    areas</label><br>
-    <br>
+           value="{{ inputdict.get('grid','0.2') if inputdict is defined else '0.2' }}">
+    <label for="grid">Spatial resolution of the underlying grid</label><br>
+    <input type="checkbox" id="hetatm" name="cli_hetatm">
+    <label for="hetatm">Include HETATM &ndash; <i><small>PDB file option</small></i></label><br>
+    
+    <input type="checkbox" id="unitcell" name="cli_unitcell">
+    <label for="unitcell">Analyze unit cell &ndash; <i
+        ><small>requires PDB or CIF file with crystallographic information</small></i></label><br>
+    
+    <input type="checkbox" id="surface" name="cli_surface" checked="checked">
+    <label for="surface">Calculate surface areas</label><br>
+
+    <h4>Generate files for download</h4>
     <!--all three options require -do for the path to output directory -->
     <input type="checkbox" id="export-report" name="cli_export-report">
     <label for="export-report">Generate report</label><br>
