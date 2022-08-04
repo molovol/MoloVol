@@ -131,11 +131,11 @@ def io():
                 args.append(structure_path)
 
             # read elements file
-            if request.form.get("use_default_elements", "") != "on":
-                print("using custom elements file")
-                elements_path = manage_uploaded_file(request, "elements")
-            else:
-                elements_path = "./inputfile/elements.txt"
+            #if request.form.get("use_default_elements", "") != "on":
+            #    print("using custom elements file")
+            #    elements_path = manage_uploaded_file(request, "elements")
+            #else:
+            elements_path = "./inputfile/elements.txt"
             args.append("-fe")
             args.append(elements_path)
 

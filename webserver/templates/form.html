@@ -18,12 +18,13 @@
     <label for="structure">Structure file</label>
     <input type="file" name="structure" id="structure"><br>
 
-    <label for="elements">Elements file</label>
-    <input type="file" name="elements" id="elements">
-    <input type="hidden" name="lastelements" id="lastelements"
-           value="{{ inputdict.get('lastelements', '') if inputdict is defined else '' }}">
-    <input type="checkbox" id="use_default_elements" checked="checked" name="use_default_elements"/>
-    <label for="use_default_elements">Use default elements file.</label><br>
+    <!--
+      Leaving out the option to upload a custom elements file. Only advanced users will
+      ever use this feature and they can be expected to download the software for the extra
+      features.
+      If a similar feature is added to the web app, it should be simplified, like by allowing
+      the user to change individual atomic radii in a table.
+    -->
 
     <input type="hidden" name="laststructure" id="laststructure"
            value="{{ inputdict.get('laststructure', '') if inputdict is defined else '' }}">
