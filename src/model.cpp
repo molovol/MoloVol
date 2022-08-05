@@ -1,4 +1,5 @@
 #include "model.h"
+#include "crystallographer.h"
 #include "controller.h"
 #include "atom.h"
 #include "misc.h"
@@ -8,6 +9,7 @@
 #include <array>
 #include <string>
 #include <vector>
+#include <cmath>
 
 //////////////////////
 // CALCRESULTBUNDLE //
@@ -140,6 +142,7 @@ CalcReportBundle Model::generateVolumeData(){
 
 double calcMolarMass(const std::map<std::string,int>&, const std::unordered_map<std::string,double>&);
 std::string generateChemicalFormula(const std::map<std::string,int>&, const std::vector<std::string>&);
+
 void Model::prepareVolumeCalc(){
   auto start = std::chrono::steady_clock::now();
   // clear calculation times from previous runs
@@ -158,13 +161,25 @@ void Model::prepareVolumeCalc(){
     }
   }
 
-  // determine which atoms will be taken into account
-  setAtomListForCalculation();
+  // Convert raw atom coordinates into vector of Atom structures and exclude elements
+  _atoms = convertAtomCoordinates(
+      _data.analyze_unit_cell ? _processed_atom_coordinates : _raw_atom_coordinates,
+      _data.included_elements);
+
   // set size of the box containing all atoms
   defineCell();
 
-  _data.molar_mass = calcMolarMass(optionAnalyzeUnitCell()? _unit_cell_atom_amounts : _atom_amounts, _elem_weight);
-  _data.chemical_formula = generateChemicalFormula(optionAnalyzeUnitCell()? _unit_cell_atom_amounts : _atom_amounts, _data.included_elements);
+  // Generate chemical formula and calculate molar mass
+  std::map<std::string, int> atom_count;
+  if (_data.analyze_unit_cell){
+    atom_count = atomCount(convertAtomCoordinates(_data.orth_cell, _data.included_elements));
+  }
+  else{
+    atom_count = atomCount(_atoms);
+  }
+  _data.molar_mass = calcMolarMass(atom_count, _elem_weight);
+  _data.chemical_formula = generateChemicalFormula(atom_count, _data.included_elements);
+  
   auto end = std::chrono::steady_clock::now();
   _data.addTime(std::chrono::duration<double>(end-start).count());
 }
@@ -232,34 +247,51 @@ CalcReportBundle Model::generateSurfaceData(){
   return _data;
 }
 
-void Model::setAtomListForCalculation(){
-  std::vector<std::tuple<std::string,double,double,double>>& atom_coordinates = (_data.analyze_unit_cell) ? _processed_atom_coordinates : _raw_atom_coordinates;
-  _atoms.clear();
+std::vector<Atom> Model::convertAtomCoordinates(const RawAtomData& atom_coordinates, 
+    const std::vector<std::string>& included_elements){
 
+  std::vector<Atom> included_atom_list;
   for(size_t i = 0; i < atom_coordinates.size(); i++){
-    if(isIncluded(std::get<0>(atom_coordinates[i]), _data.included_elements)){
+    if(isIncluded(std::get<0>(atom_coordinates[i]), included_elements)){
       Atom at = Atom(std::get<1>(atom_coordinates[i]),
                      std::get<2>(atom_coordinates[i]),
                      std::get<3>(atom_coordinates[i]),
                      std::get<0>(atom_coordinates[i]),
                      findRadiusOfAtom(std::get<0>(atom_coordinates[i])),
                      _elem_Z[std::get<0>(atom_coordinates[i])]);
-      _atoms.push_back(at);
+      included_atom_list.push_back(at);
     }
   }
+  return included_atom_list;
 }
 
-// generates a simple table to be displayed by the GUI. only uses standard library and base types in order to
-// avoid dependency issues
+// Update GUI with the list of imported atoms. Look up the radii from the previously imported 
+// elements file. Uses only standard library containers, to avoid dependency issues.
 std::vector<std::tuple<std::string, int, double>> Model::generateAtomList(){
   std::vector<std::tuple<std::string, int, double>> atoms_for_list;
-  // Element0: Element symbol
-  // Element1: Number of Atoms with that symbol
-  // Element2: Radius
-  for(auto elem : _atom_amounts){
+ 
+  std::map<std::string, int> atom_count = atomCount(_raw_atom_coordinates);
+  for(auto elem : atom_count){
     atoms_for_list.push_back(std::make_tuple(elem.first, elem.second, findRadiusOfAtom(elem.first)));
   }
+  
   return atoms_for_list;
+}
+
+std::map<std::string, int> Model::atomCount(const RawAtomData& raw_atom_data){
+  std::map<std::string, int> atom_count;
+  for (auto elem : raw_atom_data){
+    atom_count[std::get<0>(elem)]++;
+  }
+  return atom_count;
+}
+
+std::map<std::string, int> Model::atomCount(const std::vector<Atom>& raw_atom_data){
+  std::map<std::string, int> atom_count;
+  for (auto elem : raw_atom_data){
+    atom_count[elem.symbol]++;
+  }
+  return atom_count;
 }
 
 void Model::setRadiusMap(std::unordered_map<std::string, double> map){
@@ -273,29 +305,54 @@ std::unordered_map<std::string,double> Model::getRadiusMap(){
 std::string generateChemicalFormula(const std::map<std::string,int>& n_atoms, const std::vector<std::string>& included_elem){
   std::string chemical_formula = "";
   std::string prefix = "";
+
+  // Create a new map, but ignore charges and skip excluded elements
+  std::map<std::string, int> n_atoms_ignore_charges;
+  for (auto elem : n_atoms){
+    if (!isIncluded(elem.first, included_elem)){continue;}
+    n_atoms_ignore_charges[ImportMngr::stripCharge(elem.first)] += elem.second;
+  }
+
   // iterate through map in lexographic order
-  for (auto elem: n_atoms){
+  for (auto elem : n_atoms_ignore_charges){
     std::string symbol = elem.first;
     std::string subscript = std::to_string(elem.second);
-    if (isIncluded(symbol, included_elem)){
-      // by convention: carbon comes first, then hydrogen, then in alphabetical order
-      if (symbol == "C" || symbol == "H"){
-        prefix += symbol + subscript;
-      }
-      else {
-        chemical_formula += symbol + subscript;
-      }
+    // by convention: carbon comes first, then hydrogen, then in alphabetical order
+    if (symbol == "C" || symbol == "H"){
+      prefix += symbol + (subscript != "1"? subscript : "");
     }
+    else {
+      chemical_formula += symbol + (subscript != "1"? subscript : "");
+    } 
   }
   return prefix + chemical_formula;
 }
 
 double calcMolarMass(const std::map<std::string,int>& atom_list, const std::unordered_map<std::string,double>& elem_weight){
+
+  auto atomicWeight = [elem_weight](std::string symbol){
+    if (elem_weight.count(symbol)){
+      return elem_weight.at(symbol);
+    }
+
+    symbol = ImportMngr::stripCharge(symbol);
+
+    if (elem_weight.count(symbol)){
+      return elem_weight.at(symbol);
+    }
+
+    return double(0);
+  };
+
   double molar_mass = 0;
   for(auto elem : atom_list){
-    if (elem_weight.find(elem.first) != elem_weight.end()){ // skip if element weight was not given
-      molar_mass += elem_weight.at(elem.first) * elem.second;
+    double atomic_w = atomicWeight(elem.first);
+    if (!atomic_w){
+      // If any atom's weight cannot be determined, default molecular weight to not-a-number (nan)
+      return std::nan("");
     }
+
+    molar_mass += atomic_w * elem.second;
   }
   return molar_mass;
 }
@@ -316,7 +373,7 @@ void Model::defineCell(){
 ////////////////////////////////////////////
 // CRYSTAL UNIT CELL PROCESSING FUNCTIONS //
 ////////////////////////////////////////////
-
+// TODO: If possible, move eventually to crystallographer.h
 /*
 To obtain data usable by the software from a unit cell, we need
 1) to apply symmetry from the space group to the atom supplied in the structure file
@@ -341,22 +398,24 @@ bool Model::processUnitCell(){
     Ctrl::getInstance()->displayErrorMessage(111);
     return false;
   }
+
   for(int i = 0; i < 6; i++){
     if(_cell_param[i] == 0){
       Ctrl::getInstance()->displayErrorMessage(112);
       return false;
     }
   }
-  _processed_atom_coordinates.clear();
   _processed_atom_coordinates = _raw_atom_coordinates;
-  orthogonalizeUnitCell();
+
+  _cart_matrix = Cryst::orthogonalizeUnitCell(_cell_param);
+
   if(!symmetrizeUnitCell()){
     return false;
   }
   moveAtomsInsideCell();
   removeDuplicateAtoms();
-  countAtomsInUnitCell(); // for report
   _data.orth_cell = _processed_atom_coordinates;
+  
   generateSupercell(radius_limit);
   generateUsefulAtomMapFromSupercell(radius_limit);
   _data.supercell = _processed_atom_coordinates;
@@ -364,57 +423,7 @@ bool Model::processUnitCell(){
 }
 
 // 1) find orthogonal unit cell matrix = cartesian coordinates of the unit cell axes
-void Model::orthogonalizeUnitCell(){
-  /*
-  Formulae to find the cartesian coordinates of axes A, B, C:
-  Ax , Ay , Az
-  Bx , By , Bz
-  Cx , Cy , Cz
-  =
-  A , 0 , 0
-  B*cos(gamma) , B*sin(gamma) , 0
-  C*cos(beta) , C*((cos(alpha)*sin(gamma))+((cos(beta)-(cos(alpha)*cos(gamma)))*sin(gamma-90)/cos(gamma-90))) , Sqrt(C^2-Cx^2-Cy^2)
-
-  Notes:
-  alpha: angle between B and C
-  beta: angle between A and C
-  gamma: angle between A and B
-
-  The origin of ABC and xyz is 0,0,0
-  A is always along cartesian x axis
-  B is always on the cartesian xy plane with a positive y component (By > 0)
-  C is the only axis containing a cartesian z component (Cz > 0)
-  */
-  const double pi = 3.14159265358979323846;
-  // convert unit cell angles from degree to radian
-  double alpha = _cell_param[3]*pi/180;
-  double beta = _cell_param[4]*pi/180;
-  double gamma = _cell_param[5]*pi/180;
-  _cart_matrix[0][0] = _cell_param[0]; // A is always along x axis => Ax = X
-  _cart_matrix[0][1] = 0; // A is always along x axis => Ay = 0
-  _cart_matrix[0][2] = 0; // A is always along x axis => Az = 0
-  _cart_matrix[1][2] = 0; // B is always on xy plane => Bz = 0
-  if(_cell_param[5] == 90){ // if B is along y axis, no need to do calculations that could result in approximations
-    _cart_matrix[1][0] = 0;
-    _cart_matrix[1][1] = _cell_param[1];
-  }
-  else{
-    _cart_matrix[1][0] = _cell_param[1]*std::cos(gamma);
-    _cart_matrix[1][1] = _cell_param[1]*std::sin(gamma);
-
-  }
-  if(_cell_param[3] == 90 && _cell_param[4] == 90 ){ // if C is along z axis, no need to do calculations that could result in approximations
-    _cart_matrix[2][0] = 0;
-    _cart_matrix[2][1] = 0;
-    _cart_matrix[2][2] = _cell_param[2];
-  }
-  else{
-    _cart_matrix[2][0] = _cell_param[2]*std::cos(beta);
-    _cart_matrix[2][1] = _cell_param[2]*((std::cos(alpha)*std::sin(gamma))+((std::cos(beta)-(std::cos(alpha)*std::cos(gamma)))*std::sin(gamma-(pi/2))/std::cos(gamma-(pi/2))));
-    _cart_matrix[2][2] = std::sqrt(pow(_cell_param[2],2)-pow(_cart_matrix[2][0],2)-pow(_cart_matrix[2][1],2));
-  }
-  return;
-}
+// Moved to file crystallographer.h
 
 // 2) create symmetry elements from base structure
 bool Model::symmetrizeUnitCell(){
@@ -509,15 +518,6 @@ void Model::removeDuplicateAtoms(){
            j--;
       }
     }
-  }
-}
-
-// 4b) create chemical formula of a unit cell for report
-void Model::countAtomsInUnitCell(){
-  _unit_cell_atom_amounts.clear();
-  for(size_t i = 0; i < _processed_atom_coordinates.size(); i++){
-    std::string symbol = std::get<0>(_processed_atom_coordinates[i]);
-    _unit_cell_atom_amounts[symbol]++;
   }
 }
 

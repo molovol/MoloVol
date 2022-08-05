@@ -71,8 +71,4 @@ at [dockerhub](https://hub.docker.com/r/bsvogler/molovol) or be built locally. D
 If you wish to report a bug or request a feature go to the project's [GitHub issue tracker](https://github.com/molovol/MoloVol/issues).
 
 ## Development Team
-
-The development is currently lead by Jasmin B. Maglic and Roy Lavendomme. You may reach us via email through
-molovol@outlook.com
-
-
+The development is currently led by Jasmin B. Maglic and Roy Lavendomme. You may reach us via email through molovol@outlook.com

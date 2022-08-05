@@ -47,15 +47,7 @@ class Ctrl{
     bool getAbortFlag();
     void updateCalculationStatus();
 
-    void displayErrorMessage(const int);
-    void printErrorMessage(const int);
-    // unit tests
-    bool unittestExcluded();
-    bool unittestProtein();
-    bool unittestRadius();
-    bool unittest2Probe();
-    bool unittestSurface();
-    bool unittestFloodfill();
+    void displayErrorMessage(const int, const std::vector<std::string>& =std::vector<std::string>());
 
   private:
     // consider making static pointer for model

@@ -34,12 +34,11 @@ static const wxCmdLineEntryDesc s_cmd_line_desc[] =
   { wxCMD_LINE_OPTION, "o", "output", "Control what parts of the output to display (default:all)", wxCMD_LINE_VAL_STRING},
   { wxCMD_LINE_SWITCH, "q", "quiet", "Silence progress reporting", wxCMD_LINE_VAL_NONE, 0},
   { wxCMD_LINE_SWITCH, "un", "unicode", "Allow unicode output", wxCMD_LINE_VAL_NONE},
-  { wxCMD_LINE_OPTION, "u", "unittest", "Run a pre-programmed unit test", wxCMD_LINE_VAL_STRING},
   { wxCMD_LINE_SWITCH, "v", "version", "Display the app version", wxCMD_LINE_VAL_NONE},
   { wxCMD_LINE_NONE }
 };
 
-static const std::vector<std::string> s_required_args = {"r", "g", "fs"};
+static const std::vector<std::string> s_required_args = {"radius", "grid", "file-structure"};
 
 bool validateProbes(const double, const double, const bool);
 bool validateExport(const std::string, const std::vector<bool>);
@@ -62,40 +61,33 @@ void MainApp::evalCmdLine(){
     Ctrl::getInstance()->version();
     return;
   }
-  // unit tests
-  wxString unittest_id;
-  if (parser.Found("u",&unittest_id)){
-    std::cout << "Selected unit test: " << unittest_id << std::endl;
-    if (unittest_id=="excluded"){
-      Ctrl::getInstance()->unittestExcluded();
-    }
-    else if (unittest_id=="protein"){
-      Ctrl::getInstance()->unittestProtein();
-    }
-    else if (unittest_id=="radius"){
-      Ctrl::getInstance()->unittestRadius();
-    }
-    else if (unittest_id=="2probe"){
-      Ctrl::getInstance()->unittest2Probe();
-    }
-    else if (unittest_id=="surface"){
-      Ctrl::getInstance()->unittestSurface();
-    }
-    else if (unittest_id=="floodfill"){
-      Ctrl::getInstance()->unittestFloodfill();
-    }
-    else {
-      std::cout << "Invalid selection" << std::endl;
-    }
-    return;
-  }
-  // check if all required arguments are available
-  for (auto& arg_name : s_required_args){
+  
+  // Check if all required arguments are available
+  std::vector<std::string> missing_args;
+  
+  for (const std::string& arg_name : s_required_args){
     if (!parser.Found(arg_name)){
-      Ctrl::getInstance()->displayErrorMessage(901);
-      return;
+      missing_args.push_back(arg_name);
     }
   }
+  
+  switch (missing_args.size()){
+    case (0):
+      break;
+    case (1):
+      Ctrl::getInstance()->displayErrorMessage(911, missing_args);
+      return;
+    case (2):
+      Ctrl::getInstance()->displayErrorMessage(912, missing_args);
+      return;
+    case (3):
+      Ctrl::getInstance()->displayErrorMessage(913, missing_args);
+      return;
+    default:
+      Ctrl::getInstance()->displayErrorMessage(914, missing_args);
+      return;
+  }
+  // All required arguments are available
 
   Ctrl::getInstance()->hush(parser.Found("q"));
 

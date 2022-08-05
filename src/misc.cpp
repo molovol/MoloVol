@@ -5,7 +5,7 @@
 
 // access the resource folder containing elements.txt and space_groups.txt
 std::string getResourcesDir(){
-#if defined(__APPLE__) && !defined(DEBUG)
+#if defined(__APPLE__) && defined(ABS_PATH)
   CFURLRef resource_url = CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle());
   char resource_path[PATH_MAX];
   if (CFURLGetFileSystemRepresentation(resource_url, true, (UInt8 *)resource_path, PATH_MAX)){
@@ -15,7 +15,7 @@ std::string getResourcesDir(){
     return resource_path;
   }
   return "";
-#elif defined(__linux__) && !defined(DEBUG)
+#elif defined(__linux__) && defined(ABS_PATH)
   return "/usr/share/molovol";
 #else
   return "./inputfile";
@@ -62,13 +62,20 @@ int pow2(int exp){
   return (1 << exp);
 }
 
-void removeEOL(std::string& str){
-  str.erase(std::remove(str.begin(), str.end(), '\r'), str.end());
-  str.erase(std::remove(str.begin(), str.end(), '\n'), str.end());
-}
-
-void removeWhiteSpaces(std::string& str){
-  str.erase(std::remove(str.begin(), str.end(), ' '), str.end());
+namespace StrMngr {
+  void removeEOL(std::string& str){
+    str.erase(std::remove(str.begin(), str.end(), '\r'), str.end());
+    str.erase(std::remove(str.begin(), str.end(), '\n'), str.end());
+  }
+  
+  void removeWhiteSpaces(std::string& str){
+    str.erase(std::remove(str.begin(), str.end(), ' '), str.end());
+  }
+  
+  void extendToLength(std::string& str, size_t len){
+    if (len <= str.size()){return;}
+    str += std::string(len - str.size(), ' ');
+  }
 }
 
 std::string field(int n_ws, std::string text, char alignment){

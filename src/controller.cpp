@@ -81,7 +81,8 @@ bool Ctrl::loadElementsFile(){
   }
 
   std::string elements_filepath = s_gui->getElementsFilepath();
-  // even if there is no valid radii file, the program can be used by manually setting radii in the GUI after loading a structure
+  // even if there is no valid radii file, the program can be used
+  // by manually setting radii in the GUI after loading a structure
   if(!_current_calculation->importElemFile(elements_filepath)){
     displayErrorMessage(101);
   }
@@ -98,22 +99,9 @@ bool Ctrl::loadAtomFile(){
   }
 
   bool successful_import;
-  try{successful_import = _current_calculation->readAtomsFromFile(s_gui->getAtomFilepath(), s_gui->getIncludeHetatm());}
+  successful_import = _current_calculation->readAtomsFromFile(s_gui->getAtomFilepath(), s_gui->getIncludeHetatm());
 
-  catch (const ExceptIllegalFileExtension& e){
-    displayErrorMessage(103);
-    successful_import = false;
-  }
-  catch (const ExceptInvalidInputFile& e){
-    displayErrorMessage(102);
-    successful_import = false;
-  }
-  catch (const ExceptInvalidCellParams& e){
-    displayErrorMessage(109);
-    successful_import = false;
-  }
-
-  s_gui->displayAtomList(_current_calculation->generateAtomList()); // update gui
+  s_gui->displayAtomList(_current_calculation->generateAtomList());
 
   return successful_import;
 }
@@ -607,22 +595,35 @@ static const std::map<int, std::string> s_error_codes = {
   {303, "An unidentified issue has been encountered while writing the surface map."},
   // 9xx: Issues with command line arguments
   {900, "Command line interface failed!"},
-  {901, "At least one required command line argument missing."},
   {902, "Invalid output display option. At least one parameter belonging to '-o' is invalid and will be ignored."},
-  {903, "Elements file import failed. Calculation aborted."}
+  {903, "Elements file import failed. Calculation aborted."},
+  // 9xx: Required command line arguments missing
+  {910, "Unexpected error. More than three required command line arguments appear to be missing."},
+  {911, "One required command line argument missing. Please provide --%s"},
+  {912, "Two required command line arguments missing. Please provide --%s and --%s"},
+  {913, "Three required command line arguments missing. Please provide --%s, --%s, and --%s"}
 };
 
-void Ctrl::displayErrorMessage(const int error_code){
+// Print error message either to GUI or console
+void Ctrl::displayErrorMessage(const int error_code, const std::vector<std::string>& str_fill){
+  std::string msg = getErrorMessage(error_code);
+
+  // Substitute place holders
+  size_t i = 0;
+  while (msg.find("%s") != std::string::npos){
+    assert(str_fill.size() > i);
+    msg.replace(msg.find("%s"), 2, str_fill[i]);
+    ++i;
+  }
+
   if (_to_gui){
-    s_gui->extOpenErrorDialog(error_code, getErrorMessage(error_code));
+    // Print to GUI
+    s_gui->extOpenErrorDialog(error_code, msg);
   }
   else{
-    printErrorMessage(error_code);
+    // Print to console
+    std::cout << error_code << ": " << msg << std::endl;
   }
-}
-
-void Ctrl::printErrorMessage(const int error_code){
-  std::cout << error_code << ": " << getErrorMessage(error_code) << std::endl;
 }
 
 std::string Ctrl::getErrorMessage(const int error_code){

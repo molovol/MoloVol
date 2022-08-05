@@ -8,15 +8,27 @@
 #include <array>
 #include <iostream>
 
-struct Atom{ 
-  Atom() : pos_x(0), pos_y(0), pos_z(0), rad(-1), number(0), symbol("") {}
-  Atom(const double& x_inp, const double& y_inp, const double& z_inp, const std::string& symbol_inp, const double& rad_inp, const int& elem_Z_inp)
-    : pos_x(x_inp), pos_y(y_inp), pos_z(z_inp), rad(rad_inp), number(elem_Z_inp), symbol(symbol_inp) {}
+struct Atom{
+  // Constructor
+  Atom() : pos_x(0), pos_y(0), pos_z(0), rad(-1), number(0), charge(0), symbol("") {}
+  Atom(const std::pair<std::string,std::array<double,3>>& symbol_position)
+    : pos_x(symbol_position.second[0]), pos_y(symbol_position.second[1]), pos_z(symbol_position.second[2]),
+      rad(-1), number(0), charge(0), symbol(symbol_position.first) {}
+  Atom(const std::pair<std::string,std::array<double,3>>& symbol_position, signed charge)
+    : pos_x(symbol_position.second[0]), pos_y(symbol_position.second[1]), pos_z(symbol_position.second[2]),
+      rad(-1), number(0), charge(charge), symbol(symbol_position.first) {}
+  Atom(double x, double y, double z, const std::string& symbol, double rad, unsigned atomic_num)
+    : pos_x(x), pos_y(y), pos_z(z), rad(rad), number(atomic_num), charge(0), symbol(symbol) {}
+  Atom(double x, double y, double z, const std::string& symbol, double rad, unsigned atomic_num, signed charge)
+    : pos_x(x), pos_y(y), pos_z(z), rad(rad), number(atomic_num), charge(charge), symbol(symbol) {}
 
+  // Member variables
   double pos_x, pos_y, pos_z, rad;
-  unsigned int number;
-  std::string symbol;
+  unsigned number;
+  signed charge;
+  std::string symbol; // May be redundant?
 
+  // Methods
   const std::array<double,3> getPos() const {
     return {pos_x, pos_y, pos_z};
   }
@@ -25,11 +37,12 @@ struct Atom{
     return Vector(pos_x, pos_y, pos_z);
   }
 
+  // Not needed for struct member access
   const double getRad() const {
     return rad;
   }
 
-  const double getCoordinate(const char& dim){
+  const double getCoordinate(const char dim){
     switch(dim){
       case 0: return pos_x;
       case 1: return pos_y;
@@ -38,7 +51,7 @@ struct Atom{
     throw std::invalid_argument("");
   }
 
-  void print(){
+  void print() const {
     printf("Atom {%s, (%1.3f, %1.3f, %1.3f)}", symbol.c_str(), pos_x, pos_y, pos_z);
   }
 
