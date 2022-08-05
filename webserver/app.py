@@ -92,6 +92,15 @@ def save_log(log) -> str:
     return filename
 
 
+def is_nonzero_numeric(value):
+    try:
+        if float(value) == 0:
+            return False
+    except ValueError:
+        return False
+    return True
+
+
 @app.route('/', methods=['GET', 'POST'])
 def io():
     global out
@@ -109,8 +118,17 @@ def io():
                 if not key.startswith("cli_"):
                     continue
                 key = key.removeprefix("cli_")
+
+                # If the 'large probe radius' field contains a zero or a non-numeric
+                # value, then the argument is not passed on
+                if key == "radius2" and not is_nonzero_numeric(value):
+                    continue
+
                 args.append(f"--{key}")
                 if value != "" and value != "on":
+                    # TODO: Appending the value without making sure it isn't harmful is a security
+                    # risk. A user can willingly or unwillingly inject code here that is run on
+                    # the command line.
                     args.append(str(value))
 
                 # when export is requested add -do option
@@ -131,10 +149,6 @@ def io():
                 args.append(structure_path)
 
             # read elements file
-            #if request.form.get("use_default_elements", "") != "on":
-            #    print("using custom elements file")
-            #    elements_path = manage_uploaded_file(request, "elements")
-            #else:
             elements_path = "./inputfile/elements.txt"
             args.append("-fe")
             args.append(elements_path)
