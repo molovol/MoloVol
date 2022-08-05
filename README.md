@@ -53,8 +53,9 @@ Dependencies needed for compilation:
 ### MoloVol Web
 
 Instead of using the desktop front-end, you can also use a web interface. MoloVol server provides a REST-API with a web
-front-end wrapping the molovol CLI interface. To launch naviate to the directory `webserver` and run `flask run`.
-For hosting it on a web server check out the next section.
+front-end wrapping the molovol CLI interface. To launch, first change the FLASK_APP environment variable by executing 
+the command `export FLASK_APP=./webserver/app.py` from the project's root directory. Then execute `flask run`.
+For hosting on a web server check out the next section.
 
 ### Containerized application
 
