@@ -15,8 +15,11 @@
 <h2>Input</h2>
 <form id="inputs" action="." method="post" enctype=multipart/form-data>
 
-    <label for="structure">Structure file</label>
-    <input type="file" name="structure" id="structure"><br>
+  <div class="file-upload">
+    <label for="structure">Upload a structure &ndash; 
+      <i><small>Accepted formats: XYZ, PDB, or CIF file</small></i></label><br>
+    <input type="file" name="structure" id="structure" accept=".xyz,.cif,.pdb"><br>
+  </div>
 
     <!--
       Leaving out the option to upload a custom elements file. Only advanced users will
@@ -39,16 +42,16 @@
 
     <input type="text" id="radius" name="cli_radius" size="2" style="width: 20%"
            value="{{ inputdict.get('radius', '1.2') if inputdict is defined else '1.2' }}"/>
-    <label for="radius">Small probe radius</label><br>
+    <label for="radius">Small probe radius in &Aring;ngstr&ouml;m </label><br>
 
     <input type="text" id="radius2" name="cli_radius2" size="2" style="width: 20%"
            value="{{ inputdict.get('radius2', '') if inputdict is defined else '' }}"/>
-    <label for="radius">Large probe radius &ndash; 
+    <label for="radius">Large probe radius in &Aring;ngstr&ouml;m &ndash; 
       <i><small>Leave empty for single-probe mode</small></i></label><br>
 
     <input type="text" id="grid" name="cli_grid" size="2" style="width: 20%"
            value="{{ inputdict.get('grid','0.2') if inputdict is defined else '0.2' }}">
-    <label for="grid">Spatial resolution of the underlying grid</label><br>
+    <label for="grid">Spatial resolution of the underlying grid in &Aring;ngstr&ouml;m</label><br>
     <input type="checkbox" id="hetatm" name="cli_hetatm">
     <label for="hetatm">Include HETATM &ndash; <i><small>PDB file option</small></i></label><br>
     

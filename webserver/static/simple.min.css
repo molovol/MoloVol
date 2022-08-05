@@ -18,3 +18,7 @@ input[type="checkbox"] {
 input[type="text"] {
   margin-right:10px;
 }
+
+.file-upload {
+  margin-bottom:20px
+}
