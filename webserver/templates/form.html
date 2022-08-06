@@ -40,6 +40,7 @@
            value="{{inputdict.get('dir-output','')}}"><label for="dir-output">Path to the directory
     output</label><br>-->
 
+  <div class="parameters">
     <input type="text" id="radius" name="cli_radius" size="2" style="width: 20%"
            value="{{ inputdict.get('radius', '1.2') if inputdict is defined else '1.2' }}"/>
     <label for="radius">Small probe radius in &Aring;ngstr&ouml;m </label><br>
@@ -52,6 +53,9 @@
     <input type="text" id="grid" name="cli_grid" size="2" style="width: 20%"
            value="{{ inputdict.get('grid','0.2') if inputdict is defined else '0.2' }}">
     <label for="grid">Spatial resolution of the underlying grid in &Aring;ngstr&ouml;m</label><br>
+  </div>
+
+  <div class="options">
     <input type="checkbox" id="hetatm" name="cli_hetatm">
     <label for="hetatm">Include HETATM &ndash; <i><small>PDB file option</small></i></label><br>
     
@@ -61,7 +65,9 @@
     
     <input type="checkbox" id="surface" name="cli_surface" checked="checked">
     <label for="surface">Calculate surface areas</label><br>
+  </div>
 
+  <div class="export">
     <h4>Generate files for download</h4>
     <!--all three options require -do for the path to output directory -->
     <input type="checkbox" id="export-report" name="cli_export-report">
@@ -72,10 +78,11 @@
     
     <input type="checkbox" id="export-cavities" name="cli_export-cavities">
     <label for="export-cavities">Generate surface map for each cavity</label><br>
+  </div>
 
-    <!--<input type="text" id="output" name="cli_output"><label for="output">Control what parts of the output to display
-    (default:all)</label><br>-->
+  <div>
     <input type="submit"/>
+  </div>
 </form>
 
 {% if returnvalues is not none and returnvalues!="" %}
