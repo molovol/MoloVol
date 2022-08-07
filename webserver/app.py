@@ -127,22 +127,25 @@ def io():
                     continue
 
                 args.append(f"--{key}")
-                if value != "" and value != "on":
-                    # TODO: Appending the value without making sure it isn't harmful is a security
+
+                if value == "on":
+                    # when export is requested add -do option
+                    if export is None and key.startswith("export"):
+                        export = uuid4()
+                        tmp_outdir = f"{export_dir}{export}/"
+                        # check if directory exists and create if missing
+                        print(f"Exporting in zip in {tmp_outdir}")
+                        if not os.path.exists(tmp_outdir):
+                            os.makedirs(tmp_outdir)
+                        args.append(f"-do")
+                        args.append(tmp_outdir)
+                else:
+                    # Appending the value without making sure it isn't harmful is a security
                     # risk. A user can willingly or unwillingly inject code here that is run on
                     # the command line.
-                    args.append(str(value))
+                    if value != "" and safe_join(str(value)):
+                        args.append(str(value))
 
-                # when export is requested add -do option
-                if export is None and key.startswith("export") and value == "on":
-                    export = uuid4()
-                    tmp_outdir = f"{export_dir}{export}/"
-                    # check if directory exists and create if missing
-                    print(f"Exporting in zip in {tmp_outdir}")
-                    if not os.path.exists(tmp_outdir):
-                        os.makedirs(tmp_outdir)
-                    args.append(f"-do")
-                    args.append(tmp_outdir)
             inputdict = request.form
 
             # read structure file
@@ -188,7 +191,7 @@ def io():
 
 # Request the executable's version. If the executable is not found, then the web page crashes
 def app_version():
-    return subprocess.check_output(["./launch_headless.sh"] + ["-v"], stderr=subprocess.STDOUT).decode("utf-8")
+    return subprocess.check_output(["./launch_headless.sh", "-v"], stderr=subprocess.STDOUT).decode("utf-8")
 
 
 def is_nonzero_numeric(value):
@@ -198,4 +201,3 @@ def is_nonzero_numeric(value):
     except ValueError:
         return False
     return True
-
