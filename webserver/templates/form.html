@@ -9,13 +9,22 @@
     border: 1px solid #ccc;
   }</style>
   <link rel="stylesheet" type="text/css" href="{{ url_for('.static', filename='style.css') }}">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+  <link rel="mask-icon" href="{{ url_for('static', filename='static/safari-pinned-tab.svg') }}" color="#2380be"> 
+  <link rel="shortcut icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+  <link rel="shortcut icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+  <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
+  <meta name="msapplication-TileColor" content="#2380be">
+  <meta name="theme-color" content="#2380be">
+
 </head>
 <body>
   <div class="wordmark">
     <img src="static/images/wordmark.png" alt="MoloVol wordmark" height="72">
     <p>{{ version }}</p>
   </div>
-
+  
 <form id="inputs" action="." method="post" enctype=multipart/form-data>
 
   <div class="file-upload">

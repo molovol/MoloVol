@@ -3,7 +3,7 @@ import zipfile
 from typing import Optional
 from uuid import uuid4
 
-from flask import Flask, request, jsonify, render_template, Response
+from flask import Flask, request, jsonify, render_template, Response, send_from_directory, url_for
 import subprocess
 
 from werkzeug.utils import secure_filename
@@ -21,6 +21,66 @@ out = None
 log_dir = "./logs/"
 export_dir = "./export/"
 
+
+# Redirects for favicons
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico')
+
+@app.route('/favicon-16x16.png')
+def favicon16():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon-16x16.png')
+
+@app.route('/favicon-32x32.png')
+def favicon32():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon-32x32.png')
+
+@app.route('/site.webmanifest')
+def manifest():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'site.webmanifest')
+
+@app.route('/apple-touch-icon.png')
+def apple_touch_icon():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'apple-touch-icon.png')
+
+@app.route('/safari-pinned-tab.svg')
+def safari_pinned_tab():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'safari-pinned-tab.svg')
+
+@app.route('/browserconfig.xml')
+def browserconfig():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'browserconfig.xml')
+
+@app.route('/android-chrome-192x192.png')
+def android_chrome192():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'android-chrome-192x192.png')
+
+@app.route('/android-chrome-512x512.png')
+def android_chrome512():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'android-chrome-512x512.png')
+
+@app.route('/mstile-144x144.png')
+def mstile144():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'mstile-144x144.png')
+
+@app.route('/mstile-150x150.png')
+def mstile150():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'mstile-150x150.png')
+
+@app.route('/mstile-310x150.png')
+def mstile310x150():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'mstile-310x150.png')
+
+@app.route('/mstile-310x310.png')
+def mstile310():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'mstile-310x310.png')
+
+@app.route('/mstile-70x70.png')
+def mstile70():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'mstile-70x70.png')
+
+# jinja2 filters
 
 @app.template_filter('basename')
 def basename(path):
