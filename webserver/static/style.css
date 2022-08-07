@@ -335,6 +335,10 @@ input[type=checkbox],input[type=text] {
   margin-right:0.6rem;
 }
 
+input[type=checkbox]:disabled + label {
+  color:var(--text-light);
+}
+
 .file-upload,.parameters,.options,.export {
   margin-bottom:0.8rem;
 }

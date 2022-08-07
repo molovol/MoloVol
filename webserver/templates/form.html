@@ -59,14 +59,14 @@
   </div>
 
   <div class="options">
-    <input type="checkbox" id="hetatm" name="cli_hetatm">
+    <input type="checkbox" id="hetatm" name="cli_hetatm" checked disabled>
     <label for="hetatm">Include HETATM &ndash; <i><small>PDB file option</small></i></label><br>
     
-    <input type="checkbox" id="unitcell" name="cli_unitcell">
+    <input type="checkbox" id="unitcell" name="cli_unitcell" disabled>
     <label for="unitcell">Analyze unit cell &ndash; <i
         ><small>requires PDB or CIF file with crystallographic information</small></i></label><br>
     
-    <input type="checkbox" id="surface" name="cli_surface" checked="checked">
+    <input type="checkbox" id="surface" name="cli_surface">
     <label for="surface">Calculate surface areas</label><br>
   </div>
 
@@ -87,6 +87,34 @@
     <input type="submit"/>
   </div>
 </form>
+
+<script type = "text/javascript">
+  document.getElementById('structure').onchange = function(e) {
+    var filename = document.getElementById('structure').value;
+    var extension = filename.match(/\.\w+$/gm);
+    extension = extension[0].toLowerCase();
+    switch (String(extension)){
+      case '.pdb':
+        lockCheckboxes(false,false);
+        break;
+      case '.xyz':
+        lockCheckboxes(true,true);
+        break;
+      case '.cif':
+        lockCheckboxes(true,false);
+        break;
+      default:
+        lockCheckboxes(false,false);
+        alert('File extension unknown.');
+    }
+  }
+
+  function lockCheckboxes(htDisable, ucDisable) {
+    document.getElementById('hetatm').disabled = htDisable;
+    document.getElementById('unitcell').disabled = ucDisable; 
+  }
+</script>  
+
 
 {% if returnvalues is not none and returnvalues!="" %}
     <h2>Output</h2>
