@@ -133,13 +133,10 @@ def manage_uploaded_file(request, filetype="structure"):
             path = os.path.join(app.config['UPLOAD_FOLDER'],
                                 secure_filename(uuid4().hex + input_file.rsplit('_', maxsplit=1)[-1]))
             input_file.save(path)
-        if not input_file.filename:
-            out = ""  # May carry value None
-            out += "No structure file selected\n"
 
     if path is None:
         path = request.form.get(f"last{filetype}", None)
-        if path is None or not path:
+        if not path:
             path = None
             out += "Error: No file was uploaded and previous one could not be used\n"
     print(out)
