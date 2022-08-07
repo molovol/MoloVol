@@ -1,4 +1,4 @@
-FROM ubuntu AS compiler
+FROM ubuntu
 RUN apt-get update
 RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
 RUN apt-get install -y build-essential manpages-dev libgtk2.0-dev wget
@@ -18,9 +18,10 @@ COPY Makefile Makefile
 COPY src/ src/
 COPY include/ include/
 RUN make
-
+ls -al build
 COPY inputfile/ inputfile/
-COPY launch_headless.sh bin/launch.sh
-RUN chmod +x bin/launch.sh
-ENTRYPOINT ["./bin/launch.sh"]
+WORKDIR bin/
+COPY launch_headless.sh launch.sh
+RUN chmod +x launch.sh
+ENTRYPOINT ["./launch.sh"]
 CMD ["-r", "1.2", "-g", "0.2", "-fs", "/inputfile/isobutane.xyz", "-q", "-o", "time,vol"]
