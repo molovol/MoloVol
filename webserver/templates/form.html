@@ -9,20 +9,44 @@
     border: 1px solid #ccc;
   }</style>
   <link rel="stylesheet" type="text/css" href="{{ url_for('.static', filename='style.css') }}">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+  <link rel="mask-icon" href="{{ url_for('static', filename='static/safari-pinned-tab.svg') }}" color="#2380be"> 
+  <link rel="shortcut icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+  <link rel="shortcut icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+  <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
+  <meta name="msapplication-TileColor" content="#2380be">
+  <meta name="theme-color" content="#2380be">
+
 </head>
 <body>
   <div class="wordmark">
     <img src="static/images/wordmark.png" alt="MoloVol wordmark" height="72">
     <p>{{ version }}</p>
   </div>
-
+  
 <form id="inputs" action="." method="post" enctype=multipart/form-data>
 
   <div class="file-upload">
-    <label for="structure">Upload a structure &ndash; 
-      <i><small>Accepted formats: XYZ, PDB, or CIF file</small></i></label><br>
+    <label for="structure">
+      {% if laststructure is none %}
+      Upload a structure &ndash; 
+      <i><small>Accepted formats: XYZ, PDB, or CIF file</small></i>
+      {% else %}
+      Use previously uploaded structure: <b>{{ laststructure | basename }}</b> <br>
+        ... or upload new structure
+      {% endif %}
+
+    </label><br>
     <input type="file" name="structure" id="structure" accept=".xyz,.cif,.pdb"><br>
+    
+    <!--
+      This hidden element allows using the previously uploaded structure file
+    -->
+    <input type="hidden" name="laststructure" id="laststructure"
+           value="{{ laststructure if laststructure is not none else '' }}">
   </div>
+    
 
     <!--
       Leaving out the option to upload a custom elements file. Only advanced users will
@@ -32,54 +56,49 @@
       the user to change individual atomic radii in a table.
     -->
 
-    <input type="hidden" name="laststructure" id="laststructure"
-           value="{{ inputdict.get('laststructure', '') if inputdict is defined else '' }}">
-    <!-- Todo add dropdown to reuse last uploaded file
-    <input type="text" id="path-structure" name="file-structure" placeholder="path" value="{{inputdict.get('file-strucutre','')}}"><label for="path-structure">Path to the
-    structure file</label><br>
-    <input type="text" id="path-elements" name="file-elements" placeholder="path" value="{{inputdict.get('file-elements','')}}"><label for="path-elements">Path to the elements
-    file</label><br>-->
-    <!--<input type="text" id="dir-output" name="dir-output" placeholder="path -do"
-           value="{{inputdict.get('dir-output','')}}"><label for="dir-output">Path to the directory
-    output</label><br>-->
-
   <div class="parameters">
     <input type="text" id="radius" name="cli_radius" size="2" style="width: 20%"
-           value="{{ inputdict.get('radius', '1.2') if inputdict is defined else '1.2' }}"/>
+           value="{{ inputdict.get('cli_radius', '1.2') if inputdict is defined else '1.2' }}"/>
     <label for="radius">Small probe radius in &Aring;ngstr&ouml;m </label><br>
 
     <input type="text" id="radius2" name="cli_radius2" size="2" style="width: 20%"
-           value="{{ inputdict.get('radius2', '') if inputdict is defined else '' }}"/>
+           value="{{ inputdict.get('cli_radius2', '') if inputdict is defined else '' }}"/>
     <label for="radius2">Large probe radius in &Aring;ngstr&ouml;m &ndash; 
       <i><small>Leave empty for single-probe mode</small></i></label><br>
 
     <input type="text" id="grid" name="cli_grid" size="2" style="width: 20%"
-           value="{{ inputdict.get('grid','0.2') if inputdict is defined else '0.2' }}">
+           value="{{ inputdict.get('cli_grid','0.2') if inputdict is defined else '0.2' }}">
     <label for="grid">Spatial resolution of the underlying grid in &Aring;ngstr&ouml;m</label><br>
   </div>
 
   <div class="options">
-    <input type="checkbox" id="hetatm" name="cli_hetatm" checked disabled>
+    <input type="checkbox" id="hetatm" name="cli_hetatm" disabled
+      {% if (not inputdict) or ('cli_hetatm' in inputdict) %} checked {% endif %}>
     <label for="hetatm">Include HETATM &ndash; <i><small>PDB file option</small></i></label><br>
     
-    <input type="checkbox" id="unitcell" name="cli_unitcell" disabled>
+    <input type="checkbox" id="unitcell" name="cli_unitcell" disabled
+      {% if 'cli_unitcell' in inputdict %} checked {% endif %}>
     <label for="unitcell">Analyze unit cell &ndash; <i
         ><small>requires PDB or CIF file with crystallographic information</small></i></label><br>
     
-    <input type="checkbox" id="surface" name="cli_surface">
+    <input type="checkbox" id="surface" name="cli_surface" 
+      {% if 'cli_surface' in inputdict %} checked {% endif %}>
     <label for="surface">Calculate surface areas</label><br>
   </div>
 
   <div class="export">
     <h4>Generate files for download</h4>
     <!--all three options require -do for the path to output directory -->
-    <input type="checkbox" id="export-report" name="cli_export-report">
+    <input type="checkbox" id="export-report" name="cli_export-report"
+      {% if 'cli_export-report' in inputdict %} checked {% endif %}>
     <label for="export-report">Generate report</label><br>
 
-    <input type="checkbox" id="export-total" name="cli_export-total">
+    <input type="checkbox" id="export-total" name="cli_export-total"
+      {% if 'cli_export-total' in inputdict %} checked {% endif %}>
     <label for="export-total">Generate total surface map</label><br>
     
-    <input type="checkbox" id="export-cavities" name="cli_export-cavities">
+    <input type="checkbox" id="export-cavities" name="cli_export-cavities"
+      {% if 'cli_export-cavities' in inputdict %} checked {% endif %}>
     <label for="export-cavities">Generate surface map for each cavity</label><br>
   </div>
 
@@ -89,8 +108,18 @@
 </form>
 
 <script type = "text/javascript">
+  // Lock checkboxes based on previously uploaded file
+  window.onload = function(e) {
+    evalFilename("{{ laststructure }}");
+  }
+
+  // Lock checkboxes based on newly uploaded file
   document.getElementById('structure').onchange = function(e) {
     var filename = document.getElementById('structure').value;
+    evalFilename(filename);
+  }
+
+  function evalFilename(filename) {
     var extension = filename.match(/\.\w+$/gm);
     extension = extension[0].toLowerCase();
     switch (String(extension)){

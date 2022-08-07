@@ -3,7 +3,7 @@ import zipfile
 from typing import Optional
 from uuid import uuid4
 
-from flask import Flask, request, jsonify, render_template, Response
+from flask import Flask, request, jsonify, render_template, Response, send_from_directory, url_for
 import subprocess
 
 from werkzeug.security import safe_join
@@ -17,17 +17,88 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-ALLOWED_EXTENSIONS = {'xyz', 'pdb', 'txt', 'cif'}
-
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
 out = None
 log_dir = "./logs/"
 export_dir = "./export/"
+
+
+# Redirects for favicons
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico')
+
+
+@app.route('/favicon-16x16.png')
+def favicon16():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon-16x16.png')
+
+
+@app.route('/favicon-32x32.png')
+def favicon32():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon-32x32.png')
+
+
+@app.route('/site.webmanifest')
+def manifest():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'site.webmanifest')
+
+
+@app.route('/apple-touch-icon.png')
+def apple_touch_icon():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'apple-touch-icon.png')
+
+
+@app.route('/safari-pinned-tab.svg')
+def safari_pinned_tab():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'safari-pinned-tab.svg')
+
+
+@app.route('/browserconfig.xml')
+def browserconfig():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'browserconfig.xml')
+
+
+@app.route('/android-chrome-192x192.png')
+def android_chrome192():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'android-chrome-192x192.png')
+
+
+@app.route('/android-chrome-512x512.png')
+def android_chrome512():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'android-chrome-512x512.png')
+
+
+@app.route('/mstile-144x144.png')
+def mstile144():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'mstile-144x144.png')
+
+
+@app.route('/mstile-150x150.png')
+def mstile150():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'mstile-150x150.png')
+
+
+@app.route('/mstile-310x150.png')
+def mstile310x150():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'mstile-310x150.png')
+
+
+@app.route('/mstile-310x310.png')
+def mstile310():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'mstile-310x310.png')
+
+
+@app.route('/mstile-70x70.png')
+def mstile70():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'mstile-70x70.png')
+
+
+# jinja2 filters
+
+@app.template_filter('basename')
+def basename(path):
+    return os.path.basename(path)
 
 
 def manage_uploaded_file(request, filetype="structure"):
@@ -41,22 +112,26 @@ def manage_uploaded_file(request, filetype="structure"):
     path: Optional[str] = None
     if filetype in request.files:
         # try using last value
-        structure_file = request.files['structure']
-        if structure_file.filename == '':
+        input_file = request.files[filetype]
+        if input_file.filename == '':
             if out is None:
                 out = "No structure file selected"
             else:
                 out += "No structure file selected\n"
-        if structure_file and allowed_file(structure_file.filename):
+        if input_file and allowed_file(input_file.filename):
+            # File extension validation is handled during the file selection in the html form
             path = os.path.join(app.config['UPLOAD_FOLDER'],
-                                secure_filename(uuid4().hex + structure_file.rsplit('_', maxsplit=1)[-1]))
-            structure_file.save(path)
-            return path
+                                secure_filename(uuid4().hex + input_file.rsplit('_', maxsplit=1)[-1]))
+            input_file.save(path)
+        if not input_file.filename:
+            out = ""  # May carry value None
+            out += "No structure file selected\n"
+
     if path is None:
         path = request.form.get(f"last{filetype}", None)
-        if path is None or path == "":
+        if path is None or not path:
             path = None
-            out += "error as no file was uploaded and last one could not be reused\n"
+            out += "Error: No file was uploaded and previous one could not be used\n"
     print(out)
     return path
 
@@ -108,6 +183,7 @@ def io():
     inputdict = {}
     export = None
     tmp_outdir = None
+    structure_path = None
 
     v_out = app_version()
 
@@ -181,10 +257,15 @@ def io():
             except Exception as e:
                 out = "Exception: " + str(e)
     if request.accept_mimetypes['text/html']:
+
         if type(out) is str:
             out = out.split("\n")
+
+        print(structure_path)
+
         return render_template('form.html', inputdict=inputdict, returnvalues=out,
-                               resultslink=resultslink, version=v_out)
+                               resultslink=resultslink, version=v_out, laststructure=structure_path)
+
     elif request.accept_mimetypes['application/json']:
         return jsonify({"output": out})
 
