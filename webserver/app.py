@@ -6,6 +6,7 @@ from uuid import uuid4
 from flask import Flask, request, jsonify, render_template, Response
 import subprocess
 
+from werkzeug.security import safe_join
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -30,6 +31,12 @@ export_dir = "./export/"
 
 
 def manage_uploaded_file(request, filetype="structure"):
+    """
+    saves uploaded file to UPLOAD_FOLDER
+    :param request:
+    :param filetype:
+    :return: path of the saved file
+    """
     global out
     path: Optional[str] = None
     if filetype in request.files:
@@ -41,7 +48,8 @@ def manage_uploaded_file(request, filetype="structure"):
             else:
                 out += "No structure file selected\n"
         if structure_file and allowed_file(structure_file.filename):
-            path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(structure_file.filename))
+            path = os.path.join(app.config['UPLOAD_FOLDER'],
+                                secure_filename(uuid4().hex + structure_file.rsplit('_', maxsplit=1)[-1]))
             structure_file.save(path)
             return path
     if path is None:
@@ -67,7 +75,7 @@ def get_export(id):
         return Response(response="No export found", status=404, mimetype="text/plain")
     with open(f"{export_dir}{id}/results.zip", "rb") as f:
         return Response(response=f.read(), status=200, mimetype="application/zip")
-    
+
 
 def zip_export(path) -> str:
     # zip files in path
@@ -76,8 +84,8 @@ def zip_export(path) -> str:
     print(f"Found these files in path: {dir_content}. Zipping them")
     with zipfile.ZipFile(zip_file, 'w') as zip:
         for file in dir_content:
-            print("Zipping file: " +path+ file)
-            zip.write(path+file, arcname=file)
+            print("Zipping file: " + path + file)
+            zip.write(path + file, arcname=file)
     return zip_file
 
 
@@ -138,7 +146,7 @@ def io():
             inputdict = request.form
 
             # read structure file
-            if structure_path := manage_uploaded_file(request, "structure"):
+            if structure_path := manage_uploaded_file(request, filetype="structure"):
                 args.append("-fs")
                 args.append(structure_path)
 
@@ -147,7 +155,7 @@ def io():
             args.append("-fe")
             args.append(elements_path)
 
-            # we only print it out in the end so we can put it to quiet
+            # we only print it out in the end, so we can put it to quiet
             args.append("-q")
 
         else:
