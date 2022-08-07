@@ -67,7 +67,7 @@ def get_export(id):
         return Response(response="No export found", status=404, mimetype="text/plain")
     with open(f"{export_dir}{id}/results.zip", "rb") as f:
         return Response(response=f.read(), status=200, mimetype="application/zip")
-
+    
 
 def zip_export(path) -> str:
     # zip files in path
@@ -92,15 +92,6 @@ def save_log(log) -> str:
     return filename
 
 
-def is_nonzero_numeric(value):
-    try:
-        if float(value) == 0:
-            return False
-    except ValueError:
-        return False
-    return True
-
-
 @app.route('/', methods=['GET', 'POST'])
 def io():
     global out
@@ -109,6 +100,9 @@ def io():
     inputdict = {}
     export = None
     tmp_outdir = None
+
+    v_out = app_version()
+
     if request.method == 'POST':
         # when arguments ignore form data
         # split cli string so that it can be passed to subprocess
@@ -179,6 +173,21 @@ def io():
         if type(out) is str:
             out = out.split("\n")
         return render_template('form.html', inputdict=inputdict, returnvalues=out,
-                               resultslink=resultslink)
+                               resultslink=resultslink, version=v_out)
     elif request.accept_mimetypes['application/json']:
         return jsonify({"output": out})
+
+
+# Request the executable's version. If the executable is not found, then the web page crashes
+def app_version():
+    return subprocess.check_output(["./launch_headless.sh"] + ["-v"], stderr=subprocess.STDOUT).decode("utf-8")
+
+
+def is_nonzero_numeric(value):
+    try:
+        if float(value) == 0:
+            return False
+    except ValueError:
+        return False
+    return True
+

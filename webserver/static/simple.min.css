@@ -53,6 +53,15 @@ input[type=checkbox],input[type=text] {
   margin-bottom:0.8rem;
 }
 
+.wordmark {
+  margin-top:2rem;
+  margin-bottom:1.5rem;
+}
+
+.wordmark p {
+  margin-top:0rem;
+}
+
 body { 
   background-image: url('images/bg.png');
   background-repeat: no-repeat;
