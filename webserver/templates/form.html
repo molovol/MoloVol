@@ -19,10 +19,25 @@
 <form id="inputs" action="." method="post" enctype=multipart/form-data>
 
   <div class="file-upload">
-    <label for="structure">Upload a structure &ndash; 
-      <i><small>Accepted formats: XYZ, PDB, or CIF file</small></i></label><br>
+    <label for="structure">
+      {% if laststructure is none %}
+      Upload a structure &ndash; 
+      <i><small>Accepted formats: XYZ, PDB, or CIF file</small></i>
+      {% else %}
+      Use previously uploaded structure: <b>{{ laststructure | basename }}</b> <br>
+        ... or upload new structure
+      {% endif %}
+
+    </label><br>
     <input type="file" name="structure" id="structure" accept=".xyz,.cif,.pdb"><br>
+    
+    <!--
+      This hidden element allows using the previously uploaded structure file
+    -->
+    <input type="hidden" name="laststructure" id="laststructure"
+           value="{{ laststructure if laststructure is not none else '' }}">
   </div>
+    
 
     <!--
       Leaving out the option to upload a custom elements file. Only advanced users will
@@ -31,17 +46,6 @@
       If a similar feature is added to the web app, it should be simplified, like by allowing
       the user to change individual atomic radii in a table.
     -->
-
-    <input type="hidden" name="laststructure" id="laststructure"
-           value="{{ inputdict.get('laststructure', '') if inputdict is defined else '' }}">
-    <!-- Todo add dropdown to reuse last uploaded file
-    <input type="text" id="path-structure" name="file-structure" placeholder="path" value="{{inputdict.get('file-strucutre','')}}"><label for="path-structure">Path to the
-    structure file</label><br>
-    <input type="text" id="path-elements" name="file-elements" placeholder="path" value="{{inputdict.get('file-elements','')}}"><label for="path-elements">Path to the elements
-    file</label><br>-->
-    <!--<input type="text" id="dir-output" name="dir-output" placeholder="path -do"
-           value="{{inputdict.get('dir-output','')}}"><label for="dir-output">Path to the directory
-    output</label><br>-->
 
   <div class="parameters">
     <input type="text" id="radius" name="cli_radius" size="2" style="width: 20%"
@@ -95,8 +99,18 @@
 </form>
 
 <script type = "text/javascript">
+  // Lock checkboxes based on previously uploaded file
+  window.onload = function(e) {
+    evalFilename("{{ laststructure }}");
+  }
+
+  // Lock checkboxes based on newly uploaded file
   document.getElementById('structure').onchange = function(e) {
     var filename = document.getElementById('structure').value;
+    evalFilename(filename);
+  }
+
+  function evalFilename(filename) {
     var extension = filename.match(/\.\w+$/gm);
     extension = extension[0].toLowerCase();
     switch (String(extension)){

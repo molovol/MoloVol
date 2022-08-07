@@ -16,17 +16,15 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-ALLOWED_EXTENSIONS = {'xyz', 'pdb', 'txt', 'cif'}
-
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
 
 out = None
 log_dir = "./logs/"
 export_dir = "./export/"
+
+
+@app.template_filter('basename')
+def basename(path):
+    return os.path.basename(path)
 
 
 def manage_uploaded_file(request, filetype="structure"):
@@ -34,21 +32,25 @@ def manage_uploaded_file(request, filetype="structure"):
     path: Optional[str] = None
     if filetype in request.files:
         # try using last value
-        structure_file = request.files['structure']
-        if structure_file.filename == '':
-            if out is None:
-                out = "No structure file selected"
-            else:
-                out += "No structure file selected\n"
-        if structure_file and allowed_file(structure_file.filename):
-            path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(structure_file.filename))
-            structure_file.save(path)
+        input_file = request.files[filetype]
+        
+        print(input_file)
+
+        if not input_file.filename:
+            out = "" # May carry value None
+            out += "No structure file selected\n"
+        
+        if input_file:
+            # File extension validation is handled during the file selection in the html form
+            path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(input_file.filename))
+            input_file.save(path)
             return path
+
     if path is None:
         path = request.form.get(f"last{filetype}", None)
-        if path is None or path == "":
+        if path is None or not path:
             path = None
-            out += "error as no file was uploaded and last one could not be reused\n"
+            out += "Error: No file was uploaded and previous one could not be used\n"
     print(out)
     return path
 
@@ -100,6 +102,7 @@ def io():
     inputdict = {}
     export = None
     tmp_outdir = None
+    structure_path = None
 
     v_out = app_version()
 
@@ -170,10 +173,15 @@ def io():
             except Exception as e:
                 out = "Exception: " + str(e)
     if request.accept_mimetypes['text/html']:
+
         if type(out) is str:
             out = out.split("\n")
+
+        print(structure_path)
+
         return render_template('form.html', inputdict=inputdict, returnvalues=out,
-                               resultslink=resultslink, version=v_out)
+                               resultslink=resultslink, version=v_out, laststructure=structure_path)
+
     elif request.accept_mimetypes['application/json']:
         return jsonify({"output": out})
 
