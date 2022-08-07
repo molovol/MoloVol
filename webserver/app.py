@@ -101,6 +101,14 @@ def basename(path):
     return os.path.basename(path)
 
 
+ALLOWED_EXTENSIONS = {'xyz', 'pdb', 'txt', 'cif'}
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
 def manage_uploaded_file(request, filetype="structure"):
     """
     saves uploaded file to UPLOAD_FOLDER
@@ -118,8 +126,10 @@ def manage_uploaded_file(request, filetype="structure"):
                 out = "No structure file selected"
             else:
                 out += "No structure file selected\n"
+
+        # File extension validation is handled during the file selection in the html form, but can also be called via
+        # json api and never trust the client
         if input_file and allowed_file(input_file.filename):
-            # File extension validation is handled during the file selection in the html form
             path = os.path.join(app.config['UPLOAD_FOLDER'],
                                 secure_filename(uuid4().hex + input_file.rsplit('_', maxsplit=1)[-1]))
             input_file.save(path)
