@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>MoloVol Web GUI</title>
+  <title>MoloVol Web</title>
   <style>#outputbox {
     border: 1px solid #ccc;
   }</style>
@@ -23,6 +23,20 @@
   <div class="wordmark">
     <img src="static/images/wordmark.png" alt="MoloVol wordmark" height="72">
     <p>{{ version }}</p>
+  </div>
+
+  <div class="disclaimer">
+    <p>
+      MoloVol Web allows you to conveniently use <a href="https://molovol.com">MoloVol</a>
+      directly through your browser. 
+      The desktop version is equivalent but offers more options. It can be downloaded 
+      <a href="https://github.com/molovol/MoloVol/releases/tag/v{{ version | versionnumber}}">here</a>
+      along with the user manual. 
+      You can find a detailed explanation of the underlying algorithms in 
+      <a href="https://doi.org/10.1107/S1600576722004988">this publication</a>. If you end up using MoloVol Web
+      or the desktop app for your sci&shy;en&shy;ti&shy;fic work, make sure to cite the publication and 
+      <u>specify the application version</u> (Version {{ version | versionnumber }}).
+    </p>
   </div>
   
 <form id="inputs" action="." method="post" enctype=multipart/form-data>

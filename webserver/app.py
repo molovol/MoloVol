@@ -1,5 +1,6 @@
 import os
 import zipfile
+import re
 from typing import Optional
 from uuid import uuid4
 
@@ -99,6 +100,11 @@ def mstile70():
 @app.template_filter('basename')
 def basename(path):
     return os.path.basename(path)
+
+
+@app.template_filter('versionnumber')
+def versionnumber(versiontxt):
+    return re.findall("\d+\.\d+\.\d+", versiontxt)[0]
 
 
 ALLOWED_EXTENSIONS = {'xyz', 'pdb', 'cif'}

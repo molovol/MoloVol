@@ -358,3 +358,14 @@ body {
   background-attachment: fixed;
   background-size: cover;
 }
+
+.disclaimer {
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  margin-bottom:2rem;
+  font-size:0.8rem;
+}
+.disclaimer p {
+  margin:0.6rem;
+  text-align: justify;
+}
