@@ -104,7 +104,7 @@ def basename(path):
 ALLOWED_EXTENSIONS = {'xyz', 'pdb', 'cif'}
 
 
-def allowed_file(filename):
+def validate_extension(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -117,32 +117,29 @@ def manage_uploaded_file(request, filetype="structure"):
     :return: path of the saved file
     """
     global out
+    out = ""
     path: Optional[str] = None
     if filetype in request.files:
-        # try using last value
+
         input_file = request.files[filetype]
+
         if not input_file.filename:
-            if out is None:
-                out = "No structure file selected"
-            else:
-                out += "No structure file selected\n"
-        # File extension validation needs to be handled here because client can circumvent the html form
-        # Does 'if input_file' ever fail? - JM
-        elif input_file and allowed_file(input_file.filename):
+            path = request.form.get(f"last{filetype}", None)
+            if not path:
+                path = None
+                out += "No file was uploaded and previous file could not be used\n"
+        elif validate_extension(input_file.filename):
+            # File extension validation needs to be handled here because client can circumvent the html form
             path = os.path.join(app.config['UPLOAD_FOLDER'],
                                 secure_filename(uuid4().hex + input_file.filename.rsplit('_', maxsplit=1)[-1]))
             input_file.save(path)
         else:
-            # This is necessary because otherwise 'path' does not get initialised, so that the next
-            # if-statement gets executed, then a string is appended to 'out', so out cannot be None
-            out = ""
-
-    if path is None:
-        path = request.form.get(f"last{filetype}", None)
-        if not path:
+            out += "Format of uploaded file is not allowed\n"
             path = None
-            out += "No file was uploaded and previous one could not be used\n"
-    print(out)
+    
+    if out:
+        print(out)
+    
     return path
 
 
