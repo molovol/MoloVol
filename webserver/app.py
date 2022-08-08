@@ -141,7 +141,7 @@ def manage_uploaded_file(request, filetype="structure"):
         path = request.form.get(f"last{filetype}", None)
         if not path:
             path = None
-            out += "Error: No file was uploaded and previous one could not be used\n"
+            out += "No file was uploaded and previous one could not be used\n"
     print(out)
     return path
 
@@ -213,7 +213,8 @@ def io():
                     continue
 
                 args.append(f"--{key}")
-
+                    
+                # Handle checkboxes
                 if value == "on":
                     # when export is requested add -do option
                     if export is None and key.startswith("export"):
@@ -225,12 +226,12 @@ def io():
                             os.makedirs(tmp_outdir)
                         args.append(f"-do")
                         args.append(tmp_outdir)
-                else:
-                    # Appending the value without making sure it isn't harmful is a security
-                    # risk. A user can willingly or unwillingly inject code here that is run on
-                    # the command line.
-                    if value != "" and safe_join(str(value)):
-                        args.append(str(value))
+
+                # Handle other options
+                elif value and safe_join(str(value)):
+                    # Always make sure that the value can be safely appended
+                    # args will be passed to the command line!
+                    args.append(str(value))
 
             inputdict = request.form
 
