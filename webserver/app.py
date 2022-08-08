@@ -99,7 +99,7 @@ def mstile70():
 
 @app.template_filter('basename')
 def basename(path):
-    return os.path.basename(path)
+    return os.path.basename(path).split('_',1)[-1]
 
 
 @app.template_filter('versionnumber')
@@ -136,8 +136,9 @@ def manage_uploaded_file(request, filetype="structure"):
                 out += "No file was uploaded and previous file could not be used\n"
         elif validate_extension(input_file.filename):
             # File extension validation needs to be handled here because client can circumvent the html form
+            print(input_file.filename)
             path = os.path.join(app.config['UPLOAD_FOLDER'],
-                                secure_filename(uuid4().hex + input_file.filename.rsplit('_', maxsplit=1)[-1]))
+                                secure_filename(uuid4().hex + '_' + input_file.filename))
             input_file.save(path)
         else:
             out += "Format of uploaded file is not allowed\n"
