@@ -101,7 +101,7 @@ def basename(path):
     return os.path.basename(path)
 
 
-ALLOWED_EXTENSIONS = {'xyz', 'pdb', 'txt', 'cif'}
+ALLOWED_EXTENSIONS = {'xyz', 'pdb', 'cif'}
 
 
 def allowed_file(filename):
@@ -121,18 +121,21 @@ def manage_uploaded_file(request, filetype="structure"):
     if filetype in request.files:
         # try using last value
         input_file = request.files[filetype]
-        if input_file.filename == '':
+        if not input_file.filename:
             if out is None:
                 out = "No structure file selected"
             else:
                 out += "No structure file selected\n"
-
-        # File extension validation is handled during the file selection in the html form, but can also be called via
-        # json api and never trust the client
-        if input_file and allowed_file(input_file.filename):
+        # File extension validation needs to be handled here because client can circumvent the html form
+        # Does 'if input_file' ever fail? - JM
+        elif input_file and allowed_file(input_file.filename):
             path = os.path.join(app.config['UPLOAD_FOLDER'],
-                                secure_filename(uuid4().hex + input_file.rsplit('_', maxsplit=1)[-1]))
+                                secure_filename(uuid4().hex + input_file.filename.rsplit('_', maxsplit=1)[-1]))
             input_file.save(path)
+        else:
+            # This is necessary because otherwise 'path' does not get initialised, so that the next
+            # if-statement gets executed, then a string is appended to 'out', so out cannot be None
+            out = ""
 
     if path is None:
         path = request.form.get(f"last{filetype}", None)
