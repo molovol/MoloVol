@@ -124,16 +124,16 @@
 <script type = "text/javascript">
   // Lock checkboxes based on previously uploaded file
   window.onload = function(e) {
-    evalFilename("{{ laststructure }}");
+    evalFilename("{{ laststructure }}", false);
   }
 
   // Lock checkboxes based on newly uploaded file
   document.getElementById('structure').onchange = function(e) {
     var filename = document.getElementById('structure').value;
-    evalFilename(filename);
+    evalFilename(filename, true);
   }
 
-  function evalFilename(filename) {
+  function evalFilename(filename, newFile) {
     var extension = filename.match(/\.\w+$/gm);
     extension = extension[0].toLowerCase();
     switch (String(extension)){
@@ -149,6 +149,9 @@
       default:
         lockCheckboxes(false,false);
         alert('File extension unknown.');
+    }
+    if (newFile){
+      document.getElementById('hetatm').checked = true;
     }
   }
 
