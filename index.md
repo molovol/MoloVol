@@ -7,6 +7,13 @@ With MoloVol we aim to combine an intuitive and easy-to-use user interface with 
 
 The MoloVol software has been released. The software is being maintained and developed on Windows 10, macOS Big Sur, and Ubuntu.
 
+## Scientific Reference
+MoloVol v1.0.0 features and algorithms are presented in detail in an [open access scientific article](https://doi.org/10.1107/S1600576722004988) published in the Journal for Applied Crystallography.
+
+Please use the following or an equivalent citation:
+
+> Maglic, J.B. & Lavendomme, R. (2022). J. Appl. Cryst. 55, 1033-1044. DOI: [10.1107/S1600576722004988](https://doi.org/10.1107/S1600576722004988)
+
 ## Download
 
 Compiled binaries of current and previous versions for Windows, macOS and Linux as well as a quick-start guide and the user manual can be found in the [Download Installers](https://github.com/molovol/MoloVol/releases) section.
@@ -42,9 +49,3 @@ If you encounter a bug or have a request for a feature, you are more than welcom
 ## Development Team
 The development is currently lead by Jasmin B. Maglic and Roy Lavendomme. You may reach us via email through [molovol@outlook.com](mailto:molovol@outlook.com)
 
-## Scientific Reference
-MoloVol v1.0.0 features and algorithms are presented in detail in an [open access scientific article](https://doi.org/10.1107/S1600576722004988) published in the Journal for Applied Crystallography.
-
-Please use the following or an equivalent citation:
-
-> Maglic, J.B. & Lavendomme, R. (2022). J. Appl. Cryst. 55, 1033-1044. DOI: [10.1107/S1600576722004988](https://doi.org/10.1107/S1600576722004988)
