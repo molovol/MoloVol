@@ -107,6 +107,11 @@ def versionnumber(versiontxt):
     return re.findall("\d+\.\d+\.\d+", versiontxt)[0]
 
 
+@app.template_filter('titleline')
+def titleline(output):
+    return re.search("<[A-Z]+>", output)
+
+
 ALLOWED_EXTENSIONS = {'xyz', 'pdb', 'cif'}
 
 

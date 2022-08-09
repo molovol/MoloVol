@@ -165,12 +165,19 @@
   <div id="outputbox">
     <output name="result" for="inputs">
       <p>
-      {% for row in returnvalues %}
-        {{ row }}
-        {% if not loop.last %}
-          <br>
-        {% endif %}
-      {% endfor %}
+        {% for row in returnvalues %}
+          <!-- Title lines are bold -->
+          {% if row | titleline %}
+            <b>{{ row }}</b>
+          {% else %}
+            {{ row }}
+          {% endif %}
+          
+          <!-- The last line break is omitted -->
+          {% if not loop.last %}
+            <br>
+          {% endif %}
+        {% endfor %}
       </p>
     </output>
   </div>

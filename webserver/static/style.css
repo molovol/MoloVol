@@ -379,6 +379,10 @@ output p {
   margin:0.4rem;
 }
 
+output p b {
+  font-size:1rem;
+}
+
 #outputbox {
   border: 1px solid var(--border);
 }
