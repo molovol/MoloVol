@@ -251,6 +251,8 @@ def io():
 
             # we only print it out in the end, so we can put it to quiet
             args.append("-q")
+            args.append("-o") 
+            args.append("resolution,depth,radius_small,radius_large,options,vol,surf,cavities")
 
         else:
             args = request.args.get('cli-arguments', '').split(" ")
