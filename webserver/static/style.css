@@ -365,7 +365,20 @@ body {
   margin-bottom:2rem;
   font-size:0.8rem;
 }
+
 .disclaimer p {
   margin:0.6rem;
   text-align: justify;
+}
+
+output {
+  font-family:var(--mono-font);
+}
+
+output p {
+  margin:0.4rem;
+}
+
+#outputbox {
+  border: 1px solid var(--border);
 }
