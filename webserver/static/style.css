@@ -182,27 +182,6 @@ details[open] summary{
   padding:0
 }
 details[open]>:last-child{margin-bottom:0}
-table{
-  border-collapse:collapse;
-  display:block;
-  margin:1.5rem 0;
-  overflow:auto;
-  width:100%
-}
-td,th{
-  border:1px solid var(--border);
-  text-align:left;
-  padding:.5rem
-}
-th{
-  background:var(--accent-bg);
-  font-weight:700
-}
-tr:nth-child(even){background:var(--accent-bg)}
-table caption{
-  font-weight:700;
-  margin-bottom:.5rem
-}
 input,select,textarea{
   font-size:inherit;
   font-family:inherit;
@@ -371,18 +350,54 @@ body {
   text-align: justify;
 }
 
-output {
+/* Output style */
+#outputbox {
+  border: 1px solid var(--border);
+  background-color:var(--accent-bg);
   font-family:var(--mono-font);
 }
 
 output p {
   margin:0.4rem;
+  font-size:0.8rem
 }
 
 output p b {
-  font-size:1rem;
+  font-size:0.9rem;
 }
 
-#outputbox {
-  border: 1px solid var(--border);
+output table {
+  font-size:0.8rem;
+  margin: 0.4rem;
+  width:98%;
 }
+
+/* Table style */
+table{
+  border-collapse:collapse;
+  margin:1.5rem 0;
+  overflow:auto;
+  width:100%;
+}
+
+td,th{
+  text-align:left;
+  padding:0.6rem
+}
+
+th{
+  background:var(--bg);
+  font-weight:700;
+  border-top:1.5px solid var(--border);
+  border-bottom:1.5px solid var(--border);  
+}
+
+tr:nth-child(even){
+  background:var(--bg);
+}
+
+table caption{
+  font-weight:700;
+  margin-bottom:.1rem;
+}
+

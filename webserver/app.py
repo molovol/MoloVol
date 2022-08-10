@@ -112,6 +112,12 @@ def titleline(output):
     return re.search("<[A-Z]+>", output)
 
 
+@app.template_filter('tablesplit')
+def tablesplit(tablerow):
+    n=20;
+    return [tablerow[i:i+n] for i in range(0, len(tablerow), n)]
+
+
 ALLOWED_EXTENSIONS = {'xyz', 'pdb', 'cif'}
 
 

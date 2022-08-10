@@ -157,32 +157,81 @@
 </script>  
 
 
-{% if returnvalues is not none and returnvalues!="" %}
-  <h4>Output</h4>
-  {% if resultslink is not none %}
-    <a href="{{ resultslink }}">Download results</a><br><br>
-  {% endif %}
-  <div id="outputbox">
-    <output name="result" for="inputs">
-      <p>
-        {% for row in returnvalues %}
-          <!-- Title lines are bold -->
-          {% if row | titleline %}
-            <b>{{ row }}</b>
-          {% else %}
-            {{ row }}
-          {% endif %}
-          
-          <!-- The last line break is omitted -->
-          {% if not loop.last %}
-            <br>
-          {% endif %}
-        {% endfor %}
-      </p>
-    </output>
-  </div>
-{% endif %}
+  {% if returnvalues is not none and returnvalues!="" %}
+    <h4>Output</h4> 
+  
+    {% if resultslink is not none %}
+      <a href="{{ resultslink }}">Download results</a><br><br>
+    {% endif %}
 
+    <div id="outputbox">
+      <output name="result" for="inputs">
+        <p>
+        {% set printingTable = [] %}
+
+        {% for row in returnvalues %}
+
+          {% if not loop.first and not printingTable %}
+          <br>
+          {% endif %}
+
+          {% if not printingTable %}
+
+            {% if row | titleline %}
+
+            <b> {{ row }} </b>
+
+            {% elif row.startswith('Cavity ID') %}
+              
+              <!-- Paragraph ends, table begins -->
+
+              {% if printingTable.append(True) %} {% endif %}
+              </p>
+              <table class="cavities">
+                <tr>
+
+                {% set headertop = row | tablesplit %}
+                {% set headerbottom = loop.nextitem | tablesplit %}
+                
+                {% for header in headertop %}
+                <th>{{header}}<br> {{ headerbottom[loop.index - 1] }}</th>
+                {% endfor %}
+
+                <tr>
+
+            {% else %}
+
+              {{ row }}
+
+            {% endif %}
+
+          {% else %} <!-- if printingTable -->
+
+            {% if not loop.previtem.startswith('Cavity ID') %}
+              
+              {% set tablerow = row | tablesplit %}
+              <tr>
+                {% for col in tablerow %}
+                <td>{{col}}</td>
+                {% endfor %}
+              </tr>
+              
+            {% endif %}
+           
+          {% endif %}
+
+        {% endfor %}
+
+        <!-- If a table was started, it must be ended -->
+        {% if printingTable %}
+        </table>
+        {% endif %}
+        
+      </output>
+    </div>
+  {% endif %}
+
+      
 <footer>
   &copy; 2022 Molovol Web is brought to you by 
     <a href="https://benediktsvogler.com">Benedikt S. Vogler</a> based on
