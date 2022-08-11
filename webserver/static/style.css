@@ -56,7 +56,7 @@ body>header p{
 }
 main{padding-top:1.5rem}
 body>footer{
-  margin-top:4rem;
+  margin-top:3rem;
   padding:2rem 1rem 1.5rem 1rem;
   color:var(--text-light);
   font-size:.9rem;
