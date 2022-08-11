@@ -117,7 +117,7 @@
 </form>
 
 {% if returnvalues is not none and returnvalues!="" %}
-  <h4>Output</h4> 
+  <h4 id="output" href="#">Output</h4>
 
   {% if resultslink is not none %}
     <a href="{{ resultslink }}">Download results</a><br><br>
@@ -198,6 +198,9 @@
 <script type = "text/javascript">
   // Lock checkboxes based on previously uploaded file
   window.onload = function(e) {
+    if ("{{ returnvalues }}") {
+      window.location.hash="output";
+    }
     evalFilename("{{ laststructure }}", false);
   }
 
