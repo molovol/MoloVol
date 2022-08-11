@@ -401,3 +401,6 @@ table caption{
   margin-bottom:.1rem;
 }
 
+.error {
+  color:red;
+}

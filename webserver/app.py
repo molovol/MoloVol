@@ -3,6 +3,7 @@ import zipfile
 import re
 from typing import Optional
 from uuid import uuid4
+from enum import Enum
 
 from flask import Flask, request, jsonify, render_template, Response, send_from_directory, url_for
 import subprocess
@@ -25,10 +26,13 @@ export_dir = "./export/"
 
 # Error messages
 
-ERR_NOFILE = "No file was uploaded and previous file could not be used"
-ERR_NORADIUS = "Small probe radius must be specied" 
-ERR_NOGRID = "Spatial resolution must be specified"
-ERR_FORMAT = "File format of uploaded file is not supported"
+# This prefix allows the renderer to tell that the line is an error
+ERR_PREFIX = "E."
+class ErrMsg(str, Enum):
+    NOFILE =    ERR_PREFIX + "No file was uploaded and previous file could not be used",
+    NORADIUS =  ERR_PREFIX + "Small probe radius must be specied",
+    NOGRID =    ERR_PREFIX + "Spatial resolution must be specified",
+    FORMAT =    ERR_PREFIX + "File format of uploaded file is not supported"
 
 # Redirects for favicons
 
@@ -128,6 +132,11 @@ def tablesplit(tablerow):
     return [tablerow[i:i+n] for i in range(0, len(tablerow), n)]
 
 
+@app.template_filter('errorstrip')
+def errorstrip(errorline):
+    return errorline[len(ERR_PREFIX):]
+
+
 ALLOWED_EXTENSIONS = {'xyz', 'pdb', 'cif'}
 
 
@@ -153,7 +162,7 @@ def manage_uploaded_file(request, filetype="structure"):
             path = request.form.get(f"last{filetype}", None)
             if not path:
                 path = None
-                out += ERR_NOFILE + "\n"
+                out += ErrMsg.NOFILE + "\n"
         elif validate_extension(input_file.filename):
             # File extension validation needs to be handled here because client can circumvent the html form
             print(input_file.filename)
@@ -161,7 +170,7 @@ def manage_uploaded_file(request, filetype="structure"):
                                 secure_filename(uuid4().hex + '_' + input_file.filename))
             input_file.save(path)
         else:
-            out += ERR_FORMAT + "\n"
+            out += ErrMsg.FORMAT + "\n"
             path = None
     
     if out:
@@ -240,10 +249,10 @@ def io():
                 # Radius and grid are obligatory options. If they aren't specified
                 # omit them here so the error can be caught later
                 if key == "radius" and not value:
-                    out += ERR_NORADIUS + "\n"
+                    out += ErrMsg.NORADIUS + "\n"
                     continue
                 if key == "grid" and not value:
-                    out += ERR_NOGRID + "\n"
+                    out += ErrMsg.NOGRID + "\n"
                     continue
 
                 args.append(f"--{key}")
@@ -300,7 +309,7 @@ def io():
 
             # If an error occured, extract the error message from the output
             if mlvl_out.startswith("Usage"):
-                mlvl_out = mlvl_out.split("\n")[-2]
+                mlvl_out = ERR_PREFIX + mlvl_out.split("\n")[-2] + "\n"
             else:
                 mlvl_out = f"Results for structure file: {basename(structure_path)}\n" + mlvl_out 
 
@@ -315,7 +324,8 @@ def io():
     if request.accept_mimetypes['text/html']:
 
         if type(out) is str:
-            out = out.split("\n")
+            # Remove the trailing newline
+            out = out.split("\n")[:-1]
 
         if structure_path:
             print(structure_path)

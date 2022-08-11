@@ -137,7 +137,11 @@
 
         {% if not printingTable %}
 
-          {% if row | titleline %}
+          {% if row.startswith('E.') %}
+
+          <p class="error"> {{ row | errorstrip }} </p>
+
+          {% elif row | titleline %}
 
           <b> {{ row }} </b>
 
