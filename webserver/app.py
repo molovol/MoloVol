@@ -23,6 +23,13 @@ log_dir = "./logs/"
 export_dir = "./export/"
 
 
+# Error messages
+
+ERR_NOFILE = "No file was uploaded and previous file could not be used"
+ERR_NORADIUS = "Small probe radius must be specied" 
+ERR_NOGRID = "Spatial resolution must be specified"
+ERR_FORMAT = "File format of uploaded file is not supported"
+
 # Redirects for favicons
 
 @app.route('/favicon.ico')
@@ -137,7 +144,6 @@ def manage_uploaded_file(request, filetype="structure"):
     :return: path of the saved file
     """
     global out
-    out = ""
     path: Optional[str] = None
     if filetype in request.files:
 
@@ -147,7 +153,7 @@ def manage_uploaded_file(request, filetype="structure"):
             path = request.form.get(f"last{filetype}", None)
             if not path:
                 path = None
-                out += "No file was uploaded and previous file could not be used\n"
+                out += ERR_NOFILE + "\n"
         elif validate_extension(input_file.filename):
             # File extension validation needs to be handled here because client can circumvent the html form
             print(input_file.filename)
@@ -155,7 +161,7 @@ def manage_uploaded_file(request, filetype="structure"):
                                 secure_filename(uuid4().hex + '_' + input_file.filename))
             input_file.save(path)
         else:
-            out += "Format of uploaded file is not allowed\n"
+            out += ERR_FORMAT + "\n"
             path = None
     
     if out:
@@ -216,6 +222,7 @@ def io():
     v_out = app_version()
 
     if request.method == 'POST':
+        out = ""
         # when arguments ignore form data
         # split cli string so that it can be passed to subprocess
         args: list[str] = []
@@ -228,6 +235,15 @@ def io():
                 # If the 'large probe radius' field contains a zero or a non-numeric
                 # value, then the argument is not passed on
                 if key == "radius2" and not is_nonzero_numeric(value):
+                    continue
+
+                # Radius and grid are obligatory options. If they aren't specified
+                # omit them here so the error can be caught later
+                if key == "radius" and not value:
+                    out += ERR_NORADIUS + "\n"
+                    continue
+                if key == "grid" and not value:
+                    out += ERR_NOGRID + "\n"
                     continue
 
                 args.append(f"--{key}")
@@ -271,28 +287,38 @@ def io():
         else:
             args = request.args.get('cli-arguments', '').split(" ")
             inputdict = request.args
-        # with no parameters it will launch the gui
-        if len(args) == 0 or structure_path is None:
-            out += "No arguments given\n You must specify at least the structure file\n"
-            args.append("-h")
-        else:
+
+        # These three options are required
+        if "--radius" in args and "--grid" in args and structure_path:
+            print(f"Starting process with args: {args}\n")
+            
             try:
-                print("Starting process with args:", args)
-                out = subprocess.check_output(["./launch_headless.sh"] + args, stderr=subprocess.STDOUT).decode(
+                mlvl_out = subprocess.check_output(["./launch_headless.sh"] + args, stderr=subprocess.STDOUT).decode(
                     "utf-8")
-                print(out)
-                if export:
-                    resultslink = f"/{tmp_outdir}"
-                else:
-                    resultslink = f"/{save_log(out)}"
             except Exception as e:
                 out = "Exception: " + str(e)
+
+            # If an error occured, extract the error message from the output
+            if mlvl_out.startswith("Usage"):
+                mlvl_out = mlvl_out.split("\n")[-2]
+            else:
+                mlvl_out = f"Results for structure file: {basename(structure_path)}\n" + mlvl_out 
+
+            out += mlvl_out
+            print(out)
+
+            if export:
+                resultslink = f"/{tmp_outdir}"
+            else:
+                resultslink = f"/{save_log(out)}"
+
     if request.accept_mimetypes['text/html']:
 
         if type(out) is str:
             out = out.split("\n")
 
-        print(structure_path)
+        if structure_path:
+            print(structure_path)
 
         return render_template('form.html', inputdict=inputdict, returnvalues=out,
                                resultslink=resultslink, version=v_out, laststructure=structure_path)
@@ -313,3 +339,4 @@ def is_nonzero_numeric(value):
     except ValueError:
         return False
     return True
+

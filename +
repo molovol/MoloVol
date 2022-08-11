@@ -137,7 +137,11 @@
 
         {% if not printingTable %}
 
-          {% if row | titleline %}
+          {% if row.startswith("ERR") %}
+
+          <p class="error">{{ row[len("ERR: "):] }}</p>
+
+          {% elif row | titleline %}
 
           <b> {{ row }} </b>
 
