@@ -126,7 +126,9 @@
   <div id="outputbox">
     <output name="result" for="inputs">
       <p>
-      Results for structure file: {{ laststructure | basename }} <br>
+      {% if laststructure %}
+        Results for structure file: {{ laststructure | basename }} <br>
+      {% endif %}
 
       {% set printingTable = [] %}
 

@@ -99,7 +99,10 @@ def mstile70():
 
 @app.template_filter('basename')
 def basename(path):
-    return os.path.basename(path).split('_',1)[-1]
+    if path:
+        return os.path.basename(path).split('_',1)[-1]
+    else:
+        return ""
 
 
 @app.template_filter('versionnumber')
