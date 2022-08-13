@@ -8,7 +8,7 @@ With MoloVol we aim to combine an intuitive and easy-to-use user interface with 
 The MoloVol software has been released. The software is being maintained and developed on Windows 10, macOS Big Sur, and Ubuntu.
 
 ## Scientific Reference
-MoloVol v1.0.0 features and algorithms are presented in detail in an [open access scientific article](https://doi.org/10.1107/S1600576722004988) published in the Journal for Applied Crystallography.
+MoloVol v1.0.0 features and algorithms are presented in detail in an [open access scientific article](https://doi.org/10.1107/S1600576722004988) published in the *Journal of Applied Crystallography*.
 
 Please use the following or an equivalent citation:
 
