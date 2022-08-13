@@ -9,6 +9,7 @@ This changelog keeps track of changes in a user-friendly way. It is based on [ke
 ### Improved
 * The error message that occurs when an incomplete list of input arguments are provided in the CLI is now more descriptive.
 * Chemical formulas no longer contain the subscript "1" when an atom only occurs once.
+* The molecular volume is now also displayed in the results summary.
 
 ### Fixed
 * Fix an issue where the application would crash, when an invalid elements file was provided while attempting to load a structure file.
