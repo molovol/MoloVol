@@ -61,7 +61,7 @@ body>footer{
   color:var(--text-light);
   font-size:.9rem;
   text-align:center;
-  border-top:1px solid var(--border)
+  border-top:1.5px solid var(--border)
 }
 h1{font-size:3rem}
 h2{
@@ -339,8 +339,8 @@ body {
 }
 
 .disclaimer {
-  border-top:1px solid var(--border);
-  border-bottom:1px solid var(--border);
+  border-top:1.5px solid var(--border);
+  border-bottom:1.5px solid var(--border);
   margin-bottom:2rem;
   font-size:0.8rem;
 }

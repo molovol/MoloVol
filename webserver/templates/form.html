@@ -120,7 +120,13 @@
   <h4 id="output" href="#">Output</h4>
 
   {% if resultslink is not none %}
-    <a href="{{ resultslink }}">Download results</a><br><br>
+    <a href="{{ resultslink }}">
+      {% if 'cli_export-report' in inputdict or 'cli_export-report' in inputdict or 'cli_export-cavities' in inputdict %}
+      Download generated output files
+      {% else %}
+      Download summary displayed below
+      {% endif %}
+    </a><br><br>
   {% endif %}
 
   <div id="outputbox">
