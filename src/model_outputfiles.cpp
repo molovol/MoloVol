@@ -294,7 +294,9 @@ void Model::createReport(std::string path){
   output_report << " - in USCF ChimeraX, check https://www.cgl.ucsf.edu/chimerax/docs/user/tools/volumeviewer.html \n";
 
   output_report << "\nIf you wish to visualize the structure file in PyMOL with the same element radii as in the MoloVol calculation,\n";
-  output_report << "paste the following command lines (all at once) in the command prompt of PyMOL after opening the structure file.\n\n";
+  output_report << "paste the following command lines (all at once) in the command prompt of PyMOL after opening the structure file.\n";
+  output_report << "Note: remove charges from ions before copying the command because only alphabetic characters are used for element symbols in PyMOL.\n";
+  output_report << "If an element is present in more than one oxidation state, it is necessary to select atoms separately in PyMOL to apply different radii\n\n";
 
   for(std::unordered_map<std::string, double>::iterator it = _radius_map.begin(); it != _radius_map.end(); it++){
     if(isIncluded(it->first, _data.included_elements)){
