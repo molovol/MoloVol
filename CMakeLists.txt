@@ -10,7 +10,7 @@ option(MOLOVOL_BUILD_TESTING "Enables unit tests so that test source files are c
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11 CACHE STRING "Minimum macOS deployment version")
 
 # Set name and version
-project(MoloVol VERSION 1.0.0)
+project(MoloVol VERSION 1.0.1)
 
 # Specify C++ standard
 set(CMAKE_CXX_STANDARD 17)

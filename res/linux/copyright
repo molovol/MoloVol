@@ -4,11 +4,11 @@ Upstream-Contact: Jasmin B. Maglic <jmaglic@outlook.de>
 Source: https://github.com/jmaglic/MoloVol
 
 Files: *
-Copyright: 2020-2021 Jasmin B. Maglic, Roy Lavendomme <molovol@outlook.com>
+Copyright: 2020-2022 Jasmin B. Maglic, Roy Lavendomme <molovol@outlook.com>
 Licence: MIT
 
 Files: debian/*
-Copyright: 2020-2021 Jasmin B. Maglic
+Copyright: 2020-2022 Jasmin B. Maglic
 Licence: MIT
 
 Licence: MIT
