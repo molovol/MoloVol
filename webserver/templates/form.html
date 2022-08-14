@@ -70,16 +70,16 @@
   -->
 
   <div id="parameters">
-    <input type="number" id="radius" name="cli_radius" size="2" style="width: 10%" required
+    <input type="number" id="radius" name="cli_radius" size="2" style="width: 10%" min="0" step="any" required
            value="{{ inputdict.get('cli_radius', '1.2') if inputdict is defined else '1.2' }}"/>
     <label for="radius">Small probe radius in &Aring;ngstr&ouml;m </label><br>
 
-    <input type="number" id="radius2" name="cli_radius2" size="2" style="width: 10%"
+    <input type="number" id="radius2" name="cli_radius2" size="2" style="width: 10%" min="0" step="any"
            value="{{ inputdict.get('cli_radius2', '') if inputdict is defined else '' }}"/>
     <label for="radius2">Large probe radius in &Aring;ngstr&ouml;m &ndash; 
       <i><small>Leave empty for single-probe mode</small></i></label><br>
 
-    <input type="number" id="grid" name="cli_grid" size="2" style="width: 10%" required
+    <input type="number" id="grid" name="cli_grid" size="2" style="width: 10%" min="0" step="any" required
            value="{{ inputdict.get('cli_grid','0.2') if inputdict is defined else '0.2' }}">
     <label for="grid">Spatial resolution of the underlying grid in &Aring;ngstr&ouml;m</label><br>
   </div>

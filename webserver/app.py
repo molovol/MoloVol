@@ -32,6 +32,7 @@ class ErrMsg(str, Enum):
     NOFILE =    ERR_PREFIX + "No file was uploaded and previous file could not be used",
     NORADIUS =  ERR_PREFIX + "Small probe radius must be specied",
     NOGRID =    ERR_PREFIX + "Spatial resolution must be specified",
+    SMALLGRID = ERR_PREFIX + "If you would like to use a spatial resolution of less than 0.1, please use the desktop application",
     FORMAT =    ERR_PREFIX + "File format of uploaded file is not supported"
 
 # Redirects for favicons
@@ -251,9 +252,14 @@ def io():
                 if key == "radius" and not value:
                     out += ErrMsg.NORADIUS + "\n"
                     continue
-                if key == "grid" and not value:
-                    out += ErrMsg.NOGRID + "\n"
-                    continue
+                if key == "grid":
+                    if not value:
+                        out += ErrMsg.NOGRID + "\n"
+                        continue
+                    elif is_str_smaller_than(value, 0.1):
+                        out += ErrMsg.SMALLGRID + "\n"
+                        continue
+
 
                 args.append(f"--{key}")
                     
@@ -349,4 +355,11 @@ def is_nonzero_numeric(value):
     except ValueError:
         return False
     return True
+
+
+def is_str_smaller_than(text, lowerlim):
+    try:
+        return float(text) < lowerlim
+    except ValueError:
+        return True
 
