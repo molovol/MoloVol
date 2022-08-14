@@ -10,7 +10,7 @@
   --code:#d81b60;
   --preformatted:#444;
   --marked:#ffdd33;
-  --disabled:#efefef
+  --disabled:#efefef;
 }
 /* Dark mode
 @media (prefers-color-scheme:dark){
@@ -318,19 +318,6 @@ input[type=checkbox]:disabled + label {
   color:var(--text-light);
 }
 
-.file-upload,.parameters,.options,.export {
-  margin-bottom:0.8rem;
-}
-
-.wordmark {
-  margin-top:2rem;
-  margin-bottom:1.5rem;
-}
-
-.wordmark p {
-  margin-top:0rem;
-}
-
 body { 
   background-image: url('images/bg.png');
   background-repeat: no-repeat;
@@ -338,13 +325,32 @@ body {
   background-size: cover;
 }
 
-.disclaimer {
+/* Wordmark style */
+
+#wordmark {
+  margin-top:2rem;
+  margin-bottom:1.5rem;
+}
+
+#wordmark p {
+  margin-top:0rem;
+}
+
+/* Input form */
+
+#inputs div {
+  margin-bottom:0.8rem;
+}
+
+/* User communication */
+
+#disclaimer {
   border-top:1.5px solid var(--border);
   border-bottom:1.5px solid var(--border);
   margin-bottom:2rem;
 }
 
-div[class=consent]{
+#consent{
   border-top:1.5px solid var(--border);
 }
 
@@ -376,6 +382,10 @@ output table {
   width:98%;
 }
 
+.error {
+  color:red;
+}
+
 /* Table style */
 table{
   border-collapse:collapse;
@@ -393,7 +403,7 @@ th{
   background:var(--bg);
   font-weight:700;
   border-top:1.5px solid var(--border);
-  border-bottom:1.5px solid var(--border);  
+  border-bottom:var(--border);  
 }
 
 tr:nth-child(even){
@@ -403,8 +413,4 @@ tr:nth-child(even){
 table caption{
   font-weight:700;
   margin-bottom:.1rem;
-}
-
-.error {
-  color:red;
 }

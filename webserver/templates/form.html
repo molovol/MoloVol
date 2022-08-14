@@ -16,28 +16,28 @@
   <meta name="theme-color" content="#2380be">
 </head>
 <body>
-  <div class="wordmark">
-    <img src="static/images/wordmark.png" alt="MoloVol wordmark" height="72">
-    <p>{{ version }}</p>
-  </div>
+<div id="wordmark">
+  <img src="static/images/wordmark.png" alt="MoloVol wordmark" height="72">
+  <p>{{ version }}</p>
+</div>
 
-  <div class="disclaimer">
-    <p class="infotext">
-      MoloVol Web allows you to conveniently use <a href="https://molovol.com">MoloVol</a>
-      directly through your browser. 
-      An equivalent desktop version that offers slightly more options is available for download 
-      <a href="https://github.com/molovol/MoloVol/releases/tag/v{{ version | versionnumber}}">here</a>
-      along with the user manual. 
-      You can find a detailed ex&shy;pla&shy;na&shy;tion of the underlying algorithms in 
-      <a href="https://doi.org/10.1107/S1600576722004988">this publication</a>. If you end up using MoloVol Web
-      or the desktop app for your sci&shy;en&shy;ti&shy;fic work, make sure to cite the publication and 
-      <u>specify the application version</u> (Version {{ version | versionnumber }}).
-    </p>
-  </div>
+<div id="disclaimer">
+  <p class="infotext">
+    MoloVol Web allows you to conveniently use <a href="https://molovol.com">MoloVol</a>
+    directly through your browser. 
+    An equivalent desktop version that offers slightly more options is available for download 
+    <a href="https://github.com/molovol/MoloVol/releases/tag/v{{ version | versionnumber}}">here</a>
+    along with the user manual. 
+    You can find a detailed ex&shy;pla&shy;na&shy;tion of the underlying algorithms in 
+    <a href="https://doi.org/10.1107/S1600576722004988">this publication</a>. If you end up using MoloVol Web
+    or the desktop app for your sci&shy;en&shy;ti&shy;fic work, make sure to cite the publication and 
+    <u>specify the application version</u> (Version {{ version | versionnumber }}).
+  </p>
+</div>
   
 <form id="inputs" action="." method="post" enctype=multipart/form-data>
 
-  <div class="file-upload">
+  <div id="file-upload">
     <label for="structure">
       {% if laststructure is none %}
       Upload a structure &ndash; 
@@ -65,7 +65,7 @@
     the user to change individual atomic radii in a table.
   -->
 
-  <div class="parameters">
+  <div id="parameters">
     <input type="text" id="radius" name="cli_radius" size="2" style="width: 10%" required
            value="{{ inputdict.get('cli_radius', '1.2') if inputdict is defined else '1.2' }}"/>
     <label for="radius">Small probe radius in &Aring;ngstr&ouml;m </label><br>
@@ -80,7 +80,7 @@
     <label for="grid">Spatial resolution of the underlying grid in &Aring;ngstr&ouml;m</label><br>
   </div>
 
-  <div class="options">
+  <div id="options">
     <input type="checkbox" id="hetatm" name="cli_hetatm" disabled
       {% if (not inputdict) or ('cli_hetatm' in inputdict) %} checked {% endif %}>
     <label for="hetatm">Include HETATM &ndash; <i><small>PDB file option</small></i></label><br>
@@ -95,7 +95,7 @@
     <label for="surface">Calculate surface areas</label><br>
   </div>
 
-  <div class="export">
+  <div id="export">
     <h4>Generate files for download</h4>
     <!--all three options require -do for the path to output directory -->
     <input type="checkbox" id="export-report" name="cli_export-report"
@@ -111,11 +111,11 @@
     <label for="export-cavities">Generate surface map for each cavity</label><br>
   </div>
 
-  <div class="consent">
+  <div id="consent">
     <p class="infotext">
       By clicking "Submit" you consent that your structure file may be stored in unencrypted form 
-      for the purpose of performing a MoloVol calculation. Your file may also be used to compile 
-      statistical information on our users. No personal data is collected. If you do not wish to 
+      for the purpose of per&shy;form&shy;ing a MoloVol calculation. Your file may also be used to compile 
+      statistical information on our users. No per&shy;so&shy;nal data is collected. If you do not wish to 
       consent you can 
       <a href="https://github.com/molovol/MoloVol/releases/tag/v{{ version | versionnumber}}">use the desktop application</a> 
       instead.
