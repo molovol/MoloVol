@@ -124,7 +124,7 @@
       <a href="https://github.com/molovol/MoloVol/releases/tag/v{{ version | versionnumber}}">use the desktop application</a> 
       instead.
     </p>
-    <input type="submit"/>
+    <input type="submit" id="submit"/>
   </div>
 </form>
 
@@ -256,6 +256,18 @@
     document.getElementById('hetatm').disabled = htDisable;
     document.getElementById('unitcell').disabled = ucDisable; 
   }
+
+  const radius = document.getElementById("radius");
+  const radius2 = document.getElementById("radius2");
+  radius2.addEventListener("input", (event) => {
+    if (radius2.value != "" && radius2.value < radius.value) {
+      radius2.setCustomValidity("Must be larger than small probe radius");
+      radius2.reportValidity();
+    } else {
+      radius2.setCustomValidity("");
+    }
+  });
+
 </script>  
       
 <footer>

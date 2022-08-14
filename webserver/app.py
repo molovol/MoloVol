@@ -244,8 +244,9 @@ def io():
 
                 # If the 'large probe radius' field contains a zero or a non-numeric
                 # value, then the argument is not passed on
-                if key == "radius2" and not is_nonzero_numeric(value):
-                    continue
+                if key == "radius2":
+                    if not is_nonzero_numeric(value):
+                        continue
 
                 # Radius and grid are obligatory options. If they aren't specified
                 # omit them here so the error can be caught later
