@@ -342,10 +342,14 @@ body {
   border-top:1.5px solid var(--border);
   border-bottom:1.5px solid var(--border);
   margin-bottom:2rem;
-  font-size:0.8rem;
 }
 
-.disclaimer p {
+div[class=consent]{
+  border-top:1.5px solid var(--border);
+}
+
+.infotext {
+  font-size:0.8rem;
   margin:0.6rem;
   text-align: justify;
 }

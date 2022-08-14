@@ -22,7 +22,7 @@
   </div>
 
   <div class="disclaimer">
-    <p>
+    <p class="infotext">
       MoloVol Web allows you to conveniently use <a href="https://molovol.com">MoloVol</a>
       directly through your browser. 
       An equivalent desktop version that offers slightly more options is available for download 
@@ -111,7 +111,15 @@
     <label for="export-cavities">Generate surface map for each cavity</label><br>
   </div>
 
-  <div>
+  <div class="consent">
+    <p class="infotext">
+      By clicking "Submit" you consent that your structure file may be stored in unencrypted form 
+      for the purpose of performing a MoloVol calculation. Your file may also be used to compile 
+      statistical information on our users. No personal data is collected. If you do not wish to 
+      consent you can 
+      <a href="https://github.com/molovol/MoloVol/releases/tag/v{{ version | versionnumber}}">use the desktop application</a> 
+      instead.
+    </p>
     <input type="submit"/>
   </div>
 </form>
