@@ -48,7 +48,11 @@
       {% endif %}
 
     </label><br>
-    <input type="file" name="structure" id="structure" accept=".xyz,.cif,.pdb"><br>
+    <input type="file" name="structure" id="structure" accept=".xyz,.cif,.pdb"
+      {% if laststructure is none %}
+      required
+      {% endif %}
+    ><br>
     
     <!--
       This hidden element allows using the previously uploaded structure file
