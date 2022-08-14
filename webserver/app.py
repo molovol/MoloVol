@@ -165,7 +165,8 @@ def manage_uploaded_file(request, filetype="structure"):
                 path = None
                 out += ErrMsg.NOFILE + "\n"
         elif validate_extension(input_file.filename):
-            # File extension validation needs to be handled here because client can circumvent the html form
+            # File extension validation needs to be handled server side. Users can circumvent
+            # the html form by directly using the REST-API
             print(input_file.filename)
             path = os.path.join(app.config['UPLOAD_FOLDER'],
                                 secure_filename(uuid4().hex + '_' + input_file.filename))
