@@ -32,6 +32,9 @@ apptests/
 output/
 surface_map.dx
 benchmark
+export/
 
 .idea/
 *.pyc
+*userupload/
+*.log

@@ -17,11 +17,23 @@ WORKDIR /
 COPY Makefile Makefile
 COPY src/ src/
 COPY include/ include/
-RUN make
-ls -al build
+RUN make release
 COPY inputfile/ inputfile/
-WORKDIR bin/
-COPY launch_headless.sh launch.sh
-RUN chmod +x launch.sh
-ENTRYPOINT ["./launch.sh"]
-CMD ["-r", "1.2", "-g", "0.2", "-fs", "/inputfile/isobutane.xyz", "-q", "-o", "time,vol"]
+
+#add flask webserver
+RUN apt update && apt upgrade -y
+RUN apt install software-properties-common -y
+RUN add-apt-repository ppa:deadsnakes/ppa -y
+RUN apt install python3.10 -y
+# install pip
+RUN apt install python3.10-distutils -y
+RUN apt install curl -y
+RUN curl https://bootstrap.pypa.io/get-pip.py | python3.10
+RUN python3.10 -m pip install flask
+COPY webserver/ /webserver/
+WORKDIR /
+
+COPY launch_headless.sh /launch_headless.sh
+RUN chmod +x launch_headless.sh
+ENV FLASK_APP=/webserver/app.py
+CMD ["flask", "run", "--host=0.0.0.0"]

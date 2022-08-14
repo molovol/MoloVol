@@ -1,4 +1,4 @@
-FROM ubuntu
+FROM ubuntu AS compiler
 RUN apt-get update
 RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
 RUN apt-get install -y build-essential manpages-dev libgtk2.0-dev wget
@@ -18,15 +18,9 @@ COPY Makefile Makefile
 COPY src/ src/
 COPY include/ include/
 RUN make
+
 COPY inputfile/ inputfile/
-
-#add flask webserver
-RUN apt-get install python3-pip -y
-RUN pip install flask
-COPY webserver/ /webserver/
-WORKDIR /
-
-COPY launch_headless.sh /launch_headless.sh
-RUN chmod +x launch_headless.sh
-ENV FLASK_APP=/webserver/app.py
-CMD ["flask", "run", "--host=0.0.0.0"]
+COPY launch_headless.sh bin/launch.sh
+RUN chmod +x bin/launch.sh
+ENTRYPOINT ["./bin/launch.sh"]
+CMD ["-r", "1.2", "-g", "0.2", "-fs", "/inputfile/isobutane.xyz", "-q", "-o", "time,vol"]

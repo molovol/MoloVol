@@ -16,28 +16,28 @@
   <meta name="theme-color" content="#2380be">
 </head>
 <body>
-<div id="wordmark">
-  <img src="static/images/wordmark.png" alt="MoloVol wordmark" height="72">
-  <p>{{ version }}</p>
-</div>
+  <div class="wordmark">
+    <img src="static/images/wordmark.png" alt="MoloVol wordmark" height="72">
+    <p>{{ version }}</p>
+  </div>
 
-<div id="disclaimer">
-  <p class="infotext">
-    MoloVol Web allows you to conveniently use <a href="https://molovol.com">MoloVol</a>
-    directly through your browser. 
-    An equivalent desktop version that offers slightly more options is available for download 
-    <a href="https://github.com/molovol/MoloVol/releases/tag/v{{ version | versionnumber}}">here</a>
-    along with the user manual. 
-    You can find a detailed ex&shy;pla&shy;na&shy;tion of the underlying algorithms in 
-    <a href="https://doi.org/10.1107/S1600576722004988">this publication</a>. If you end up using MoloVol Web
-    or the desktop app for your sci&shy;en&shy;ti&shy;fic work, make sure to cite the publication and 
-    <u>specify the application version</u> (Version {{ version | versionnumber }}).
-  </p>
-</div>
+  <div class="disclaimer">
+    <p>
+      MoloVol Web allows you to conveniently use <a href="https://molovol.com">MoloVol</a>
+      directly through your browser. 
+      An equivalent desktop version that offers slightly more options is available for download 
+      <a href="https://github.com/molovol/MoloVol/releases/tag/v{{ version | versionnumber}}">here</a>
+      along with the user manual. 
+      You can find a detailed ex&shy;pla&shy;na&shy;tion of the underlying algorithms in 
+      <a href="https://doi.org/10.1107/S1600576722004988">this publication</a>. If you end up using MoloVol Web
+      or the desktop app for your sci&shy;en&shy;ti&shy;fic work, make sure to cite the publication and 
+      <u>specify the application version</u> (Version {{ version | versionnumber }}).
+    </p>
+  </div>
   
 <form id="inputs" action="." method="post" enctype=multipart/form-data>
 
-  <div id="file-upload">
+  <div class="file-upload">
     <label for="structure">
       {% if laststructure is none %}
       Upload a structure &ndash; 
@@ -48,11 +48,7 @@
       {% endif %}
 
     </label><br>
-    <input type="file" name="structure" id="structure" accept=".xyz,.cif,.pdb"
-      {% if laststructure is none %}
-      required
-      {% endif %}
-    ><br>
+    <input type="file" name="structure" id="structure" accept=".xyz,.cif,.pdb"><br>
     
     <!--
       This hidden element allows using the previously uploaded structure file
@@ -69,22 +65,22 @@
     the user to change individual atomic radii in a table.
   -->
 
-  <div id="parameters">
-    <input type="number" id="radius" name="cli_radius" size="2" style="width: 10%" min="0" step="any" required
+  <div class="parameters">
+    <input type="text" id="radius" name="cli_radius" size="2" style="width: 10%" required
            value="{{ inputdict.get('cli_radius', '1.2') if inputdict is defined else '1.2' }}"/>
     <label for="radius">Small probe radius in &Aring;ngstr&ouml;m </label><br>
 
-    <input type="number" id="radius2" name="cli_radius2" size="2" style="width: 10%" min="0" step="any"
+    <input type="text" id="radius2" name="cli_radius2" size="2" style="width: 10%"
            value="{{ inputdict.get('cli_radius2', '') if inputdict is defined else '' }}"/>
     <label for="radius2">Large probe radius in &Aring;ngstr&ouml;m &ndash; 
       <i><small>Leave empty for single-probe mode</small></i></label><br>
 
-    <input type="number" id="grid" name="cli_grid" size="2" style="width: 10%" min="0" step="any" required
+    <input type="text" id="grid" name="cli_grid" size="2" style="width: 10%" required
            value="{{ inputdict.get('cli_grid','0.2') if inputdict is defined else '0.2' }}">
     <label for="grid">Spatial resolution of the underlying grid in &Aring;ngstr&ouml;m</label><br>
   </div>
 
-  <div id="options">
+  <div class="options">
     <input type="checkbox" id="hetatm" name="cli_hetatm" disabled
       {% if (not inputdict) or ('cli_hetatm' in inputdict) %} checked {% endif %}>
     <label for="hetatm">Include HETATM &ndash; <i><small>PDB file option</small></i></label><br>
@@ -99,7 +95,7 @@
     <label for="surface">Calculate surface areas</label><br>
   </div>
 
-  <div id="export">
+  <div class="export">
     <h4>Generate files for download</h4>
     <!--all three options require -do for the path to output directory -->
     <input type="checkbox" id="export-report" name="cli_export-report"
@@ -115,29 +111,16 @@
     <label for="export-cavities">Generate surface map for each cavity</label><br>
   </div>
 
-  <div id="consent">
-    <p class="infotext">
-      By clicking "Submit" you consent that your structure file may be stored in unencrypted form 
-      for the purpose of per&shy;form&shy;ing a MoloVol calculation. No per&shy;so&shy;nal data is collected.
-      If you are concerned about this, for instance, due to working with unpublished or confidential data, you can 
-      <a href="https://github.com/molovol/MoloVol/releases/tag/v{{ version | versionnumber}}">use the desktop application</a> 
-      instead.
-    </p>
-    <input type="submit" id="submit"/>
+  <div>
+    <input type="submit"/>
   </div>
 </form>
 
 {% if returnvalues is not none and returnvalues!="" %}
-  <h4 id="output" href="#">Output</h4>
+  <h4>Output</h4> 
 
   {% if resultslink is not none %}
-    <a href="{{ resultslink }}">
-      {% if 'cli_export-report' in inputdict or 'cli_export-report' in inputdict or 'cli_export-cavities' in inputdict %}
-      Download generated output files
-      {% else %}
-      Download summary displayed below
-      {% endif %}
-    </a><br><br>
+    <a href="{{ resultslink }}">Download results</a><br><br>
   {% endif %}
 
   <div id="outputbox">
@@ -154,9 +137,9 @@
 
         {% if not printingTable %}
 
-          {% if row.startswith('E.') %}
+          {% if row.startswith("ERR") %}
 
-          <p class="error"> {{ row | errorstrip }} </p>
+          <p class="error">{{ row[len("ERR: "):] }}</p>
 
           {% elif row | titleline %}
 
@@ -215,12 +198,7 @@
 <script type = "text/javascript">
   // Lock checkboxes based on previously uploaded file
   window.onload = function(e) {
-    if ("{{ returnvalues }}") {
-      window.location.hash="output";
-    }
-    if ("{{ laststructure }}") {
-      evalFilename("{{ laststructure }}", false);
-    }
+    evalFilename("{{ laststructure }}", false);
   }
 
   // Lock checkboxes based on newly uploaded file
@@ -255,24 +233,12 @@
     document.getElementById('hetatm').disabled = htDisable;
     document.getElementById('unitcell').disabled = ucDisable; 
   }
-
-  const radius = document.getElementById("radius");
-  const radius2 = document.getElementById("radius2");
-  radius2.addEventListener("input", (event) => {
-    if (radius2.value != "" && radius2.value < radius.value) {
-      radius2.setCustomValidity("Must be larger than small probe radius");
-      radius2.reportValidity();
-    } else {
-      radius2.setCustomValidity("");
-    }
-  });
-
 </script>  
       
 <footer>
   &copy; 2022 Molovol Web is brought to you by 
-    <a href="https://benediktsvogler.com">Benedikt&nbsp;S.&nbsp;Vogler</a> and Jasmin&nbsp;B.&nbsp;Maglic based on
-    <a href="https://molovol.com">Molovol&nbsp;Desktop</a> by J.&nbsp;B.&nbsp;Maglic and Roy&nbsp;Lavendomme.
+    <a href="https://benediktsvogler.com">Benedikt S. Vogler</a> based on
+    <a href="https://molovol.com">Molovol Desktop</a> by Jasmin B. Maglic and Roy Lavendomme.
   <br>
   &copy; 2020-2022 The MoloVol logo and wordmark were designed by Jasmin B. Maglic
 </footer>

@@ -8,7 +8,7 @@ WORKDIR  wxWidgets-3.1.5
 RUN ./configure --disable-shared --enable-unicode
 RUN make install
 
-# hack to create a headless x server, does not work when set in dockerfile?
+# hack to create a headless x server (virutal framebuffer), does not work when set in dockerfile?
 RUN apt-get install xvfb -y
 ENV DISPLAY=:1.0
 
