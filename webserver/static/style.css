@@ -310,7 +310,7 @@ pre code{
   padding:0
 }
 
-input[type=checkbox],input[type=text] {
+input[type=checkbox],input[type=number] {
   margin-right:0.6rem;
 }
 
@@ -413,4 +413,16 @@ tr:nth-child(even){
 table caption{
   font-weight:700;
   margin-bottom:.1rem;
+}
+
+/* Remove splin buttons from number input */
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
 }
