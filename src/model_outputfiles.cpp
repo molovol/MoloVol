@@ -39,8 +39,9 @@ void Model::createReport(std::string path){
   output_report << "   MM    MMM    MM   OO  OO   LL   OO  OO        VVV        OO  OO   LL   \n";
   output_report << "   MM     M     MM    OOOO    LL    OOOO          V          OOOO    LL   \n\n";
   output_report << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n";
+  output_report << "Website: https://molovol.com\n";
   output_report << "Source code available at https://github.com/molovol/MoloVol under the MIT licence\n";
-  output_report << "Copyright © 2020-2021 Jasmin B. Maglic, Roy Lavendomme\n\n";
+  output_report << "Copyright © 2020-2022 Jasmin B. Maglic, Roy Lavendomme\n\n";
   output_report << "MoloVol program: calculation results report\n";
   output_report << "version: " + Ctrl::getVersion() + "\n\n";
   output_report << "Time of the calculation: " << _time_stamp << "\n";
@@ -52,7 +53,10 @@ void Model::createReport(std::string path){
   if (isnan(_data.molar_mass)){
     output_report << " - Structure contains atoms with unknown atomic weights.";
   }
-  output_report << "\n";
+  output_report << "\n\n";
+  output_report << "Please cite the following reference and include the calculation parameters below in the methods when reporting results.\n";
+  output_report << "MoloVol: an easy-to-use program for analyzing cavities, volumes and surface areas of chemical structures.\n"; 
+  output_report << "J. B. Maglic, R. Lavendomme, J. Appl. Cryst. 2022, 55, 1033–1044. DOI: 10.1107/S1600576722004988\n";
   
 
   output_report << "\n\n\t////////////////////////////\n";
