@@ -5,12 +5,17 @@ option(ABS_RESOURCE_PATH "Set a platform-dependant, absolute path to the resourc
 option(OSX_FAT_FILE "Make executable a fat file with architectures x86_64 and arm64" OFF)
 option(MOLOVOL_BUILD_TESTING "Enables unit tests so that test source files are compiled along with executable" OFF)
 
+if (CMAKE_MACOSX_BUNDLE AND NOT ABS_RESOURCE_PATH)
+  message(WARNING "The executable inside a macOS application bundle is always compiled with ABS_RESOURCE_PATH enabled")
+  set(ABS_RESOURCE_PATH TRUE)
+endif()
+
 # Minimum macOS version, ignored on other platforms
 # Must be set before project()
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11 CACHE STRING "Minimum macOS deployment version")
 
 # Set name and version
-project(MoloVol VERSION 1.0.1)
+project(MoloVol VERSION 1.1.0)
 
 # Specify C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -60,25 +65,43 @@ set(SOURCES
 )
 
 # Resource files
+set(ELEM_FILE "${CMAKE_CURRENT_SOURCE_DIR}/inputfile/elements.txt")
+set(SPACEGROUP_FILE "${CMAKE_CURRENT_SOURCE_DIR}/inputfile/space_groups.txt")
+
 if(NOT ABS_RESOURCE_PATH)
   add_custom_target(copy-resource-files ALL
     COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --blue "Copying resource files to build directory"
     COMMAND ${CMAKE_COMMAND} -E copy
-    ${CMAKE_CURRENT_SOURCE_DIR}/inputfile/elements.txt
+    ${ELEM_FILE}
       ${CMAKE_CURRENT_BINARY_DIR}/inputfile/elements.txt
     COMMAND ${CMAKE_COMMAND} -E copy
-    ${CMAKE_CURRENT_SOURCE_DIR}/inputfile/space_groups.txt
+    ${SPACEGROUP_FILE}
       ${CMAKE_CURRENT_BINARY_DIR}/inputfile/space_groups.txt
   )
 endif()
 
+# Resource files for macOS Bundle
+set(ICON_FILE "${CMAKE_CURRENT_SOURCE_DIR}/res/macOS/icon.icns")
+set_source_files_properties(${ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+set_source_files_properties(${ELEM_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+set_source_files_properties(${SPACEGROUP_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+set(RESOURCE_FILES ${ICON_FILE} ${ELEM_FILE} ${SPACEGROUP_FILE})
+
 # Target MoloVol
-add_executable(MoloVol ${SOURCES})
+add_executable(MoloVol ${SOURCES} ${RESOURCE_FILES})
   # XCode compatibility
 set_target_properties(MoloVol PROPERTIES
   XCODE_GENERATE_SCHEME TRUE
   XCODE_SCHEME_WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
+  # macOS Bundle
+set_target_properties(MoloVol PROPERTIES
+  MACOSX_BUNDLE_BUNDLE_NAME MoloVol
+  MACOSX_BUNDLE_EXECUTABLE_NAME MoloVol
+  MACOSX_BUNDLE_BUNDLE_VERSION ${CMAKE_PROJECT_VERSION}
+  MACOSX_BUNDLE_ICON_FILE icon
+)
+
   # Library shenanigans
 string(REPLACE "-ltiff" "/usr/local/opt/libtiff/lib/libtiff.a" wxWidgets_LIBRARIES "${wxWidgets_LIBRARIES}")
 target_link_libraries(MoloVol ${wxWidgets_LIBRARIES})
