@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.20)
 
 # Custom options
-option(ABS_RESOURCE_PATH "Set a platform-dependant, absolute path to the resource directory" OFF)
-option(OSX_FAT_FILE "Make executable a fat file with architectures x86_64 and arm64" OFF)
+option(MOLOVOL_ABS_RESOURCE_PATH "Set a platform-dependant, absolute path to the resource directory" OFF)
+option(MOLOVOL_OSX_FAT_FILE "Make executable a fat file with architectures x86_64 and arm64" OFF)
 option(MOLOVOL_BUILD_TESTING "Enables unit tests so that test source files are compiled along with executable" OFF)
 
-if (CMAKE_MACOSX_BUNDLE AND NOT ABS_RESOURCE_PATH)
-  message(WARNING "The executable inside a macOS application bundle is always compiled with ABS_RESOURCE_PATH enabled")
-  set(ABS_RESOURCE_PATH TRUE)
+if (CMAKE_MACOSX_BUNDLE AND NOT MOLOVOL_ABS_RESOURCE_PATH)
+  message(WARNING "The executable inside a macOS application bundle is always compiled with MOLOVOL_ABS_RESOURCE_PATH enabled")
+  set(MOLOVOL_ABS_RESOURCE_PATH TRUE)
 endif()
 
 # Minimum macOS version, ignored on other platforms
@@ -22,7 +22,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Make universal binary
-if(OSX_FAT_FILE)
+if(MOLOVOL_OSX_FAT_FILE)
   set(CMAKE_OSX_ARCHITECTURES arm64;x86_64)
 endif()
 
@@ -68,7 +68,7 @@ set(SOURCES
 set(ELEM_FILE "${CMAKE_CURRENT_SOURCE_DIR}/inputfile/elements.txt")
 set(SPACEGROUP_FILE "${CMAKE_CURRENT_SOURCE_DIR}/inputfile/space_groups.txt")
 
-if(NOT ABS_RESOURCE_PATH)
+if(NOT MOLOVOL_ABS_RESOURCE_PATH)
   add_custom_target(copy-resource-files ALL
     COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --blue "Copying resource files to build directory"
     COMMAND ${CMAKE_COMMAND} -E copy
@@ -106,7 +106,7 @@ set_target_properties(MoloVol PROPERTIES
 string(REPLACE "-ltiff" "/usr/local/opt/libtiff/lib/libtiff.a" wxWidgets_LIBRARIES "${wxWidgets_LIBRARIES}")
 target_link_libraries(MoloVol ${wxWidgets_LIBRARIES})
   # Add custom flag
-if(ABS_RESOURCE_PATH)
+if(MOLOVOL_ABS_RESOURCE_PATH)
   target_compile_definitions(MoloVol PUBLIC -DABS_PATH)
 endif()
 
