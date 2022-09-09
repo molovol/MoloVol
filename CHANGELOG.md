@@ -12,6 +12,7 @@ This changelog keeps track of changes in a user-friendly way. It is based on [ke
 
 ### Fixed
 * Fix an issue where the application would crash, when an invalid elements file was provided while attempting to load a structure file.
+* Fix an issue where some atoms were counted twice inside unit cells, thus generating the wrong chemical formula.
 
 ## [v1.0.0](https://github.com/molovol/MoloVol/releases/tag/v1.0.0) - 2021-09-14
 ### Added
