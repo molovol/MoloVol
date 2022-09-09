@@ -483,7 +483,7 @@ void Model::moveAtomsInsideCell(){
       std::get<2>(_processed_atom_coordinates[n]) += _cart_matrix[2][1];
       std::get<1>(_processed_atom_coordinates[n]) += _cart_matrix[2][0];
     }
-    while(std::get<3>(_processed_atom_coordinates[n]) > _cart_matrix[2][2]){
+    while(std::get<3>(_processed_atom_coordinates[n]) >= _cart_matrix[2][2]){
       std::get<3>(_processed_atom_coordinates[n]) -= _cart_matrix[2][2];
       std::get<2>(_processed_atom_coordinates[n]) -= _cart_matrix[2][1];
       std::get<1>(_processed_atom_coordinates[n]) -= _cart_matrix[2][0];
@@ -492,14 +492,14 @@ void Model::moveAtomsInsideCell(){
       std::get<2>(_processed_atom_coordinates[n]) += _cart_matrix[1][1];
       std::get<1>(_processed_atom_coordinates[n]) += _cart_matrix[1][0];
     }
-    while(std::get<2>(_processed_atom_coordinates[n]) > _cart_matrix[1][1]){
+    while(std::get<2>(_processed_atom_coordinates[n]) >= _cart_matrix[1][1]){
       std::get<2>(_processed_atom_coordinates[n]) -= _cart_matrix[1][1];
       std::get<1>(_processed_atom_coordinates[n]) -= _cart_matrix[1][0];
     }
     while(std::get<1>(_processed_atom_coordinates[n]) < 0){
       std::get<1>(_processed_atom_coordinates[n]) += _cart_matrix[0][0];
     }
-    while(std::get<1>(_processed_atom_coordinates[n]) > _cart_matrix[0][0]){
+    while(std::get<1>(_processed_atom_coordinates[n]) >= _cart_matrix[0][0]){
       std::get<1>(_processed_atom_coordinates[n]) -= _cart_matrix[0][0];
     }
   }
