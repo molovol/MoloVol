@@ -55,9 +55,9 @@ void Model::createReport(std::string path){
   }
   output_report << "\n\n";
   output_report << "Please cite the following reference and include the calculation parameters below in the methods when reporting results.\n";
-  output_report << "MoloVol: an easy-to-use program for analyzing cavities, volumes and surface areas of chemical structures.\n"; 
+  output_report << "MoloVol: an easy-to-use program for analyzing cavities, volumes and surface areas of chemical structures.\n";
   output_report << "J. B. Maglic, R. Lavendomme, J. Appl. Cryst. 2022, 55, 1033–1044. DOI: 10.1107/S1600576722004988\n";
-  
+
 
   output_report << "\n\n\t////////////////////////////\n";
   output_report << "\t// Calculation parameters //\n";
@@ -152,6 +152,10 @@ void Model::createReport(std::string path){
   if(_data.probe_mode || _data.analyze_unit_cell){
     output_report << vol_block(small_p + " occupied volume", _data.volumes[0b00001001] + _data.volumes[0b00010001], "(core + shell)");
   }
+  if(!_data.probe_mode && _data.analyze_unit_cell){
+    output_report << "For porous materials, this probe occupied volume is the value typically reported for total pore volume.\n";
+    output_report << "(only if the pore network is fully accessible without isolated cavities, check the cavity list below and surface maps)\n";
+  }
 
   if(_data.probe_mode){
     if(!_data.analyze_unit_cell){
@@ -184,6 +188,11 @@ void Model::createReport(std::string path){
     output_report << surf_block("Van der Waals surface", _data.surf_vdw);
     output_report << surf_block(small_p + " excluded surface", _data.surf_probe_excluded, "(similar to Connolly surface)");
     output_report << surf_block(small_p + " accessible surface", _data.surf_probe_accessible, "(similar to Lee-Richards surface)");
+	if(!_data.probe_mode && _data.analyze_unit_cell){
+      output_report << "For porous materials, this probe accessible surface area is the value typically reported for BET and Langmuir surface areas.\n";
+      output_report << "(only if the pore network is fully accessible without isolated cavities, check the cavity list below and surface maps)\n";
+	  output_report << "Check the user manual to understand the limitations of this calculated value compared to experimental data.\n";
+    }
     if(_data.probe_mode){
       output_report << surf_block("Molecular surface", _data.surf_molecular, "(both probes excluded surface)");
     }
@@ -209,6 +218,7 @@ void Model::createReport(std::string path){
     output_report << "Note 3:\tIn single probe mode, pockets and tunnels are counted in the 'outside space'.\n";
     output_report << "Note 4:\tSome very small isolated chunks of small probe cores can be detected and lead to small cavities.\n";
     output_report << "Note 5:\tProbe occupied volume corresponds to empty space as defined by the molecular surface (similar to the Connolly surface).\n";
+    output_report << "\tThis occupied volume is typically the volume reported for cavities in cage compounds.\n";
     output_report << "Note 6:\tProbe accessible volume corresponds to empty space as defined\n";
     output_report << "\tby the surface accessible to its core (similar to the Lee-Richards surface).\n";
     output_report << "Note 7:\tFor a detailed shape of each cavity, check the surface maps.\n\n";
