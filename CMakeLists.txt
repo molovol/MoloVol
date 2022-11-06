@@ -16,6 +16,13 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11 CACHE STRING "Minimum macOS deployment ver
 
 # Set name and version
 project(MoloVol VERSION 1.1.0)
+# TODO: Consider making executable name lower case on all platforms
+if (UNIX AND NOT APPLE)
+  string(TOLOWER ${PROJECT_NAME} LOWER_NAME)
+  set(EXE_NAME ${LOWER_NAME})
+else()
+  set(EXE_NAME ${PROJECT_NAME})
+endif()
 
 # Specify C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -31,7 +38,7 @@ set(wxWidgets_USE_STATIC=ON)
 find_package(wxWidgets REQUIRED core base OPTIONAL_COMPONENTS net)
 include(${wxWidgets_USE_FILE})
 
-find_package(OpenMP)
+#find_package(OpenMP)
 
 # Add include path, so that header files can be found
 include_directories(include)
@@ -64,9 +71,27 @@ set(SOURCES
   src/voxel.cpp
 )
 
-# Resource files
+# RESOURCE FILES
+
+# Universal resource files
 set(ELEM_FILE "${CMAKE_CURRENT_SOURCE_DIR}/inputfile/elements.txt")
 set(SPACEGROUP_FILE "${CMAKE_CURRENT_SOURCE_DIR}/inputfile/space_groups.txt")
+
+# Resource files for macOS Bundle
+set(OSX_ICON_FILE "${CMAKE_CURRENT_SOURCE_DIR}/res/macOS/icon.icns")
+set_source_files_properties(${OSX_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+set_source_files_properties(${ELEM_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+set_source_files_properties(${SPACEGROUP_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+set(OSX_RESOURCE_FILES ${OSX_ICON_FILE} ${ELEM_FILE} ${SPACEGROUP_FILE})
+
+# Resource files for Debian package
+set(DEB_COPYRIGHT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/res/linux/copyright")
+set(DEB_CHANGELOG_FILE "${CMAKE_CURRENT_SOURCE_DIR}/res/linux/changelog")
+file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/res/linux/MoloVol.desktop DEB_DESKTOP_FILE)
+set(DEB_DESKTOP_FILE ${CMAKE_CURRENT_SOURCE_DIR}/res/linux/MoloVol.desktop)
+set(DEB_MAN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/res/linux/molovol.1)
+
+# RESOURCE FILES
 
 if(NOT MOLOVOL_ABS_RESOURCE_PATH)
   add_custom_target(copy-resource-files ALL
@@ -80,34 +105,30 @@ if(NOT MOLOVOL_ABS_RESOURCE_PATH)
   )
 endif()
 
-# Resource files for macOS Bundle
-set(ICON_FILE "${CMAKE_CURRENT_SOURCE_DIR}/res/macOS/icon.icns")
-set_source_files_properties(${ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-set_source_files_properties(${ELEM_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-set_source_files_properties(${SPACEGROUP_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-set(RESOURCE_FILES ${ICON_FILE} ${ELEM_FILE} ${SPACEGROUP_FILE})
-
 # Target MoloVol
-add_executable(MoloVol ${SOURCES} ${RESOURCE_FILES})
+add_executable(${EXE_NAME} ${SOURCES} ${OSX_RESOURCE_FILES})
   # XCode compatibility
-set_target_properties(MoloVol PROPERTIES
+set_target_properties(${EXE_NAME} PROPERTIES
   XCODE_GENERATE_SCHEME TRUE
   XCODE_SCHEME_WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
   # macOS Bundle
-set_target_properties(MoloVol PROPERTIES
-  MACOSX_BUNDLE_BUNDLE_NAME MoloVol
-  MACOSX_BUNDLE_EXECUTABLE_NAME MoloVol
+set_target_properties(${EXE_NAME} PROPERTIES
+  MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME}
+  MACOSX_BUNDLE_EXECUTABLE_NAME ${PROJECT_NAME}
   MACOSX_BUNDLE_BUNDLE_VERSION ${CMAKE_PROJECT_VERSION}
   MACOSX_BUNDLE_ICON_FILE icon
 )
 
   # Library shenanigans
-string(REPLACE "-ltiff" "/usr/local/opt/libtiff/lib/libtiff.a" wxWidgets_LIBRARIES "${wxWidgets_LIBRARIES}")
-target_link_libraries(MoloVol ${wxWidgets_LIBRARIES})
+if(APPLE)
+  string(REPLACE "-ltiff" "/usr/local/opt/libtiff/lib/libtiff.a" wxWidgets_LIBRARIES "${wxWidgets_LIBRARIES}")
+endif()
+
+target_link_libraries(${EXE_NAME} ${wxWidgets_LIBRARIES})
   # Add custom flag
 if(MOLOVOL_ABS_RESOURCE_PATH)
-  target_compile_definitions(MoloVol PUBLIC -DABS_PATH)
+  target_compile_definitions(${EXE_NAME} PUBLIC -DABS_PATH)
 endif()
 
 # Keeping this around just so I don't forget the syntax
@@ -137,3 +158,32 @@ if (MOLOVOL_BUILD_TESTING AND BUILD_TESTING)
   add_test(NAME "Should cut off string after non-letter" COMMAND ${TEST_EXE_NAME})
 
 endif()
+
+# Installation instructions for debian package
+if (UNIX AND NOT APPLE)
+  include(GNUInstallDirs)
+
+  # Compress changelog
+  set(DEB_CHANGELOG_COMPRESSED "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz")
+  add_custom_command(
+    OUTPUT ${DEB_CHANGELOG_COMPRESSED}
+    COMMAND gzip -9 -c ${DEB_CHANGELOG_FILE} > ${DEB_CHANGELOG_COMPRESSED}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    DEPENDS ${DEB_CHANGELOG_FILE}
+    COMMENT "Compressing changelog"
+  )
+  add_custom_target(changelog ALL DEPENDS ${DEB_CHANGELOG_COMPRESSED})
+
+  # 
+  execute_process(COMMAND dpkg --print-architecture COMMAND tr -d '\n' OUTPUT_VARIABLE LINUX_ARCHITECTURE)
+
+  # Install commands so that these files get added to the deb file
+  install(TARGETS ${EXE_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+  install(FILES ${ELEM_FILE} ${SPACEGROUP_FILE} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME})
+  install(FILES ${DEB_COPYRIGHT_FILE} ${DEB_CHANGELOG_COMPRESSED} DESTINATION ${CMAKE_INSTALL_DOCDIR})
+  install(FILES ${DEB_DESKTOP_FILE} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
+  install(FILES ${DEB_MAN_FILE} DESTINATION ${CMAKE_INSTALL_MANDIR})
+endif()
+
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(Packing)
