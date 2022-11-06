@@ -1,9 +1,10 @@
-molvol (1.0.1) unstable; urgency=low
+molvol (1.1.0) unstable; urgency=low
 
   * Added full support for charged atoms in structures, along with default ionic radii for common ions
   * The error message that occurs when an incomplete list of input arguments are provided in the CLI is now more descriptive
   * Chemical formulas no longer contain the subscript "1" when an atom only occurs once
   * The molecular volume is now also displayed in the results summary
+  * Reports now include information to find results relevant to porous materials and cavities in cage compounds
   * Fix an issue where the application would crash, when an invalid elements file was provided while attempting to load a structure file
 
 (1.0.0)

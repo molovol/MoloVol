@@ -2,8 +2,8 @@
 
 This changelog keeps track of changes in a user-friendly way. It is based on [keep a changelog](https://keepachangelog.com/en/1.0.0/) by Olivier Lacan.
 
-## [v1.0.1](https://github.com/molovol/MoloVol/releases/tag/v1.0.1) - 2022-08
-)
+## [v1.1.0](https://github.com/molovol/MoloVol/releases/tag/v1.1.0) - 2022-10
+
 ### Added
 * Added full support for charged atoms in structures, along with default ionic radii for common ions.
 
@@ -11,6 +11,7 @@ This changelog keeps track of changes in a user-friendly way. It is based on [ke
 * The error message that occurs when an incomplete list of input arguments are provided in the CLI is now more descriptive.
 * Chemical formulas no longer contain the subscript "1" when an atom only occurs once.
 * The molecular volume is now also displayed in the results summary.
+* Reports now include information to find results relevant to porous materials and cavities in cage compounds.
 
 ### Fixed
 * Fix an issue where the application would crash, when an invalid elements file was provided while attempting to load a structure file.
