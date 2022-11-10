@@ -1,5 +1,5 @@
 set(CPACK_PACKAGE_NAME ${EXE_NAME})
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Scientific software for molecular volumes and surface areas")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Scientific software for molecular volumes and surface areas\nProvides calculation and surface map exports.")
 
 set(CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_NAME})
 
