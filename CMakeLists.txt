@@ -1,9 +1,25 @@
 cmake_minimum_required(VERSION 3.20)
 
 # Custom options
-option(MOLOVOL_ABS_RESOURCE_PATH "Set a platform-dependant, absolute path to the resource directory" OFF)
-option(MOLOVOL_OSX_FAT_FILE "Make executable a fat file with architectures x86_64 and arm64" OFF)
-option(MOLOVOL_BUILD_TESTING "Enables unit tests so that test source files are compiled along with executable" OFF)
+option(
+  MOLOVOL_ABS_RESOURCE_PATH 
+  "Set a platform-dependant, absolute path to the resource directory" 
+  OFF
+)
+option(
+  MOLOVOL_OSX_FAT_FILE
+  "Make executable a fat file with architectures x86_64 and arm64" 
+  OFF
+)
+option(
+  MOLOVOL_BUILD_TESTING
+  "Enables unit tests so that test source files are compiled along with executable" 
+  OFF
+)
+
+# Strip binary for release build
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -109,6 +125,7 @@ endif()
 
 # Target MoloVol
 add_executable(${EXE_NAME} ${SOURCES} ${OSX_RESOURCE_FILES})
+
   # XCode compatibility
 set_target_properties(${EXE_NAME} PROPERTIES
   XCODE_GENERATE_SCHEME TRUE
@@ -159,6 +176,7 @@ if (UNIX AND NOT APPLE)
     DEPENDS ${DEB_CHANGELOG_FILE} ${DEB_MAN_FILE}
     COMMENT "Compressing changelog and manual file"
   )
+
   add_custom_target(compress ALL DEPENDS ${DEB_CHANGELOG_COMPRESSED} ${DEB_MAN_COMPRESSED})
 
   # 
@@ -173,3 +191,4 @@ if (UNIX AND NOT APPLE)
 endif()
 
 include(Packing)
+
