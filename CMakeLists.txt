@@ -163,7 +163,7 @@ endif()
 # Installation instructions for debian package
 if (UNIX AND NOT APPLE)
   include(GNUInstallDirs)
-
+  
   # Compress changelog
   set(DEB_CHANGELOG_COMPRESSED "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz")
   set(DEB_MAN_COMPRESSED "${CMAKE_CURRENT_BINARY_DIR}/molovol.1.gz")
@@ -181,6 +181,15 @@ if (UNIX AND NOT APPLE)
 
   # 
   execute_process(COMMAND dpkg --print-architecture COMMAND tr -d '\n' OUTPUT_VARIABLE LINUX_ARCHITECTURE)
+
+  # Set directory permissions to 0755
+  # Must come before install commands
+  set(
+    CPACK_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS
+    OWNER_READ OWNER_WRITE OWNER_EXECUTE
+    GROUP_READ GROUP_EXECUTE
+    WORLD_READ WORLD_EXECUTE
+  )
 
   # Install commands so that these files get added to the deb file
   install(TARGETS ${EXE_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
