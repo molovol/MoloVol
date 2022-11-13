@@ -5,6 +5,8 @@ option(MOLOVOL_ABS_RESOURCE_PATH "Set a platform-dependant, absolute path to the
 option(MOLOVOL_OSX_FAT_FILE "Make executable a fat file with architectures x86_64 and arm64" OFF)
 option(MOLOVOL_BUILD_TESTING "Enables unit tests so that test source files are compiled along with executable" OFF)
 
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 if (CMAKE_MACOSX_BUNDLE AND NOT MOLOVOL_ABS_RESOURCE_PATH)
   message(WARNING "The executable inside a macOS application bundle is always compiled with MOLOVOL_ABS_RESOURCE_PATH enabled")
   set(MOLOVOL_ABS_RESOURCE_PATH TRUE)
@@ -138,25 +140,7 @@ endif()
 
 # Tests
 if (MOLOVOL_BUILD_TESTING AND BUILD_TESTING)
-  enable_testing()
-  # Create a MoloVol library for the test sources to use
-  set(TEST_SOURCES
-    src/importmanager.cpp
-    src/crystallographer.cpp
-    src/misc.cpp
-  )
-  add_library(mvl SHARED ${TEST_SOURCES})
-  target_include_directories(mvl PUBLIC ./)
-  target_compile_definitions(mvl PRIVATE LIBRARY_BUILD)
-
-  set(TEST_NAME cut_off_string)
-  set(TEST_SRC_NAME ${TEST_NAME}.cpp)
-  set(TEST_EXE_NAME t_${TEST_NAME})
-  add_executable(${TEST_EXE_NAME} test/${TEST_SRC_NAME})
-  target_include_directories(${TEST_EXE_NAME} PUBLIC ./test)
-  target_link_libraries(${TEST_EXE_NAME} mvl)
-  add_test(NAME "Should cut off string after non-letter" COMMAND ${TEST_EXE_NAME})
-
+  include(Testing)
 endif()
 
 # Installation instructions for debian package
@@ -188,5 +172,4 @@ if (UNIX AND NOT APPLE)
   install(FILES ${DEB_MAN_COMPRESSED} DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 endif()
 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(Packing)
