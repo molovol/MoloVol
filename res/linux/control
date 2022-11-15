@@ -1,7 +1,0 @@
-Package: molovol
-Section: science
-Priority: optional
-Version: 1.0
-Maintainer: Jasmin B. Maglic <jmaglic@outlook.de>
-Description: Scientific software for molecular volumes and surfaces.
- Provides calculation and surface map exports.

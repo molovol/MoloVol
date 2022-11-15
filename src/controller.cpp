@@ -341,6 +341,11 @@ void Ctrl::displayResults(CalcReportBundle& data, const unsigned display_flag){
       notifyUser(vol_unit);
       notifyUser("\n");
     }
+    if (display_flag & mvOUT_VOL_MOL){
+      notifyUser("Molecular volume (Vvdw + Vvoid): " + std::to_string(data.volumes[0b00000011] + data.volumes[0b00000101]) + " ");
+      notifyUser(vol_unit);
+      notifyUser("\n");
+    }
     std::string prefix = data.probe_mode? "Small p" : "P";
     if (display_flag & mvOUT_VOL_CORE_S){
       if(!data.probe_mode && !data.analyze_unit_cell){
@@ -384,11 +389,14 @@ void Ctrl::displayResults(CalcReportBundle& data, const unsigned display_flag){
         notifyUser(surf_unit);
         notifyUser("\n");
       }
-      if(data.probe_mode){
-        if (display_flag & mvOUT_SURF_MOL){
-          notifyUser("Molecular surface: " + std::to_string(data.getSurfMolecular()) + " ");
+      if (display_flag & mvOUT_SURF_MOL){
+        if(data.probe_mode){
+          notifyUser("Molecular surface (both probes excluded surface): " + std::to_string(data.getSurfMolecular()) + " ");
           notifyUser(surf_unit);
           notifyUser("\n");
+        }
+        else if(!data.analyze_unit_cell) {
+          notifyUser("Molecular open surface (reachable from outside): see outside space surface data in cavities list.\n");
         }
       }
       if (display_flag & mvOUT_SURF_EXCLUDED_S){

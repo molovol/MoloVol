@@ -36,7 +36,7 @@ RELEASEFLAGS := -O3 -DABS_PATH
 CXXFLAGS := -std=c++17 -Wall -Werror -Wno-unused-command-line-argument -Wno-invalid-source-encoding
 
 WXCONFIGLIBS := $(shell wx-config --libs)
-WXCONFIGLIBS := $(WXCONFIGLIBS:-ltiff=/usr/local/opt/libtiff/lib/libtiff.a)
+#WXCONFIGLIBS := $(WXCONFIGLIBS:-ltiff=/usr/local/opt/libtiff/lib/libtiff.a)
 LDFLAGS := $(WXCONFIGLIBS)
 ARCHFLAG := 
 X86FLAG := -target x86_64-apple-macos10.11

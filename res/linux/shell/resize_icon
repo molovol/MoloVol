@@ -1,0 +1,15 @@
+#!bin/sh
+targeticon=$1
+targetdir=$2
+
+mkdir $targetdir/hicolor
+for d in /usr/share/icons/hicolor/*/; do
+	d=${d::-1}
+	d=${d##*/}
+	mkdir $targetdir/hicolor/$d
+	mkdir $targetdir/hicolor/$d/apps
+	n=${d##*x}
+	if [[ $n =~ ^[0-9]+$ ]] ; then
+		convert -resize $d $targeticon $targetdir/hicolor/$d/apps/molovol.png
+	fi
+done

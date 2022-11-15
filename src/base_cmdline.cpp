@@ -61,16 +61,16 @@ void MainApp::evalCmdLine(){
     Ctrl::getInstance()->version();
     return;
   }
-  
+
   // Check if all required arguments are available
   std::vector<std::string> missing_args;
-  
+
   for (const std::string& arg_name : s_required_args){
     if (!parser.Found(arg_name)){
       missing_args.push_back(arg_name);
     }
   }
-  
+
   switch (missing_args.size()){
     case (0):
       break;
@@ -200,6 +200,7 @@ static std::map<std::string,unsigned> s_display_map {
   {"vol_shell_s", mvOUT_VOL_SHELL_S},
   {"vol_core_l", mvOUT_VOL_CORE_L},
   {"vol_shell_l", mvOUT_VOL_SHELL_L},
+  {"vol_mol", mvOUT_VOL_MOL},
   {"vol", mvOUT_VOL},
   {"surf_vdw", mvOUT_SURF_VDW},
   {"surf_mol", mvOUT_SURF_MOL},
