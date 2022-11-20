@@ -18,6 +18,7 @@ inputfile/*
 .DS_store
 *.dSYM/Contents/Info.plist
 *.dSYM
+!res/macOS/DS_Store/.DS_store
 
 # XCode
 xcuserdata/
