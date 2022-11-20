@@ -94,6 +94,8 @@ set(SOURCES
 # Universal resource files
 set(ELEM_FILE "${CMAKE_CURRENT_SOURCE_DIR}/inputfile/elements.txt")
 set(SPACEGROUP_FILE "${CMAKE_CURRENT_SOURCE_DIR}/inputfile/space_groups.txt")
+set(LICENSE_FILE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+set(README_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 
 # Resource files for macOS Bundle
 set(OSX_RES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res/macOS")
