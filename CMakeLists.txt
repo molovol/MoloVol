@@ -98,6 +98,7 @@ set(SPACEGROUP_FILE "${CMAKE_CURRENT_SOURCE_DIR}/inputfile/space_groups.txt")
 # Resource files for macOS Bundle
 set(OSX_RES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res/macOS")
 set(OSX_ICON_FILE "${OSX_RES_DIR}/icon.icns")
+set(OSX_LICENSE_RTF "${OSX_RES_DIR}/LICENSE.rtf")
 set(OSX_DMG_BACKGROUND "${OSX_RES_DIR}/background.png")
 set(OSX_DMG_DSSTORE "${OSX_RES_DIR}/DS_Store/.DS_Store")
 set_source_files_properties(${OSX_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
