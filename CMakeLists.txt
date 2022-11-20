@@ -165,6 +165,8 @@ endif()
 # Installation instructions for debian package
 if (UNIX AND NOT APPLE)
   include(DebInstall)
+elseif (APPLE)
+  include(MacInstall)
 endif()
 
 include(Packing)
