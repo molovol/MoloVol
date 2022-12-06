@@ -2,7 +2,7 @@
 
 This changelog keeps track of changes in a user-friendly way. It is based on [keep a changelog](https://keepachangelog.com/en/1.0.0/) by Olivier Lacan.
 
-## [v1.1.0](https://github.com/molovol/MoloVol/releases/tag/v1.1.0) - 2022-10
+## [v1.1.0](https://github.com/molovol/MoloVol/releases/tag/v1.1.0) - 2022-12-06
 
 ### Added
 * Added full support for charged atoms in structures, along with default ionic radii for common ions.
