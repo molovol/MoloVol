@@ -1,6 +1,6 @@
 List of element properties used by MoloVol program.
 https://github.com/jmaglic/MoloVol
-Version: 2021-06-23
+Version: 2022-07-06
 
 References:
 - vdW radii
