@@ -24,6 +24,8 @@ Please use the following or an equivalent citation:
 
 ### Download
 
+|[Windows](https://molovol.com/windows)| [macOS](https://molovol.com/macOS) | [Linux](https://molovol.com/linux) |
+
 Compiled binaries of current and previous versions for Windows, macOS and Linux as well as a quick-start guide and the user manual can be found in the [Download Installers](https://github.com/molovol/MoloVol/releases) section.
 
 New features and changes the current and all previous releases can be found in the [Changelog](https://github.com/molovol/MoloVol/blob/master/CHANGELOG.md).

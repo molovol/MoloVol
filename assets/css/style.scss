@@ -111,6 +111,19 @@ header>p{
   text-align: start;
 }
 
+table{
+  table-layout: fixed;
+}
+
+td{
+  background: var(--accent-bg);
+  text-align: center;
+}
+
+td>a{
+  font-weight: bold;
+}
+
 /*
 :root{
   font-family:var(--sans-font);
