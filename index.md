@@ -1,3 +1,6 @@
+---
+---
+
 <img class="title" src="/docs/assets/images/wordmark.png" alt="MoloVol wordmark" height="72">
 
 MoloVol is a free, cross-plattform, scientific software for volume and surface computations of single molecules and crystallographic unit cells. We aim to combine an intuitive and easy-to-use user interface with powerful computing algorithms. We want the software to serve a broad range of scientist by being easily accessible on all common platforms.
@@ -9,7 +12,8 @@ MoloVol v1.0.0 features and algorithms are presented in detail in an [open acces
 
 Please use the following or an equivalent citation:
 
-> Maglic, J.B. & Lavendomme, R. (2022). J. Appl. Cryst. 55, 1033-1044. DOI: [10.1107/S1600576722004988](https://doi.org/10.1107/S1600576722004988)
+> Maglic, J.B. & Lavendomme, R. (2022). J. Appl. Cryst. 55, 1033-1044.\
+> DOI: [10.1107/S1600576722004988](https://doi.org/10.1107/S1600576722004988)
 
 ### Download
 

@@ -83,6 +83,10 @@ p{
   text-align: justify;
 }
 
+blockquote>p{
+  text-align: start;
+}
+
 .title{
   margin-top:2rem;
 }
