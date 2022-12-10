@@ -23,6 +23,10 @@ body{
   color:var(--text);
   background:var(--bg);
   line-height:1.5;
+  background-image: url('/docs/assets/images/bg.png');
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
 }
 
 body>*{
@@ -96,6 +100,7 @@ header li:hover{
 
 h1.header{
   font-family: var(--sans-font);
+  font-weight: bold;
 }
 
 header>p{
@@ -382,12 +387,6 @@ input[type=checkbox]:disabled + label {
   color:var(--text-light);
 }
 
-body { 
-  background-image: url('images/bg.png');
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-size: cover;
-}
 
 // Wordmark style
 
