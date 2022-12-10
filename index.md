@@ -1,4 +1,4 @@
-# MoloVol<img src="https://user-images.githubusercontent.com/65410083/99060370-3a6ab980-25a0-11eb-8f39-92e7af993223.png" width="250" ALIGN="right">
+<img class="title" src="/docs/assets/images/wordmark.png" alt="MoloVol wordmark" height="72">
 
 MoloVol is a free, cross-plattform, scientific software for volume and surface computations of single molecules and crystallographic unit cells.
 

@@ -22,7 +22,6 @@
 body{
   color:var(--text);
   background:var(--bg);
-  //font-size:1rem;
   line-height:1.5;
 }
 
@@ -77,6 +76,10 @@ h1,h2,h3{
 
 p{
   font-family: var(--sans-font);
+}
+
+.title{
+  margin-top:2rem;
 }
 
 // Specific to molovol.com
