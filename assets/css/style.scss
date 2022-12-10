@@ -76,6 +76,7 @@ h1,h2,h3{
 
 p{
   font-family: var(--sans-font);
+  text-align: justify;
 }
 
 .title{
@@ -88,8 +89,17 @@ header li{
   background: linear-gradient(to top, var(--accent-primary) 0%, var(--primary) 100%);
   box-shadow: inset 0px 1px 1px 0 var(--primary);
 }
+
 header li:hover{
   background: linear-gradient(to top, var(--accent-primary) 0%, var(--accent-primary) 100%);
+}
+
+h1.header{
+  font-family: var(--sans-font);
+}
+
+header>p{
+  text-align: start;
 }
 
 /*
