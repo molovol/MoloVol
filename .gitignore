@@ -1,5 +1,6 @@
 .DS_Store
 .atomtree.cpp.un~
+*.swp
 .sass-cache/
 _site/
 apptests/

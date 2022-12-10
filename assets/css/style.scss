@@ -11,16 +11,88 @@
   --text:#212121;
   --text-light:#585858;
   --border:#d8dae1;
-  --accent:#2380be;
+  --primary:#2380be;
+  --accent-primary:#1a96e9;
   --code:#d81b60;
   --preformatted:#444;
   --marked:#ffdd33;
   --disabled:#efefef;
+}
+
+body{
+  color:var(--text);
+  background:var(--bg);
+  //font-size:1rem;
+  line-height:1.5;
+}
+
+body>*{
+  grid-column:2;
+}
+
+body>header{
+  background:var(--accent-bg);
+  border-bottom:1px solid var(--border);
+  text-align:center;
+  padding:0 .5rem 2rem .5rem;
+  grid-column:1/-1;
+  box-sizing:border-box
+}
+
+h1,h2,h3,h4,h5,h6{
+  font-family: var(--sans-font);
+  color:var(--text);
+}
+
+h1{
+  font-size:3rem;
+}
+
+h2{
+  font-size:2.6rem;
+  margin-top:2rem;
+}
+
+h3{
+  font-size:2rem;
+  margin-top:2rem;
+}
+
+h4{
+  font-size:1.3rem;
+  margin-bottom:1rem;
+}
+
+h5{
+  font-size:1.15rem;
+}
+
+h6{
+  font-size:.96rem;
+}
+
+h1,h2,h3{
+  line-height:1.1;
+}
+
+p{
+  font-family: var(--sans-font);
+}
+
+// Specific to molovol.com
+
+header li{
+  background: linear-gradient(to top, var(--accent-primary) 0%, var(--primary) 100%);
+  box-shadow: inset 0px 1px 1px 0 var(--primary);
+}
+header li:hover{
+  background: linear-gradient(to top, var(--accent-primary) 0%, var(--accent-primary) 100%);
+}
+
+/*
+:root{
   font-family:var(--sans-font);
   scroll-behavior:smooth
-}
-.markdown-body{
-  font-family:var(--sans-font);
 }
 body{
   color:var(--text);
@@ -55,31 +127,18 @@ body>footer{
   text-align:center;
   border-top:1.5px solid var(--border)
 }
-h1{font-size:3rem}
-h2{
-  font-size:2.6rem;
-  margin-top:2rem;
-}
-h3{font-size:2rem;margin-top:2rem}
-h4{
-  font-size:1.3rem;
-  margin-bottom:1rem;
-}
-h5{font-size:1.15rem}
-h6{font-size:.96rem}
-h1,h2,h3{line-height:1.1}
 @media only screen and (max-width:720px){
   h1{font-size:2.5rem}
   h2{font-size:2.1rem}
   h3{font-size:1.75rem}
   h4{font-size:1.25rem}
 }
-a,a:visited{color:var(--accent)}
+a,a:visited{color:var(--primary)}
 a:hover{text-decoration:none}
 [role=button],button,input[type=button],input[type=reset],input[type=submit]{
   border:none;
   border-radius:5px;
-  background:var(--accent);
+  background:var(--primary);
   font-size:1rem;
   color:var(--bg);
   padding:.7rem .9rem;
@@ -124,15 +183,15 @@ header>nav a,header>nav a:visited{
   text-decoration:none
 }
 header>nav a:hover{
-  color:var(--accent);
-  border-color:var(--accent)
+  color:var(--primary);
+  border-color:var(--primary)
 }
 header>nav a:last-child{margin-right:0}
 @media only screen and (max-width:720px){
   header>nav a{
     border:none;
     padding:0;
-    color:var(--accent);
+    color:var(--primary);
     text-decoration:underline;line-height:1
   }
 }
@@ -205,7 +264,7 @@ input[type=checkbox],input[type=radio]{
 }
 input[type=radio]{border-radius:100%}
 input[type=checkbox]:checked,input[type=radio]:checked{
-  background:var(--accent)
+  background:var(--primary)
 }
 input[type=checkbox]:checked::after{
   content:" ";
@@ -266,7 +325,7 @@ figcaption{
 blockquote{
   margin:2rem 0 2rem 2rem;
   padding:.4rem .8rem;
-  border-left:.35rem solid var(--accent);
+  border-left:.35rem solid var(--primary);
   color:var(--text-light);
   font-style:italic
 }
@@ -317,7 +376,7 @@ body {
   background-size: cover;
 }
 
-/* Wordmark style */
+// Wordmark style
 
 #wordmark {
   margin-top:2rem;
@@ -328,13 +387,13 @@ body {
   margin-top:0rem;
 }
 
-/* Input form */
+// Input form
 
 #inputs div {
   margin-bottom:0.8rem;
 }
 
-/* User communication */
+// User communication
 
 #disclaimer {
   border-top:1.5px solid var(--border);
@@ -352,7 +411,7 @@ body {
   text-align: justify;
 }
 
-/* Output style */
+// Output style
 #outputbox {
   border: 1px solid var(--border);
   background-color:var(--accent-bg);
@@ -378,7 +437,7 @@ output table {
   color:red;
 }
 
-/* Table style */
+// Table style
 table{
   border-collapse:collapse;
   margin:1.5rem 0;
@@ -407,14 +466,14 @@ table caption{
   margin-bottom:.1rem;
 }
 
-/* Remove spin buttons from number input */
-/* Chrome, Safari, Edge, Opera */
+// Remove spin buttons from number input
+// Chrome, Safari, Edge, Opera
 input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-/* Firefox */
+// Firefox
 input[type=number] {
   -moz-appearance: textfield;
-}
+}*/
