@@ -93,13 +93,36 @@ blockquote>p{
 
 // Specific to molovol.com
 
-header li{
-  background: linear-gradient(to top, var(--accent-primary) 0%, var(--primary) 100%);
-  box-shadow: inset 0px 1px 1px 0 var(--primary);
+.button{
+  a{
+    color: var(--bg);
+  }
+  ul{
+    position: static;
+    padding: 0;
+  }
+  li{
+    width: 148px;
+  }
 }
 
-header li:hover{
+header li, .button li{
+  background: linear-gradient(to top, var(--accent-primary) 0%, var(--primary) 100%);
+  box-shadow: inset 0px 1px 1px 0 var(--primary);
+  height: 15px;
+  line-height: 1em;
+  padding: 6px 6px 6px 7px;
+  border-radius: 4px;
+  border: 1px solid var(--primary);
+  list-style-type: none;
+}
+
+header li:hover, .button li:hover{
   background: linear-gradient(to top, var(--accent-primary) 0%, var(--accent-primary) 100%);
+}
+
+div .download{
+  margin: 2rem 0rem 0rem 0.5rem;
 }
 
 h1.header{
@@ -122,6 +145,22 @@ td{
 
 td>a{
   font-weight: bold;
+}
+
+#changelog{
+  h1{
+    font-weight: bold;
+    font-size: 1.0rem;
+    margin: 12px 0 4px;
+    border-bottom: none;
+  }
+  li{
+    font-size: 0.8rem;
+  }
+  background: var(--accent-bg);
+  padding: 0rem 0.5rem 0rem 0.8rem;
+  border: 1px solid var(--border);
+  margin: 0rem 0.5rem 0.5rem 0.5rem;
 }
 
 /*
