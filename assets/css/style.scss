@@ -123,7 +123,10 @@ header li:hover, .button li:hover{
 }
 
 div.download{
-  margin: 2rem 0rem 0rem 0.5rem;
+  margin: 1.5rem 0rem 0rem 0.5rem;
+  ul{
+    margin: 0 0 0;
+  }
 }
 
 h1.header{
