@@ -15,24 +15,11 @@ Apple silicon, as well as older CPU architectures.
   </a>
 </div>
 
+{% include manualdownload.html %}
+
 #### Changes since v1.0.0
 
-<div id="changelog" markdown="1">
-
-# Added
-* Added full support for charged atoms in structures, along with default ionic radii for common ions.
-
-# Improved
-* The error message that occurs when an incomplete list of input arguments are provided in the CLI is now more descriptive.
-* Chemical formulas no longer contain the subscript "1" when an atom only occurs once.
-* The molecular volume is now also displayed in the results summary.
-* Reports now include information to find results relevant to porous materials and cavities in cage compounds.
-
-# Fixed
-* Fixed an issue where the application would crash, when an invalid elements file was provided while attempting to load a structure file.
-* Fixed an issue where some atoms were rarely counted twice inside unit cells, thus generating the wrong chemical formula.
-
-</div>
+{% include latestchanges.html %}
 
 Previous versions can be downloaded in the [Releases Section](https://github.com/molovol/MoloVol/releases) 
 of our GitHub page.
