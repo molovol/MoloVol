@@ -10,7 +10,8 @@ algorithms. We want the software to serve a broad range of scientist by being
 easily accessible on all common platforms.
 
 The software is being maintained and developed by Jasmin B. Maglic and Roy Lavendomme
-and is available on Windows 10, macOS, and Ubuntu.
+and is available on Windows 10, macOS, and Ubuntu. The application is also available
+as a [**Web App**](https://app.molovol.com).
 
 ### Scientific Reference
 MoloVol v1.0.0 features and algorithms are presented in detail in an 
