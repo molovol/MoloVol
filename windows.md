@@ -20,6 +20,9 @@ Version for Windows.
 
 {% include latestchanges.html %}
 
+Previous versions can be downloaded in the [Releases Section](https://github.com/molovol/MoloVol/releases) 
+of our GitHub page.
+
 ### Installation
 
 The app is usable directly after download. The executable file along with all necessary resources are packed
