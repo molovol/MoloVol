@@ -129,6 +129,14 @@ div.download{
   }
 }
 
+.link ul{ 
+  text-align: center;
+  li a.buttons{
+    padding: 2px 2px 2px 2px;
+    background: none;
+  }
+}
+
 h1.header{
   font-family: var(--sans-font);
   font-weight: bold;

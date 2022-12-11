@@ -24,7 +24,7 @@ Please use the following or an equivalent citation:
 
 ### Download and Installation
 
-|[Windows](windows.md)| [macOS](macOS.md) | [Linux](linux.md) |
+{% include platforms.html %}
 
 New features and changes the current and all previous releases can be 
 found in the [Changelog](https://github.com/molovol/MoloVol/blob/master/CHANGELOG.md).
@@ -32,9 +32,8 @@ found in the [Changelog](https://github.com/molovol/MoloVol/blob/master/CHANGELO
 The source code of the current development build can be found in the 
 [Github Repository](https://github.com/molovol/MoloVol).
 
-The source code for each stable release can be found 
-[with the installers](https://github.com/molovol/MoloVol/releases) 
-as .zip or .tar.gz archives.
+The source code for each stable release can be found in the
+[Releases Section](https://github.com/molovol/MoloVol/releases).
 
 ### Getting Help
 If you encounter a bug or have a request for a feature, you are more than welcome 
