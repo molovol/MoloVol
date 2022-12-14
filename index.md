@@ -27,7 +27,7 @@ Please use the following or an equivalent citation:
 
 {% include platforms.html %}
 
-New features and changes the current and all previous releases can be 
+New features and changes in the current and all previous releases can be 
 found in the [Changelog](https://github.com/molovol/MoloVol/blob/master/CHANGELOG.md).
 
 The source code of the current development build can be found in the 
