@@ -122,12 +122,16 @@ blockquote>p{
 header li, .button li{
   background: linear-gradient(to top, var(--accent-primary) 0%, var(--primary) 100%);
   box-shadow: inset 0px 1px 1px 0 var(--primary);
-  height: 15px;
+  height: 100%;
   line-height: 1em;
   padding: 6px 6px 6px 7px;
   border-radius: 4px;
   border: 1px solid var(--primary);
   list-style-type: none;
+}
+
+.button li{
+  max-width: 80%;
 }
 
 header li:hover, .button li:hover{
@@ -154,6 +158,10 @@ a.github{
   color: var(--bg);
 }
 
+a.buttons{
+  line-height: 1.2;
+}
+
 h1.header{
   font-family: var(--sans-font);
   font-weight: bold;
@@ -165,6 +173,7 @@ footer p, header p{
 
 table{
   table-layout: fixed;
+  width: 100%;
 }
 
 table.invisible{
