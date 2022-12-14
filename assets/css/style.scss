@@ -78,6 +78,19 @@ h1,h2,h3{
   line-height:1.1;
 }
 
+a, a:visited{
+  color: var(--primary);
+  font: var(--sans-font);
+}
+
+a:any-link{
+  text-decoration: underline;
+}
+
+a:hover{
+  text-decoration: none;
+}
+
 p{
   font-family: var(--sans-font);
   text-align: justify;
@@ -91,10 +104,9 @@ blockquote>p{
   margin-top:2rem;
 }
 
-// Specific to molovol.com
-
 .button{
   a{
+    text-decoration: none;
     color: var(--bg);
   }
   ul{
@@ -137,12 +149,17 @@ div.download{
   }
 }
 
+a.github{
+  text-decoration: none;
+  color: var(--bg);
+}
+
 h1.header{
   font-family: var(--sans-font);
   font-weight: bold;
 }
 
-header>p{
+footer p, header p{
   text-align: start;
 }
 
