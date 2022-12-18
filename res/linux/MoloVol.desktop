@@ -1,0 +1,10 @@
+[Desktop Entry]
+Exec=molovol
+Type=Application
+Name=MoloVol
+Comment=Molecular volumes and surfaces
+Encoding=UTF-8
+Icon=molovol
+Categories=Science
+StartupWMClass=Molovol
+Terminal=false

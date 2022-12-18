@@ -2,6 +2,8 @@
 #include "atom.h"
 #include "controller.h"
 #include "misc.h"
+#include "exception.h"
+#include "importmanager.h"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -12,205 +14,236 @@
 #include <iterator>
 #include <algorithm>
 
-///////////////////////////////
-// AUX FUNCTION DECLARATIONS //
-///////////////////////////////
+///////////////////
+// IMPORT STRUCT //
+///////////////////
 
-bool isAtomLine(const std::vector<std::string>& substrings);
-std::string strToValidSymbol(std::string str);
-static inline std::vector<std::string> splitLine(std::string& line);
+struct ElementsFileBundle{ // data bundle for elements file import
+  std::unordered_map<std::string, double> rad_map;
+  std::unordered_map<std::string, double> weight_map;
+  std::unordered_map<std::string, int> atomic_num_map;
+};
 
-/////////////////
-// FILE IMPORT //
-/////////////////
+//////////////////////////
+// ELEMENTS FILE IMPORT //
+//////////////////////////
+// TODO: Move to importmanager.h
+ElementsFileBundle extractDataFromElemFile(const std::string& elem_path);
 
-// reads radii from a file specified by the filepath and
-// stores them in an unordered map that is an attribute of
-// the Model object
-void Model::readRadiiAndAtomNumFromFile(std::string& filepath){
-  // clear unordered_maps to avoid keeping data from previous runs
-  raw_radius_map.clear();
-  elem_Z.clear();
-
-  std::string line;
-  std::ifstream inp_file(filepath);
-
-  while(getline(inp_file,line)){
-    std::vector<std::string> substrings = splitLine(line);
-    if(substrings.size() == 3){
-      // TODO: make sure substrings[1] is converted to valid symbol
-      raw_radius_map[substrings[1]] = std::stod(substrings[2]);
-      elem_Z[substrings[1]] = std::stoi(substrings[0]);
-    }
-  }
-  // Notify the user if no radius is defined
-  // the program can continue running because the user can manually define radii
-  if (raw_radius_map.size() == 0) {
-    Ctrl::getInstance()->notifyUser("Invalid radii definition file!");
-    Ctrl::getInstance()->notifyUser("Please select a valid file or set radii manually.");
-  }
+// generates three maps for assigning a radius, weight and atomic number respectively, to an element symbol
+// sets the maps to members of the model class
+bool Model::importElemFile(const std::string& elem_path){
+  ElementsFileBundle data = extractDataFromElemFile(elem_path);
+  setRadiusMap(data.rad_map);
+  _elem_weight = data.weight_map;
+  _elem_Z = data.atomic_num_map;
+  
+  return (data.rad_map.size());
 }
 
+// used for importing only the radius map from the radius file
+// needed for running the app from the command line
+std::unordered_map<std::string, double> Model::extractRadiusMap(const std::string& elem_path){
+  return extractDataFromElemFile(elem_path).rad_map;
+}
+
+ElementsFileBundle extractDataFromElemFile(const std::string& elem_path){
+  ElementsFileBundle data;
+
+  auto hasCorrectFormat = [](std::vector<std::string> substrings){
+    if (substrings.size() != 4){return false;}
+    if (substrings[0].find_first_not_of("0123456789") != std::string::npos){return false;}
+    for (char i : {2,3}){
+      if (substrings[i].find_first_not_of("0123456789E.+e") != std::string::npos){return false;}
+    }
+    return true;
+  };
+
+  std::string line;
+  std::ifstream inp_file(elem_path);
+  bool invalid_symbol_detected = false;
+  bool invalid_radius_value = false;
+  bool invalid_weight_value = false;
+  while(getline(inp_file,line)){
+    std::vector<std::string> substrings = ImportMngr::splitLine(line);
+    // substrings[0]: Atomic Number
+    // substrings[1]: Element Symbol
+    // substrings[2]: Radius
+    // substrings[3]: Weight
+    if(hasCorrectFormat(substrings)){
+      substrings[1] = ImportMngr::strToValidSymbol(substrings[1]);
+      // skip entry if element symbol invalid
+      if (substrings[1].empty()){
+        invalid_symbol_detected = true;
+      }
+      else {
+        try{data.rad_map[substrings[1]] = std::stod(substrings[2]);}
+        catch (const std::invalid_argument& e){
+          data.rad_map[substrings[1]] = 0;
+          invalid_radius_value = true;
+        }
+        try{data.weight_map[substrings[1]] = std::stod(substrings[3]);}
+        catch (const std::invalid_argument& e){
+          data.weight_map[substrings[1]] = 0;
+          invalid_weight_value = true;
+        }
+        try{data.atomic_num_map[substrings[1]] = std::stoi(substrings[0]);}
+        catch (const std::invalid_argument& e){
+          data.atomic_num_map[substrings[1]] = 0;
+        }
+      }
+    }
+  }
+  if (invalid_symbol_detected) {Ctrl::getInstance()->displayErrorMessage(106);}
+  if (invalid_radius_value) {Ctrl::getInstance()->displayErrorMessage(107);}
+  if (invalid_weight_value) {Ctrl::getInstance()->displayErrorMessage(108);}
+  return data;
+}
+
+//////////////////////
+// ATOM FILE IMPORT //
+//////////////////////
+
 bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
+  clearAtomData();
 
-  atom_amounts.clear();
-  raw_atom_coordinates.clear();
-
+  std::vector<Atom> atom_list;
+  // XYZ file import
   if (fileExtension(filepath) == "xyz"){
-    readFileXYZ(filepath);
-  }
+    atom_list = ImportMngr::readFileXYZ(filepath);
+  }  
+  // PDB file import
   else if (fileExtension(filepath) == "pdb"){
-    readFilePDB(filepath, include_hetatm);
+    const std::pair<std::vector<Atom>,UnitCell> import_data = ImportMngr::readFilePDB(filepath, include_hetatm);
+    atom_list = import_data.first;
+    
+    _space_group = import_data.second.space_group;
+    for (size_t i = 0; i < _cell_param.size(); ++i){
+      _cell_param[i] = import_data.second.parameters[i];
+    }
   }
-  else { // The browser does not allow other file formats but a user could manually write the path to an invalid file
-    Ctrl::getInstance()->notifyUser("Invalid structure file format!");
+  // CIF file import
+  else if (fileExtension(filepath) == "cif"){
+    try{
+      const std::pair<std::vector<Atom>,UnitCell> import_data = ImportMngr::readFileCIF(filepath);
+      atom_list = import_data.first;
+      _cell_param = import_data.second.parameters;
+      _cart_matrix = import_data.second.cart_matrix;
+      _sym_matrix_XYZ = import_data.second.sym_matrix_XYZ;
+      _sym_matrix_fraction = import_data.second.sym_matrix_fraction;
+    }
+    catch (const ExceptInvalidCellParams& e){
+      Ctrl::getInstance()->displayErrorMessage(112);
+      return false;
+    }
+  }
+  // File extension not supported 
+  else {
+    Ctrl::getInstance()->displayErrorMessage(103);
     return false;
   }
-  if (raw_atom_coordinates.size() == 0){ // If no atom is detected in the input file, the file is deemed invalid
-    Ctrl::getInstance()->notifyUser("Invalid structure file!");
+
+  for (const Atom& elem : atom_list){
+    _raw_atom_coordinates.emplace_back(elem.symbol, elem.pos_x, elem.pos_y, elem.pos_z);
+  }
+  
+  // If no atom is detected in the input file, the file is deemed invalid
+  if (atom_list.empty()){
+    Ctrl::getInstance()->displayErrorMessage(102);
     return false;
   }
+
   return true;
 }
 
-void Model::readFileXYZ(const std::string& filepath){
-
-//if (inp_file.is_open()){  //TODO consider adding an exception, for when file in not valid
-  std::string line;
-  std::ifstream inp_file(filepath);
-
-  // iterate through lines
-  while(getline(inp_file,line)){
-    // divide line into "words"
-    std::vector<std::string> substrings = splitLine(line);
-    // create new atom and add to storage vector if line format corresponds to Element_Symbol x y z
-    if (isAtomLine(substrings)) {
-
-      std::string valid_symbol = strToValidSymbol(substrings[0]);
-      atom_amounts[valid_symbol]++; // adds one to counter for this symbol
-
-      // if a key leads to multiple z-values, set z-value to 0 (?)
-      if (elem_Z.count(valid_symbol) > 0){
-        elem_Z[valid_symbol] = 0;
-      }
-      // Stores the full list of atom coordinates from the input file
-      raw_atom_coordinates.emplace_back(valid_symbol,
-                                        std::stod(substrings[1]),
-                                        std::stod(substrings[2]),
-                                        std::stod(substrings[3]));
-    }
+void Model::clearAtomData(){
+  _raw_atom_coordinates.clear();
+  _space_group = "";
+  _sym_matrix_XYZ.clear();
+  _sym_matrix_fraction.clear();
+  for(int i = 0; i < 6; i++){
+    _cell_param[i] = 0;
   }
-  // file has been read
-  inp_file.close();
 }
 
-void Model::readFilePDB(const std::string& filepath, bool include_hetatm){
+// used in unittest
+std::vector<std::string> Model::listElementsInStructure(){
+  std::vector<std::string> list;
 
-//if (inp_file.is_open()){  //TODO consider adding an exception, for when file in not valid
-  std::string line;
-  std::ifstream inp_file(filepath);
+  auto atom_count = atomCount(_raw_atom_coordinates);
+  for (auto elem : atom_count){
+    list.push_back(elem.first);
+  }
+  return list;
+}
 
-  // iterate through lines
-  while(getline(inp_file,line)){
-    if (line.substr(0,6) == "ATOM  " || (include_hetatm == true && line.substr(0,6) == "HETATM")){
-      // Element symbol is located at characters 77 and 78, right-justified in the official pdb format
-      std::string symbol = line.substr(76,2);
-      // Some software generate pdb files with symbol left-justified instead of right-justified
-      // Therefore, it is better to check both characters and erase any white space
-      symbol.erase(std::remove(symbol.begin(), symbol.end(), ' '), symbol.end());
-      symbol = strToValidSymbol(symbol);
-      atom_amounts[symbol]++; // adds one to counter for this symbol
-
-      // if a key leads to multiple z-values, set z-value to 0 (?)
-      if (elem_Z.count(symbol) > 0){
-        elem_Z[symbol] = 0;
+// TODO: This function seems misplaced
+bool Model::getSymmetryElements(std::string group, std::vector<int> &sym_matrix_XYZ, std::vector<double> &sym_matrix_fraction){
+  for (size_t i = 0; i<group.size(); i++) { // convert space group to upper case chars to compare with the list
+    group[i] = toupper(group[i]);
+  }
+  group = "'" + group + "'";
+  std::ifstream sym_file(getResourcesDir() + "/space_groups.txt");
+  std::string sym_line;
+  bool group_found = 0;
+  bool sym_matrix = 0;
+  while (getline (sym_file, sym_line)){
+    if(sym_matrix){
+      if(sym_line.find("Space group end") != std::string::npos){
+        return true; // end function when all symmetry elements of the matching space group are stored in vectors
       }
-      // Stores the full list of atom coordinates from the input file
-      raw_atom_coordinates.emplace_back(symbol,
-                                        std::stod(line.substr(30,8)),
-                                        std::stod(line.substr(38,8)),
-                                        std::stod(line.substr(46,8)));
+      else{
+        std::vector<std::string> sym_matrix_line = ImportMngr::splitLine(sym_line); // store 12 parameters of the symmetry matrix
+        std::stringstream ss;
+        if(sym_matrix_line.size() == 12){
+          for (int i = 0; i < 9; i++){
+            std::stringstream ss(sym_matrix_line[i]);
+            int matrix_elem = 0;
+            ss >> matrix_elem;
+            sym_matrix_XYZ.emplace_back(matrix_elem); // stores the Aa, Ab, Ac, Ba, Bb, Bc, Ca, Cb, Cc matrix elements as +1, 0 or -1
+          }
+          for (int i = 9; i < 12; i++){
+            sym_matrix_fraction.emplace_back(std::stod(sym_matrix_line[i])); // stores the AA, BB, CC matrix elements as fractions 0, 1/6, 1/4, 1/3, 1/2, 2/3, 3/4, 5/6
+          }
+        }
+        else {
+          return false; // return false if a matrix line was found with less than 12 elements which should not happen with the space group list file provided
+        }
+      }
+    }
+    else if(group_found && sym_line.find("_symmetry_equiv_pos_as_matrix") != std::string::npos){
+      sym_matrix = 1; // activate second switch when we reach the symmetry matrix part of the matching space group
+    }
+    else if(sym_line.find("_symmetry_space_group_name_H-M") != std::string::npos && sym_line.find(group) != std::string::npos){
+      group_found = 1; // activate switch when matching space group is found
     }
   }
-  // file has been read
-  inp_file.close();
+  return false; // return false when no matching space group was found in the list file or no file found
 }
 
 ////////////////////////
 // METHOD DEFINITIONS //
 ////////////////////////
 
-// returns the radius of an atom with a given symbol
-inline double Model::findRadiusOfAtom(const std::string& symbol){
-  //TODO add exception handling for when no radius was found:
-  //if(radius_map[symbol == 0]){
-  //  throw ...;
-  //}
-  //else{ return...;}
-  return radius_map[symbol];
+// Returns the radius of an atom with a given symbol
+// If the symbol is not intially found, the function strips everything after the first
+// non-letter character and tries to look up the radius again. If the symbol is still not
+// found, defaults to 0
+double Model::findRadiusOfAtom(std::string symbol) const {
+  if (_radius_map.count(symbol)){
+    return _radius_map.at(symbol);
+  }
+
+  symbol = ImportMngr::stripCharge(symbol);
+
+  if (_radius_map.count(symbol)){
+    return _radius_map.at(symbol);
+  }
+  
+  return 0;
 }
 
-inline double Model::findRadiusOfAtom(const Atom& at){
+double Model::findRadiusOfAtom(const Atom& at) const {
   return findRadiusOfAtom(at.symbol);
 }
 
-///////////////////
-// AUX FUNCTIONS //
-///////////////////
-
-// split line into substrings when separated by whitespaces
-static inline std::vector<std::string> splitLine(std::string& line){
-  std::istringstream iss(line);
-  std::vector<std::string> substrings((std::istream_iterator<std::string>(iss)), std::istream_iterator<std::string>());
-  return substrings;
-}
-
-bool isAtomLine(const std::vector<std::string>& substrings) {
-  if (substrings.size() == 4) {
-// TODO: decide whether element symbol substring should be checked as starting with a letter
-//  if (isalpha(substrings[0][0])){
-    for (char i=1; i<4; i++){
-      // using a try-block feels hacky, but the alternative using strtod does as well
-      try {
-        size_t str_pos = 0; // will contain the last position in the string that was successfully evaluated by std::stod()
-        std::stod(substrings[i], &str_pos);
-        if (substrings[i].size() != str_pos) {
-          return false;
-        }
-      }
-      catch (const std::invalid_argument& ia) {
-        return false;
-      }
-    }
-/* TODO bis
-  }
-  else {
-  	return false;
-  }*/
-    return true;
-  }
-  return false;
-}
-
-// reads a string and converts it to valid atom symbol: first character uppercase followed by lowercase characters
-std::string strToValidSymbol(std::string str){
-  // iterate over all characters in string
-  for (int i = 0; i<str.size(); i++) {
-// TODO: decide whether non-alphabetic characters should be erased or not
-//    if (isalpha(str[i])){
-      // only for first character in sequence, convert to uppercase
-      if (i==0) {
-        str[i] = toupper(str[i]);
-      }
-      // for all other characters, convert to lowercase
-      else {
-        str[i] = tolower(str[i]);
-      }
-// TODO bis
-//    }
-//    else { // Remove number or charges from atoms so that "Pd2+" becomes "Pd"
-//      str.erase(i, str.size());
-//    }
-  }
-  return str;
-}

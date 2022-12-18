@@ -3,47 +3,50 @@
 #include <iostream>
 #include <cassert>
 
-std::string Symbol::angstrom(){
-  return "\xE2\x84\xAB";
+bool Symbol::s_ascii = false;
+
+void Symbol::limit2ascii(){
+  Symbol::s_ascii = true;
 }
 
-std::string Symbol::cubed(){
-  return "\xC2\xB3";
+void Symbol::allow_unicode(){
+  Symbol::s_ascii = false;
 }
-// TODO: write function to return subscript encoding based on int or char
 
-// from an int, produce a string of utf-8 encoded subscripts
-std::string Symbol::subscript(int num){
-  std::string retval = "";
+std::wstring Symbol::angstrom(){
+  return Symbol::s_ascii? L"A" : L"\u212B";
+}
 
-  while (num > 0){
-    char subscript[4] = "\xE2\x82\x80"; // utf-8 encoding of subscript "0"
-    int digit = num%10;
-    subscript[2] += digit;
-    for (char c : subscript){
-      retval.push_back(c);
+std::wstring Symbol::squared(){
+  return Symbol::s_ascii? L"^2" : L"\u00B2";
+}
+
+std::wstring Symbol::cubed(){
+  return Symbol::s_ascii? L"^3": L"\u00B3";
+}
+
+// from a numeric char, return the unicode encoded subscripts
+wchar_t Symbol::digitSubscript(char digit){
+  if (Symbol::s_ascii){return digit;}
+  wchar_t subscript = 0x2080;           // unicode encoding of subscript "0"
+  int value = digit - '0';              // convert numeric char to corresponding int
+  subscript = subscript + value;        // adding a digit to subscript "0" return subscript of that digit
+  return subscript;
+}
+
+std::wstring Symbol::generateChemicalFormulaUnicode(std::string chemical_formula){
+  std::wstring chemical_formula_unicode;
+  for (size_t i = 0; i < chemical_formula.size(); i++){
+    if (isalpha(chemical_formula[i])){
+      // it is much simpler to convert string to wxString to wstring than directly from string to wstring
+      wxString buffer(chemical_formula[i]);
+      chemical_formula_unicode.append(buffer.wxString::ToStdWstring());
     }
-    num = num/10;
-  }
-  return retval;
-}
-
-// from a numeric string, produce a string of utf-8 encoded subscripts
-std::string Symbol::subscript(std::string num){
-  std::string retval = "";
-
-  // iterate over all chars in input
-  for (char c : num){
-    assert(c >= '0' && c <= '9');
-    char subscript[4] = "\xE2\x82\x80";   // utf-8 encoding of subscript "0"
-    int digit = c - '0';                  // covert numeric char to corresponding int
-    subscript[2] += digit;                // adding a digit to subscript "0" return subscript of that digit
-    for (char c : subscript){
-      retval.push_back(c);
+    else {
+      chemical_formula_unicode += digitSubscript(chemical_formula[i]);
     }
-
   }
-  return retval;
+  return chemical_formula_unicode;
 }
 
 

@@ -6,42 +6,46 @@
 
 struct Atom;
 class AtomTree;
-struct AtomNode{
-  AtomNode(Atom* at, AtomNode* left_node, AtomNode* right_node); 
-    
-  Atom* atom; // using pointer so that original atom list can be kept and objects do not have to be copied
-  // using pointers, so that children can be assigned to null pointers
-  AtomNode* left_child;
-  AtomNode* right_child;
+class AtomNode{
+  public:
+    AtomNode(int, AtomNode* left_node, AtomNode* right_node);
+    ~AtomNode();
+ 
+    AtomNode* getLeftChild() const;
+    AtomNode* getRightChild() const;
+    Atom& getAtom() const;
+    int getAtomId() const;
+    void print();
 
-  void print();
+    static Atom& getAtom(const int);
+    static void setAtomList(const std::vector<Atom>&);
+    static std::vector<Atom>& getAtomList();
+  private:
+    AtomNode* _left_child;
+    AtomNode* _right_child;
+    int _atom_id;
+    static inline std::vector<Atom> s_atom_list;
 };
 
 struct Atom;
-struct AtomNode;
+class AtomNode;
 class AtomTree{
   public:
     AtomTree();
-    AtomTree(std::vector<Atom>& list_of_atoms);
+    AtomTree(const std::vector<Atom>& list_of_atoms);
+    ~AtomTree();
     
     const AtomNode* getRoot() const;
-
     const double getMaxRad() const;
     void print() const;
-
   private:
-    AtomNode* root;
-    double max_rad;
-
-    AtomNode* buildTree(
-        std::vector<Atom>& list_of_atoms, 
-        int vec_first, // index of first vector element (default 0)
-        int vec_end, // vector size (index of last element + 1)
-        char dim);
+    AtomNode* _root;
+    double _max_rad;
+    
+    AtomNode* buildTree(int, int, char);
   
     void quicksort(std::vector<Atom>& list_of_atoms, const int& vec_first, const int& vec_end, const char& dim);
     void swap(Atom& a, Atom& b);
 };
-
 
 #endif
