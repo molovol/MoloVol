@@ -44,3 +44,20 @@ submit an issue to the project's [Issues](https://github.com/jmaglic/MoloVol/iss
 The development is currently lead by Jasmin B. Maglic and Roy Lavendomme. 
 You may reach us via email through [molovol@outlook.com](mailto:molovol@outlook.com)
 
+### Calculation Showcase
+MoloVol can calculate various types of surface areas and volumes of molecular systems and their cavities. MoloVol can notably generate surface maps to visualize the calculation results in graphic softwares like [PyMOL](https://pymol.org/2/) or [ChimeraX](https://www.cgl.ucsf.edu/chimerax/). Images below were rendered with [PyMOL Open-Source](https://github.com/schrodinger/pymol-open-source).
+
+<img src="/docs/assets/images/MoloVol_outputs_tr.png" width="600" style="horizontal-align:middle">
+
+Many types of molecular systems can be analyzed such as:
+
+#### Closed and Open Cages (from Small to Giant)
+  <img src="/docs/assets/images/C60_Sexc_tr.png" width="200">     <img src="/docs/assets/images/M48L96_tr.png" width="200">
+
+#### Macrocycles and Deep Cavitands
+  <img src="/docs/assets/images/pillar_tr.png" width="200">     <img src="/docs/assets/images/deep_cavitand_tr.png" width="260">
+
+#### Crystalline Materials
+  <img src="/docs/assets/images/IRMOF-10_tr.png" width="250">
+
+#### And more...
