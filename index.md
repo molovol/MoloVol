@@ -10,18 +10,19 @@ algorithms. We want the software to serve a broad range of scientist by being
 easily accessible on all common platforms.
 
 The software is being maintained and developed by Jasmin B. Maglic and Roy Lavendomme
-and is available on Windows 10, macOS, and Ubuntu. The application is also available
-as a [**Web App**](https://app.molovol.com).
+and is available on Windows 10, macOS, Linux (Ubuntu, Debian), and as a web application.
 
-### Scientific Reference
-MoloVol v1.0.0 features and algorithms are presented in detail in an 
-[openly accessible scientific article](https://doi.org/10.1107/S1600576722004988) 
-published in the *Journal of Applied Crystallography*.
+### Web Application
 
-Please use the following or an equivalent citation:
+<div class="button link" markdown="1">
+* <a class="buttons" 
+    href="https://app.molovol.com">
+    Visit Web App
+  </a>
+</div>
 
-> Maglic, J.B. & Lavendomme, R. (2022). J. Appl. Cryst. 55, 1033-1044.\
-> DOI: [10.1107/S1600576722004988](https://doi.org/10.1107/S1600576722004988)
+You can try out the software without installation directly through your browser.
+Simply follow the link above.
 
 ### Download and Installation
 
@@ -35,6 +36,16 @@ The source code of the current development build can be found in the
 
 The source code for each stable release can be found in the
 [Releases Section](https://github.com/molovol/MoloVol/releases).
+
+### Scientific Reference
+MoloVol v1.0.0 features and algorithms are presented in detail in an 
+[openly accessible scientific article](https://doi.org/10.1107/S1600576722004988) 
+published in the *Journal of Applied Crystallography*.
+
+Please use the following or an equivalent citation:
+
+> Maglic, J.B. & Lavendomme, R. (2022). J. Appl. Cryst. 55, 1033-1044.\
+> DOI: [10.1107/S1600576722004988](https://doi.org/10.1107/S1600576722004988)
 
 ### Getting Help
 If you encounter a bug or have a request for a feature, you are more than welcome 
