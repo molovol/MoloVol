@@ -10,7 +10,7 @@ algorithms. We want the software to serve a broad range of scientist by being
 easily accessible on all common platforms.
 
 The software is being maintained and developed by Jasmin B. Maglic and Roy Lavendomme
-and is available on Windows 10, macOS, Linux (Ubuntu, Debian), and as a web application.
+and is available on Windows (7, 8, 10, 11), macOS, Linux (Ubuntu, Debian), and as a web application.
 
 ### Web Application
 
