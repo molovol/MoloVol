@@ -1,5 +1,5 @@
 # builds molovol and installs the webapp
-FROM bsvogler/wxwidget
+FROM bsvogler/wxwidgets
 
 # hack to create a headless x server
 RUN apt-get install xvfb -y
