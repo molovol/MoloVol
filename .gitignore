@@ -35,6 +35,10 @@ surface_map.dx
 benchmark
 export/
 
+# Generated from webserver
+.sass-cache/
+_site/
+
 .idea/
 *.pyc
 *userupload/
