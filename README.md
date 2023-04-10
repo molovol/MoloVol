@@ -38,7 +38,7 @@ installation from the command line.
 $ dpkg -i bin/MoloVol_debian_version.deb 
 ```
 
-### 💪🏻 Compiling the source code 
+### Compiling the source code 
 
 You can find the source code for each release under [Releases](https://github.com/molovol/MoloVol/releases) in a .zip or
 .tar.gz file. For detailed guides on how to compile the source code yourself, visit
@@ -50,33 +50,39 @@ Dependencies needed for compilation:
 - Any C++ compiler
 - [wxWidgets 3.1.5](https://www.wxwidgets.org)
 
-### MoloVol Web 🕸️
+### MoloVol Web
 
 Instead of using the desktop front-end, you can also use a web interface. MoloVol server provides a REST-API with a web
 front-end wrapping the MoloVol CLI interface. To launch, first change the FLASK_APP environment variable by executing 
 the command `export FLASK_APP=./webserver/app.py` from the project's root directory. Then execute `flask run`.
 For hosting on a web server check out the next section.
 
-### 🐳 Containerized application
+### Containerized application
 
-Instead of compiling or running the binaries you can also use a containerized version (using e.g. docker or podman) to
-access the CLI or web interface.
-In order to create a container you first need to obtain a Docker image for your operating system. A build can be found
-at [dockerhub](https://hub.docker.com/r/bsvogler/molovol) or be built locally. Dockerfiles are in the 'container' directory. If you build locally replace the `bsvogler/molovol` with your local image name.
+Instead of compiling or running the binaries you can also use a containerized version (for instance using docker or 
+podman) to access the CLI or web interface.
+To create a container you first need to obtain a Docker image for your operating system. One such image can be found
+at [dockerhub](https://hub.docker.com/r/bsvogler/molovol). Alternatively an image can be built locally. Dockerfiles
+are inside the directory titled 'container'. If you build your image locally, replace `bsvogler/molovol` in the command below with your local image name.
 
-- For a short-lived container: Pass the CLI arguments in the run command:  `docker run -it bsvogler/molovol ./launch_headless.sh <yourMolovolArguments>`
-- To run web application http://localhost:80: run `docker run -dt --restart=always -p 80:5000 --name molovol bsvogler/molovol`. When not otherwise specified the default port is 5000.
+- For a short-lived container: Pass the CLI arguments in the run command:
+  `docker run -it bsvogler/molovol ./launch_headless.sh <yourMolovolArguments>`
+- To run web application http://localhost:80: run 
+  `docker run -dt --restart=always -p 80:5000 --name molovol bsvogler/molovol`. 
+  When not otherwise specified the default port is 5000.
 
 How to update:
 `docker pull bsvogler/molovol`
 `docker stop molovol`
 `docker rm molovol`
 
-To serve it with https you need to put a reverse proxy in front of it. For example with nginx.
+To serve it with https you need to put a reverse proxy in front of it, for example using nginx.
 
 ## Getting Help
 
-If you wish to report a bug or request a feature go to the project's [GitHub issue tracker](https://github.com/molovol/MoloVol/issues).
+If you wish to report a bug or request a feature go to the project's 
+[GitHub issue tracker](https://github.com/molovol/MoloVol/issues).
 
 ## Development Team
-The development is currently led by Jasmin B. Maglic and Roy Lavendomme. You may reach us via email through molovol@outlook.com
+The development is currently led by Jasmin B. Maglic and Roy Lavendomme. 
+You may reach us via email through molovol@outlook.com
