@@ -3,10 +3,8 @@
 #define ATOM_H
 
 #include "vector.h"
-#include <exception>
-#include <vector>
 #include <array>
-#include <iostream>
+#include <string>
 
 struct Atom {
   

@@ -1,4 +1,6 @@
 #include "atom.h"
+#include <exception>
+#include <iostream>
 
 // Constructor
 Atom::Atom() : pos_x(0), pos_y(0), pos_z(0), rad(-1), number(0), charge(0), symbol("") {}
