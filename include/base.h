@@ -71,7 +71,7 @@ class MainFrame: public wxFrame, public wxThreadHelper
     bool getMakeSurfaceMap();
     bool getMakeCavityMaps();
     std::string getOutputDir();
-    void enableGuiElements(bool inp); // method to turn on and off interactable gui elements
+    void enableGuiElements(bool inp); // method to turn interactable gui elements on or off
 
     void displayAtomList(std::vector<std::tuple<std::string, int, double>> symbol_number_radius);
     std::unordered_map<std::string, double> generateRadiusMap();

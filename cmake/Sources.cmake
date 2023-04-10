@@ -1,6 +1,7 @@
 
 # List of source files
 set(SOURCES
+  src/atom.cpp
   src/atomtree.cpp
   src/base_guicontrol.cpp
   src/base_cmdline.cpp

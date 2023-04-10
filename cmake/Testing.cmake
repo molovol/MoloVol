@@ -2,6 +2,8 @@
 enable_testing()
 # Create a MoloVol library for the test sources to use
 set(TEST_SOURCES
+  src/atom.cpp
+  src/vector.cpp
   src/importmanager.cpp
   src/crystallographer.cpp
   src/misc.cpp
@@ -16,5 +18,12 @@ set(TEST_EXE_NAME t_${TEST_NAME})
 add_executable(${TEST_EXE_NAME} test/${TEST_SRC_NAME})
 target_include_directories(${TEST_EXE_NAME} PUBLIC ./test)
 target_link_libraries(${TEST_EXE_NAME} mvl)
-add_test(NAME "Should cut off string after non-letter" COMMAND ${TEST_EXE_NAME})
+add_test(NAME "Cutting off string after non-letter" COMMAND ${TEST_EXE_NAME})
 
+set(TEST_NAME atom_struct)
+set(TEST_SRC_NAME ${TEST_NAME}.cpp)
+set(TEST_EXE_NAME t_${TEST_NAME})
+add_executable(${TEST_EXE_NAME} test/${TEST_SRC_NAME})
+target_include_directories(${TEST_EXE_NAME} PUBLIC ./test)
+target_link_libraries(${TEST_EXE_NAME} mvl)
+add_test(NAME "Testing atom struct" COMMAND ${TEST_EXE_NAME})
