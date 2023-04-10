@@ -1,11 +1,13 @@
 #include "atom.h"
 #include <cassert>
 #include <utility>
+#include <iostream>
+#include <chrono>
 
 bool validateAtom(const Atom&, Atom::num_type, Atom::num_type, Atom::num_type, 
     Atom::symbol_type, Atom::num_type, Atom::atomic_num_type, Atom::charge_type);
 
-int main(){
+int main(int argc, char* argv[]){
   // Default constructor
   Atom at;
 
@@ -30,6 +32,32 @@ int main(){
   at = Atom(1, 2, 3, "Gh", 1.2, 34, -2);
   validateAtom(at, 1, 2, 3, "Gh", 1.2, 34, -2);
   assert(isValid(at));
+
+  // Benchmark
+  if (argc > 1 && !strcmp(argv[1], "benchmark")){
+
+    std::chrono::steady_clock::time_point begin;
+    std::chrono::steady_clock::time_point end;
+ 
+    int n_test_cycle = 1000000;
+
+    auto pp = std::make_pair("Gh", Atom::pos_type({1,2,3}));
+    begin = std::chrono::steady_clock::now();
+    for (int i = 1; i < n_test_cycle; ++i){
+      at = Atom(pp, -2);
+    }
+    end = std::chrono::steady_clock::now();
+    std::cout << "Array-based constructor: " 
+      << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
+
+    begin = std::chrono::steady_clock::now();
+    for (int i = 1; i < n_test_cycle; ++i){
+      at = Atom(1, 2, 3, "Gh", 1.2, 34, -2);
+    }
+    end = std::chrono::steady_clock::now();
+    std::cout << "Number-based constructor: " 
+      << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
+  }
 
 }
 
