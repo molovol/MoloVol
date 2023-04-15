@@ -16,8 +16,8 @@ target_compile_definitions(mvl PRIVATE LIBRARY_BUILD)
 
 set(TEST_NAMES
   cut_off_string
-  atom_struct
-  vector_operations
+  struct_atom
+  class_vector
 )
 
 set(MOLOVOL_TEST_DIR ${CMAKE_SOURCE_DIR}/test)

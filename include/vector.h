@@ -4,6 +4,9 @@
 
 #include <array>
 
+// Wrapper class for a numeric array of size three.
+// Allows easy mathematical operations. Represents a positional
+// vector in R3.
 struct Vector{
   public:
     // constructors
