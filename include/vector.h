@@ -27,12 +27,6 @@ struct Vector{
     Vector normalise() const; 
     Vector normalize() const {return normalise();}
     
-    // relation to other vector
-    double angle(const Vector&) const;
-    
-    // relation to multiple vectors
-    bool isInsideTriangle(const std::array<Vector,3>&) const;
-
     // comparisons
     bool isLongerThan(const Vector&) const;
     bool isLongerThan(double) const;
@@ -74,8 +68,6 @@ Vector operator/(const Vector&, double);
 
 double dotproduct(const Vector&, const Vector&);
 double operator*(const Vector&, const Vector&);
-
-Vector crossproduct(const Vector&, const Vector&);
 
 double distance(const Vector&, const Vector&);
 double distance(const Vector&, const Vector&, const char);
