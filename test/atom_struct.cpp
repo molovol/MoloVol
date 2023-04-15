@@ -12,9 +12,9 @@ int main(int argc, char* argv[]){
   Atom at;
 
   validateAtom(at, 0, 0, 0, "", -1, 0, 0);
-  assert(!isValid(at)); // Default constructed atom is always invalid
+  assert(!at.isValid()); // Default constructed atom is always invalid
   at.rad = 1; 
-  assert(isValid(at));
+  assert(at.isValid());
 
   // Construct with position and symbol
   at = Atom(std::make_pair("Gh", Atom::pos_type({1, 2, 3})));
@@ -31,7 +31,7 @@ int main(int argc, char* argv[]){
   // Construct with position, symbol, radius, number and charge
   at = Atom(1, 2, 3, "Gh", 1.2, 34, -2);
   validateAtom(at, 1, 2, 3, "Gh", 1.2, 34, -2);
-  assert(isValid(at));
+  assert(at.isValid());
 
   // Benchmark
   if (argc > 1 && !strcmp(argv[1], "benchmark")){
