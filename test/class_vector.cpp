@@ -95,6 +95,18 @@ int main(){
 
       assert(dotproduct(lhs, rhs) == 28);
       assert(lhs * rhs == 28);
+      
+      // const
+      validateCoordinates(scale(c_lhs, 3), 3, 9, 15);
+      validateCoordinates(scale(3, c_lhs), 3, 9, 15);
+
+      validateCoordinates(c_lhs * 5, 5, 15, 25);
+      validateCoordinates(5 * c_lhs, 5, 15, 25);
+
+      validateCoordinates(c_lhs / 2, 0.5, 1.5, 2.5);
+
+      assert(dotproduct(c_lhs, c_rhs) == 28);
+      assert(c_lhs * c_rhs == 28);
     }
 
     { // Other
@@ -107,17 +119,165 @@ int main(){
       assert(lhs.length() == sqrt(35));
 
       validateCoordinates(Vector(4,4,7).normalise(), 4.0/9.0, 4.0/9.0, 7.0/9.0);
+
+      // const
+      assert(distance(c_lhs, c_rhs) == sqrt(35));
+
+      assert(distance(c_lhs, c_rhs, 0) == 5);
+      assert(distance(c_lhs, c_rhs, 1) == 1);
+      assert(distance(c_lhs, c_rhs, 2) == -3);
+
+      assert(c_lhs.length() == sqrt(35));
+
+      const Vector vec(4,4,7);
+      validateCoordinates(vec.normalise(), 4.0/9.0, 4.0/9.0, 7.0/9.0);
     }
   }
 
   { // Comparison operators
+    Vector vec(3,6,2);
+    Vector longer(7,9,9);
+    Vector shorter(1,2,1);
+    Vector equal(2,3,6);
 
+    assert(!vec.isLongerThan(longer));
+    assert( vec.isLongerThan(shorter));
+    assert(!vec.isLongerThan(equal));
+    assert(!vec.isLongerThan(longer.length()));
+    assert( vec.isLongerThan(shorter.length()));
+    assert(!vec.isLongerThan(equal.length()));
+
+    assert(!(vec > longer));
+    assert( (vec > shorter));
+    assert(!(vec > equal));
+    assert(!(vec > longer.length()));
+    assert( (vec > shorter.length()));
+    assert(!(vec > equal.length()));
+
+    assert(!(vec >= longer));
+    assert( (vec >= shorter));
+    assert( (vec >= equal));
+    assert(!(vec >= longer.length()));
+    assert( (vec >= shorter.length()));
+    assert( (vec >= equal.length()));
+
+    assert( vec.isShorterThan(longer));
+    assert(!vec.isShorterThan(shorter));
+    assert(!vec.isShorterThan(equal));
+    assert( vec.isShorterThan(longer.length()));
+    assert(!vec.isShorterThan(shorter.length()));
+    assert(!vec.isShorterThan(equal.length()));
+
+    assert( (vec < longer));
+    assert(!(vec < shorter));
+    assert(!(vec < equal));
+    assert( (vec < longer.length()));
+    assert(!(vec < shorter.length()));
+    assert(!(vec < equal.length()));
+    
+    assert( (vec <= longer));
+    assert(!(vec <= shorter));
+    assert( (vec <= equal));
+    assert( (vec <= longer.length()));
+    assert(!(vec <= shorter.length()));
+    assert( (vec <= equal.length()));
+
+    assert(!vec.isSameLength(longer));
+    assert(!vec.isSameLength(shorter));
+    assert( vec.isSameLength(equal));
+    assert(!vec.isSameLength(longer.length()));
+    assert(!vec.isSameLength(shorter.length()));
+    assert( vec.isSameLength(equal.length()));
+
+    assert(!(vec == longer));
+    assert(!(vec == shorter));
+    assert( (vec == equal));
+    assert(!(vec == longer.length()));
+    assert(!(vec == shorter.length()));
+    assert( (vec == equal.length()));
+
+    assert( (vec != longer));
+    assert( (vec != shorter));
+    assert(!(vec != equal));
+    assert( (vec != longer.length()));
+    assert( (vec != shorter.length()));
+    assert(!(vec != equal.length()));
+  }
+
+  { // Comparison operators const
+    const Vector vec(3,6,2);
+    const Vector longer(7,9,9);
+    const Vector shorter(1,2,1);
+    const Vector equal(2,3,6);
+
+    assert(!vec.isLongerThan(longer));
+    assert( vec.isLongerThan(shorter));
+    assert(!vec.isLongerThan(equal));
+    assert(!vec.isLongerThan(longer.length()));
+    assert( vec.isLongerThan(shorter.length()));
+    assert(!vec.isLongerThan(equal.length()));
+
+    assert(!(vec > longer));
+    assert( (vec > shorter));
+    assert(!(vec > equal));
+    assert(!(vec > longer.length()));
+    assert( (vec > shorter.length()));
+    assert(!(vec > equal.length()));
+
+    assert(!(vec >= longer));
+    assert( (vec >= shorter));
+    assert( (vec >= equal));
+    assert(!(vec >= longer.length()));
+    assert( (vec >= shorter.length()));
+    assert( (vec >= equal.length()));
+
+    assert( vec.isShorterThan(longer));
+    assert(!vec.isShorterThan(shorter));
+    assert(!vec.isShorterThan(equal));
+    assert( vec.isShorterThan(longer.length()));
+    assert(!vec.isShorterThan(shorter.length()));
+    assert(!vec.isShorterThan(equal.length()));
+
+    assert( (vec < longer));
+    assert(!(vec < shorter));
+    assert(!(vec < equal));
+    assert( (vec < longer.length()));
+    assert(!(vec < shorter.length()));
+    assert(!(vec < equal.length()));
+    
+    assert( (vec <= longer));
+    assert(!(vec <= shorter));
+    assert( (vec <= equal));
+    assert( (vec <= longer.length()));
+    assert(!(vec <= shorter.length()));
+    assert( (vec <= equal.length()));
+
+    assert(!vec.isSameLength(longer));
+    assert(!vec.isSameLength(shorter));
+    assert( vec.isSameLength(equal));
+    assert(!vec.isSameLength(longer.length()));
+    assert(!vec.isSameLength(shorter.length()));
+    assert( vec.isSameLength(equal.length()));
+
+    assert(!(vec == longer));
+    assert(!(vec == shorter));
+    assert( (vec == equal));
+    assert(!(vec == longer.length()));
+    assert(!(vec == shorter.length()));
+    assert( (vec == equal.length()));
+
+    assert( (vec != longer));
+    assert( (vec != shorter));
+    assert(!(vec != equal));
+    assert( (vec != longer.length()));
+    assert( (vec != shorter.length()));
+    assert(!(vec != equal.length()));
   }
 
 }
 
 void validateCoordinates(Vector vec, double x, double y, double z){
-  double small = 0.0000001;
+  [[maybe_unused]] double small = 0.0000001;
   assert(abs(vec.getCoordinate(0)-x) < small);
   assert(abs(vec.getCoordinate(1)-y) < small);
   assert(abs(vec.getCoordinate(2)-z) < small);
