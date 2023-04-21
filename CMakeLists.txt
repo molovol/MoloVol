@@ -7,8 +7,6 @@ include(Options)
 # MOLOVOL_OSX_FAT_FILE
 # MOLOVOL_BUILD_TESTING
 
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
-
 # Strip binary for release build
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
@@ -45,6 +43,12 @@ include_directories(include)
 # Compiler flag for development build
 add_compile_options("$<$<NOT:$<CONFIG:RELEASE,MINSIZEREL,RELWITHDEBINFO>>:-DDEBUG>")
 add_compile_options(-Wall -Werror -Wno-unused-command-line-argument -Wno-invalid-source-encoding)
+
+include(CheckIPOSupported)
+check_ipo_supported(RESULT IPO_SUPPORTED OUTPUT IPO_ERROR)
+if(IPO_SUPPORTED AND CMAKE_BUILD_TYPE STREQUAL "RELEASE")
+  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
 
 include(Sources)
 # SOURCES
