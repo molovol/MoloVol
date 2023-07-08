@@ -237,7 +237,7 @@ def io():
 
         reduce_dir_to_target_size(export_dir, 100 * 1024 * 1024);
         reduce_dir_to_target_size(UPLOAD_FOLDER, 100 * 1024);
-        reduce_dir_to_target_size(log_dir, 100);
+        reduce_dir_to_target_size(log_dir, 100, 30);
 
         out = ""
         # when arguments ignore form data
@@ -350,9 +350,11 @@ def io():
     elif request.accept_mimetypes['application/json']:
         return jsonify({"output": out})
 
+import time
 # Makes space for new user upload and export files by deleting the oldest files until a predefined
-# amount of disk space is available
-def reduce_dir_to_target_size(directory, target_size):
+# amount of disk space is available. Keeps all files that are younger than the grace period. The
+# grace period is given in seconds.
+def reduce_dir_to_target_size(directory, target_size, grace_period=0):
     print(f"Deleting entries in {directory} to reach {target_size} bytes.")
     total_size = get_entry_size(directory)
 
@@ -360,8 +362,18 @@ def reduce_dir_to_target_size(directory, target_size):
     entries = [os.path.join(directory,x) for x in entries]
     entries.sort(key=os.path.getctime, reverse=True)  # Sort files and folders by creation time (oldest first)
 
+    current_time = time.time()
+    latest_ctime = current_time - (grace_period) # Determine the latest allowed creation time
+
     while entries and total_size > target_size:
         entry_path = entries.pop()
+        entry_size = get_entry_size(entry_path)
+        
+        # Skip file if it is too young
+        entry_ctime = os.path.getctime(entry_path)
+        if entry_ctime > latest_ctime:
+            continue
+
         entry_size = get_entry_size(entry_path)
 
         try:
@@ -374,8 +386,7 @@ def reduce_dir_to_target_size(directory, target_size):
         except OSError as e:
             print(f"Error deleting: {entry_path}, {e}")
 
-    if total_size <= target_size:
-        print("Total directory size is now smaller than the target size.\n")
+    print(f"Total directory size is now {total_size} bytes.\n")
 
 # Determines the size of an entry, i.e., a directory or a file
 def get_entry_size(entry_path):
