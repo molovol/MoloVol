@@ -1,6 +1,7 @@
 import os
 import zipfile
 import re
+import shutil
 from typing import Optional
 from uuid import uuid4
 from enum import Enum
@@ -233,6 +234,11 @@ def io():
     v_out = app_version()
 
     if request.method == 'POST':
+
+        reduce_dir_to_target_size(export_dir, 100 * 1024 * 1024);
+        reduce_dir_to_target_size(UPLOAD_FOLDER, 100 * 1024);
+        reduce_dir_to_target_size(log_dir, 100);
+
         out = ""
         # when arguments ignore form data
         # split cli string so that it can be passed to subprocess
@@ -344,6 +350,46 @@ def io():
     elif request.accept_mimetypes['application/json']:
         return jsonify({"output": out})
 
+# Makes space for new user upload and export files by deleting the oldest files until a predefined
+# amount of disk space is available
+def reduce_dir_to_target_size(directory, target_size):
+    print(f"Deleting entries in {directory} to reach {target_size} bytes.")
+    total_size = get_entry_size(directory)
+
+    entries = os.listdir(directory)
+    entries = [os.path.join(directory,x) for x in entries]
+    entries.sort(key=os.path.getctime, reverse=True)  # Sort files and folders by creation time (oldest first)
+
+    while entries and total_size > target_size:
+        entry_path = entries.pop()
+        entry_size = get_entry_size(entry_path)
+
+        try:
+            if os.path.isfile(entry_path):
+                os.remove(entry_path) # Delete the file
+            else:
+                shutil.rmtree(entry_path) # Delete the folder
+            print(f"Deleted: {entry_path}")
+            total_size -= entry_size
+        except OSError as e:
+            print(f"Error deleting: {entry_path}, {e}")
+
+    if total_size <= target_size:
+        print("Total directory size is now smaller than the target size.\n")
+
+# Determines the size of an entry, i.e., a directory or a file
+def get_entry_size(entry_path):
+    total_size = 0
+        
+    if os.path.isfile(entry_path):
+        total_size = os.path.getsize(entry_path)
+    else:
+        for path, dirs, files in os.walk(entry_path):
+            for file in files:
+                file_path = os.path.join(path, file)
+                total_size += os.path.getsize(file_path)
+
+    return total_size
 
 # Request the executable's version. If the executable is not found, then the web page crashes
 def app_version():
