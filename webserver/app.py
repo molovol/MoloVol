@@ -235,9 +235,9 @@ def io():
 
     if request.method == 'POST':
 
-        reduce_dir_to_target_size(export_dir, 100 * 1024 * 1024);
-        reduce_dir_to_target_size(UPLOAD_FOLDER, 100 * 1024);
-        reduce_dir_to_target_size(log_dir, 100, 30);
+        reduce_dir_to_target_size(export_dir, 7 * 1024 * 1024 * 1024, 3600); # 7 GiB
+        reduce_dir_to_target_size(UPLOAD_FOLDER, 1024 * 1024 * 1024, 3600); # 1 GiB
+        reduce_dir_to_target_size(log_dir, 10 * 1024 * 1024, 3600); # 10 MiB
 
         out = ""
         # when arguments ignore form data
