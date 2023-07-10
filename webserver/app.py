@@ -7,6 +7,7 @@ from uuid import uuid4
 from enum import Enum
 
 from flask import Flask, request, jsonify, render_template, Response, send_from_directory, url_for
+from flask_cors import CORS
 import subprocess
 
 from werkzeug.security import safe_join
@@ -24,6 +25,8 @@ out = None
 log_dir = "./logs/"
 export_dir = "./export/"
 
+# Cross-Origin Resource Sharing
+cors = CORS(app, resources={r"/api/*": {"origins": "http://localhost:4000"}})
 
 # Error messages
 
