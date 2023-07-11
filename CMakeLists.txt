@@ -16,7 +16,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11 CACHE STRING "Minimum macOS deployment version")
 
 # Set name and version
-project(MoloVol VERSION 1.1.0)
+project(MoloVol VERSION 1.1.1)
 
 include(ExecutableName)
 # EXE_NAME

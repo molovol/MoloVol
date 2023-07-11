@@ -1,4 +1,9 @@
-molvol (1.1.0) unstable; urgency=low
+molvol (1.1.1) unstable; urgency=low
+
+  * Enabled link time optimisation which reduces calculation
+    time by at least 30 %.
+
+  (1.1.0)
 
   * Added full support for charged atoms in structures,
     along with default ionic radii for common ions
