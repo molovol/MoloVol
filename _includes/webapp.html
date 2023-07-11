@@ -1,0 +1,62 @@
+<div id="webappContainer"></div>
+
+<script>
+//function checkWebsiteStatus(url, callback) {
+//  fetch(url)
+//    .then(response => {
+//      callback(response.ok);
+//    })
+//    .catch(error => {
+//      console.log("error")
+//    });
+//}
+  function checkWebsiteStatus(url, callback) {
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4) {
+      console.log(xhr.status);
+      if (xhr.status === 200) {
+        callback(true);
+      } else {
+        callback(false);
+      }
+    }
+  };
+  xhr.open("GET", url, true);
+  xhr.send();
+}
+
+  function addPageContent(webavailable) {
+    var container = document.getElementById("webappContainer");
+    var webcontent;
+    if (webavailable){
+
+      webcontent = `
+        <div class="button link">
+          <ul>
+            <li><a class="buttons" href="https://app.molovol.com">
+          Visit Web App
+        </a></li>
+          </ul>
+        </div>
+        <p>You can try out the software without installation directly through your browser.
+        Simply follow the link above.</p>
+     `;
+
+      console.log("Website up");
+    } else {
+
+      webcontent = `
+        <p> The web app is currently unavailable due to maintenance.
+          If your request is urgent we recommend downloading the desktop app (see below).
+        </p>
+      `;
+      console.log("Website down");
+    }
+    container.innerHTML = webcontent;
+  }
+
+// Usage example
+checkWebsiteStatus("http://127.0.0.1:5000/api", addPageContent);
+</script>
+

@@ -14,6 +14,8 @@ and is available on Windows 10, macOS, Linux (Ubuntu, Debian), and as a web appl
 
 ### Web Application
 
+{% include webapp.html %}
+
 <div class="button link" markdown="1">
 * <a class="buttons" 
     href="https://app.molovol.com">
