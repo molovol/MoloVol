@@ -23,7 +23,7 @@ RUN apt install python3.11 -y
 RUN apt install python3.11-distutils -y
 RUN apt install curl -y
 RUN curl https://bootstrap.pypa.io/get-pip.py | python3.11
-RUN python3.11 -m pip install flask
+RUN python3.11 -m pip install --ignore-installed flask
 COPY webserver/ /webserver/
 WORKDIR /
 

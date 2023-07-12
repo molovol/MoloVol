@@ -61,20 +61,24 @@ For hosting on a web server check out the next section.
 
 Instead of compiling or running the binaries you can also use a containerized version (for instance using docker or 
 podman) to access the CLI or web interface.
-To create a container you first need to obtain a Docker image for your operating system. One such image can be found
-at [dockerhub](https://hub.docker.com/r/bsvogler/molovol). Alternatively an image can be built locally. Dockerfiles
-are inside the directory titled 'container'. If you build your image locally, replace `bsvogler/molovol` in the command below with your local image name.
+To create a container you first need to obtain a Docker image for your operating system.
+- One such image for x86 can be found
+at [dockerhub](https://hub.docker.com/r/bsvogler/molovol).
+- Alternatively an image can be built locally. Dockerfiles
+are inside the directory titled 'container'. If you build your image localy, replace `bsvogler/molovol` in the command below with your local image name.
 
+Running a container:
 - For a short-lived container: Pass the CLI arguments in the run command:
   `docker run -it bsvogler/molovol ./launch_headless.sh <yourMolovolArguments>`
 - To run web application http://localhost:80: run 
-  `docker run -dt --restart=always -p 80:5000 --name molovol bsvogler/molovol`. 
-  When not otherwise specified the default port is 5000.
+  `docker run -dt --restart=always -p 5000:5000 --name molovol bsvogler/molovol`. 
+  When not otherwise specified the default port of a flask instance is 5000.
 
-How to update:
+How to update a deployment:
 `docker pull bsvogler/molovol`
 `docker stop molovol`
 `docker rm molovol`
+`docker run ...`
 
 To serve it with https you need to put a reverse proxy in front of it, for example using nginx.
 
