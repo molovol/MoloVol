@@ -31,7 +31,8 @@ Open". You will be prompted with a dialog box where you will need to select "Ope
 exception. [Apple's support website](https://support.apple.com/en-ie/guide/mac-help/mh40616/mac) provides a more
 detailed guide.
 
-On __Debian__ and __Ubuntu__ you should download the .deb file appropriate for your CPU architecture (*x86-64* or *arm64*). Installation should be as simple as opening the file; however, if you run into issues you can also run the
+On __Debian__ and __Ubuntu__ you should download the .deb file appropriate for your CPU architecture (*x86-64* or *arm64*).
+Installation should be as simple as opening the file; however, if you run into issues you can also run the
 installation from the command line.
 
 ```
@@ -64,8 +65,9 @@ podman) to access the CLI or web interface.
 To create a container you first need to obtain a Docker image for your operating system.
 - One such image for x86 can be found
 at [dockerhub](https://hub.docker.com/r/bsvogler/molovol).
-- Alternatively an image can be built locally. Dockerfiles
-are inside the directory titled 'container'. If you build your image localy, replace `bsvogler/molovol` in the command below with your local image name.
+- Alternatively, an image can be built locally. Dockerfiles
+are inside the directory titled 'container'. If you build your image locally, replace `bsvogler/molovol` in the command
+below with your local image name.
 
 Running a container:
 - For a short-lived container: Pass the CLI arguments in the run command:
