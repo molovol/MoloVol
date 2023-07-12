@@ -1,11 +1,13 @@
 import os
 import zipfile
 import re
+import shutil
 from typing import Optional
 from uuid import uuid4
 from enum import Enum
 
 from flask import Flask, request, jsonify, render_template, Response, send_from_directory, url_for
+from flask_cors import CORS
 import subprocess
 
 from werkzeug.security import safe_join
@@ -23,6 +25,8 @@ out = None
 log_dir = "./logs/"
 export_dir = "./export/"
 
+# Cross-Origin Resource Sharing
+cors = CORS(app, resources={r"/api/*": {"origins": "http://localhost:4000"}})
 
 # Error messages
 
@@ -233,6 +237,11 @@ def io():
     v_out = app_version()
 
     if request.method == 'POST':
+
+        reduce_dir_to_target_size(export_dir, 7 * 1024 * 1024 * 1024, 3600); # 7 GiB
+        reduce_dir_to_target_size(UPLOAD_FOLDER, 1024 * 1024 * 1024, 3600); # 1 GiB
+        reduce_dir_to_target_size(log_dir, 10 * 1024 * 1024, 3600); # 10 MiB
+
         out = ""
         # when arguments ignore form data
         # split cli string so that it can be passed to subprocess
@@ -344,6 +353,57 @@ def io():
     elif request.accept_mimetypes['application/json']:
         return jsonify({"output": out})
 
+import time
+# Makes space for new user upload and export files by deleting the oldest files until a predefined
+# amount of disk space is available. Keeps all files that are younger than the grace period. The
+# grace period is given in seconds.
+def reduce_dir_to_target_size(directory, target_size, grace_period=0):
+    print(f"Deleting entries in {directory} to reach {target_size} bytes.")
+    total_size = get_entry_size(directory)
+
+    entries = os.listdir(directory)
+    entries = [os.path.join(directory,x) for x in entries]
+    entries.sort(key=os.path.getctime, reverse=True)  # Sort files and folders by creation time (oldest first)
+
+    current_time = time.time()
+    latest_ctime = current_time - (grace_period) # Determine the latest allowed creation time
+
+    while entries and total_size > target_size:
+        entry_path = entries.pop()
+        entry_size = get_entry_size(entry_path)
+        
+        # Skip file if it is too young
+        entry_ctime = os.path.getctime(entry_path)
+        if entry_ctime > latest_ctime:
+            continue
+
+        entry_size = get_entry_size(entry_path)
+
+        try:
+            if os.path.isfile(entry_path):
+                os.remove(entry_path) # Delete the file
+            else:
+                shutil.rmtree(entry_path) # Delete the folder
+            print(f"Deleted: {entry_path}")
+            total_size -= entry_size
+        except OSError as e:
+            print(f"Error deleting: {entry_path}, {e}")
+
+    print(f"Total directory size is now {total_size} bytes.\n")
+
+# Determines the size of an entry, i.e., a directory or a file
+def get_entry_size(entry_path):
+    total_size = 0
+        
+    if os.path.isfile(entry_path):
+        total_size = os.path.getsize(entry_path)
+    else:
+        for path, dirs, files in os.walk(entry_path):
+            for file in files:
+                file_path = os.path.join(path, file)
+                total_size += os.path.getsize(file_path)
+
+    return total_size
 
 # Request the executable's version. If the executable is not found, then the web page crashes
 def app_version():

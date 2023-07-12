@@ -8,6 +8,7 @@ authors = ["Benedikt S. Vogler <developer@benediktsvogler.com>"]
 [tool.poetry.dependencies]
 python = ">=3.8"
 Flask = "^2.0.2"
+flask-cors = "^4.0.0"
 
 [tool.poetry.dev-dependencies]
 

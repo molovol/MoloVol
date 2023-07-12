@@ -33,7 +33,14 @@ apptests/
 output/
 surface_map.dx
 benchmark
+
+# Web application
+.sass-cache/
+_site/
 export/
+userupload/
+logs/
+xvfb.log
 
 # Generated from webserver
 .sass-cache/
@@ -41,5 +48,3 @@ _site/
 
 .idea/
 *.pyc
-*userupload/
-*.log
