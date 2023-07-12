@@ -3,7 +3,7 @@ title: Linux download
 filename: linux.md
 ---
 
-### Latest version – v1.1.0
+### Latest version – v1.1.1
 
 Installers for Ubuntu/Debian. Download the installer that corresponds to your CPU architecture.
 If you are unsure, you can find your machine's architecture by running the following command in your Terminal.

@@ -3,7 +3,7 @@ title: Windows download
 filename: windows.md
 ---
 
-### Latest version – v1.1.0
+### Latest version – v1.1.1
 
 Version for Windows.
 

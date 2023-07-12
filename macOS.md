@@ -3,7 +3,7 @@ title: macOS Download
 filename: macOS.md
 ---
 
-### Latest version – v1.1.0
+### Latest version – v1.1.1
 
 Version for macOS El Capitan (10.11) and higher. The app natively supports Macs running on
 Apple silicon, as well as older CPU architectures.
