@@ -7,6 +7,9 @@ include(Options)
 # MOLOVOL_OSX_FAT_FILE
 # MOLOVOL_BUILD_TESTING
 
+# Set name and version
+project(MoloVol VERSION 1.1.1)
+
 # Strip binary for release build
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
@@ -14,9 +17,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
 # Minimum macOS version, ignored on other platforms
 # Must be set before project()
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11 CACHE STRING "Minimum macOS deployment version")
-
-# Set name and version
-project(MoloVol VERSION 1.1.1)
 
 include(ExecutableName)
 # EXE_NAME
