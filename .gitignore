@@ -42,5 +42,9 @@ userupload/
 logs/
 xvfb.log
 
+# Generated from webserver
+.sass-cache/
+_site/
+
 .idea/
 *.pyc

@@ -35,15 +35,15 @@ double& Vector::operator[](char i) {
   return coord[i];
 }
 
-const double& Vector::getCoordinate(char i) const {
+double Vector::getCoordinate(char i) const {
   return (*this)[i];
 }
 
-const double& Vector::operator[](char i) const {
+double Vector::operator[](char i) const {
   return coord[i];
 }
 
-void Vector::setCoordinate(char i, const double& val){
+void Vector::setCoordinate(char i, double val){
   coord[i] = val;
 }
 
@@ -59,15 +59,11 @@ Vector Vector::normalise() const {
   return (*this)/(this->length());
 }
 
-double Vector::angle(const Vector& vec) const {
-  return acos(this->normalise() * vec.normalise());
-}
-
 bool Vector::isLongerThan(const Vector& vecToCompare) const {
   return (this->squared() > vecToCompare.squared());
 }
 
-bool Vector::isLongerThan(const double& valToCompare) const {
+bool Vector::isLongerThan(double valToCompare) const {
   return (this->squared() > (valToCompare*valToCompare));
 }
 
@@ -75,7 +71,7 @@ bool Vector::isShorterThan(const Vector& vecToCompare) const{
   return (this->squared() < vecToCompare.squared());
 }
 
-bool Vector::isShorterThan(const double& valToCompare) const{
+bool Vector::isShorterThan(double valToCompare) const{
   return (this->squared() < (valToCompare*valToCompare));
 }
 
@@ -83,38 +79,22 @@ bool Vector::isSameLength(const Vector& vecToCompare) const{
   return (this->squared() == vecToCompare.squared());
 }
 
-bool Vector::isSameLength(const double& valToCompare) const{
+bool Vector::isSameLength(double valToCompare) const{
   return (this->squared() == (valToCompare*valToCompare));
 }
 
 bool Vector::operator>(const Vector& vec) const {return this->isLongerThan(vec);}
-bool Vector::operator>(const double& val) const {return this->isLongerThan(val);}
+bool Vector::operator>(double val) const {return this->isLongerThan(val);}
 bool Vector::operator>=(const Vector& vec) const {return !this->isShorterThan(vec);}
-bool Vector::operator>=(const double& val) const {return !this->isShorterThan(val);}
+bool Vector::operator>=(double val) const {return !this->isShorterThan(val);}
 bool Vector::operator<(const Vector& vec) const {return this->isShorterThan(vec);}
-bool Vector::operator<(const double& val) const {return this->isShorterThan(val);}
+bool Vector::operator<(double val) const {return this->isShorterThan(val);}
 bool Vector::operator<=(const Vector& vec) const {return !this->isLongerThan(vec);}
-bool Vector::operator<=(const double& val) const {return !this->isLongerThan(val);}
+bool Vector::operator<=(double val) const {return !this->isLongerThan(val);}
 bool Vector::operator==(const Vector& vec) const {return this->isSameLength(vec);}
-bool Vector::operator==(const double& val) const {return this->isSameLength(val);}
+bool Vector::operator==(double val) const {return this->isSameLength(val);}
 bool Vector::operator!=(const Vector& vec) const {return !this->isSameLength(vec);}
-bool Vector::operator!=(const double& val) const {return !this->isSameLength(val);}
-
-bool Vector::isInsideTriangle(const std::array<Vector,3>& vec_vertices) const {
-  Vector vec_oop = crossproduct(vec_vertices[1]-vec_vertices[0],vec_vertices[2]-vec_vertices[0]);
-
-  bool sign;
-  for (int i = 0; i < 3; i++){
-    int j = (i+1)%3;
-    if(!i){
-      sign = std::signbit(crossproduct(vec_oop,vec_vertices[j]-vec_vertices[i])*((*this)-vec_vertices[i]));
-    }
-    else if(sign != std::signbit(crossproduct(vec_oop,vec_vertices[j]-vec_vertices[i])*((*this)-vec_vertices[i]))){
-      return false;
-    }
-  }
-  return true;
-}
+bool Vector::operator!=(double val) const {return !this->isSameLength(val);}
 
 ////////////////
 // OPERATIONS //
@@ -135,18 +115,18 @@ Vector operator-(const Vector& lhs, const Vector& rhs){
   return add(lhs, scale(rhs,-1));
 }
 
-Vector scale(Vector vec, const double& scalar){
+Vector scale(Vector vec, double scalar){
   for (char i = 0; i<3; i++){
     vec.setCoordinate(i, vec.getCoordinate(i) * scalar);
   }
   return vec;
 }
 
-Vector scale(const double& scalar, const Vector& vec){return scale(vec,scalar);}
+Vector scale(double scalar, const Vector& vec){return scale(vec,scalar);}
 
-Vector operator*(const Vector& vec, const double& scalar){return scale(vec, scalar);}
-Vector operator*(const double& scalar, const Vector& vec){return scale(vec, scalar);}
-Vector operator/(const Vector& vec, const double& div){return vec*(1/div);}
+Vector operator*(const Vector& vec, double scalar){return scale(vec, scalar);}
+Vector operator*(double scalar, const Vector& vec){return scale(vec, scalar);}
+Vector operator/(const Vector& vec, double div){return vec*(1/div);}
 
 double dotproduct(const Vector& rhs, const Vector& lhs){
   double retval = 0;
@@ -157,14 +137,6 @@ double dotproduct(const Vector& rhs, const Vector& lhs){
 }
 
 double operator*(const Vector& rhs, const Vector& lhs){return dotproduct(lhs, rhs);}
-
-Vector crossproduct(const Vector& lhs, const Vector& rhs){
-  Vector retvec = Vector();
-  retvec[0] = lhs[1]*rhs[2] - lhs[2]*rhs[1];
-  retvec[1] = lhs[2]*rhs[0] - lhs[0]*rhs[2];
-  retvec[2] = lhs[0]*rhs[1] - lhs[1]*rhs[0];
-  return retvec;
-}
 
 double distance(const Vector& start, const Vector& end){
   return (end-start).length();

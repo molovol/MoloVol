@@ -4,6 +4,9 @@
 
 #include <array>
 
+// Wrapper class for a numeric array of size three.
+// Allows easy mathematical operations. Represents a positional
+// vector in R3.
 struct Vector{
   public:
     // constructors
@@ -15,9 +18,9 @@ struct Vector{
     // access
     double& getCoordinate(char);
     double& operator[](char);
-    const double& getCoordinate(char) const;
-    const double& operator[](char) const;
-    void setCoordinate(char,const double&);
+    double getCoordinate(char) const;
+    double operator[](char) const;
+    void setCoordinate(char,double);
     
     // display
     void print() const; 
@@ -27,31 +30,25 @@ struct Vector{
     Vector normalise() const; 
     Vector normalize() const {return normalise();}
     
-    // relation to other vector
-    double angle(const Vector&) const;
-    
-    // relation to multiple vectors
-    bool isInsideTriangle(const std::array<Vector,3>&) const;
-
     // comparisons
     bool isLongerThan(const Vector&) const;
-    bool isLongerThan(const double&) const;
+    bool isLongerThan(double) const;
     bool isShorterThan(const Vector&) const;
-    bool isShorterThan(const double&) const;
+    bool isShorterThan(double) const;
     bool isSameLength(const Vector&) const;
-    bool isSameLength(const double&) const;
+    bool isSameLength(double) const;
     bool operator>(const Vector&) const;
-    bool operator>(const double&) const;
+    bool operator>(double) const;
     bool operator>=(const Vector&) const;
-    bool operator>=(const double&) const;
+    bool operator>=(double) const;
     bool operator<(const Vector&) const;
-    bool operator<(const double&) const;
+    bool operator<(double) const;
     bool operator<=(const Vector&) const;
-    bool operator<=(const double&) const;
+    bool operator<=(double) const;
     bool operator==(const Vector&) const;
-    bool operator==(const double&) const;
+    bool operator==(double) const;
     bool operator!=(const Vector&) const;
-    bool operator!=(const double&) const;
+    bool operator!=(double) const;
 
   private:
     // data
@@ -66,16 +63,14 @@ Vector add(Vector, const Vector&);
 Vector operator+(const Vector&, const Vector&);
 Vector operator-(const Vector&, const Vector&);
 
-Vector scale(Vector, const double&);
-Vector scale(const double&, const Vector&);
-Vector operator*(const Vector&, const double&);
-Vector operator*(const double&, const Vector&);
-Vector operator/(const Vector&, const double&);
+Vector scale(Vector, double);
+Vector scale(double, const Vector&);
+Vector operator*(const Vector&, double);
+Vector operator*(double, const Vector&);
+Vector operator/(const Vector&, double);
 
 double dotproduct(const Vector&, const Vector&);
 double operator*(const Vector&, const Vector&);
-
-Vector crossproduct(const Vector&, const Vector&);
 
 double distance(const Vector&, const Vector&);
 double distance(const Vector&, const Vector&, const char);
