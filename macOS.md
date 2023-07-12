@@ -10,7 +10,7 @@ Apple silicon, as well as older CPU architectures.
 
 <div class="button download" markdown="1">
 * <a class="buttons" 
-    href="https://github.com/molovol/MoloVol/releases/download/v1.1.0/MoloVol_macOS-10.11+_v1.1.0.dmg">
+    href="https://github.com/molovol/MoloVol/releases/download/v1.1.1/MoloVol_macOS-10.11+_v1.1.1.dmg">
     Download Installer
   </a>
 </div>

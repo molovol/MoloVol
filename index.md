@@ -12,6 +12,15 @@ easily accessible on all common platforms.
 The software is being maintained and developed by Jasmin B. Maglic and Roy Lavendomme
 and is available on Windows (7, 8, 10, 11), macOS, Linux (Ubuntu, Debian), and as a web application.
 
+### News
+
+We have released version 1.1.1 which introduces a small patch to increase the calculation
+speed by around 50%. Other than that, this version is equivalent to the previous version,
+so we encourage everyone to upgrade.
+
+If you have previously experienced instability of the web app, its newest version fixes an
+issue that led to crashed. With this new change the web app should be more reliable.
+
 ### Web Application
 
 <div class="button link" markdown="1">

@@ -17,7 +17,7 @@ $ dpkg-architecture -q DEB_BUILD_ARCH
 <td>
 <div class="button download" markdown="1">
 * <a class="buttons" 
-    href="https://github.com/molovol/MoloVol/releases/download/v1.1.0/MoloVol_debian_arm64_v1.1.0.deb">
+    href="https://github.com/molovol/MoloVol/releases/download/v1.1.1/MoloVol_debian_arm64_v1.1.1.deb">
     Installer for arm64
   </a>
 </div>
@@ -25,7 +25,7 @@ $ dpkg-architecture -q DEB_BUILD_ARCH
 <td>
 <div class="button download" markdown="1">
 * <a class="buttons" 
-    href="https://github.com/molovol/MoloVol/releases/download/v1.1.0/MoloVol_debian_x86-64_v1.1.0.deb">
+    href="https://github.com/molovol/MoloVol/releases/download/v1.1.1/MoloVol_debian_amd64_v1.1.1.deb">
     Installer for x86_64
   </a>
 </div>
@@ -33,7 +33,7 @@ $ dpkg-architecture -q DEB_BUILD_ARCH
 <td>
 <div class="button download" markdown="1">
 * <a class="buttons" 
-    href="https://github.com/molovol/MoloVol/releases/download/v1.1.0/MoloVol_debian_x86-64_v1.1.0.deb">
+    href="https://github.com/molovol/MoloVol/releases/download/v1.1.1/MoloVol_debian_amd64_v1.1.1.deb">
     Installer for amd64
   </a>
 </div>

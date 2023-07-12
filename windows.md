@@ -9,7 +9,7 @@ Version for Windows.
 
 <div class="button download" markdown="1">
 * <a class="buttons" 
-    href="https://github.com/molovol/MoloVol/releases/download/v1.1.0/MoloVol_windows_v1.1.0.zip">
+    href="https://github.com/molovol/MoloVol/releases/download/v1.1.1/MoloVol_windows_v1.1.1.zip">
     Download Installer
   </a>
 </div>
