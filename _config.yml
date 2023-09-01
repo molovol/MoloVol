@@ -8,7 +8,7 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 title: MoloVol
-email: jmaglic@outlook.de
+email: molovol@outlook.com
 description: >- # this means to ignore newlines until "baseurl:"
   MoloVol is a free, cross-plattform, scientific software for volume 
   and surface computations of single molecules and crystallographic unit cells.
