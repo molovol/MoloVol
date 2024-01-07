@@ -238,9 +238,18 @@ def io():
 
     if request.method == 'POST':
 
-        reduce_dir_to_target_size(export_dir, 7 * 1024 * 1024 * 1024, 3600); # 7 GiB
-        reduce_dir_to_target_size(UPLOAD_FOLDER, 1024 * 1024 * 1024, 3600); # 1 GiB
-        reduce_dir_to_target_size(log_dir, 10 * 1024 * 1024, 3600); # 10 MiB
+        reduce_dir_to_target_size(export_dir, 
+                                  6 * 1024 * 1024 * 1024, 
+                                  7 * 1024 * 1024 * 1024, 
+                                  600); # 6 GiB kept 10 mins, max 7 GiB
+        reduce_dir_to_target_size(UPLOAD_FOLDER, 
+                                  0.8 * 1024 * 1024 * 1024, 
+                                  1.0 * 1024 * 1024 * 1024, 
+                                  1800); # 0.8 GiB kept 30 mins, max 1 GiB
+        reduce_dir_to_target_size(log_dir, 
+                                  10 * 1024 * 1024, 
+                                  100 * 1024 * 1024, 
+                                  3600); # 10 MiB kept 60 mins, max 100 MiB
 
         out = ""
         # when arguments ignore form data
@@ -357,7 +366,7 @@ import time
 # Makes space for new user upload and export files by deleting the oldest files until a predefined
 # amount of disk space is available. Keeps all files that are younger than the grace period. The
 # grace period is given in seconds.
-def reduce_dir_to_target_size(directory, target_size, grace_period=0):
+def reduce_dir_to_target_size(directory, target_size, max_size, grace_period=0):
     print(f"Deleting entries in {directory} to reach {target_size} bytes.")
     total_size = get_entry_size(directory)
 
@@ -366,15 +375,15 @@ def reduce_dir_to_target_size(directory, target_size, grace_period=0):
     entries.sort(key=os.path.getctime, reverse=True)  # Sort files and folders by creation time (oldest first)
 
     current_time = time.time()
-    latest_ctime = current_time - (grace_period) # Determine the latest allowed creation time
+    latest_ctime = current_time - grace_period # Determine the latest allowed creation time
 
     while entries and total_size > target_size:
         entry_path = entries.pop()
         entry_size = get_entry_size(entry_path)
         
-        # Skip file if it is too young
+        # Skip file if it is too young and there is still space in the directory
         entry_ctime = os.path.getctime(entry_path)
-        if entry_ctime > latest_ctime:
+        if entry_ctime > latest_ctime and total_size < max_size:
             continue
 
         entry_size = get_entry_size(entry_path)
