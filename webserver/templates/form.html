@@ -8,7 +8,10 @@
   <link rel="stylesheet" type="text/css" href="{{ url_for('.static', filename='style.css') }}">
   <!-- Favicon -->
   <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
-  <link rel="mask-icon" href="{{ url_for('static', filename='static/safari-pinned-tab.svg') }}" color="#2380be"> 
+  <!-- <link rel="mask-icon" href="{{ url_for('static', filename='safari-pinned-tab.svg') }}" color="#2380be"> 
+  By removing this line I am forcing Safari to use the same favicon as on the main website. The mask icon 
+  produces a nice looking icon on the touch bar but the tab icon in Safari looks bad, especially in dark mode.
+  Not even Apple's website itself makes use of this feature. -JBM -->
   <link rel="shortcut icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
   <link rel="shortcut icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
   <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
