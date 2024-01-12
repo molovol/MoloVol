@@ -216,14 +216,16 @@
 {% endif %}
 
 <script type = "text/javascript">
-  // Lock checkboxes based on previously uploaded file
   window.onload = function(e) {
-    if ("{{ returnvalues }}") {
+    // If user has just run a calculation, redirect them to the output section
+    {% if returnvalues %}
       window.location.hash="output";
-    }
-    if ("{{ laststructure }}") {
+    {% endif %}
+
+    // Lock checkboxes based on previously uploaded file
+    {% if laststructure %}
       evalFilename("{{ laststructure }}", false);
-    }
+    {% endif %}
   }
 
   // Lock checkboxes based on newly uploaded file
