@@ -16,7 +16,7 @@ COPY include/ include/
 COPY LICENSE ./
 COPY README.md ./
 COPY inputfile/ inputfile/
-RUN cmake . && make
+RUN cmake . -DCMAKE_BUILD_TYPE=RELEASE && make
 WORKDIR /
 
 # add flask webserver
