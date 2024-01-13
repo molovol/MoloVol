@@ -239,9 +239,9 @@ def io():
     if request.method == 'POST':
 
         reduce_dir_to_target_size(export_dir, 
-                                  6 * 1024 * 1024 * 1024, 
-                                  7 * 1024 * 1024 * 1024, 
-                                  600); # 6 GiB kept 10 mins, max 7 GiB
+                                  3 * 1024 * 1024 * 1024, 
+                                  4 * 1024 * 1024 * 1024, 
+                                  600); # 3 GiB kept 10 mins, max 4 GiB
         reduce_dir_to_target_size(UPLOAD_FOLDER, 
                                   0.8 * 1024 * 1024 * 1024, 
                                   1.0 * 1024 * 1024 * 1024, 
