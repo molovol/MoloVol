@@ -465,7 +465,7 @@ typename ImportMngr::SymMatData ImportMngr::convertCifSymmetryElements(const std
     std::stringstream check1(symop_list[i]);
     // Tokenizing separated by comma
     std::string token;
-    for (int j = 0; getline(check1, token, ','); j++){
+    while (getline(check1, token, ',')){
       for (char coord : {'x','y','z'}){
         sym_matrix_data.first.push_back(evalToken(token, coord));
       }

@@ -3,6 +3,7 @@
 #define ATOMTREE_H
 
 #include <vector>
+#include "atom.h"
 
 struct Atom;
 class AtomTree;
@@ -27,7 +28,6 @@ class AtomNode{
     static inline std::vector<Atom> s_atom_list;
 };
 
-struct Atom;
 class AtomNode;
 class AtomTree{
   public:
