@@ -1,17 +1,22 @@
 # builds molovol and installs the webapp
 FROM bsvogler/wxwidgets
 # hack to create a headless x server, cmake for building
+RUN apt-get update
 RUN apt-get install xvfb cmake -y
 # does not work when set in dockerfile?
 ENV DISPLAY=:1.0
 
-# compile molovol
+# compile molovol, for some reason some less important files like the readme are needed for cmake
 WORKDIR /build
+COPY cmake/ cmake/
 COPY CMakeLists.txt CMakeLists.txt
+COPY res/ res/
 COPY src/ src/
 COPY include/ include/
-RUN cmake . && make
+COPY LICENSE ./
+COPY README.md ./
 COPY inputfile/ inputfile/
+RUN cmake . && make
 WORKDIR /
 
 # add flask webserver
