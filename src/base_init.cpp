@@ -29,6 +29,10 @@ bool MainApp::OnInit()
     MainFrame* MainWin = new MainFrame(_("MoloVol " + Ctrl::getVersion()), wxDefaultPosition, wxDefaultSize);
     MainWin->Show(true);
     SetTopWindow(MainWin);
+
+    ExperimentalFrame* ExpWin = new ExperimentalFrame("Experimental", wxDefaultPosition, wxDefaultSize);
+    ExpWin->Show(true);
+
   }
   return true;
 };

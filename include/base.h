@@ -37,6 +37,14 @@ class MainApp: public wxApp
 
 wxDECLARE_EVENT(wxEVT_COMMAND_WORKERTHREAD_COMPLETED, wxThreadEvent);
 
+class ExperimentalFrame : public wxFrame {
+  public:
+    ExperimentalFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
+        : wxFrame(NULL, wxID_ANY, title, pos, size) {
+          //wxStaticText* label = new wxStaticText(this, wxID_ANY, "This is the secondary window.", wxPoint(10, 10));
+    }
+};
+
 class MainFrame: public wxFrame, public wxThreadHelper
 {
   public:
