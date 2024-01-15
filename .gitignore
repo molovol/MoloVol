@@ -51,3 +51,6 @@ _site/
 
 # Virtual python environment
 venv*/
+
+# Third party libraries
+external/
