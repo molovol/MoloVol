@@ -316,9 +316,9 @@ def io():
                 args.append(structure_path)
 
             # read elements file
-            elements_path = "./inputfile/elements.txt"
+            elements_path = "/usr/share/molovol/elements.txt"
             args.append("-fe")
-            args.append(elements_path)
+            args.append(elements_path) # May not even be necessary
 
             # we only print it out in the end, so we can put it to quiet
             args.append("-q")
