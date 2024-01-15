@@ -48,3 +48,6 @@ _site/
 
 .idea/
 *.pyc
+
+# Virtual python environment
+venv*/
