@@ -13,11 +13,13 @@ set(TEST_SOURCES
 add_library(mvl SHARED ${TEST_SOURCES})
 target_include_directories(mvl PUBLIC ./)
 target_compile_definitions(mvl PRIVATE LIBRARY_BUILD)
+include_directories(external/PolyVox/include)
 
 set(TEST_NAMES
   cut_off_string
   struct_atom
   class_vector
+  experimental
 )
 
 set(MOLOVOL_TEST_DIR ${CMAKE_SOURCE_DIR}/test)
