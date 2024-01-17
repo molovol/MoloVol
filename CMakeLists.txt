@@ -33,10 +33,16 @@ endif()
 
 # wxWidgets
 set(wxWidgets_USE_STATIC=ON)
-find_package(wxWidgets REQUIRED core base OPTIONAL_COMPONENTS net)
+find_package(wxWidgets REQUIRED core base gl OPTIONAL_COMPONENTS net)
 include(${wxWidgets_USE_FILE})
 
 #find_package(OpenMP)
+
+# OpenGL
+find_package(OpenGL REQUIRED)
+find_package(GLUT REQUIRED)
+
+include_directories(${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS})
 
 # Add include path, so that header files can be found
 include_directories(include)
@@ -77,7 +83,7 @@ add_executable(${EXE_NAME} ${SOURCES} ${OSX_RESOURCE_FILES})
 # XCode, app bundle and libtiff
 include(MacSpecific)
 
-target_link_libraries(${EXE_NAME} ${wxWidgets_LIBRARIES})
+target_link_libraries(${EXE_NAME} ${wxWidgets_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
   # Add custom flag
 if(MOLOVOL_ABS_RESOURCE_PATH)
   target_compile_definitions(${EXE_NAME} PUBLIC -DABS_PATH)

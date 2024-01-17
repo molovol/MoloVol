@@ -22,6 +22,50 @@
 #include <map>
 #include <utility>
 
+// CANVAS
+#include <wx/glcanvas.h>
+#include <GLUT/glut.h>
+ 
+class VoxelCanvas : public wxGLCanvas
+{
+  public:
+  	VoxelCanvas(wxFrame* parent, int* args);
+  	virtual ~VoxelCanvas();
+      
+  	void resized(wxSizeEvent& evt);
+      
+  	int getWidth();
+  	int getHeight();
+      
+  	void render(wxPaintEvent& evt);
+  	void prepare3DViewport(int topleft_x, int topleft_y, int bottomrigth_x, int bottomrigth_y);
+  	void prepare2DViewport(int topleft_x, int topleft_y, int bottomrigth_x, int bottomrigth_y);
+      
+  	// events
+  	void mouseMoved(wxMouseEvent& event);
+  	void mouseDown(wxMouseEvent& event);
+  	void mouseWheelMoved(wxMouseEvent& event);
+  	void mouseReleased(wxMouseEvent& event);
+  	void rightClick(wxMouseEvent& event);
+  	void mouseLeftWindow(wxMouseEvent& event);
+  	void keyPressed(wxKeyEvent& event);
+  	void keyReleased(wxKeyEvent& event);
+      
+  	DECLARE_EVENT_TABLE()
+
+  private:
+    wxGLContext*	m_context;
+
+    // Vertices and faces of a simple cube to demonstrate 3D render
+    // source: http://www.opengl.org/resources/code/samples/glut_examples/examples/cube.c
+    GLfloat m_v[8][3];
+    GLint m_faces[6][4] = {  /* Vertex indices for the 6 faces of a cube. */
+      {0, 1, 2, 3}, {3, 2, 6, 7}, {7, 6, 5, 4},
+      {4, 5, 1, 0}, {5, 6, 2, 1}, {7, 4, 0, 3} };
+
+};
+
+// Application
 class MainApp: public wxApp
 {
   public:
@@ -33,17 +77,13 @@ class MainApp: public wxApp
     void evalCmdLine();
     void silenceGUI(bool);
     bool isSilent();
+
+    // For graphics
+    wxFrame *frame;
+    VoxelCanvas *canvas;
 };
 
 wxDECLARE_EVENT(wxEVT_COMMAND_WORKERTHREAD_COMPLETED, wxThreadEvent);
-
-class ExperimentalFrame : public wxFrame {
-  public:
-    ExperimentalFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
-        : wxFrame(NULL, wxID_ANY, title, pos, size) {
-          //wxStaticText* label = new wxStaticText(this, wxID_ANY, "This is the secondary window.", wxPoint(10, 10));
-    }
-};
 
 class MainFrame: public wxFrame, public wxThreadHelper
 {
