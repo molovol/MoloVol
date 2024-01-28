@@ -16,7 +16,8 @@ COPY include/ include/
 COPY LICENSE ./
 COPY README.md ./
 COPY inputfile/ inputfile/
-RUN cmake . -DCMAKE_BUILD_TYPE=RELEASE && make
+RUN cmake . -DCMAKE_BUILD_TYPE=RELEASE -DMOLOVOL_ABS_RESOURCE_PATH=ON && make
+RUN cpack -G DEB && dpkg -i MoloVol_*.deb
 WORKDIR /
 
 # add flask webserver
