@@ -20,3 +20,9 @@ if (CMAKE_MACOSX_BUNDLE AND NOT MOLOVOL_ABS_RESOURCE_PATH)
   message(WARNING "The executable inside a macOS application bundle is always compiled with MOLOVOL_ABS_RESOURCE_PATH enabled")
   set(MOLOVOL_ABS_RESOURCE_PATH TRUE)
 endif()
+
+option(
+  MOLOVOL_RENDERER
+  "Enable compilation and linking to wxVTK24" 
+  ON
+)
