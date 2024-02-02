@@ -32,6 +32,7 @@ find_package(VTK
 # wxVTKRenderWindowInteractor library
 set(WXVTK_LIB wxVTK24)
 set(WXVTK_SRC_DIR ${CMAKE_SOURCE_DIR}/external/WxVTK_CPP_Random_Cube_Visualized)
+include_directories(${WXVTK_SRC_DIR})
 add_library(${WXVTK_LIB}
   STATIC ${WXVTK_SRC_DIR}/wxVTKRenderWindowInteractor.cxx 
   ${WXVTK_SRC_DIR}/wxVTKRenderWindowInteractor.h)

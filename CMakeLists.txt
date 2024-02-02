@@ -57,6 +57,10 @@ endif()
 
 include(Sources)
 # SOURCES
+if(MOLOVOL_RENDERER)
+  list(APPEND SOURCES "src/render_frame.cpp")
+endif()
+
 
 include(Resources)
 # ELEM_FILE
@@ -84,6 +88,7 @@ include(MacSpecific)
 target_link_libraries(${EXE_NAME} ${wxWidgets_LIBRARIES})
 if(MOLOVOL_RENDERER)
   target_link_libraries(${EXE_NAME} ${WXVTK_LIB})
+  target_compile_definitions(${EXE_NAME} PRIVATE MOLOVOL_RENDERER)
 endif()
 
   # Add custom flag
