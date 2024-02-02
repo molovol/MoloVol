@@ -31,7 +31,6 @@ class RenderFrame : public wxFrame {
   
     vtkSmartPointer<vtkNamedColors> colors;
     vtkSmartPointer<vtkImageData> cylinder;
-    vtkSmartPointer<vtkVoxelModeller> voxelModeller;
     vtkSmartPointer<vtkMarchingCubes> surface;
     vtkSmartPointer<vtkRenderer> renderer;
     vtkSmartPointer<vtkRenderWindow> renderWindow;

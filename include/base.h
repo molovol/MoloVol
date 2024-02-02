@@ -96,6 +96,10 @@ class MainFrame: public wxFrame, public wxThreadHelper
 
     void openErrorDialog(const std::pair<int,std::string>&);
 
+    // The main frame should contain the render window, so that the Model class
+    // can transfer image information to the render frame
+    wxFrame* RenderWin;
+
     wxMessageQueue<bool>* _abort_q;
     wxStatusBar* statusBar;
 

@@ -9,10 +9,6 @@
 #include "controller.h"
 #include "misc.h"
 
-#ifdef MOLOVOL_RENDERER
-#include "render_frame.h"
-#endif
-
 #include <cassert>
 
 // wxWidgets macro that contains the entry point, initialised the app, and calls wxApp::OnInit()
@@ -34,11 +30,6 @@ bool MainApp::OnInit()
     MainFrame* MainWin = new MainFrame(_("MoloVol " + Ctrl::getVersion()), wxDefaultPosition, wxDefaultSize);
     MainWin->Show(true);
     SetTopWindow(MainWin);
-
-#ifdef MOLOVOL_RENDERER
-    RenderFrame* RenderWin = new RenderFrame(wxT("Hello World"), wxPoint(50,50), wxSize(400,200));
-    RenderWin->Show(true);
-#endif
 
   }
   return true;
