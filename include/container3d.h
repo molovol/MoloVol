@@ -44,21 +44,9 @@ class Container3D{
       return _data[z * _n_elements[0] * _n_elements[1] + y * _n_elements[0] + x];
     }
 
-
     // These functions should be a template function
-    T& getElement(const std::array<unsigned long int,3> coord){
-      return _data[coord[2] * _n_elements[0] * _n_elements[1] + coord[1] * _n_elements[0] + coord[0]];
-    }
-    
-    T& getElement(const std::array<unsigned int,3> coord){
-      return _data[coord[2] * _n_elements[0] * _n_elements[1] + coord[1] * _n_elements[0] + coord[0]];
-    }
-    
-    T& getElement(const std::array<long int,3> coord){
-      return _data[coord[2] * _n_elements[0] * _n_elements[1] + coord[1] * _n_elements[0] + coord[0]];
-    }
-    
-    T& getElement(const std::array<int,3> coord){
+    template<std::integral INT>
+    T& getElement(const std::array<INT,3> coord){
       return _data[coord[2] * _n_elements[0] * _n_elements[1] + coord[1] * _n_elements[0] + coord[0]];
     }
 
