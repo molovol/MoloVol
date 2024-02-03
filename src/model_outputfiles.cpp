@@ -455,7 +455,7 @@ void Model::writeSurfaceMap(const std::string file_path,
                             const unsigned char id){
   bool issue_encountered = false;
   // assemble data
-  Container3D<Voxel>* surface_map = &_cell.getGrid(0);
+  const Container3D<Voxel>* surface_map = &_cell.getGrid(0);
 
   // create map for assigning numbers to types
   const std::map<char,int> typeToNum =
@@ -536,6 +536,10 @@ void Model::writeSurfaceMap(const std::string file_path,
   // close the file
   output_file.close();
   if (issue_encountered) {Ctrl::getInstance()->displayErrorMessage(303);}
+}
+
+const Container3D<Voxel>& Model::getSurfaceData() const {
+  return _cell.getGrid(0);
 }
 
 ///////////////

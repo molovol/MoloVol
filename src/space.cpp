@@ -534,7 +534,7 @@ double Space::getVxlSize() const {
   return _grid_size;
 }
 
-Container3D<Voxel>& Space::getGrid(const unsigned lvl){
+const Container3D<Voxel>& Space::getGrid(const unsigned lvl) const{
   return _grid[lvl];
 }
 

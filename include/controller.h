@@ -10,6 +10,10 @@
 struct CalcReportBundle;
 class Model;
 class MainFrame;
+
+template <typename> class Container3D;
+class Voxel;
+
 class Ctrl{
   public:
     static Ctrl* getInstance();
@@ -27,7 +31,9 @@ class Ctrl{
     bool loadElementsFile();
     bool loadAtomFile();
     bool runCalculation();
-    bool runCalculation(const double, const double, const double, const std::string&, const std::string&, const std::string&, const int, const bool, const bool, const bool, const bool, const bool, const bool, const bool, const unsigned);
+    bool runCalculation(const double, const double, const double, const std::string&,
+        const std::string&, const std::string&, const int, const bool, const bool,
+        const bool, const bool, const bool, const bool, const bool, const unsigned);
     void registerView(MainFrame* inp_gui);
     void clearOutput();
     void notifyUser(std::string);
@@ -39,6 +45,7 @@ class Ctrl{
     void exportReport(std::string);
     void exportSurfaceMap(bool);
     void exportSurfaceMap(const std::string, bool);
+    void renderSurface(const Container3D<Voxel>&);
 
     void newCalculation();
     void calculationDone(const bool=true);

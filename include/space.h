@@ -26,7 +26,7 @@ class Space{
     bool isInBounds(const std::array<int,3>&, const unsigned);
     bool isInBounds(const std::array<unsigned,3>&, const unsigned);
     double getVxlSize() const;
-    Container3D<Voxel>& getGrid(const unsigned);
+    const Container3D<Voxel>& getGrid(const unsigned) const;
 
     // get voxel
     Voxel& getVxlFromGrid(const unsigned int, unsigned);

@@ -7,6 +7,8 @@
 #include "exception.h"
 #include "special_chars.h"
 #include "griddata.h"
+#include "container3d.h"
+#include "voxel.h"
 #include <chrono>
 #include <utility>
 #include <map>
@@ -156,6 +158,7 @@ bool Ctrl::runCalculation(){
 
   // OUTPUT
   displayResults(data);
+  renderSurface(_current_calculation->getSurfaceData());
 
   if (data.success){
     // export if appropriate option is toggled
@@ -500,6 +503,10 @@ void Ctrl::updateProgressBar(const int percentage){
   else {
     std::cout << std::to_string(percentage) + "\%"  << std::endl;
   }
+}
+
+void Ctrl::renderSurface(const Container3D<Voxel>& surf_data) {
+  std::cout << "Data passed to Controller!" << std::endl;
 }
 
 ////////////
