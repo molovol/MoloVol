@@ -12,6 +12,9 @@
 #include <vtkRenderer.h>
 #include <vtkMarchingCubes.h>
 
+#include <array>
+#include <unordered_map>
+
 // EVENT TABLE
 #define MY_FRAME    101
 #define MY_VTK_WINDOW 102
@@ -101,7 +104,24 @@ void RenderFrame::ConfigureVTK()
 }
 
 void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data){
-
+  std::array<size_t,3> dims = surf_data.getNumElements();
+  cylinder->SetDimensions(dims[0],dims[1],dims[2]);
+  const std::unordered_map<char,int> typeToNum =
+    {{0b00000011, 0},
+     {0b00000101, 1},
+     {0b00001001, 6},
+     {0b00010001, 4},
+     {0b00100001, 2},
+     {0b01000001, 2}};
+  
+  for (size_t i = 0; i < dims[0]; ++i) {
+    for (size_t j = 0; j < dims[1]; ++j) {
+      for (size_t k = 0; k < dims[2]; ++k) {
+        int* voxel = static_cast<int*>(cylinder->GetScalarPointer(i,j,k));
+        *voxel = typeToNum.find(surf_data.getElement(i,j,k).getType())->second;
+      }
+    }
+  }
 }
 
 void RenderFrame::OnQuit(wxCommandEvent& WXUNUSED(event)) {
