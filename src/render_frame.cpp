@@ -93,7 +93,7 @@ void RenderFrame::ConfigureVTK()
     }
   }
 
-  surface->SetInputData(cylinder); // change cylinder to volume to display sphere
+  surface->SetInputData(cylinder);
   surface->ComputeNormalsOn();
   surface->SetValue(0, isoValue);
 
@@ -122,6 +122,8 @@ void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data){
       }
     }
   }
+
+  m_pVTKWindow->GetRenderWindow()->Render();
 }
 
 void RenderFrame::OnQuit(wxCommandEvent& WXUNUSED(event)) {
