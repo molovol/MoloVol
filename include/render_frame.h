@@ -21,6 +21,8 @@ class vtkRenderer;
 class vtkRenderWindow;
 class vtkPolyDataMapper;
 class vtkActor;
+template <typename> class Container3D;
+class Voxel;
 
 class RenderFrame : public wxFrame {
   public:
@@ -28,6 +30,7 @@ class RenderFrame : public wxFrame {
     ~RenderFrame();
 
     void OnQuit(wxCommandEvent& event);
+    void UpdateSurface(const Container3D<Voxel>&);
   
     vtkSmartPointer<vtkNamedColors> colors;
     vtkSmartPointer<vtkImageData> cylinder;

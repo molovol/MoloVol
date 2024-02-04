@@ -98,6 +98,10 @@ void RenderFrame::ConfigureVTK()
 
 }
 
+void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data){
+  std::cout << "Success" << std::endl;
+}
+
 void RenderFrame::OnQuit(wxCommandEvent& WXUNUSED(event)) {
   // Only hide window when this window is closed
   Show(false);
