@@ -33,7 +33,7 @@ class RenderFrame : public wxFrame {
     void UpdateSurface(const Container3D<Voxel>&);
   
     vtkSmartPointer<vtkNamedColors> colors;
-    vtkSmartPointer<vtkImageData> cylinder;
+    vtkSmartPointer<vtkImageData> imagedata;
     vtkSmartPointer<vtkMarchingCubes> surface;
     vtkSmartPointer<vtkRenderer> renderer;
     vtkSmartPointer<vtkRenderWindow> renderWindow;

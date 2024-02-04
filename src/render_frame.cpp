@@ -54,7 +54,7 @@ RenderFrame::~RenderFrame()
 void RenderFrame::ConstructVTK()
 {
   colors = vtkSmartPointer<vtkNamedColors>::New(); 
-  cylinder = vtkSmartPointer<vtkImageData>::New();
+  imagedata = vtkSmartPointer<vtkImageData>::New();
   surface = vtkSmartPointer<vtkMarchingCubes>::New();
   renderer = vtkSmartPointer<vtkRenderer>::New();
   mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
@@ -78,22 +78,22 @@ void RenderFrame::ConfigureVTK()
   
   // Alternative image data
   int lim = 200;
-  cylinder->SetDimensions(lim,lim,lim);
-  cylinder->AllocateScalars(VTK_INT,1);
+  imagedata->SetDimensions(lim,lim,lim);
+  imagedata->AllocateScalars(VTK_INT,1);
   for (size_t i = 0; i < lim; ++i) {
     for (size_t j = 0; j < lim; ++j) {
-      // Constructing a cylinder
+      // Constructing a imagedata
       bool writeLine = (i-100)*(i-100) + (j-100)*(j-100) < 50*50;
       for (size_t k = 0; k < lim; ++k) {
         bool cap = k > 2 && k < lim-2;
 
-        int* voxel = static_cast<int*>(cylinder->GetScalarPointer(i, j, k));
+        int* voxel = static_cast<int*>(imagedata->GetScalarPointer(i, j, k));
         *voxel = writeLine && cap? 1 : 0;
       }
     }
   }
 
-  surface->SetInputData(cylinder);
+  surface->SetInputData(imagedata);
   surface->ComputeNormalsOn();
   surface->SetValue(0, isoValue);
 
@@ -105,7 +105,11 @@ void RenderFrame::ConfigureVTK()
 
 void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data){
   std::array<size_t,3> dims = surf_data.getNumElements();
-  cylinder->SetDimensions(dims[0],dims[1],dims[2]);
+
+  vtkImageData* molecule = vtkImageData::New(); 
+  molecule->SetDimensions(dims[0],dims[1],dims[2]);
+  // Sets the type of the scalar
+  molecule->AllocateScalars(VTK_INT,1);
   const std::unordered_map<char,int> typeToNum =
     {{0b00000011, 0},
      {0b00000101, 1},
@@ -113,16 +117,23 @@ void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data){
      {0b00010001, 4},
      {0b00100001, 2},
      {0b01000001, 2}};
-  
+
   for (size_t i = 0; i < dims[0]; ++i) {
     for (size_t j = 0; j < dims[1]; ++j) {
       for (size_t k = 0; k < dims[2]; ++k) {
-        int* voxel = static_cast<int*>(cylinder->GetScalarPointer(i,j,k));
-        *voxel = typeToNum.find(surf_data.getElement(i,j,k).getType())->second;
+        int* voxel = static_cast<int*>(molecule->GetScalarPointer(i,j,k));
+        //std::cout << voxel << std::endl;
+        //std::cout << (int)typeToNum.find(surf_data.getElement(i,j,k).getType())->second << std::endl;
+        *voxel = (int)typeToNum.find(surf_data.getElement(i,j,k).getType())->second;
       }
     }
   }
 
+  imagedata = molecule;
+  surface->SetInputData(imagedata);
+  surface->ComputeNormalsOn();
+  surface->SetValue(0, 0.5);
+  
   m_pVTKWindow->GetRenderWindow()->Render();
 }
 
