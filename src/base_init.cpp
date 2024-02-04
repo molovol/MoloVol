@@ -27,9 +27,9 @@ bool MainApp::OnInit()
   }
   else {
     // initialise the GUI
-    MainFrame* MainWin = new MainFrame(_("MoloVol " + Ctrl::getVersion()), wxDefaultPosition, wxDefaultSize);
-    MainWin->Show(true);
-    SetTopWindow(MainWin);
+    m_mainWin = new MainFrame(_("MoloVol " + Ctrl::getVersion()), wxDefaultPosition, wxDefaultSize);
+    m_mainWin->Show(true);
+    SetTopWindow(m_mainWin);
 
   }
   return true;

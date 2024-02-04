@@ -19,7 +19,7 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
   InitTopLevel();
 
 #ifdef MOLOVOL_RENDERER
-  m_renderWin = std::make_unique<RenderFrame>(wxT("Hello World"), wxPoint(50,50), wxSize(400,200));
+  m_renderWin = new RenderFrame(wxT("Hello World"), wxPoint(50,50), wxSize(400,200));
   m_renderWin->Show(true);
 #endif
 };

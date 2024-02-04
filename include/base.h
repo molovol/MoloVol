@@ -26,8 +26,8 @@
 #include <unordered_map>
 #include <map>
 #include <utility>
-#include <memory>
 
+class MainFrame;
 // Application
 class MainApp: public wxApp
 {
@@ -37,6 +37,8 @@ class MainApp: public wxApp
     virtual int OnExit();
 
   private:
+    MainFrame* m_mainWin;
+
     void evalCmdLine();
     void silenceGUI(bool);
     bool isSilent();
@@ -112,7 +114,7 @@ class MainFrame: public wxFrame, public wxThreadHelper
 #ifdef MOLOVOL_RENDERER
     // The main frame should contain the render window, so that the Model class
     // can transfer image information to the render frame
-    std::unique_ptr<RenderFrame> m_renderWin;
+    RenderFrame* m_renderWin;
 #endif
 
     wxMessageQueue<bool>* _abort_q;
