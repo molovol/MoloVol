@@ -8,8 +8,14 @@
 #include "special_chars.h"
 #include "misc.h"
 #include "flags.h"
+#include "container3d.h"
+#include "voxel.h"
 #include <string>
 #include <wx/msgdlg.h>
+
+#ifdef MOLOVOL_RENDERER
+#include "render_frame.h"
+#endif
 
 //////////////////////////////////
 // METHODS FOR MANIPULATING GUI //
@@ -48,6 +54,10 @@ void MainFrame::extDisplayCavityList(const GridData& table){
 void MainFrame::extOpenErrorDialog(const int error_code, const std::string& error_message){
   const std::pair<int, std::string> code_message = std::make_pair(error_code, error_message);
   GetEventHandler()->CallAfter(&MainFrame::openErrorDialog, code_message);
+}
+
+void MainFrame::extRenderSurface(const Container3D<Voxel>& surf_data){
+  GetEventHandler()->CallAfter(&MainFrame::renderSurface, surf_data);
 }
 
 // NOT THREAD SAFE
@@ -257,6 +267,12 @@ void MainFrame::setStatus(const std::string str){
 
 void MainFrame::setProgressBar(const int percentage){
   progressGauge->SetValue(percentage);
+}
+
+void MainFrame::renderSurface(const Container3D<Voxel>& surf_data){
+#ifdef MOLOVOL_RENDERER
+  std::cout << "Success" << std::endl;
+#endif
 }
 
 ////////////////////

@@ -506,7 +506,9 @@ void Ctrl::updateProgressBar(const int percentage){
 }
 
 void Ctrl::renderSurface(const Container3D<Voxel>& surf_data) {
-  std::cout << "Data passed to Controller!" << std::endl;
+  if (_to_gui) {
+    s_gui->extRenderSurface(surf_data);
+  }
 }
 
 ////////////

@@ -38,6 +38,9 @@ class MainApp: public wxApp
 
 wxDECLARE_EVENT(wxEVT_COMMAND_WORKERTHREAD_COMPLETED, wxThreadEvent);
 
+template <typename> class Container3D;
+class Voxel;
+
 class MainFrame: public wxFrame, public wxThreadHelper
 {
   public:
@@ -53,6 +56,8 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void extSetStatus(const std::string);
     void extSetProgressBar(const int);
     void extDisplayCavityList(const GridData&);
+    void extRenderSurface(const Container3D<Voxel>&);
+
     bool receivedAbortCommand();
 
     void extOpenErrorDialog(const int, const std::string&);
@@ -93,6 +98,7 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void setStatus(const std::string);
     void setProgressBar(const int);
     void displayCavityList(const GridData&);
+    void renderSurface(const Container3D<Voxel>&);
 
     void openErrorDialog(const std::pair<int,std::string>&);
 
