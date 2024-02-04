@@ -4,6 +4,11 @@
 
 #include "cavity.h"
 #include "griddata.h"
+
+#ifdef MOLOVOL_RENDERER
+#include "render_frame.h"
+#endif
+ 
 #include <wx/filectrl.h>
 #include <wx/filepicker.h>
 #include <wx/wfstream.h>
@@ -21,7 +26,8 @@
 #include <unordered_map>
 #include <map>
 #include <utility>
- 
+#include <memory>
+
 // Application
 class MainApp: public wxApp
 {
@@ -40,6 +46,7 @@ wxDECLARE_EVENT(wxEVT_COMMAND_WORKERTHREAD_COMPLETED, wxThreadEvent);
 
 template <typename> class Container3D;
 class Voxel;
+class RenderFrame;
 
 class MainFrame: public wxFrame, public wxThreadHelper
 {
@@ -102,9 +109,11 @@ class MainFrame: public wxFrame, public wxThreadHelper
 
     void openErrorDialog(const std::pair<int,std::string>&);
 
+#ifdef MOLOVOL_RENDERER
     // The main frame should contain the render window, so that the Model class
     // can transfer image information to the render frame
-    wxFrame* RenderWin;
+    std::unique_ptr<RenderFrame> m_renderWin;
+#endif
 
     wxMessageQueue<bool>* _abort_q;
     wxStatusBar* statusBar;

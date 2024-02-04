@@ -13,10 +13,6 @@
 #include <string>
 #include <wx/msgdlg.h>
 
-#ifdef MOLOVOL_RENDERER
-#include "render_frame.h"
-#endif
-
 //////////////////////////////////
 // METHODS FOR MANIPULATING GUI //
 //////////////////////////////////
@@ -271,7 +267,6 @@ void MainFrame::setProgressBar(const int percentage){
 
 void MainFrame::renderSurface(const Container3D<Voxel>& surf_data){
 #ifdef MOLOVOL_RENDERER
-  std::cout << "Success" << std::endl;
 #endif
 }
 
