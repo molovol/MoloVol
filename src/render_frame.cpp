@@ -1,4 +1,6 @@
 #include "render_frame.h"
+#include "container3d.h"
+#include "voxel.h"
 
 // VTK
 #include <vtkActor.h>
@@ -99,7 +101,7 @@ void RenderFrame::ConfigureVTK()
 }
 
 void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data){
-  std::cout << "Success" << std::endl;
+
 }
 
 void RenderFrame::OnQuit(wxCommandEvent& WXUNUSED(event)) {

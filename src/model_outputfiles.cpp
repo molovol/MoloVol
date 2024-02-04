@@ -41,7 +41,7 @@ void Model::createReport(std::string path){
   output_report << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n";
   output_report << "Website: https://molovol.com\n";
   output_report << "Source code available at https://github.com/molovol/MoloVol under the MIT licence\n";
-  output_report << "Copyright © 2020-2022 Jasmin B. Maglic, Roy Lavendomme\n\n";
+  output_report << "Copyright © 2020-2024 Jasmin B. Maglic, Roy Lavendomme\n\n";
   output_report << "MoloVol program: calculation results report\n";
   output_report << "version: " + Ctrl::getVersion() + "\n\n";
   output_report << "Time of the calculation: " << _time_stamp << "\n";
