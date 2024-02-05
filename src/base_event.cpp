@@ -51,6 +51,7 @@ void MainFrame::OnClose(wxCloseEvent& event){
   if (_abort_q->IsOk()){
     _abort_q->Post(true);
   }
+  delete _abort_q;
   if (GetThread() && GetThread()->IsRunning()){
     GetThread()->Wait();
   }
@@ -83,11 +84,13 @@ void MainFrame::OnCalc(wxCommandEvent& event){
 }
 
 wxThread::ExitCode MainFrame::Entry(){
-  // worker thread
+  // Worker thread
   Ctrl::getInstance()->runCalculation();
+
   // after the calculation is finished, this event tells the main thread to give the stop signal
   // and reenable the GUI
   wxQueueEvent(this, new wxThreadEvent(wxEVT_COMMAND_WORKERTHREAD_COMPLETED));
+
   // give main thread a millisecond to give stop signal. this avoids starting the while loop again
   GetThread()->Sleep(1);
   return (wxThread::ExitCode)0;
