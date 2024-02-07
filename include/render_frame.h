@@ -29,7 +29,7 @@ class RenderFrame : public wxFrame {
     RenderFrame(const wxString&, const wxPoint&, const wxSize&);
     ~RenderFrame();
 
-    void OnQuit(wxCommandEvent& event);
+    void OnClose(wxCloseEvent& event);
     void UpdateSurface(const Container3D<Voxel>&);
   
     vtkSmartPointer<vtkNamedColors> colors;

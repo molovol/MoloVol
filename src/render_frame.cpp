@@ -20,7 +20,7 @@
 #define MY_VTK_WINDOW 102
 
 BEGIN_EVENT_TABLE(RenderFrame, wxFrame)
-  EVT_MENU(Minimal_Quit,  RenderFrame::OnQuit)
+  EVT_CLOSE(RenderFrame::OnClose)
 END_EVENT_TABLE()
 
 // DEFINITIONS
@@ -137,8 +137,7 @@ void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data){
   m_pVTKWindow->GetRenderWindow()->Render();
 }
 
-void RenderFrame::OnQuit(wxCommandEvent& WXUNUSED(event)) {
-  // Only hide window when this window is closed
+void RenderFrame::OnClose(wxCloseEvent& WXUNUSED(event)){
   Show(false);
 }
 

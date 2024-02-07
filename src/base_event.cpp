@@ -55,7 +55,7 @@ void MainFrame::OnClose(wxCloseEvent& event){
   if (GetThread() && GetThread()->IsRunning()){
     GetThread()->Wait();
   }
-  m_renderWin->Close();
+  m_renderWin->Destroy();
   event.Skip();
 }
 

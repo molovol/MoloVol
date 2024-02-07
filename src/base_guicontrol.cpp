@@ -268,6 +268,7 @@ void MainFrame::setProgressBar(const int percentage){
 void MainFrame::renderSurface(const Container3D<Voxel>& surf_data){
 #ifdef MOLOVOL_RENDERER
   m_renderWin->UpdateSurface(surf_data);
+  m_renderWin->Show(true);
 #endif
 }
 
