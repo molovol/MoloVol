@@ -15,5 +15,6 @@ set_target_properties(${EXE_NAME} PROPERTIES
 
 # Library shenanigans
 if(APPLE)
-  string(REPLACE "-ltiff" "/usr/local/opt/libtiff/lib/libtiff.a" wxWidgets_LIBRARIES "${wxWidgets_LIBRARIES}")
+  # This does not seem to be necessary anymore as of 2024-02-07
+  #string(REPLACE "-ltiff" "/usr/local/opt/libtiff/lib/libtiff.a" wxWidgets_LIBRARIES "${wxWidgets_LIBRARIES}")
 endif()
