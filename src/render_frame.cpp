@@ -106,10 +106,12 @@ void RenderFrame::ConfigureVTK()
 void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data){
   std::array<size_t,3> dims = surf_data.getNumElements();
 
+  // New image data
   vtkImageData* molecule = vtkImageData::New(); 
   molecule->SetDimensions(dims[0],dims[1],dims[2]);
   // Sets the type of the scalar
   molecule->AllocateScalars(VTK_INT,1);
+  // TODO: Make this a static member of this class
   const std::unordered_map<char,int> typeToNum =
     {{0b00000011, 0},
      {0b00000101, 1},
@@ -117,13 +119,11 @@ void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data){
      {0b00010001, 4},
      {0b00100001, 2},
      {0b01000001, 2}};
-
+  // Copy image data
   for (size_t i = 0; i < dims[0]; ++i) {
     for (size_t j = 0; j < dims[1]; ++j) {
       for (size_t k = 0; k < dims[2]; ++k) {
         int* voxel = static_cast<int*>(molecule->GetScalarPointer(i,j,k));
-        //std::cout << voxel << std::endl;
-        //std::cout << (int)typeToNum.find(surf_data.getElement(i,j,k).getType())->second << std::endl;
         *voxel = (int)typeToNum.find(surf_data.getElement(i,j,k).getType())->second;
       }
     }
@@ -135,6 +135,7 @@ void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data){
   surface->SetValue(0, 0.5);
   
   m_pVTKWindow->GetRenderWindow()->Render();
+  //m_pVTKWindow->GetRenderWindow()->ResetCamera();
 }
 
 void RenderFrame::OnClose(wxCloseEvent& WXUNUSED(event)){
