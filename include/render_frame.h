@@ -46,7 +46,7 @@ class RenderFrame : public wxFrame {
     vtkSmartPointer<vtkActor> actor;
   
   private:
-    void ConstructVTK();
+    void InitPointerMembers();
     void ConfigureVTK();
   
     wxVTKRenderWindowInteractor* m_pVTKWindow;

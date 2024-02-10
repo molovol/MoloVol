@@ -62,7 +62,7 @@ RenderFrame::RenderFrame(const wxString& title, const wxPoint& pos, const wxSize
   }
 
   // Render window
-  ConstructVTK();
+  InitPointerMembers();
   ConfigureVTK();
 
 }
@@ -72,7 +72,7 @@ RenderFrame::~RenderFrame()
   if(m_pVTKWindow) m_pVTKWindow->Delete();
 }
 
-void RenderFrame::ConstructVTK()
+void RenderFrame::InitPointerMembers()
 {
   colors = vtkSmartPointer<vtkNamedColors>::New(); 
   imagedata = vtkSmartPointer<vtkImageData>::New();
@@ -80,7 +80,6 @@ void RenderFrame::ConstructVTK()
   renderer = vtkSmartPointer<vtkRenderer>::New();
   mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
   actor = vtkSmartPointer<vtkActor>::New();
-
 }
 
 void RenderFrame::ConfigureVTK()
