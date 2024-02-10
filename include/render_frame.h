@@ -21,6 +21,11 @@ class vtkRenderer;
 class vtkRenderWindow;
 class vtkPolyDataMapper;
 class vtkActor;
+
+class wxPanel;
+class wxTextCtrl;
+class wxStaticText;
+
 template <typename> class Container3D;
 class Voxel;
 
@@ -45,6 +50,10 @@ class RenderFrame : public wxFrame {
     void ConfigureVTK();
   
     wxVTKRenderWindowInteractor* m_pVTKWindow;
+    wxPanel* m_controlPanel;
+      wxPanel* m_isoPanel;
+        wxStaticText* m_isoText;
+        wxTextCtrl* m_isoCtrl;
   
   private:
     DECLARE_EVENT_TABLE()
@@ -52,6 +61,11 @@ class RenderFrame : public wxFrame {
 
 enum {
   Minimal_Quit = 1,
+  WXVTK_Render,
+  PANEL_Control,
+  PANEL_Iso,
+  TEXT_Iso,
+  TEXT_IsoCtrl
 };
 
 #endif

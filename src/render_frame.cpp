@@ -12,38 +12,59 @@
 #include <vtkRenderer.h>
 #include <vtkMarchingCubes.h>
 
+// wxWidgets
+#include <wx/spinctrl.h>
+
 #include <array>
 #include <unordered_map>
 
 // EVENT TABLE
-#define MY_FRAME    101
-#define MY_VTK_WINDOW 102
-
 BEGIN_EVENT_TABLE(RenderFrame, wxFrame)
   EVT_CLOSE(RenderFrame::OnClose)
 END_EVENT_TABLE()
 
 // DEFINITIONS
-RenderFrame::RenderFrame(const wxString& title, const wxPoint& pos, const wxSize& size) : wxFrame((wxFrame *)NULL, -1, title, pos, size)
-{
+// Constructor is called when the render window is initiated by the main window.
+// Initialises the render frame and control widgets.
+RenderFrame::RenderFrame(const wxString& title, const wxPoint& pos, const wxSize& size) 
+  : wxFrame((wxFrame *)NULL, -1, title, pos, size) {
 
-  CreateStatusBar(2);
-  wxString mystring;
-  mystring << "WxWidgets Version: ";
-  mystring << wxMAJOR_VERSION;
-  mystring << ".";
-  mystring << wxMINOR_VERSION;
-  mystring << ".";
-  mystring << wxRELEASE_NUMBER;
-  mystring << ".";
-  mystring << wxSUBRELEASE_NUMBER;
-  SetStatusText(mystring,1);
-  
-  m_pVTKWindow = new wxVTKRenderWindowInteractor(this, MY_VTK_WINDOW);
+  // Create wxVTK window interactor
+  m_pVTKWindow = new wxVTKRenderWindowInteractor(this, WXVTK_Render, wxDefaultPosition, wxSize(400,400));
   m_pVTKWindow->UseCaptureMouseOn(); // TODO: Not sure what this does
   
+  m_controlPanel = new wxPanel(this, PANEL_Control, wxDefaultPosition, wxSize(200,-1));
+
+  m_isoPanel = new wxPanel(m_controlPanel, PANEL_Iso);
+
+  m_isoText = new wxStaticText(m_isoPanel, TEXT_Iso, "Iso Value");
+  m_isoCtrl = new wxTextCtrl(m_isoPanel, TEXT_IsoCtrl, "0.5");
+
+  {
+    wxBoxSizer* isoSizer = new wxBoxSizer(wxHORIZONTAL);
+    isoSizer->Add(m_isoText, 1);
+    isoSizer->Add(m_isoCtrl, 1);
+    m_isoPanel->SetSizerAndFit(isoSizer);
+  }
+
+  {
+    wxBoxSizer* controlSizer = new wxBoxSizer(wxVERTICAL);
+    controlSizer->Add(m_isoPanel, 0, wxEXPAND);
+    m_controlPanel->SetSizerAndFit(controlSizer);
+  }
+
+  // Top level horizontal box sizer, contains render frame and the control panel
+  {
+    wxBoxSizer* topLvlSizer = new wxBoxSizer(wxHORIZONTAL);
+    topLvlSizer->Add(m_pVTKWindow, 1, wxEXPAND);
+    topLvlSizer->Add(m_controlPanel, 0, wxEXPAND);
+    this->SetSizerAndFit(topLvlSizer);
+  }
+
+  // Render window
   ConstructVTK();
   ConfigureVTK();
+
 }
 
 RenderFrame::~RenderFrame()
