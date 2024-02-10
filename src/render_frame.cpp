@@ -154,8 +154,8 @@ void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data){
   surface->ComputeNormalsOn();
   surface->SetValue(0, 0.5);
   
+  renderer->ResetCamera();
   m_pVTKWindow->GetRenderWindow()->Render();
-  //m_pVTKWindow->GetRenderWindow()->ResetCamera();
 }
 
 void RenderFrame::OnClose(wxCloseEvent& WXUNUSED(event)){
