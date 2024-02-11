@@ -36,6 +36,7 @@ class RenderFrame : public wxFrame {
 
     void OnClose(wxCloseEvent& event);
     void UpdateSurface(const Container3D<Voxel>&);
+    void Render();
   
     vtkSmartPointer<vtkNamedColors> colors;
     vtkSmartPointer<vtkImageData> imagedata;
