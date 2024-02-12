@@ -14,6 +14,7 @@
 
 // wxWidgets
 #include <wx/spinctrl.h>
+#include <wx/event.h>
 
 #include <array>
 #include <unordered_map>
@@ -21,6 +22,7 @@
 // EVENT TABLE
 BEGIN_EVENT_TABLE(RenderFrame, wxFrame)
   EVT_CLOSE(RenderFrame::OnClose)
+  EVT_TEXT_ENTER(TEXT_IsoCtrl, RenderFrame::OnChangeIso)
 END_EVENT_TABLE()
 
 // DEFINITIONS
@@ -38,7 +40,8 @@ RenderFrame::RenderFrame(const wxString& title, const wxPoint& pos, const wxSize
   m_isoPanel = new wxPanel(m_controlPanel, PANEL_Iso);
 
   m_isoText = new wxStaticText(m_isoPanel, TEXT_Iso, "Iso Value");
-  m_isoCtrl = new wxTextCtrl(m_isoPanel, TEXT_IsoCtrl, "0.5");
+  m_isoCtrl = new wxTextCtrl(m_isoPanel, TEXT_IsoCtrl, "0.5", wxDefaultPosition, wxDefaultSize,
+      wxTE_PROCESS_ENTER);
 
   {
     wxBoxSizer* isoSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -159,6 +162,17 @@ void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data){
 
 void RenderFrame::Render() {
   renderWindow->Render();  
+}
+
+////////////////////
+// EVENT HANDLERS //
+////////////////////
+void RenderFrame::OnChangeIso(wxCommandEvent& e) {
+  auto number = e.GetString();
+  double value;
+  if(!number.ToDouble(&value)){ /* error! */ }
+  surface->SetValue(0,value);
+  Render();
 }
 
 void RenderFrame::OnClose(wxCloseEvent& WXUNUSED(event)){

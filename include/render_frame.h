@@ -25,6 +25,7 @@ class vtkActor;
 class wxPanel;
 class wxTextCtrl;
 class wxStaticText;
+class wxCommandEvent;
 
 template <typename> class Container3D;
 class Voxel;
@@ -49,6 +50,9 @@ class RenderFrame : public wxFrame {
   private:
     void InitPointerMembers();
     void ConfigureVTK();
+
+    // Events
+    void OnChangeIso(wxCommandEvent&);
   
     wxVTKRenderWindowInteractor* m_pVTKWindow;
     wxPanel* m_controlPanel;
