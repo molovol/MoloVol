@@ -52,9 +52,11 @@ class RenderFrame : public wxFrame {
     void InitPointerMembers();
     void ConfigureVTK();
     void AdjustControls(bool);
+    void ChangeIso(double);
 
     // Events
     void OnChangeIso(wxCommandEvent&);
+    void OnButtonIso(wxCommandEvent&);
 
     // Members
     bool m_twoProbeMode;

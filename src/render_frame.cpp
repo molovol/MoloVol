@@ -19,11 +19,13 @@
 
 #include <array>
 #include <unordered_map>
+#include <string> 
 
 // EVENT TABLE
 BEGIN_EVENT_TABLE(RenderFrame, wxFrame)
   EVT_CLOSE(RenderFrame::OnClose)
   EVT_TEXT_ENTER(TEXT_IsoCtrl, RenderFrame::OnChangeIso)
+  EVT_BUTTON(wxID_ANY, RenderFrame::OnButtonIso)
 END_EVENT_TABLE()
 
 // DEFINITIONS
@@ -52,9 +54,9 @@ RenderFrame::RenderFrame(const wxString& title, const wxPoint& pos, const wxSize
   }
 
   m_vdwBtn = new wxButton(m_controlPanel, BUTTON_Vdw, "Van der Waals-Surface");
-  m_molBtn = new wxButton(m_controlPanel, BUTTON_Vdw, "Molecular Surface");
-  m_cavityBtn = new wxButton(m_controlPanel, BUTTON_Vdw, "Cavity Surfaces");
-  m_accessibleBtn = new wxButton(m_controlPanel, BUTTON_Vdw, "Probe Accessible Surface");
+  m_molBtn = new wxButton(m_controlPanel, BUTTON_Mol, "Molecular Surface");
+  m_cavityBtn = new wxButton(m_controlPanel, BUTTON_Cavity, "Cavity Surfaces");
+  m_accessibleBtn = new wxButton(m_controlPanel, BUTTON_Accessible, "Probe Accessible Surface");
 
   {
     wxBoxSizer* controlSizer = new wxBoxSizer(wxVERTICAL);
@@ -165,7 +167,9 @@ void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data, bool probe_
   imagedata = molecule;
   surface->SetInputData(imagedata);
   surface->ComputeNormalsOn();
+  // Set initial iso value and set iso value in text field
   surface->SetValue(0, 0.5);
+  m_isoCtrl->SetValue("0.5");
   
   renderer->ResetCamera();
 
@@ -188,15 +192,52 @@ void RenderFrame::Render() {
   renderWindow->Render();  
 }
 
+void RenderFrame::ChangeIso(double value) {
+  // Set value to UI
+  std::string str = std::to_string(value);
+  // Remove trailing zeros
+  str = str.substr(0, str.find_last_not_of('0')+1); 
+  if(str.find('.') == str.size()-1) {
+    // Remove decimal point
+    str = str.substr(0, str.size()-1);
+  }
+  m_isoCtrl->SetValue(str);
+  // Set iso in renderer
+  surface->SetValue(0,value);
+  Render();
+}
+
 ////////////////////
 // EVENT HANDLERS //
 ////////////////////
 void RenderFrame::OnChangeIso(wxCommandEvent& e) {
   auto number = e.GetString();
   double value;
-  if(!number.ToDouble(&value)){ /* error! */ }
-  surface->SetValue(0,value);
-  Render();
+  if(!number.ToDouble(&value)){
+    ChangeIso(0);
+  }
+  else {
+    ChangeIso(value);
+  }
+}
+
+void RenderFrame::OnButtonIso(wxCommandEvent& event) {
+  double isoValue;
+  switch (event.GetId()) {
+    case BUTTON_Vdw:
+      isoValue = 0.5;
+      break;
+    case BUTTON_Mol:
+      isoValue = m_twoProbeMode? 1.5 : 2.0;
+      break;
+    case BUTTON_Cavity:
+      isoValue = 3.0;
+      break;
+    case BUTTON_Accessible:
+      isoValue = 5.0;
+      break;
+  }
+  ChangeIso(isoValue);
 }
 
 void RenderFrame::OnClose(wxCloseEvent& WXUNUSED(event)){
