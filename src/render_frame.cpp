@@ -15,6 +15,7 @@
 // wxWidgets
 #include <wx/spinctrl.h>
 #include <wx/event.h>
+#include <wx/button.h>
 
 #include <array>
 #include <unordered_map>
@@ -50,8 +51,17 @@ RenderFrame::RenderFrame(const wxString& title, const wxPoint& pos, const wxSize
     m_isoPanel->SetSizerAndFit(isoSizer);
   }
 
+  m_vdwBtn = new wxButton(m_controlPanel, BUTTON_Vdw, "Van der Waals-Surface");
+  m_molBtn = new wxButton(m_controlPanel, BUTTON_Vdw, "Molecular Surface");
+  m_cavityBtn = new wxButton(m_controlPanel, BUTTON_Vdw, "Cavity Surfaces");
+  m_accessibleBtn = new wxButton(m_controlPanel, BUTTON_Vdw, "Probe Accessible Surface");
+
   {
     wxBoxSizer* controlSizer = new wxBoxSizer(wxVERTICAL);
+    controlSizer->Add(m_vdwBtn, 0, wxEXPAND);
+    controlSizer->Add(m_molBtn, 0, wxEXPAND);
+    controlSizer->Add(m_cavityBtn, 0, wxEXPAND);
+    controlSizer->Add(m_accessibleBtn, 0, wxEXPAND);
     controlSizer->Add(m_isoPanel, 0, wxEXPAND);
     m_controlPanel->SetSizerAndFit(controlSizer);
   }
@@ -126,7 +136,7 @@ void RenderFrame::ConfigureVTK()
 
 }
 
-void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data){
+void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data, bool probe_mode){
   std::array<size_t,3> dims = surf_data.getNumElements();
 
   // New image data
@@ -158,6 +168,20 @@ void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data){
   surface->SetValue(0, 0.5);
   
   renderer->ResetCamera();
+
+  AdjustControls(probe_mode);
+}
+
+// Adjust GUI elements based on the probe mode
+void RenderFrame::AdjustControls(bool probe_mode) {
+  m_twoProbeMode = probe_mode;
+  if (probe_mode) {
+    m_cavityBtn->Show();
+  }
+  else {
+    m_cavityBtn->Hide();
+  }
+  Layout();
 }
 
 void RenderFrame::Render() {

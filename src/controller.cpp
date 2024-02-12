@@ -158,7 +158,7 @@ bool Ctrl::runCalculation(){
 
   // OUTPUT
   displayResults(data);
-  renderSurface(_current_calculation->getSurfaceData());
+  renderSurface(_current_calculation->getSurfaceData(), data.probe_mode);
 
   if (data.success){
     // export if appropriate option is toggled
@@ -505,9 +505,9 @@ void Ctrl::updateProgressBar(const int percentage){
   }
 }
 
-void Ctrl::renderSurface(const Container3D<Voxel>& surf_data) {
+void Ctrl::renderSurface(const Container3D<Voxel>& surf_data, bool probe_mode) {
   if (_to_gui) {
-    s_gui->extRenderSurface(surf_data);
+    s_gui->extRenderSurface(surf_data, probe_mode);
   }
 }
 

@@ -52,8 +52,8 @@ void MainFrame::extOpenErrorDialog(const int error_code, const std::string& erro
   GetEventHandler()->CallAfter(&MainFrame::openErrorDialog, code_message);
 }
 
-void MainFrame::extRenderSurface(const Container3D<Voxel>& surf_data){
-  GetEventHandler()->CallAfter(&MainFrame::renderSurface, surf_data);
+void MainFrame::extRenderSurface(const Container3D<Voxel>& surf_data, bool probe_mode){
+  GetEventHandler()->CallAfter(&MainFrame::renderSurface, surf_data, probe_mode);
 }
 
 // NOT THREAD SAFE
@@ -265,9 +265,9 @@ void MainFrame::setProgressBar(const int percentage){
   progressGauge->SetValue(percentage);
 }
 
-void MainFrame::renderSurface(const Container3D<Voxel>& surf_data){
+void MainFrame::renderSurface(const Container3D<Voxel>& surf_data, bool probe_mode){
 #ifdef MOLOVOL_RENDERER
-  m_renderWin->UpdateSurface(surf_data);
+  m_renderWin->UpdateSurface(surf_data, probe_mode);
   
   // Only render if window is currently visible
   if (m_renderWin->IsShown()) {

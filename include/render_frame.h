@@ -26,6 +26,7 @@ class wxPanel;
 class wxTextCtrl;
 class wxStaticText;
 class wxCommandEvent;
+class wxButton;
 
 template <typename> class Container3D;
 class Voxel;
@@ -36,7 +37,7 @@ class RenderFrame : public wxFrame {
     ~RenderFrame();
 
     void OnClose(wxCloseEvent& event);
-    void UpdateSurface(const Container3D<Voxel>&);
+    void UpdateSurface(const Container3D<Voxel>&, bool);
     void Render();
   
     vtkSmartPointer<vtkNamedColors> colors;
@@ -50,17 +51,24 @@ class RenderFrame : public wxFrame {
   private:
     void InitPointerMembers();
     void ConfigureVTK();
+    void AdjustControls(bool);
 
     // Events
     void OnChangeIso(wxCommandEvent&);
+
+    // Members
+    bool m_twoProbeMode;
   
     wxVTKRenderWindowInteractor* m_pVTKWindow;
     wxPanel* m_controlPanel;
+      wxButton* m_vdwBtn;
+      wxButton* m_molBtn;
+      wxButton* m_cavityBtn;
+      wxButton* m_accessibleBtn;
       wxPanel* m_isoPanel;
         wxStaticText* m_isoText;
         wxTextCtrl* m_isoCtrl;
   
-  private:
     DECLARE_EVENT_TABLE()
 };
 
@@ -68,6 +76,10 @@ enum {
   Minimal_Quit = 1,
   WXVTK_Render,
   PANEL_Control,
+  BUTTON_Vdw,
+  BUTTON_Mol,
+  BUTTON_Cavity,
+  BUTTON_Accessible,
   PANEL_Iso,
   TEXT_Iso,
   TEXT_IsoCtrl
