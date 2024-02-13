@@ -56,20 +56,22 @@ class RenderFrame : public wxFrame {
 
     // Events
     void OnChangeIso(wxCommandEvent&);
-    void OnButtonIso(wxCommandEvent&);
+    void OnButtonClick(wxCommandEvent&);
 
     // Members
     bool m_twoProbeMode;
   
     wxVTKRenderWindowInteractor* m_pVTKWindow;
     wxPanel* m_controlPanel;
-      wxButton* m_vdwBtn;
-      wxButton* m_molBtn;
-      wxButton* m_cavityBtn;
-      wxButton* m_accessibleBtn;
-      wxPanel* m_isoPanel;
-        wxStaticText* m_isoText;
-        wxTextCtrl* m_isoCtrl;
+      wxPanel* m_isoCtrlPanel;
+        wxButton* m_vdwBtn;
+        wxButton* m_molBtn;
+        wxButton* m_cavityBtn;
+        wxButton* m_accessibleBtn;
+        wxPanel* m_isoInputPanel;
+          wxStaticText* m_isoText;
+          wxTextCtrl* m_isoCtrl;
+        wxButton* m_resetCameraBtn;
   
     DECLARE_EVENT_TABLE()
 };
@@ -78,13 +80,15 @@ enum {
   Minimal_Quit = 1,
   WXVTK_Render,
   PANEL_Control,
+  PANEL_IsoCtrl,
   BUTTON_Vdw,
   BUTTON_Mol,
   BUTTON_Cavity,
   BUTTON_Accessible,
-  PANEL_Iso,
+  PANEL_IsoInput,
   TEXT_Iso,
-  TEXT_IsoCtrl
+  TEXT_IsoCtrl,
+  BUTTON_ResetCamera
 };
 
 #endif

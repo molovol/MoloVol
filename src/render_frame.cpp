@@ -25,7 +25,7 @@
 BEGIN_EVENT_TABLE(RenderFrame, wxFrame)
   EVT_CLOSE(RenderFrame::OnClose)
   EVT_TEXT_ENTER(TEXT_IsoCtrl, RenderFrame::OnChangeIso)
-  EVT_BUTTON(wxID_ANY, RenderFrame::OnButtonIso)
+  EVT_BUTTON(wxID_ANY, RenderFrame::OnButtonClick)
 END_EVENT_TABLE()
 
 // DEFINITIONS
@@ -38,25 +38,31 @@ RenderFrame::RenderFrame(const wxString& title, const wxPoint& pos, const wxSize
   m_pVTKWindow = new wxVTKRenderWindowInteractor(this, WXVTK_Render, wxDefaultPosition, wxSize(400,400));
   m_pVTKWindow->UseCaptureMouseOn(); // TODO: Not sure what this does
   
+  // Control Panel
   m_controlPanel = new wxPanel(this, PANEL_Control, wxDefaultPosition, wxSize(200,-1));
+ 
+  // Iso Control Panel
+  m_isoCtrlPanel = new wxPanel(m_controlPanel, PANEL_IsoCtrl);
 
-  m_isoPanel = new wxPanel(m_controlPanel, PANEL_Iso);
+  // Iso Input Panel
+  m_isoInputPanel = new wxPanel(m_isoCtrlPanel, PANEL_IsoInput);
 
-  m_isoText = new wxStaticText(m_isoPanel, TEXT_Iso, "Iso Value");
-  m_isoCtrl = new wxTextCtrl(m_isoPanel, TEXT_IsoCtrl, "0.5", wxDefaultPosition, wxDefaultSize,
+  m_isoText = new wxStaticText(m_isoInputPanel, TEXT_Iso, "Iso Value");
+  m_isoCtrl = new wxTextCtrl(m_isoInputPanel, TEXT_IsoCtrl, "0.5", wxDefaultPosition, wxDefaultSize,
       wxTE_PROCESS_ENTER);
 
   {
     wxBoxSizer* isoSizer = new wxBoxSizer(wxHORIZONTAL);
     isoSizer->Add(m_isoText, 1);
     isoSizer->Add(m_isoCtrl, 1);
-    m_isoPanel->SetSizerAndFit(isoSizer);
+    m_isoInputPanel->SetSizerAndFit(isoSizer);
   }
+  // Iso Input Panel
 
-  m_vdwBtn = new wxButton(m_controlPanel, BUTTON_Vdw, "Van der Waals-Surface");
-  m_molBtn = new wxButton(m_controlPanel, BUTTON_Mol, "Molecular Surface");
-  m_cavityBtn = new wxButton(m_controlPanel, BUTTON_Cavity, "Cavity Surfaces");
-  m_accessibleBtn = new wxButton(m_controlPanel, BUTTON_Accessible, "Probe Accessible Surface");
+  m_vdwBtn = new wxButton(m_isoCtrlPanel, BUTTON_Vdw, "Van der Waals-Surface");
+  m_molBtn = new wxButton(m_isoCtrlPanel, BUTTON_Mol, "Molecular Surface");
+  m_cavityBtn = new wxButton(m_isoCtrlPanel, BUTTON_Cavity, "Cavity Surfaces");
+  m_accessibleBtn = new wxButton(m_isoCtrlPanel, BUTTON_Accessible, "Probe Accessible Surface");
 
   {
     wxBoxSizer* controlSizer = new wxBoxSizer(wxVERTICAL);
@@ -64,9 +70,20 @@ RenderFrame::RenderFrame(const wxString& title, const wxPoint& pos, const wxSize
     controlSizer->Add(m_molBtn, 0, wxEXPAND);
     controlSizer->Add(m_cavityBtn, 0, wxEXPAND);
     controlSizer->Add(m_accessibleBtn, 0, wxEXPAND);
-    controlSizer->Add(m_isoPanel, 0, wxEXPAND);
+    controlSizer->Add(m_isoInputPanel, 0, wxEXPAND);
+    m_isoCtrlPanel->SetSizerAndFit(controlSizer);
+  }
+  // Iso Control Panel
+
+  m_resetCameraBtn = new wxButton(m_controlPanel, BUTTON_ResetCamera, "Center Camera");
+  
+  {
+    wxBoxSizer* controlSizer = new wxBoxSizer(wxVERTICAL);
+    controlSizer->Add(m_isoCtrlPanel, 0, wxEXPAND);
+    controlSizer->Add(m_resetCameraBtn, 0, wxEXPAND);
     m_controlPanel->SetSizerAndFit(controlSizer);
   }
+  // Control Panel
 
   // Top level horizontal box sizer, contains render frame and the control panel
   {
@@ -221,23 +238,27 @@ void RenderFrame::OnChangeIso(wxCommandEvent& e) {
   }
 }
 
-void RenderFrame::OnButtonIso(wxCommandEvent& event) {
-  double isoValue;
+void RenderFrame::OnButtonClick(wxCommandEvent& event) {
+
   switch (event.GetId()) {
     case BUTTON_Vdw:
-      isoValue = 0.5;
+      ChangeIso(0.5);
       break;
     case BUTTON_Mol:
-      isoValue = m_twoProbeMode? 1.5 : 2.0;
+      ChangeIso(m_twoProbeMode? 1.5 : 2.0);
       break;
     case BUTTON_Cavity:
-      isoValue = 3.0;
+      ChangeIso(3.0);
       break;
     case BUTTON_Accessible:
-      isoValue = 5.0;
+      ChangeIso(5.0);
+      break;
+    case BUTTON_ResetCamera:
+      renderer->ResetCamera();
+      Render();
       break;
   }
-  ChangeIso(isoValue);
+
 }
 
 void RenderFrame::OnClose(wxCloseEvent& WXUNUSED(event)){
