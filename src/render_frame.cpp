@@ -79,6 +79,7 @@ void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data, bool probe_
      {0b00100001, 2},
      {0b01000001, 2}};
   // Copy image data
+  // TODO: Parallelise
   for (size_t i = 0; i < dims[0]; ++i) {
     for (size_t j = 0; j < dims[1]; ++j) {
       for (size_t k = 0; k < dims[2]; ++k) {
@@ -197,7 +198,6 @@ void RenderFrame::InitPointerMembers()
 }
 
 void RenderFrame::InitRenderWindow() {
-  double isoValue = 0.5;
 
   // Here we get the renderer window from wxVTK
   renderWindow = m_pVTKWindow->GetRenderWindow();
@@ -211,7 +211,6 @@ void RenderFrame::InitRenderWindow() {
   
   surface->SetInputData(imagedata);
   surface->ComputeNormalsOn();
-  surface->SetValue(0, isoValue);
 
   // The mapper requires our vtkMarchingCubes object
   mapper->SetInputConnection(surface->GetOutputPort());
