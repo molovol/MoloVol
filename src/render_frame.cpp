@@ -66,11 +66,10 @@ RenderFrame::~RenderFrame()
 void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data, bool probe_mode){
   std::array<size_t,3> dims = surf_data.getNumElements();
 
-  // New image data
-  vtkImageData* molecule = vtkImageData::New(); 
-  molecule->SetDimensions(dims[0],dims[1],dims[2]);
+  imagedata->Initialize();
+  imagedata->SetDimensions(dims[0],dims[1],dims[2]);
   // Sets the type of the scalar
-  molecule->AllocateScalars(VTK_INT,1);
+  imagedata->AllocateScalars(VTK_INT,1);
   // TODO: Make this a static member of this class
   const std::unordered_map<char,int> typeToNum =
     {{0b00000011, 0},
@@ -83,15 +82,12 @@ void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data, bool probe_
   for (size_t i = 0; i < dims[0]; ++i) {
     for (size_t j = 0; j < dims[1]; ++j) {
       for (size_t k = 0; k < dims[2]; ++k) {
-        int* voxel = static_cast<int*>(molecule->GetScalarPointer(i,j,k));
+        int* voxel = static_cast<int*>(imagedata->GetScalarPointer(i,j,k));
         *voxel = (int)typeToNum.find(surf_data.getElement(i,j,k).getType())->second;
       }
     }
   }
 
-  imagedata = molecule;
-  surface->SetInputData(imagedata);
-  surface->ComputeNormalsOn();
   // Set initial iso value and set iso value in text field
   surface->SetValue(0, 0.5);
   m_isoCtrl->SetValue("0.5");
@@ -213,23 +209,6 @@ void RenderFrame::InitRenderWindow() {
   actor->GetProperty()->SetColor(colors->GetColor3d("MistyRose").GetData());
   actor->SetMapper(mapper);
   
-  // Alternative image data
-  int lim = 200;
-  imagedata->SetDimensions(lim,lim,lim);
-  imagedata->AllocateScalars(VTK_INT,1);
-  for (size_t i = 0; i < lim; ++i) {
-    for (size_t j = 0; j < lim; ++j) {
-      // Constructing a imagedata
-      bool writeLine = (i-100)*(i-100) + (j-100)*(j-100) < 50*50;
-      for (size_t k = 0; k < lim; ++k) {
-        bool cap = k > 2 && k < lim-2;
-
-        int* voxel = static_cast<int*>(imagedata->GetScalarPointer(i, j, k));
-        *voxel = writeLine && cap? 1 : 0;
-      }
-    }
-  }
-
   surface->SetInputData(imagedata);
   surface->ComputeNormalsOn();
   surface->SetValue(0, isoValue);
