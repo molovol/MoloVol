@@ -38,52 +38,7 @@ RenderFrame::RenderFrame(const wxString& title, const wxPoint& pos, const wxSize
   m_pVTKWindow = new wxVTKRenderWindowInteractor(this, WXVTK_Render, wxDefaultPosition, wxSize(400,400));
   m_pVTKWindow->UseCaptureMouseOn(); // TODO: Not sure what this does
   
-  // Control Panel
-  m_controlPanel = new wxPanel(this, PANEL_Control, wxDefaultPosition, wxSize(200,-1));
- 
-  // Iso Control Panel
-  m_isoCtrlPanel = new wxPanel(m_controlPanel, PANEL_IsoCtrl);
-
-  // Iso Input Panel
-  m_isoInputPanel = new wxPanel(m_isoCtrlPanel, PANEL_IsoInput);
-
-  m_isoText = new wxStaticText(m_isoInputPanel, TEXT_Iso, "Iso Value");
-  m_isoCtrl = new wxTextCtrl(m_isoInputPanel, TEXT_IsoCtrl, "0.5", wxDefaultPosition, wxDefaultSize,
-      wxTE_PROCESS_ENTER);
-
-  {
-    wxBoxSizer* isoSizer = new wxBoxSizer(wxHORIZONTAL);
-    isoSizer->Add(m_isoText, 1);
-    isoSizer->Add(m_isoCtrl, 1);
-    m_isoInputPanel->SetSizerAndFit(isoSizer);
-  }
-  // Iso Input Panel
-
-  m_vdwBtn = new wxButton(m_isoCtrlPanel, BUTTON_Vdw, "Van der Waals-Surface");
-  m_molBtn = new wxButton(m_isoCtrlPanel, BUTTON_Mol, "Molecular Surface");
-  m_cavityBtn = new wxButton(m_isoCtrlPanel, BUTTON_Cavity, "Cavity Surfaces");
-  m_accessibleBtn = new wxButton(m_isoCtrlPanel, BUTTON_Accessible, "Probe Accessible Surface");
-
-  {
-    wxBoxSizer* controlSizer = new wxBoxSizer(wxVERTICAL);
-    controlSizer->Add(m_vdwBtn, 0, wxEXPAND);
-    controlSizer->Add(m_molBtn, 0, wxEXPAND);
-    controlSizer->Add(m_cavityBtn, 0, wxEXPAND);
-    controlSizer->Add(m_accessibleBtn, 0, wxEXPAND);
-    controlSizer->Add(m_isoInputPanel, 0, wxEXPAND);
-    m_isoCtrlPanel->SetSizerAndFit(controlSizer);
-  }
-  // Iso Control Panel
-
-  m_resetCameraBtn = new wxButton(m_controlPanel, BUTTON_ResetCamera, "Center Camera");
-  
-  {
-    wxBoxSizer* controlSizer = new wxBoxSizer(wxVERTICAL);
-    controlSizer->Add(m_isoCtrlPanel, 0, wxEXPAND);
-    controlSizer->Add(m_resetCameraBtn, 0, wxEXPAND);
-    m_controlPanel->SetSizerAndFit(controlSizer);
-  }
-  // Control Panel
+  InitControlPanel();
 
   // Top level horizontal box sizer, contains render frame and the control panel
   {
@@ -95,7 +50,7 @@ RenderFrame::RenderFrame(const wxString& title, const wxPoint& pos, const wxSize
 
   // Render window
   InitPointerMembers();
-  ConfigureVTK();
+  InitRenderWindow();
 
 }
 
@@ -104,56 +59,9 @@ RenderFrame::~RenderFrame()
   if(m_pVTKWindow) m_pVTKWindow->Delete();
 }
 
-void RenderFrame::InitPointerMembers()
-{
-  colors = vtkSmartPointer<vtkNamedColors>::New(); 
-  imagedata = vtkSmartPointer<vtkImageData>::New();
-  surface = vtkSmartPointer<vtkMarchingCubes>::New();
-  renderer = vtkSmartPointer<vtkRenderer>::New();
-  mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-  actor = vtkSmartPointer<vtkActor>::New();
-}
-
-void RenderFrame::ConfigureVTK()
-{
-  double isoValue = 0.5;
-
-  // Here we get the renderer window from wxVTK
-  renderWindow = m_pVTKWindow->GetRenderWindow();
-  renderWindow->AddRenderer(renderer);
-
-  renderer->SetBackground(colors->GetColor3d("DarkSlateGray").GetData());
-  renderer->AddActor(actor);
-
-  actor->GetProperty()->SetColor(colors->GetColor3d("MistyRose").GetData());
-  actor->SetMapper(mapper);
-  
-  // Alternative image data
-  int lim = 200;
-  imagedata->SetDimensions(lim,lim,lim);
-  imagedata->AllocateScalars(VTK_INT,1);
-  for (size_t i = 0; i < lim; ++i) {
-    for (size_t j = 0; j < lim; ++j) {
-      // Constructing a imagedata
-      bool writeLine = (i-100)*(i-100) + (j-100)*(j-100) < 50*50;
-      for (size_t k = 0; k < lim; ++k) {
-        bool cap = k > 2 && k < lim-2;
-
-        int* voxel = static_cast<int*>(imagedata->GetScalarPointer(i, j, k));
-        *voxel = writeLine && cap? 1 : 0;
-      }
-    }
-  }
-
-  surface->SetInputData(imagedata);
-  surface->ComputeNormalsOn();
-  surface->SetValue(0, isoValue);
-
-  // The mapper requires our vtkMarchingCubes object
-  mapper->SetInputConnection(surface->GetOutputPort());
-  mapper->ScalarVisibilityOff();
-
-}
+////////////////////
+// PUBLIC METHODS //
+////////////////////
 
 void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data, bool probe_mode){
   std::array<size_t,3> dims = surf_data.getNumElements();
@@ -193,6 +101,14 @@ void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data, bool probe_
   AdjustControls(probe_mode);
 }
 
+void RenderFrame::Render() {
+  renderWindow->Render();  
+}
+
+/////////////////////
+// PRIVATE METHODS //
+/////////////////////
+
 // Adjust GUI elements based on the probe mode
 void RenderFrame::AdjustControls(bool probe_mode) {
   m_twoProbeMode = probe_mode;
@@ -203,10 +119,6 @@ void RenderFrame::AdjustControls(bool probe_mode) {
     m_cavityBtn->Hide();
   }
   Layout();
-}
-
-void RenderFrame::Render() {
-  renderWindow->Render();  
 }
 
 void RenderFrame::ChangeIso(double value) {
@@ -222,6 +134,110 @@ void RenderFrame::ChangeIso(double value) {
   // Set iso in renderer
   surface->SetValue(0,value);
   Render();
+}
+
+//////////
+// INIT //
+//////////
+void RenderFrame::InitIsoInputPanel() {
+  m_isoInputPanel = new wxPanel(m_isoCtrlPanel, PANEL_IsoInput);
+
+  m_isoText = new wxStaticText(m_isoInputPanel, TEXT_Iso, "Iso Value");
+  m_isoCtrl = new wxTextCtrl(m_isoInputPanel, TEXT_IsoCtrl, "0.5", wxDefaultPosition, wxDefaultSize,
+      wxTE_PROCESS_ENTER);
+
+  {
+    wxBoxSizer* isoSizer = new wxBoxSizer(wxHORIZONTAL);
+    isoSizer->Add(m_isoText, 1);
+    isoSizer->Add(m_isoCtrl, 1);
+    m_isoInputPanel->SetSizerAndFit(isoSizer);
+  }
+}
+
+void RenderFrame::InitIsoControlPanel() {
+  m_isoCtrlPanel = new wxPanel(m_controlPanel, PANEL_IsoCtrl);
+
+  m_vdwBtn = new wxButton(m_isoCtrlPanel, BUTTON_Vdw, "Van der Waals-Surface");
+  m_molBtn = new wxButton(m_isoCtrlPanel, BUTTON_Mol, "Molecular Surface");
+  m_cavityBtn = new wxButton(m_isoCtrlPanel, BUTTON_Cavity, "Cavity Surfaces");
+  m_accessibleBtn = new wxButton(m_isoCtrlPanel, BUTTON_Accessible, "Probe Accessible Surface");
+
+  InitIsoInputPanel();
+
+  {
+    wxBoxSizer* controlSizer = new wxBoxSizer(wxVERTICAL);
+    controlSizer->Add(m_vdwBtn, 0, wxEXPAND);
+    controlSizer->Add(m_molBtn, 0, wxEXPAND);
+    controlSizer->Add(m_cavityBtn, 0, wxEXPAND);
+    controlSizer->Add(m_accessibleBtn, 0, wxEXPAND);
+    controlSizer->Add(m_isoInputPanel, 0, wxEXPAND);
+    m_isoCtrlPanel->SetSizerAndFit(controlSizer);
+  }
+}
+
+void RenderFrame::InitControlPanel() {
+  m_controlPanel = new wxPanel(this, PANEL_Control, wxDefaultPosition, wxSize(200,-1));
+ 
+  InitIsoControlPanel();
+
+  m_resetCameraBtn = new wxButton(m_controlPanel, BUTTON_ResetCamera, "Center Camera");
+  
+  {
+    wxBoxSizer* controlSizer = new wxBoxSizer(wxVERTICAL);
+    controlSizer->Add(m_isoCtrlPanel, 0, wxEXPAND);
+    controlSizer->Add(m_resetCameraBtn, 0, wxEXPAND);
+    m_controlPanel->SetSizerAndFit(controlSizer);
+  }
+}
+
+void RenderFrame::InitPointerMembers()
+{
+  colors = vtkSmartPointer<vtkNamedColors>::New(); 
+  imagedata = vtkSmartPointer<vtkImageData>::New();
+  surface = vtkSmartPointer<vtkMarchingCubes>::New();
+  renderer = vtkSmartPointer<vtkRenderer>::New();
+  mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+  actor = vtkSmartPointer<vtkActor>::New();
+}
+
+void RenderFrame::InitRenderWindow() {
+  double isoValue = 0.5;
+
+  // Here we get the renderer window from wxVTK
+  renderWindow = m_pVTKWindow->GetRenderWindow();
+  renderWindow->AddRenderer(renderer);
+
+  renderer->SetBackground(colors->GetColor3d("DarkSlateGray").GetData());
+  renderer->AddActor(actor);
+
+  actor->GetProperty()->SetColor(colors->GetColor3d("MistyRose").GetData());
+  actor->SetMapper(mapper);
+  
+  // Alternative image data
+  int lim = 200;
+  imagedata->SetDimensions(lim,lim,lim);
+  imagedata->AllocateScalars(VTK_INT,1);
+  for (size_t i = 0; i < lim; ++i) {
+    for (size_t j = 0; j < lim; ++j) {
+      // Constructing a imagedata
+      bool writeLine = (i-100)*(i-100) + (j-100)*(j-100) < 50*50;
+      for (size_t k = 0; k < lim; ++k) {
+        bool cap = k > 2 && k < lim-2;
+
+        int* voxel = static_cast<int*>(imagedata->GetScalarPointer(i, j, k));
+        *voxel = writeLine && cap? 1 : 0;
+      }
+    }
+  }
+
+  surface->SetInputData(imagedata);
+  surface->ComputeNormalsOn();
+  surface->SetValue(0, isoValue);
+
+  // The mapper requires our vtkMarchingCubes object
+  mapper->SetInputConnection(surface->GetOutputPort());
+  mapper->ScalarVisibilityOff();
+
 }
 
 ////////////////////

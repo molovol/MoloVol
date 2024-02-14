@@ -49,14 +49,19 @@ class RenderFrame : public wxFrame {
     vtkSmartPointer<vtkActor> actor;
   
   private:
-    void InitPointerMembers();
-    void ConfigureVTK();
     void AdjustControls(bool);
     void ChangeIso(double);
 
     // Events
     void OnChangeIso(wxCommandEvent&);
     void OnButtonClick(wxCommandEvent&);
+
+    // Init
+    void InitIsoInputPanel();
+    void InitIsoControlPanel();
+    void InitControlPanel();
+    void InitPointerMembers();
+    void InitRenderWindow();
 
     // Members
     bool m_twoProbeMode;
