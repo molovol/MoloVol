@@ -82,7 +82,7 @@ class RenderFrame : public wxFrame {
 };
 
 enum {
-  Minimal_Quit = 1,
+  Minimal_Quit = wxID_HIGHEST+1,
   WXVTK_Render,
   PANEL_Control,
   PANEL_IsoCtrl,
