@@ -17,6 +17,8 @@
 #include <wx/spinctrl.h>
 #include <wx/event.h>
 #include <wx/button.h>
+#include <wx/listbox.h>
+#include <wx/arrstr.h>
 
 #include <array>
 #include <unordered_map>
@@ -64,7 +66,8 @@ RenderFrame::~RenderFrame()
 // PUBLIC METHODS //
 ////////////////////
 
-void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data, bool probe_mode){
+void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data, const bool probe_mode, const unsigned char n_cavities){
+  // Set up image
   std::array<size_t,3> dims = surf_data.getNumElements();
 
   imagedata->Initialize();
@@ -72,12 +75,10 @@ void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data, bool probe_
   // Sets the type of the scalar
   imagedata->AllocateScalars(VTK_INT,1);
 
-
   maskdata->Initialize();
   maskdata->SetDimensions(dims[0],dims[1],dims[2]);
   // Sets the type of the scalar
   maskdata->AllocateScalars(VTK_UNSIGNED_CHAR,1);
-
 
   // TODO: Make this a static member of this class
   const std::unordered_map<char,int> typeToNum =
@@ -113,6 +114,14 @@ void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data, bool probe_
   renderer->ResetCamera();
 
   AdjustControls(probe_mode);
+
+  wxArrayString list_items;
+  list_items.Add("Full Map");
+  for (size_t i = 0; i < n_cavities; ++i) {
+    list_items.Add("Cavity #" + std::to_string(i+1));
+  }
+  m_cavityList->InsertItems(list_items, 0);
+
 }
 
 void RenderFrame::Render() {
@@ -195,11 +204,14 @@ void RenderFrame::InitControlPanel() {
   InitIsoControlPanel();
 
   m_resetCameraBtn = new wxButton(m_controlPanel, BUTTON_ResetCamera, "Center Camera");
+
+  m_cavityList = new wxListBox(m_controlPanel, LIST_Cavity, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_EXTENDED);
   
   {
     wxBoxSizer* controlSizer = new wxBoxSizer(wxVERTICAL);
     controlSizer->Add(m_isoCtrlPanel, 0, wxEXPAND);
     controlSizer->Add(m_resetCameraBtn, 0, wxEXPAND);
+    controlSizer->Add(m_cavityList, 0, wxEXPAND);
     m_controlPanel->SetSizerAndFit(controlSizer);
   }
 }

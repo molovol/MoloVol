@@ -65,7 +65,7 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void extSetStatus(const std::string);
     void extSetProgressBar(const int);
     void extDisplayCavityList(const GridData&);
-    void extRenderSurface(const Container3D<Voxel>&, bool);
+    void extRenderSurface(const Container3D<Voxel>&, const bool, const unsigned char);
 
     bool receivedAbortCommand();
 
@@ -107,7 +107,7 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void setStatus(const std::string);
     void setProgressBar(const int);
     void displayCavityList(const GridData&);
-    void renderSurface(const Container3D<Voxel>&, bool);
+    void renderSurface(const Container3D<Voxel>&, const std::pair<bool,unsigned char>);
 
     void openErrorDialog(const std::pair<int,std::string>&);
 

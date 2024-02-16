@@ -28,6 +28,7 @@ class wxTextCtrl;
 class wxStaticText;
 class wxCommandEvent;
 class wxButton;
+class wxListCtrl;
 
 template <typename> class Container3D;
 class Voxel;
@@ -38,7 +39,7 @@ class RenderFrame : public wxFrame {
     ~RenderFrame();
 
     void OnClose(wxCloseEvent& event);
-    void UpdateSurface(const Container3D<Voxel>&, bool);
+    void UpdateSurface(const Container3D<Voxel>&, const bool, const unsigned char);
     void Render();
   
     vtkSmartPointer<vtkNamedColors> colors;
@@ -79,7 +80,8 @@ class RenderFrame : public wxFrame {
         wxPanel* m_isoInputPanel;
           wxStaticText* m_isoText;
           wxTextCtrl* m_isoCtrl;
-        wxButton* m_resetCameraBtn;
+      wxButton* m_resetCameraBtn;
+      wxListBox* m_cavityList;
   
     DECLARE_EVENT_TABLE()
 };
@@ -95,7 +97,8 @@ enum {
   PANEL_IsoInput,
   TEXT_Iso,
   TEXT_IsoCtrl,
-  BUTTON_ResetCamera
+  BUTTON_ResetCamera,
+  LIST_Cavity
 };
 
 #endif
