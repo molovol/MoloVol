@@ -11,6 +11,7 @@
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderer.h>
 #include <vtkMarchingCubes.h>
+#include <vtkImageMask.h>
 
 // wxWidgets
 #include <wx/spinctrl.h>
@@ -70,6 +71,14 @@ void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data, bool probe_
   imagedata->SetDimensions(dims[0],dims[1],dims[2]);
   // Sets the type of the scalar
   imagedata->AllocateScalars(VTK_INT,1);
+
+
+  maskdata->Initialize();
+  maskdata->SetDimensions(dims[0],dims[1],dims[2]);
+  // Sets the type of the scalar
+  maskdata->AllocateScalars(VTK_UNSIGNED_CHAR,1);
+
+
   // TODO: Make this a static member of this class
   const std::unordered_map<char,int> typeToNum =
     {{0b00000011, 0},
@@ -85,9 +94,17 @@ void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data, bool probe_
       for (size_t k = 0; k < dims[2]; ++k) {
         int* voxel = static_cast<int*>(imagedata->GetScalarPointer(i,j,k));
         *voxel = (int)typeToNum.find(surf_data.getElement(i,j,k).getType())->second;
+
+        voxel = static_cast<int*>(maskdata->GetScalarPointer(i,j,k));
+        *voxel = (int)(surf_data.getElement(i,j,k).getID() == 2 ? 1 : 0);
       }
     }
   }
+
+  // Apply mask to image data
+  imagemask->SetImageInputData(imagedata);
+  imagemask->SetMaskInputData(maskdata);
+  imagemask->SetMaskedOutputValue(1);
 
   // Set initial iso value and set iso value in text field
   surface->SetValue(0, 0.5);
@@ -191,6 +208,8 @@ void RenderFrame::InitPointerMembers()
 {
   colors = vtkSmartPointer<vtkNamedColors>::New(); 
   imagedata = vtkSmartPointer<vtkImageData>::New();
+  maskdata = vtkSmartPointer<vtkImageData>::New();
+  imagemask = vtkSmartPointer<vtkImageMask>::New();
   surface = vtkSmartPointer<vtkMarchingCubes>::New();
   renderer = vtkSmartPointer<vtkRenderer>::New();
   mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
@@ -199,23 +218,25 @@ void RenderFrame::InitPointerMembers()
 
 void RenderFrame::InitRenderWindow() {
 
-  // Here we get the renderer window from wxVTK
+  // Here we get the renderer window from wxVTK then add the renderer
   renderWindow = m_pVTKWindow->GetRenderWindow();
   renderWindow->AddRenderer(renderer);
 
+  // Adding the actor to the renderer
   renderer->SetBackground(colors->GetColor3d("DarkSlateGray").GetData());
   renderer->AddActor(actor);
 
+  // Adding the mapper to the renderer
   actor->GetProperty()->SetColor(colors->GetColor3d("MistyRose").GetData());
   actor->SetMapper(mapper);
-  
-  surface->SetInputData(imagedata);
-  surface->ComputeNormalsOn();
-
-  // The mapper requires our vtkMarchingCubes object
+ 
+  // Adding marching cubes data to mapper
   mapper->SetInputConnection(surface->GetOutputPort());
   mapper->ScalarVisibilityOff();
 
+  // Add image data to marching cube object
+  surface->SetInputConnection(imagemask->GetOutputPort());
+  surface->ComputeNormalsOn();
 }
 
 ////////////////////

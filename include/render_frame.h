@@ -16,6 +16,7 @@
 
 class vtkNamedColors;
 class vtkImageData;
+class vtkImageMask;
 class vtkMarchingCubes;
 class vtkRenderer;
 class vtkRenderWindow;
@@ -42,6 +43,8 @@ class RenderFrame : public wxFrame {
   
     vtkSmartPointer<vtkNamedColors> colors;
     vtkSmartPointer<vtkImageData> imagedata;
+    vtkSmartPointer<vtkImageData> maskdata;
+    vtkSmartPointer<vtkImageMask> imagemask;
     vtkSmartPointer<vtkMarchingCubes> surface;
     vtkSmartPointer<vtkRenderer> renderer;
     vtkSmartPointer<vtkRenderWindow> renderWindow;
