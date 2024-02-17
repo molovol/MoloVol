@@ -137,6 +137,11 @@ void RenderFrame::AdjustControls(bool probe_mode) {
   else {
     m_cavityBtn->Hide();
   }
+
+  m_vdwBtn->Enable();
+  m_molBtn->SetLabel("Molecular Surface");
+  m_accessibleBtn->SetLabel("Probe Accessible Surface");
+
   Layout();
 }
 
@@ -325,6 +330,9 @@ void RenderFrame::OnCavitySelect(wxCommandEvent& event) {
     m_cavityList->SetSelection(0);
     ClearMask();
     
+    m_vdwBtn->Enable();
+    m_molBtn->SetLabel("Molecular Surface");
+    m_accessibleBtn->SetLabel("Probe Accessible Surface");
   }
   else {
     // Get size of image data
@@ -342,6 +350,10 @@ void RenderFrame::OnCavitySelect(wxCommandEvent& event) {
         }
       }
     }
+
+    m_vdwBtn->Disable();
+    m_molBtn->SetLabel("Cavity Shell Surface");
+    m_accessibleBtn->SetLabel("Cavity Core Surface");
   }
 
   // Apply mask to image data
