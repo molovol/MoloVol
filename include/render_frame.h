@@ -32,10 +32,11 @@ class wxListCtrl;
 
 template <typename> class Container3D;
 class Voxel;
+class MainFrame;
 
 class RenderFrame : public wxFrame {
   public:
-    RenderFrame(const wxString&, const wxPoint&, const wxSize&);
+    RenderFrame(const MainFrame*, const wxString&, const wxPoint&, const wxSize&);
     ~RenderFrame();
 
     void OnClose(wxCloseEvent& event);
@@ -55,10 +56,12 @@ class RenderFrame : public wxFrame {
   private:
     void AdjustControls(bool);
     void ChangeIso(double);
+    void ClearMask();
 
     // Events
     void OnChangeIso(wxCommandEvent&);
     void OnButtonClick(wxCommandEvent&);
+    void OnCavitySelect(wxCommandEvent&);
 
     // Init
     void InitIsoInputPanel();
@@ -69,6 +72,7 @@ class RenderFrame : public wxFrame {
 
     // Members
     bool m_twoProbeMode;
+    const MainFrame* m_parentWindow;
   
     wxVTKRenderWindowInteractor* m_pVTKWindow;
     wxPanel* m_controlPanel;

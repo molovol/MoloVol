@@ -511,6 +511,10 @@ void Ctrl::renderSurface(const Container3D<Voxel>& surf_data, const bool probe_m
   }
 }
 
+const Container3D<Voxel>& Ctrl::getSurfaceData() const {
+  return _current_calculation->getSurfaceData();
+};
+
 ////////////
 // EXPORT //
 ////////////

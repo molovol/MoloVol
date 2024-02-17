@@ -134,7 +134,7 @@ double MainFrame::getGridsize(){
   }
 }
 
-int MainFrame::getDepth(){
+int MainFrame::getDepth() const {
   return depthInput->GetValue();
 }
 

@@ -81,11 +81,12 @@ class MainFrame: public wxFrame, public wxThreadHelper
     double getProbe1Radius();
     double getProbe2Radius();
     double getGridsize();
-    int getDepth();
+    int getDepth() const;
     bool getMakeReport();
     bool getMakeSurfaceMap();
     bool getMakeCavityMaps();
     std::string getOutputDir();
+    const Container3D<Voxel>& getSurfaceData() const;
     void enableGuiElements(bool inp); // method to turn interactable gui elements on or off
 
     void displayAtomList(std::vector<std::tuple<std::string, int, double>> symbol_number_radius);

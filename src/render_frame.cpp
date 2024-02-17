@@ -1,6 +1,7 @@
 #include "render_frame.h"
 #include "container3d.h"
 #include "voxel.h"
+#include "base.h"
 
 // VTK
 #include <vtkActor.h>
@@ -19,6 +20,7 @@
 #include <wx/button.h>
 #include <wx/listbox.h>
 #include <wx/arrstr.h>
+#include <wx/dynarray.h>
 
 #include <array>
 #include <unordered_map>
@@ -29,13 +31,14 @@ BEGIN_EVENT_TABLE(RenderFrame, wxFrame)
   EVT_CLOSE(RenderFrame::OnClose)
   EVT_TEXT_ENTER(TEXT_IsoCtrl, RenderFrame::OnChangeIso)
   EVT_BUTTON(wxID_ANY, RenderFrame::OnButtonClick)
+  EVT_LISTBOX(LIST_Cavity, RenderFrame::OnCavitySelect)
 END_EVENT_TABLE()
 
 // DEFINITIONS
 // Constructor is called when the render window is initiated by the main window.
 // Initialises the render frame and control widgets.
-RenderFrame::RenderFrame(const wxString& title, const wxPoint& pos, const wxSize& size) 
-  : wxFrame((wxFrame *)NULL, -1, title, pos, size) {
+RenderFrame::RenderFrame(const MainFrame* parent, const wxString& title, const wxPoint& pos, const wxSize& size) 
+  : wxFrame((wxFrame *)NULL, -1, title, pos, size), m_parentWindow(parent) {
 
   // Create wxVTK window interactor
   m_pVTKWindow = new wxVTKRenderWindowInteractor(this, WXVTK_Render, wxDefaultPosition, wxSize(400,400));
@@ -54,7 +57,6 @@ RenderFrame::RenderFrame(const wxString& title, const wxPoint& pos, const wxSize
   // Render window
   InitPointerMembers();
   InitRenderWindow();
-
 }
 
 RenderFrame::~RenderFrame()
@@ -70,15 +72,10 @@ void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data, const bool 
   // Set up image
   std::array<size_t,3> dims = surf_data.getNumElements();
 
-  imagedata->Initialize();
+  imagedata->PrepareForNewData();
   imagedata->SetDimensions(dims[0],dims[1],dims[2]);
   // Sets the type of the scalar
-  imagedata->AllocateScalars(VTK_INT,1);
-
-  maskdata->Initialize();
-  maskdata->SetDimensions(dims[0],dims[1],dims[2]);
-  // Sets the type of the scalar
-  maskdata->AllocateScalars(VTK_UNSIGNED_CHAR,1);
+  imagedata->AllocateScalars(VTK_CHAR,1);
 
   // TODO: Make this a static member of this class
   const std::unordered_map<char,int> typeToNum =
@@ -93,14 +90,12 @@ void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data, const bool 
   for (size_t i = 0; i < dims[0]; ++i) {
     for (size_t j = 0; j < dims[1]; ++j) {
       for (size_t k = 0; k < dims[2]; ++k) {
-        int* voxel = static_cast<int*>(imagedata->GetScalarPointer(i,j,k));
-        *voxel = (int)typeToNum.find(surf_data.getElement(i,j,k).getType())->second;
-
-        voxel = static_cast<int*>(maskdata->GetScalarPointer(i,j,k));
-        *voxel = (int)(surf_data.getElement(i,j,k).getID() == 2 ? 1 : 0);
+        unsigned char* voxel = static_cast<unsigned char*>(imagedata->GetScalarPointer(i,j,k));
+        *voxel = (unsigned char)typeToNum.find(surf_data.getElement(i,j,k).getType())->second;
       }
     }
   }
+  ClearMask();
 
   // Apply mask to image data
   imagemask->SetImageInputData(imagedata);
@@ -120,6 +115,7 @@ void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data, const bool 
   for (size_t i = 0; i < n_cavities; ++i) {
     list_items.Add("Cavity #" + std::to_string(i+1));
   }
+  m_cavityList->Clear();
   m_cavityList->InsertItems(list_items, 0);
 
 }
@@ -157,6 +153,26 @@ void RenderFrame::ChangeIso(double value) {
   // Set iso in renderer
   surface->SetValue(0,value);
   Render();
+}
+
+void RenderFrame::ClearMask() {
+  int dims[3];
+  imagedata->GetDimensions(dims);
+
+  maskdata->PrepareForNewData();
+  maskdata->SetDimensions(dims[0],dims[1],dims[2]);
+  // Sets the type of the scalar
+  maskdata->AllocateScalars(VTK_UNSIGNED_CHAR,1);
+
+  // TODO: Parallelise
+  for (size_t i = 0; i < dims[0]; ++i) {
+    for (size_t j = 0; j < dims[1]; ++j) {
+      for (size_t k = 0; k < dims[2]; ++k) {
+        unsigned char* voxel = static_cast<unsigned char*>(maskdata->GetScalarPointer(i,j,k));
+        *voxel = 1; 
+      }
+    }
+  }
 }
 
 //////////
@@ -285,7 +301,54 @@ void RenderFrame::OnButtonClick(wxCommandEvent& event) {
       Render();
       break;
   }
+}
 
+void RenderFrame::OnCavitySelect(wxCommandEvent& event) {
+  auto surf_data = m_parentWindow->getSurfaceData();
+  maskdata->PrepareForNewData();
+  
+  // Get a vector of selected cavity IDs
+  wxArrayInt selection;
+  int n_selections = m_cavityList->GetSelections(selection);
+  std::vector<unsigned char> idx_list;
+  for (size_t i = 0; i < n_selections; ++i) {
+    idx_list.push_back(selection.Item(i));
+  }
+  // Return if no item has been selected
+  if (idx_list.empty()) {return;}
+
+  // If "Full Map" was selected, show entire surface map
+  if (idx_list[0] == 0) {
+    for (size_t i = 0; i<n_selections; ++i) {
+      m_cavityList->Deselect(idx_list[i]);
+    }
+    m_cavityList->SetSelection(0);
+    ClearMask();
+    
+  }
+  else {
+    // Get size of image data
+    std::array<size_t,3> dims = surf_data.getNumElements();
+    maskdata->SetDimensions(dims[0],dims[1],dims[2]);
+    maskdata->AllocateScalars(VTK_UNSIGNED_CHAR,1);
+
+    for (size_t i = 0; i < dims[0]; ++i) {
+      for (size_t j = 0; j < dims[1]; ++j) {
+        for (size_t k = 0; k < dims[2]; ++k) {
+          unsigned char* voxel = static_cast<unsigned char*>(maskdata->GetScalarPointer(i,j,k));
+          *voxel = (unsigned char)(
+              std::binary_search(idx_list.begin(), idx_list.end(), surf_data.getElement(i,j,k).getID())? 1 : 0
+            );
+        }
+      }
+    }
+  }
+
+  // Apply mask to image data
+  imagemask->SetImageInputData(imagedata);
+  imagemask->SetMaskInputData(maskdata);
+  imagemask->SetMaskedOutputValue(1);
+  Render();
 }
 
 void RenderFrame::OnClose(wxCloseEvent& WXUNUSED(event)){

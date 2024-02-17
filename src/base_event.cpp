@@ -235,6 +235,10 @@ void MainFrame::OnTextInput(wxCommandEvent& event){
   }
 }
 
+const Container3D<Voxel>& MainFrame::getSurfaceData() const {
+  return Ctrl::getInstance()->getSurfaceData();
+}
+
 ///////////////
 // ON EXPORT //
 ///////////////
