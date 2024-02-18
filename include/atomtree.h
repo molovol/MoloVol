@@ -11,8 +11,10 @@ class AtomNode{
     AtomNode(int, AtomNode* left_node, AtomNode* right_node);
     ~AtomNode();
  
-    AtomNode* getLeftChild() const;
-    AtomNode* getRightChild() const;
+    const AtomNode* getLeftChild() const;
+    const AtomNode* getRightChild() const;
+    AtomNode* getLeftChild();
+    AtomNode* getRightChild();
     Atom& getAtom() const;
     int getAtomId() const;
     void print();

@@ -8,7 +8,7 @@ std::vector<Atom> isobutane();
 
 int main() {
   auto atomlist = isobutane();
-  AtomTree atomtree(atomlist);
+  const AtomTree atomtree(atomlist);
  
   // TEST: Check correct radius access
   assert(atomtree.getMaxRad() == 1.7);
@@ -34,8 +34,8 @@ int main() {
       treenodes.pop_back();
       unsigned char d = depth[depth.size()-1];
       depth.pop_back();
-      AtomNode* left = node->getLeftChild();
-      AtomNode* right = node->getRightChild();
+      const AtomNode* left = node->getLeftChild();
+      const AtomNode* right = node->getRightChild();
 
       if (left && right) {
         assert(left->getAtom().getCoordinate(d%3) <= right->getAtom().getCoordinate(d%3));
@@ -48,7 +48,7 @@ int main() {
     }
   }
 
-
+  
 
   return 0;
 }

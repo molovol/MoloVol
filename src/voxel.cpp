@@ -315,7 +315,7 @@ void Voxel::traverseTree
     if(isAtom(atom, pos_vxl, rad_vxl, rad_probe)){return;}
 
     // continue with both children
-    for (AtomNode* child : {node->getLeftChild(), node->getRightChild()}){
+    for (const AtomNode* child : {node->getLeftChild(), node->getRightChild()}){
       traverseTree(child, rad_max, pos_vxl, rad_vxl, rad_probe, max_depth, exit_type, (dim+1)%3);
     }
   }
@@ -370,7 +370,7 @@ void Voxel::listFromTree(
     }
 
     // continue with both children
-    for (AtomNode* child : {node->getLeftChild(), node->getRightChild()}){
+    for (const AtomNode* child : {node->getLeftChild(), node->getRightChild()}){
       listFromTree(atom_id_list, child, pos_point, rad_point, rad_max, max_dist, (dim+1)%3);
     }
   }

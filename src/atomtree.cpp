@@ -27,11 +27,19 @@ AtomNode::~AtomNode(){
 
 // ACCESS
 
-AtomNode* AtomNode::getLeftChild() const {
+const AtomNode* AtomNode::getLeftChild() const {
   return _left_child;
 }
 
-AtomNode* AtomNode::getRightChild() const {
+const AtomNode* AtomNode::getRightChild() const {
+  return _right_child;
+}
+
+AtomNode* AtomNode::getLeftChild(){
+  return _left_child;
+}
+
+AtomNode* AtomNode::getRightChild(){
   return _right_child;
 }
 
