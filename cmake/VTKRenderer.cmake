@@ -5,6 +5,7 @@ find_package(VTK
     CommonColor
     CommonCore
     CommonDataModel
+    DomainsChemistry
     FiltersCore
     FiltersSources
     IOImage

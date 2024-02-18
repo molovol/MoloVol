@@ -22,6 +22,8 @@ class vtkRenderer;
 class vtkRenderWindow;
 class vtkPolyDataMapper;
 class vtkActor;
+class vtkMolecule;
+class vtkMoleculeMapper;
 
 class wxPanel;
 class wxTextCtrl;
@@ -52,6 +54,9 @@ class RenderFrame : public wxFrame {
     vtkSmartPointer<vtkRenderWindow> renderWindow;
     vtkSmartPointer<vtkPolyDataMapper> mapper;
     vtkSmartPointer<vtkActor> actor;
+    vtkSmartPointer<vtkMolecule> molecule;
+    vtkSmartPointer<vtkMoleculeMapper> molmapper;
+    vtkSmartPointer<vtkActor> molactor;
   
   private:
     void AdjustControls(bool);
