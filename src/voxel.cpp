@@ -681,7 +681,8 @@ void Voxel::tallyVoxelsOfType(std::map<char,double>& type_tally,
         sub_index[1] = index[1]*2 + y;
         for(char z = 0; z < 2; ++z){
           sub_index[2] = index[2]*2 + z;
-          getSubvoxel(sub_index, lvl).tallyVoxelsOfType(type_tally, id_core_tally, id_shell_tally, id_min, id_max, sub_index, lvl-1, vxl_fraction);
+          getSubvoxel(sub_index, lvl).tallyVoxelsOfType(
+              type_tally, id_core_tally, id_shell_tally, id_min, id_max, sub_index, lvl-1, vxl_fraction);
         }
       }
     }

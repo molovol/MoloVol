@@ -33,6 +33,9 @@ int main(int argc, char* argv[]){
   validateAtom(at, 1, 2, 3, "Gh", 1.2, 34, -2);
   assert(at.isValid());
 
+  // Comparison operator
+  assert(at == at);
+
   // Benchmark
   if (argc > 1 && !strcmp(argv[1], "benchmark")){
 

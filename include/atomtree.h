@@ -5,7 +5,6 @@
 #include <vector>
 #include "atom.h"
 
-struct Atom;
 class AtomTree;
 class AtomNode{
   public:
@@ -28,7 +27,6 @@ class AtomNode{
     static inline std::vector<Atom> s_atom_list;
 };
 
-class AtomNode;
 class AtomTree{
   public:
     AtomTree();
@@ -44,8 +42,8 @@ class AtomTree{
     
     AtomNode* buildTree(int, int, char);
   
-    void quicksort(std::vector<Atom>& list_of_atoms, const int& vec_first, const int& vec_end, const char& dim);
-    void swap(Atom& a, Atom& b);
+    void quicksort(std::vector<Atom>&, const int, const int, const char);
+    void swap(Atom&, Atom&);
 };
 
 #endif

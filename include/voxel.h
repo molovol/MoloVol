@@ -28,9 +28,7 @@ struct SearchIndex{
 };
 
 class Space;
-class AtomTree;
 class FloodStack;
-class AtomNode;
 struct Atom;
 struct VoxelLoc;
 class Voxel{

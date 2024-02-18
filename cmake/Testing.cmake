@@ -4,6 +4,7 @@ enable_testing()
 # Create a MoloVol library for the test sources to use
 set(TEST_SOURCES
   src/atom.cpp
+  src/atomtree.cpp
   src/vector.cpp
   src/importmanager.cpp
   src/crystallographer.cpp
@@ -13,7 +14,6 @@ set(TEST_SOURCES
 add_library(mvl SHARED ${TEST_SOURCES})
 target_include_directories(mvl PUBLIC ./)
 target_compile_definitions(mvl PRIVATE LIBRARY_BUILD)
-include_directories(external/PolyVox/include)
 
 set(TEST_NAMES
   cut_off_string

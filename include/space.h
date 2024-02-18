@@ -9,7 +9,6 @@
 #include <array>
 #include <map>
 
-class AtomTree;
 struct Atom;
 class Voxel;
 class Space{
