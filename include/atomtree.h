@@ -2,8 +2,9 @@
 
 #define ATOMTREE_H
 
-#include <vector>
 #include "atom.h"
+#include <vector>
+#include <string>
 
 class AtomTree;
 class AtomNode{
@@ -36,6 +37,7 @@ class AtomTree{
     ~AtomTree();
     
     const AtomNode* getRoot() const;
+    const AtomNode* getNode(const std::string) const;
     const double getMaxRad() const;
     void print() const;
   private:

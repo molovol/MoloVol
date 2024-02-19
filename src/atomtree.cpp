@@ -197,3 +197,22 @@ const double AtomTree::getMaxRad() const {
 const AtomNode* AtomTree::getRoot() const {
   return _root;
 }
+
+// Access node via a specified path. The path is encoded in a string
+// The string contains either the letter 'l' or 'r' in every
+// position, specifying to take either the path towards the left or
+// right child respectively.
+const AtomNode* AtomTree::getNode(const std::string path) const {
+  const AtomNode* node = _root;
+  for (size_t i = 0; i < path.length(); ++i) {
+    if (path[i] == 'l') {
+      node = node->getLeftChild();
+    } else if (path[i] == 'r') {
+      node = node->getRightChild();
+    } else {
+//      throw std::exception;
+    }
+  }
+  return node;
+}
+

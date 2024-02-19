@@ -7,6 +7,7 @@
 std::vector<Atom> isobutane();
 
 int main() {
+
   auto atomlist = isobutane();
   const AtomTree atomtree(atomlist);
  
@@ -48,9 +49,19 @@ int main() {
     }
   }
 
-  
+  // TEST: Access node via path
+  // Nodes can be accessed via a string that specifies the path to take
+  // in the binary tree. The string consists of a series of 'r' and 'l'
+  // characters to instruct to follow the right or left child respectively.
+  {
+    const AtomNode* root = atomtree.getRoot();
+    
+    assert(atomtree.getNode("")->getAtom() == root->getAtom());
+    assert(atomtree.getNode("r")->getAtom() == root->getRightChild()->getAtom());
+    assert(atomtree.getNode("l")->getAtom() == root->getLeftChild()->getAtom());
+    assert(atomtree.getNode("rlr")->getAtom() == root->getRightChild()->getLeftChild()->getRightChild()->getAtom());
+  }
 
-  return 0;
 }
 
 std::vector<Atom> isobutane() {
