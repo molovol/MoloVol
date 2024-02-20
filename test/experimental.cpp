@@ -3,6 +3,9 @@
 #include <vector>
 #include <iostream>
 
+// Using this macro for future compatibility with Catch2
+# define REQUIRE(x) if (!x) return -1;
+
 std::vector<Atom> isobutane();
 
 int main() {
@@ -12,6 +15,22 @@ int main() {
  
   // TEST: Check correct radius access
   if(atomtree.getMaxRad() != 1.7) return -1;
+
+  // TEST: Check correct atom list access
+  // The atom list inside atom tree does not have to and likely does not
+  // store the atoms in the same order as the originally input list.
+  {
+    auto atomlist_from_tree = atomtree.getAtomList();
+    bool all_atoms_found = true;
+    for (const Atom& at : atomlist_from_tree) {
+      bool atom_found = false;
+      for (const Atom& at2 : atomlist) {
+        atom_found |= at == at2; // Looking for single match
+      }
+      all_atoms_found &= atom_found; // All atoms need to be found
+    }
+    REQUIRE(all_atoms_found);
+  }
 
   // TEST: Verify k-d tree
   // In a k-d tree the nodes are inserted based on their spatial relation.
