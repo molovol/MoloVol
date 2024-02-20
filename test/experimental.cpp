@@ -2,7 +2,6 @@
 #include "atomtree.h"
 #include <vector>
 #include <iostream>
-#include <cassert>
 
 std::vector<Atom> isobutane();
 
