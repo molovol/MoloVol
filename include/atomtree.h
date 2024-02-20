@@ -43,7 +43,6 @@ class AtomTree{
     // TODO: Move and copy operators
     
     const AtomNode* getRoot() const;
-    const AtomNode* getNode(const std::string) const;
 
     const double getMaxRad() const;
     const std::vector<Atom>& getAtomList() const;

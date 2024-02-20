@@ -195,24 +195,6 @@ const AtomNode* AtomTree::getRoot() const {
   return _root;
 }
 
-// Access node via a specified path. The path is encoded in a string
-// The string contains either the letter 'l' or 'r' in every
-// position, specifying to take either the path towards the left or
-// right child respectively.
-const AtomNode* AtomTree::getNode(const std::string path) const {
-  const AtomNode* node = _root;
-  for (size_t i = 0; i < path.length(); ++i) {
-    if (path[i] == 'l') {
-      node = node->getLeftChild();
-    } else if (path[i] == 'r') {
-      node = node->getRightChild();
-    } else {
-//      throw std::exception;
-    }
-  }
-  return node;
-}
-
 // Returns a vector containing atom IDs of all atoms whose distance from the atom's center
 // is equal or below a specified maximal distance + the radius of the atom.
 // Can be used to find all atoms that are touching or intersecting a sphere.

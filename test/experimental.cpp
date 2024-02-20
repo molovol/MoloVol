@@ -68,21 +68,6 @@ int main() {
     }
   }
 
-  // TEST: Access node via path
-  // Nodes can be accessed via a string that specifies the path to take
-  // in the binary tree. The string consists of a series of 'r' and 'l'
-  // characters to instruct to follow the right or left child respectively.
-  {
-    const AtomNode* root = atomtree.getRoot();
-    
-    if (!(
-      atomtree.getNode("")->getAtom() == root->getAtom()
-      && atomtree.getNode("r")->getAtom() == root->getRightChild()->getAtom()
-      && atomtree.getNode("l")->getAtom() == root->getLeftChild()->getAtom()
-      && atomtree.getNode("rlr")->getAtom() == root->getRightChild()->getLeftChild()->getRightChild()->getAtom()
-    )) return -1;
-  }
-
   std::map<std::string,int> valence = {
     {"C", 4},
     {"H", 1}
