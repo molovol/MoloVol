@@ -213,3 +213,46 @@ const AtomNode* AtomTree::getNode(const std::string path) const {
   return node;
 }
 
+// Returns a vector containing atom IDs of all atoms whose distance from the atom's center
+// is equal or below a specified maximal distance + the radius of the atom.
+// Can be used to find all atoms that are touching or intersecting a sphere.
+std::vector<size_t> AtomTree::listAllWithin(const typename AtomTree::pos_type pos, const double max_dist) const {
+  std::vector<size_t> id_list;
+
+  std::vector<std::pair<AtomNode*,char>> to_visit;
+  to_visit.push_back(std::make_pair(_root,0));
+  
+  while (!to_visit.empty()) {
+    auto node_dim = to_visit.back();
+    to_visit.pop_back();
+    // Skip if nullptr
+    if (!node_dim.first) continue;
+    AtomNode& node = *node_dim.first;
+    char dim = node_dim.second;
+
+    num_type at_pos_dim = node.getAtom().getCoordinate(dim);
+    num_type dist1D = pos[dim] - at_pos_dim;
+
+    // If distance along current direction is smaller than threshold then check
+    // this node's atom for match and visit both children.
+    if (abs(dist1D) <= max_dist + _max_rad) {
+
+      if (distance(node.getAtom().getPos(), pos) <= max_dist + node.getAtom().rad) {
+        id_list.push_back(node.getAtomId());
+      }
+
+      to_visit.push_back(std::make_pair(node.getLeftChild(), (dim+1)%3));
+      to_visit.push_back(std::make_pair(node.getRightChild(), (dim+1)%3));
+    }
+    // If distance is larger then visit either left or right child, depending on
+    // relation of the atom and the point.
+    else {
+      to_visit.push_back(std::make_pair(
+            dist1D < 0? node.getLeftChild() : node.getRightChild(),
+            (dim+1)%3));
+    }
+  }
+
+  return id_list;
+}
+

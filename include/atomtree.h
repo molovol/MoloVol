@@ -33,7 +33,10 @@ class AtomNode{
 class AtomTree{
   public:
     friend AtomNode;
-      
+
+    typedef Atom::num_type num_type;  
+    typedef Atom::pos_type pos_type;
+
     AtomTree();
     AtomTree(const std::vector<Atom>& list_of_atoms);
     ~AtomTree();
@@ -44,6 +47,8 @@ class AtomTree{
 
     const double getMaxRad() const;
     const std::vector<Atom>& getAtomList() const;
+
+    std::vector<size_t> listAllWithin(Atom::pos_type, const double) const;
 
     void print() const;
   private:

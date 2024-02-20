@@ -2,6 +2,7 @@
 #include "atomtree.h"
 #include <vector>
 #include <iostream>
+#include <map>
 
 // Using this macro for future compatibility with Catch2
 # define REQUIRE(x) if (!x) return -1;
@@ -82,6 +83,23 @@ int main() {
     )) return -1;
   }
 
+  std::map<std::string,int> valence = {
+    {"C", 4},
+    {"H", 1}
+  };
+
+  // TEST: Bond detection
+  // First search the atom tree for all atoms within their van der Waals radius.
+  // The number of matches should be equal to the valence+1 because the atom counts
+  // itself as a match.
+  {
+    auto all_atoms = atomtree.getAtomList();
+    for (size_t at_id = 0; at_id < all_atoms.size(); ++at_id) {
+      const Atom& at = all_atoms[at_id];
+      std::vector<size_t> closest = atomtree.listAllWithin(at.getPos(), 0);
+      REQUIRE(closest.size()-1 == valence.at(at.symbol))
+    }
+  }
 }
 
 std::vector<Atom> isobutane() {
