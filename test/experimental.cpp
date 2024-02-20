@@ -12,7 +12,7 @@ int main() {
   const AtomTree atomtree(atomlist);
  
   // TEST: Check correct radius access
-  assert(atomtree.getMaxRad() == 1.7);
+  if(atomtree.getMaxRad() != 1.7) return -1;
 
   // TEST: Verify k-d tree
   // In a k-d tree the nodes are inserted based on their spatial relation.
@@ -39,7 +39,7 @@ int main() {
       const AtomNode* right = node->getRightChild();
 
       if (left && right) {
-        assert(left->getAtom().getCoordinate(d%3) <= right->getAtom().getCoordinate(d%3));
+        if (!(left->getAtom().getCoordinate(d%3) <= right->getAtom().getCoordinate(d%3))) return -1;
 
         treenodes.push_back(left);
         treenodes.push_back(right);
@@ -56,10 +56,12 @@ int main() {
   {
     const AtomNode* root = atomtree.getRoot();
     
-    assert(atomtree.getNode("")->getAtom() == root->getAtom());
-    assert(atomtree.getNode("r")->getAtom() == root->getRightChild()->getAtom());
-    assert(atomtree.getNode("l")->getAtom() == root->getLeftChild()->getAtom());
-    assert(atomtree.getNode("rlr")->getAtom() == root->getRightChild()->getLeftChild()->getRightChild()->getAtom());
+    if (!(
+      atomtree.getNode("")->getAtom() == root->getAtom()
+      && atomtree.getNode("r")->getAtom() == root->getRightChild()->getAtom()
+      && atomtree.getNode("l")->getAtom() == root->getLeftChild()->getAtom()
+      && atomtree.getNode("rlr")->getAtom() == root->getRightChild()->getLeftChild()->getRightChild()->getAtom()
+    )) return -1;
   }
 
 }
