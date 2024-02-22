@@ -158,7 +158,8 @@ bool Ctrl::runCalculation(){
 
   // OUTPUT
   displayResults(data);
-  renderSurface(_current_calculation->getSurfaceData(), data.probe_mode, 
+  renderSurface(_current_calculation->getSurfaceData(), _current_calculation->getCellOrigin(),
+      data.grid_step, data.probe_mode, 
       data.cavities.size(), _current_calculation->getAtomTree().getAtomList());
 
   if (data.success){
@@ -506,10 +507,10 @@ void Ctrl::updateProgressBar(const int percentage){
   }
 }
 
-void Ctrl::renderSurface(const Container3D<Voxel>& surf_data, const bool probe_mode, 
-    const unsigned char n_cavities, const std::vector<Atom>& atomlist) {
+void Ctrl::renderSurface(const Container3D<Voxel>& surf_data, const std::array<double,3> origin, 
+    const double grid_step, const bool probe_mode, const unsigned char n_cavities, const std::vector<Atom>& atomlist) {
   if (_to_gui) {
-    s_gui->extRenderSurface(surf_data, probe_mode, n_cavities, atomlist);
+    s_gui->extRenderSurface(surf_data, origin, grid_step, probe_mode, n_cavities, atomlist);
   }
 }
 

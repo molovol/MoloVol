@@ -543,6 +543,10 @@ const Container3D<Voxel>& Model::getSurfaceData() const {
   return _cell.getGrid(0);
 }
 
+std::array<double,3> Model::getCellOrigin() const {
+  return _cell.getOrigin();
+}
+
 const AtomTree& Model::getAtomTree() const {
   return Voxel::getAtomTree();
 }

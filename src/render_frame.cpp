@@ -71,12 +71,15 @@ RenderFrame::~RenderFrame()
 // PUBLIC METHODS //
 ////////////////////
 
-void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data, const bool probe_mode, const unsigned char n_cavities){
+void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data, const std::array<double,3> origin, 
+    const double grid_step, const bool probe_mode, const unsigned char n_cavities){
   // Set up image
   std::array<size_t,3> dims = surf_data.getNumElements();
 
   imagedata->PrepareForNewData();
   imagedata->SetDimensions(dims[0],dims[1],dims[2]);
+  imagedata->SetOrigin(origin[0], origin[1], origin[2]);
+  imagedata->SetSpacing(grid_step, grid_step, grid_step);
   // Sets the type of the scalar
   imagedata->AllocateScalars(VTK_CHAR,1);
 

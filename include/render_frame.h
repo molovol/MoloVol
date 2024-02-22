@@ -43,7 +43,8 @@ class RenderFrame : public wxFrame {
     ~RenderFrame();
 
     void OnClose(wxCloseEvent& event);
-    void UpdateSurface(const Container3D<Voxel>&, const bool, const unsigned char);
+    void UpdateSurface(const Container3D<Voxel>&, const std::array<double,3>, 
+        const double, const bool, const unsigned char);
     void UpdateMolecule(const std::vector<Atom>&);
     void Render();
   

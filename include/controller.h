@@ -47,7 +47,8 @@ class Ctrl{
     void exportReport(std::string);
     void exportSurfaceMap(bool);
     void exportSurfaceMap(const std::string, bool);
-    void renderSurface(const Container3D<Voxel>&, const bool, const unsigned char, const std::vector<Atom>&);
+    void renderSurface(const Container3D<Voxel>&, const std::array<double,3>, 
+        const double, const bool, const unsigned char, const std::vector<Atom>&);
     const Container3D<Voxel>& getSurfaceData() const;
 
     void newCalculation();

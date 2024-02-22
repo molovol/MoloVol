@@ -65,7 +65,8 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void extSetStatus(const std::string);
     void extSetProgressBar(const int);
     void extDisplayCavityList(const GridData&);
-    void extRenderSurface(const Container3D<Voxel>&, const bool, const unsigned char, const std::vector<Atom>&);
+    void extRenderSurface(const Container3D<Voxel>&, const std::array<double,3>, const double, 
+        const bool, const unsigned char, const std::vector<Atom>&);
 
     bool receivedAbortCommand();
 
@@ -108,7 +109,8 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void setStatus(const std::string);
     void setProgressBar(const int);
     void displayCavityList(const GridData&);
-    void renderSurface(const Container3D<Voxel>&, const std::pair<bool,unsigned char>);
+    void renderSurface(const Container3D<Voxel>&, const std::array<double,3>, 
+      const double, const std::pair<bool,unsigned char>);
     void renderMolecule(const std::vector<Atom>&);
 
     void openErrorDialog(const std::pair<int,std::string>&);

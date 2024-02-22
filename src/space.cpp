@@ -510,15 +510,15 @@ inline bool isSolid(const Voxel& vxl, const std::vector<char>& solid_types){
 // ACCESS FUNCTIONS //
 //////////////////////
 
-std::array<double,3> Space::getMin(){
+std::array<double,3> Space::getMin() const {
   return _cart_min;
 }
 
-std::array<double,3> Space::getOrigin(){
+std::array<double,3> Space::getOrigin() const {
   return getMin();
 }
 
-std::array<double,3> Space::getMax(){
+std::array<double,3> Space::getMax() const {
   return _cart_max;
 }
 
