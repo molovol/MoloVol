@@ -10,6 +10,8 @@
 struct CalcReportBundle;
 class Model;
 class MainFrame;
+class AtomTree;
+struct Atom;
 
 template <typename> class Container3D;
 class Voxel;
@@ -45,7 +47,7 @@ class Ctrl{
     void exportReport(std::string);
     void exportSurfaceMap(bool);
     void exportSurfaceMap(const std::string, bool);
-    void renderSurface(const Container3D<Voxel>&, const bool, const unsigned char);
+    void renderSurface(const Container3D<Voxel>&, const bool, const unsigned char, const std::vector<Atom>&);
     const Container3D<Voxel>& getSurfaceData() const;
 
     void newCalculation();

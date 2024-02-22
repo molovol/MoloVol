@@ -208,7 +208,7 @@ std::vector<size_t> AtomTree::listAllWithin(const typename AtomTree::pos_type po
     auto node_dim = to_visit.back();
     to_visit.pop_back();
     // Skip if nullptr
-    if (!node_dim.first) continue;
+    if (node_dim.first == nullptr) continue;
     AtomNode& node = *node_dim.first;
     char dim = node_dim.second;
 

@@ -52,8 +52,15 @@ void MainFrame::extOpenErrorDialog(const int error_code, const std::string& erro
   GetEventHandler()->CallAfter(&MainFrame::openErrorDialog, code_message);
 }
 
-void MainFrame::extRenderSurface(const Container3D<Voxel>& surf_data, const bool probe_mode, const unsigned char n_cavities){
-  GetEventHandler()->CallAfter(&MainFrame::renderSurface, surf_data, std::make_pair(probe_mode, n_cavities));
+void MainFrame::extRenderSurface(const Container3D<Voxel>& surf_data, const bool probe_mode, 
+    const unsigned char n_cavities, const std::vector<Atom>& atomlist){
+
+  auto render = [this, surf_data, probe_mode, n_cavities, atomlist](){
+    renderMolecule(atomlist);
+    renderSurface(surf_data, std::make_pair(probe_mode, n_cavities));
+  };
+
+  GetEventHandler()->CallAfter(render);
 }
 
 // NOT THREAD SAFE
@@ -263,6 +270,12 @@ void MainFrame::setStatus(const std::string str){
 
 void MainFrame::setProgressBar(const int percentage){
   progressGauge->SetValue(percentage);
+}
+
+void MainFrame::renderMolecule(const std::vector<Atom>& atomlist){
+#ifdef MOLOVOL_RENDERER
+  m_renderWin->UpdateMolecule(atomlist);
+#endif
 }
 
 void MainFrame::renderSurface(const Container3D<Voxel>& surf_data, const std::pair<bool,unsigned char> args){

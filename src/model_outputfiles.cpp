@@ -4,6 +4,7 @@
 #include "misc.h"
 #include "container3d.h"
 #include "griddata.h"
+#include "voxel.h"
 #include <string>
 #include <sstream>
 #include <vector>
@@ -540,6 +541,10 @@ void Model::writeSurfaceMap(const std::string file_path,
 
 const Container3D<Voxel>& Model::getSurfaceData() const {
   return _cell.getGrid(0);
+}
+
+const AtomTree& Model::getAtomTree() const {
+  return Voxel::getAtomTree();
 }
 
 ///////////////

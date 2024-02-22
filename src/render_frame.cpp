@@ -2,6 +2,7 @@
 #include "container3d.h"
 #include "voxel.h"
 #include "base.h"
+#include "atomtree.h"
 
 // VTK
 #include <vtkActor.h>
@@ -120,6 +121,18 @@ void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data, const bool 
   m_cavityList->Clear();
   m_cavityList->InsertItems(list_items, 0);
 
+}
+
+void RenderFrame::UpdateMolecule(const std::vector<Atom>& all_atoms) {
+  {
+    AtomTree atomtree(all_atoms);
+
+    for (size_t at_id = 0; at_id < all_atoms.size(); ++at_id) {
+      const Atom& at = all_atoms[at_id];
+      std::vector<size_t> closest = atomtree.listAllWithin(at.getPos(), 0);
+      std::cout << at.symbol << " " << closest.size() << std::endl;
+    }
+  }
 }
 
 void RenderFrame::Render() {
@@ -277,7 +290,7 @@ void RenderFrame::InitRenderWindow() {
   surface->ComputeNormalsOn();
 
   molecule->Initialize();
-  vtkAtom O1 = molecule->AppendAtom(8, 3.0088731969, 1.1344098673, 0.9985902874);
+  /*vtkAtom O1 = molecule->AppendAtom(8, 3.0088731969, 1.1344098673, 0.9985902874);
   vtkAtom O2 = molecule->AppendAtom(8, -0.2616286966, 2.7806709534, 0.7027800226);
   vtkAtom C1 = molecule->AppendAtom(6, -2.0738607910, 1.2298524695, 0.3421802228);
   vtkAtom C2 = molecule->AppendAtom(6, -1.4140240045, 0.1045928523, 0.0352265378);
@@ -303,7 +316,7 @@ void RenderFrame::InitRenderWindow() {
   molecule->AppendBond(C2, H2, 1);
   molecule->AppendBond(C6, H3, 1);
   molecule->AppendBond(C6, H4, 1);
-  molecule->AppendBond(O1, H5, 1);
+  molecule->AppendBond(O1, H5, 1);*/
   molmapper->SetInputData(molecule);
   molmapper->UseLiquoriceStickSettings();
   molactor->SetMapper(molmapper);

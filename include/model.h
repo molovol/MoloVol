@@ -108,6 +108,7 @@ class Model{
     CalcReportBundle generateVolumeData();
     CalcReportBundle generateSurfaceData();
     const Container3D<Voxel>& getSurfaceData() const;
+    const AtomTree& getAtomTree() const;
 
     // calls the Space constructor and creates a cell containing all atoms. Cell size is defined by atom positions
     void defineCell();
