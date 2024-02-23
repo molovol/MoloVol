@@ -391,6 +391,7 @@ void RenderFrame::OnButtonClick(wxCommandEvent& event) {
     case BUTTON_HideMol:
       molactor->SetVisibility(m_hideMolBtn->GetLabel() != HIDEMOLLABEL);
       Render();
+      m_hideMolBtn->SetLabel(m_hideMolBtn->GetLabel() == HIDEMOLLABEL? SHOWMOLLABEL : HIDEMOLLABEL);
       break;
     case BUTTON_LiquoriceModel:
       molmapper->UseLiquoriceStickSettings();
