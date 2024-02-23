@@ -24,6 +24,7 @@
 #include <wx/listbox.h>
 #include <wx/arrstr.h>
 #include <wx/dynarray.h>
+#include <wx/sizer.h>
 
 #include <array>
 #include <unordered_map>
@@ -228,7 +229,7 @@ void RenderFrame::InitIsoControlPanel() {
   InitIsoInputPanel();
 
   {
-    wxBoxSizer* controlSizer = new wxBoxSizer(wxVERTICAL);
+    wxStaticBoxSizer* controlSizer = new wxStaticBoxSizer(wxVERTICAL, m_isoCtrlPanel, "Surface Select");
     controlSizer->Add(m_vdwBtn, 0, wxEXPAND);
     controlSizer->Add(m_molBtn, 0, wxEXPAND);
     controlSizer->Add(m_cavityBtn, 0, wxEXPAND);
@@ -258,18 +259,26 @@ void RenderFrame::InitControlPanel() {
  
   InitIsoControlPanel();
 
-  m_resetCameraBtn = new wxButton(m_controlPanel, BUTTON_ResetCamera, "Center Camera");
-
+  wxPanel* camera_panel = new wxPanel(m_controlPanel);
+  m_resetCameraBtn = new wxButton(camera_panel, BUTTON_ResetCamera, "Center Camera");
+  wxStaticBoxSizer* camera_sizer = new wxStaticBoxSizer(wxVERTICAL, camera_panel, "View Control");
+  camera_sizer->Add(m_resetCameraBtn, 0, wxEXPAND);
+  camera_panel->SetSizerAndFit(camera_sizer);
+  
   InitMolPanel();
 
-  m_cavityList = new wxListBox(m_controlPanel, LIST_Cavity, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_EXTENDED);
+  wxPanel* cavity_panel = new wxPanel(m_controlPanel);
+  m_cavityList = new wxListBox(cavity_panel, LIST_Cavity, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_EXTENDED);
+  wxStaticBoxSizer* cavity_sizer = new wxStaticBoxSizer(wxVERTICAL, cavity_panel, "Cavity Select");
+  cavity_sizer->Add(m_cavityList, 0, wxEXPAND);
+  cavity_panel->SetSizerAndFit(cavity_sizer);
   
   {
     wxBoxSizer* controlSizer = new wxBoxSizer(wxVERTICAL);
     controlSizer->Add(m_isoCtrlPanel, 0, wxEXPAND);
-    controlSizer->Add(m_resetCameraBtn, 0, wxEXPAND);
+    controlSizer->Add(camera_panel, 0, wxEXPAND);
     controlSizer->Add(m_molPanel, 0, wxEXPAND);
-    controlSizer->Add(m_cavityList, 0, wxEXPAND);
+    controlSizer->Add(cavity_panel, 0, wxEXPAND);
     m_controlPanel->SetSizerAndFit(controlSizer);
   }
 }
@@ -278,7 +287,7 @@ void RenderFrame::InitMolPanel() {
   m_molPanel = new wxPanel(m_controlPanel, PANEL_Mol);
   m_hideMolBtn = new wxButton(m_molPanel, BUTTON_HideMol, HIDEMOLLABEL);
 
-  wxBoxSizer* hSizer = new wxBoxSizer(wxVERTICAL);
+  wxStaticBoxSizer* hSizer = new wxStaticBoxSizer(wxVERTICAL, m_molPanel, "Molecule Render");
   hSizer->Add(m_hideMolBtn, 0, wxEXPAND);
   m_molPanel->SetSizerAndFit(hSizer);
 }
