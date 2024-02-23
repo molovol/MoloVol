@@ -340,7 +340,6 @@ void RenderFrame::InitRenderWindow() {
   molmapper->UseLiquoriceStickSettings();
   molactor->SetMapper(molmapper);
   renderer->AddActor(molactor);
-
 }
 
 ////////////////////
@@ -379,18 +378,23 @@ void RenderFrame::OnButtonClick(wxCommandEvent& event) {
     case BUTTON_HideMol:
       molactor->SetVisibility(m_hideMolBtn->GetLabel() != HIDEMOLLABEL);
       Render();
-      m_hideMolBtn->SetLabel(m_hideMolBtn->GetLabel() == HIDEMOLLABEL ? SHOWMOLLABEL : HIDEMOLLABEL);
       break;
     case BUTTON_LiquoriceModel:
       molmapper->UseLiquoriceStickSettings();
+      molactor->SetVisibility(true);
+      m_hideMolBtn->SetLabel(HIDEMOLLABEL);
       Render();
       break;
     case BUTTON_SticksNBallsModel:
       molmapper->UseBallAndStickSettings();
+      molactor->SetVisibility(true);
+      m_hideMolBtn->SetLabel(HIDEMOLLABEL);
       Render();
       break;
     case BUTTON_VdwModel:
       molmapper->UseVDWSpheresSettings ();
+      molactor->SetVisibility(true);
+      m_hideMolBtn->SetLabel(HIDEMOLLABEL);
       Render();
       break;
   }
