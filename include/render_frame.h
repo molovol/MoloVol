@@ -96,6 +96,9 @@ class RenderFrame : public wxFrame {
       wxButton* m_resetCameraBtn;
       wxPanel* m_molPanel;
         wxButton* m_hideMolBtn;
+        wxButton* m_liquoriceModelBtn;
+        wxButton* m_sticksnballsModelBtn;
+        wxButton* m_vdwModelBtn;
       wxListBox* m_cavityList;
   
     DECLARE_EVENT_TABLE()
@@ -115,6 +118,9 @@ enum {
   BUTTON_ResetCamera,
   PANEL_Mol,
   BUTTON_HideMol,
+  BUTTON_LiquoriceModel,
+  BUTTON_SticksNBallsModel,
+  BUTTON_VdwModel,
   LIST_Cavity
 };
 

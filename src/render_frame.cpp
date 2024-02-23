@@ -286,9 +286,15 @@ void RenderFrame::InitControlPanel() {
 void RenderFrame::InitMolPanel() {
   m_molPanel = new wxPanel(m_controlPanel, PANEL_Mol);
   m_hideMolBtn = new wxButton(m_molPanel, BUTTON_HideMol, HIDEMOLLABEL);
+  m_liquoriceModelBtn = new wxButton(m_molPanel, BUTTON_LiquoriceModel, "Liquorice Stick");
+  m_sticksnballsModelBtn = new wxButton(m_molPanel, BUTTON_SticksNBallsModel, "Sticks and Balls");
+  m_vdwModelBtn = new wxButton(m_molPanel, BUTTON_VdwModel, "Van der Waals Radii");
 
   wxStaticBoxSizer* hSizer = new wxStaticBoxSizer(wxVERTICAL, m_molPanel, "Molecule Render");
   hSizer->Add(m_hideMolBtn, 0, wxEXPAND);
+  hSizer->Add(m_liquoriceModelBtn, 0, wxEXPAND);
+  hSizer->Add(m_sticksnballsModelBtn, 0, wxEXPAND);
+  hSizer->Add(m_vdwModelBtn, 0, wxEXPAND);
   m_molPanel->SetSizerAndFit(hSizer);
 }
 
@@ -374,6 +380,18 @@ void RenderFrame::OnButtonClick(wxCommandEvent& event) {
       molactor->SetVisibility(m_hideMolBtn->GetLabel() != HIDEMOLLABEL);
       Render();
       m_hideMolBtn->SetLabel(m_hideMolBtn->GetLabel() == HIDEMOLLABEL ? SHOWMOLLABEL : HIDEMOLLABEL);
+      break;
+    case BUTTON_LiquoriceModel:
+      molmapper->UseLiquoriceStickSettings();
+      Render();
+      break;
+    case BUTTON_SticksNBallsModel:
+      molmapper->UseBallAndStickSettings();
+      Render();
+      break;
+    case BUTTON_VdwModel:
+      molmapper->UseVDWSpheresSettings ();
+      Render();
       break;
   }
 }
