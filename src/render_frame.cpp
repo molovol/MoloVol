@@ -82,7 +82,7 @@ void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data, const std::
 
   imagedata->PrepareForNewData();
   imagedata->SetDimensions(dims[0],dims[1],dims[2]);
-  imagedata->SetOrigin(origin[0], origin[1], origin[2]);
+  imagedata->SetOrigin(origin[0]+grid_step/2, origin[1]+grid_step/2, origin[2]+grid_step/2);
   imagedata->SetSpacing(grid_step, grid_step, grid_step);
   // Sets the type of the scalar
   imagedata->AllocateScalars(VTK_CHAR,1);
