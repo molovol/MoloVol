@@ -29,6 +29,7 @@ class wxPanel;
 class wxTextCtrl;
 class wxStaticText;
 class wxCommandEvent;
+class wxScrollEvent;
 class wxButton;
 class wxListCtrl;
 
@@ -70,6 +71,7 @@ class RenderFrame : public wxFrame {
     void OnChangeIso(wxCommandEvent&);
     void OnButtonClick(wxCommandEvent&);
     void OnCavitySelect(wxCommandEvent&);
+    void OnOpacitySlide(wxScrollEvent&);
 
     // Init
     void InitIsoInputPanel();
@@ -94,6 +96,7 @@ class RenderFrame : public wxFrame {
           wxStaticText* m_isoText;
           wxTextCtrl* m_isoCtrl;
       wxButton* m_resetCameraBtn;
+      wxSlider* m_opacitySlider;
       wxPanel* m_molPanel;
         wxButton* m_hideMolBtn;
         wxButton* m_liquoriceModelBtn;
@@ -116,6 +119,7 @@ enum {
   TEXT_Iso,
   TEXT_IsoCtrl,
   BUTTON_ResetCamera,
+  SLIDER_Opacity,
   PANEL_Mol,
   BUTTON_HideMol,
   BUTTON_LiquoriceModel,

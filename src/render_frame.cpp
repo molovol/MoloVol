@@ -25,6 +25,7 @@
 #include <wx/arrstr.h>
 #include <wx/dynarray.h>
 #include <wx/sizer.h>
+#include <wx/slider.h>
 
 #include <array>
 #include <unordered_map>
@@ -39,6 +40,7 @@ BEGIN_EVENT_TABLE(RenderFrame, wxFrame)
   EVT_TEXT_ENTER(TEXT_IsoCtrl, RenderFrame::OnChangeIso)
   EVT_BUTTON(wxID_ANY, RenderFrame::OnButtonClick)
   EVT_LISTBOX(LIST_Cavity, RenderFrame::OnCavitySelect)
+  EVT_SCROLL(RenderFrame::OnOpacitySlide)
 END_EVENT_TABLE()
 
 // DEFINITIONS
@@ -261,7 +263,11 @@ void RenderFrame::InitControlPanel() {
 
   wxPanel* camera_panel = new wxPanel(m_controlPanel);
   m_resetCameraBtn = new wxButton(camera_panel, BUTTON_ResetCamera, "Center Camera");
+  wxStaticText* opacity_label = new wxStaticText(camera_panel, wxID_ANY, "Opacity [%]");
+  m_opacitySlider = new wxSlider(camera_panel, SLIDER_Opacity, 60, 0, 100);
   wxStaticBoxSizer* camera_sizer = new wxStaticBoxSizer(wxVERTICAL, camera_panel, "View Control");
+  camera_sizer->Add(opacity_label, 0, wxEXPAND);
+  camera_sizer->Add(m_opacitySlider, 0, wxEXPAND);
   camera_sizer->Add(m_resetCameraBtn, 0, wxEXPAND);
   camera_panel->SetSizerAndFit(camera_sizer);
   
@@ -325,6 +331,7 @@ void RenderFrame::InitRenderWindow() {
 
   // Adding the mapper to the renderer
   actor->GetProperty()->SetColor(colors->GetColor3d("MistyRose").GetData());
+  actor->GetProperty()->SetOpacity(0.6);
   actor->SetMapper(mapper);
  
   // Adding marching cubes data to mapper
@@ -354,6 +361,12 @@ void RenderFrame::OnChangeIso(wxCommandEvent& e) {
   else {
     ChangeIso(value);
   }
+}
+
+void RenderFrame::OnOpacitySlide(wxScrollEvent& e) {
+  double op = (double)m_opacitySlider->GetValue()/(double)m_opacitySlider->GetMax();
+  actor->GetProperty()->SetOpacity(op);
+  Render();
 }
 
 void RenderFrame::OnButtonClick(wxCommandEvent& event) {
