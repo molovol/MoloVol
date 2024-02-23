@@ -74,6 +74,7 @@ class RenderFrame : public wxFrame {
     // Init
     void InitIsoInputPanel();
     void InitIsoControlPanel();
+    void InitMolPanel();
     void InitControlPanel();
     void InitPointerMembers();
     void InitRenderWindow();
@@ -93,6 +94,8 @@ class RenderFrame : public wxFrame {
           wxStaticText* m_isoText;
           wxTextCtrl* m_isoCtrl;
       wxButton* m_resetCameraBtn;
+      wxPanel* m_molPanel;
+        wxButton* m_hideMolBtn;
       wxListBox* m_cavityList;
   
     DECLARE_EVENT_TABLE()
@@ -110,6 +113,8 @@ enum {
   TEXT_Iso,
   TEXT_IsoCtrl,
   BUTTON_ResetCamera,
+  PANEL_Mol,
+  BUTTON_HideMol,
   LIST_Cavity
 };
 

@@ -29,6 +29,9 @@
 #include <unordered_map>
 #include <string> 
 
+#define HIDEMOLLABEL "Hide Molecule"
+#define SHOWMOLLABEL "Show Molecule"
+
 // EVENT TABLE
 BEGIN_EVENT_TABLE(RenderFrame, wxFrame)
   EVT_CLOSE(RenderFrame::OnClose)
@@ -146,6 +149,9 @@ void RenderFrame::UpdateMolecule(const std::vector<Atom>& all_atoms) {
       }
     }
   }
+
+  molactor->SetVisibility(true);
+  m_hideMolBtn->SetLabel(HIDEMOLLABEL);
 }
 
 void RenderFrame::Render() {
@@ -211,21 +217,6 @@ void RenderFrame::ClearMask() {
 //////////
 // INIT //
 //////////
-void RenderFrame::InitIsoInputPanel() {
-  m_isoInputPanel = new wxPanel(m_isoCtrlPanel, PANEL_IsoInput);
-
-  m_isoText = new wxStaticText(m_isoInputPanel, TEXT_Iso, "Iso Value");
-  m_isoCtrl = new wxTextCtrl(m_isoInputPanel, TEXT_IsoCtrl, "0.5", wxDefaultPosition, wxDefaultSize,
-      wxTE_PROCESS_ENTER);
-
-  {
-    wxBoxSizer* isoSizer = new wxBoxSizer(wxHORIZONTAL);
-    isoSizer->Add(m_isoText, 1);
-    isoSizer->Add(m_isoCtrl, 1);
-    m_isoInputPanel->SetSizerAndFit(isoSizer);
-  }
-}
-
 void RenderFrame::InitIsoControlPanel() {
   m_isoCtrlPanel = new wxPanel(m_controlPanel, PANEL_IsoCtrl);
 
@@ -247,6 +238,21 @@ void RenderFrame::InitIsoControlPanel() {
   }
 }
 
+void RenderFrame::InitIsoInputPanel() {
+  m_isoInputPanel = new wxPanel(m_isoCtrlPanel, PANEL_IsoInput);
+
+  m_isoText = new wxStaticText(m_isoInputPanel, TEXT_Iso, "Iso Value");
+  m_isoCtrl = new wxTextCtrl(m_isoInputPanel, TEXT_IsoCtrl, "0.5", wxDefaultPosition, wxDefaultSize,
+      wxTE_PROCESS_ENTER);
+
+  {
+    wxBoxSizer* isoSizer = new wxBoxSizer(wxHORIZONTAL);
+    isoSizer->Add(m_isoText, 1);
+    isoSizer->Add(m_isoCtrl, 1);
+    m_isoInputPanel->SetSizerAndFit(isoSizer);
+  }
+}
+
 void RenderFrame::InitControlPanel() {
   m_controlPanel = new wxPanel(this, PANEL_Control, wxDefaultPosition, wxSize(200,-1));
  
@@ -254,15 +260,27 @@ void RenderFrame::InitControlPanel() {
 
   m_resetCameraBtn = new wxButton(m_controlPanel, BUTTON_ResetCamera, "Center Camera");
 
+  InitMolPanel();
+
   m_cavityList = new wxListBox(m_controlPanel, LIST_Cavity, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_EXTENDED);
   
   {
     wxBoxSizer* controlSizer = new wxBoxSizer(wxVERTICAL);
     controlSizer->Add(m_isoCtrlPanel, 0, wxEXPAND);
     controlSizer->Add(m_resetCameraBtn, 0, wxEXPAND);
+    controlSizer->Add(m_molPanel, 0, wxEXPAND);
     controlSizer->Add(m_cavityList, 0, wxEXPAND);
     m_controlPanel->SetSizerAndFit(controlSizer);
   }
+}
+
+void RenderFrame::InitMolPanel() {
+  m_molPanel = new wxPanel(m_controlPanel, PANEL_Mol);
+  m_hideMolBtn = new wxButton(m_molPanel, BUTTON_HideMol, HIDEMOLLABEL);
+
+  wxBoxSizer* hSizer = new wxBoxSizer(wxVERTICAL);
+  hSizer->Add(m_hideMolBtn, 0, wxEXPAND);
+  m_molPanel->SetSizerAndFit(hSizer);
 }
 
 void RenderFrame::InitPointerMembers()
@@ -342,6 +360,11 @@ void RenderFrame::OnButtonClick(wxCommandEvent& event) {
     case BUTTON_ResetCamera:
       renderer->ResetCamera();
       Render();
+      break;
+    case BUTTON_HideMol:
+      molactor->SetVisibility(m_hideMolBtn->GetLabel() != HIDEMOLLABEL);
+      Render();
+      m_hideMolBtn->SetLabel(m_hideMolBtn->GetLabel() == HIDEMOLLABEL ? SHOWMOLLABEL : HIDEMOLLABEL);
       break;
   }
 }
