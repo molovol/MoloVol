@@ -179,6 +179,7 @@ void RenderFrame::AdjustControls(bool probe_mode) {
   }
 
   m_vdwBtn->Enable();
+  m_cavityBtn->Enable();
   m_molBtn->SetLabel("Molecular Surface");
   m_accessibleBtn->SetLabel("Probe Accessible Surface");
 
@@ -440,6 +441,7 @@ void RenderFrame::OnCavitySelect(wxCommandEvent& event) {
     ClearMask();
     
     m_vdwBtn->Enable();
+    m_cavityBtn->Enable();
     m_molBtn->SetLabel("Molecular Surface");
     m_accessibleBtn->SetLabel("Probe Accessible Surface");
   }
@@ -461,6 +463,7 @@ void RenderFrame::OnCavitySelect(wxCommandEvent& event) {
     }
 
     m_vdwBtn->Disable();
+    m_cavityBtn->Disable();
     m_molBtn->SetLabel("Cavity Shell Surface");
     m_accessibleBtn->SetLabel("Cavity Core Surface");
   }
