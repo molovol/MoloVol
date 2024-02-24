@@ -33,6 +33,7 @@
 
 #define HIDEMOLLABEL "Hide Molecule"
 #define SHOWMOLLABEL "Show Molecule"
+#define BORDER 2
 
 // EVENT TABLE
 BEGIN_EVENT_TABLE(RenderFrame, wxFrame)
@@ -233,10 +234,10 @@ void RenderFrame::InitIsoControlPanel() {
 
   {
     wxStaticBoxSizer* controlSizer = new wxStaticBoxSizer(wxVERTICAL, m_isoCtrlPanel, "Surface Select");
-    controlSizer->Add(m_vdwBtn, 0, wxEXPAND);
-    controlSizer->Add(m_molBtn, 0, wxEXPAND);
-    controlSizer->Add(m_cavityBtn, 0, wxEXPAND);
-    controlSizer->Add(m_accessibleBtn, 0, wxEXPAND);
+    controlSizer->Add(m_vdwBtn, 0, wxEXPAND | wxBOTTOM, BORDER);
+    controlSizer->Add(m_molBtn, 0, wxEXPAND | wxBOTTOM, BORDER);
+    controlSizer->Add(m_cavityBtn, 0, wxEXPAND | wxBOTTOM, BORDER);
+    controlSizer->Add(m_accessibleBtn, 0, wxEXPAND | wxBOTTOM, BORDER);
     controlSizer->Add(m_isoInputPanel, 0, wxEXPAND);
     m_isoCtrlPanel->SetSizerAndFit(controlSizer);
   }
@@ -268,7 +269,7 @@ void RenderFrame::InitControlPanel() {
   m_opacitySlider = new wxSlider(camera_panel, SLIDER_Opacity, 60, 0, 100);
   wxStaticBoxSizer* camera_sizer = new wxStaticBoxSizer(wxVERTICAL, camera_panel, "View Control");
   camera_sizer->Add(opacity_label, 0, wxEXPAND);
-  camera_sizer->Add(m_opacitySlider, 0, wxEXPAND);
+  camera_sizer->Add(m_opacitySlider, 0, wxEXPAND | wxBOTTOM, BORDER);
   camera_sizer->Add(m_resetCameraBtn, 0, wxEXPAND);
   camera_panel->SetSizerAndFit(camera_sizer);
   
@@ -298,9 +299,9 @@ void RenderFrame::InitMolPanel() {
   m_vdwModelBtn = new wxButton(m_molPanel, BUTTON_VdwModel, "Large Spheres");
 
   wxStaticBoxSizer* hSizer = new wxStaticBoxSizer(wxVERTICAL, m_molPanel, "Molecule Render");
-  hSizer->Add(m_hideMolBtn, 0, wxEXPAND);
-  hSizer->Add(m_liquoriceModelBtn, 0, wxEXPAND);
-  hSizer->Add(m_sticksnballsModelBtn, 0, wxEXPAND);
+  hSizer->Add(m_hideMolBtn, 0, wxEXPAND | wxBOTTOM, BORDER);
+  hSizer->Add(m_liquoriceModelBtn, 0, wxEXPAND | wxBOTTOM, BORDER);
+  hSizer->Add(m_sticksnballsModelBtn, 0, wxEXPAND | wxBOTTOM, BORDER);
   hSizer->Add(m_vdwModelBtn, 0, wxEXPAND);
   m_molPanel->SetSizerAndFit(hSizer);
 }
