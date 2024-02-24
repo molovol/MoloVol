@@ -295,7 +295,7 @@ void RenderFrame::InitMolPanel() {
   m_hideMolBtn = new wxButton(m_molPanel, BUTTON_HideMol, HIDEMOLLABEL);
   m_liquoriceModelBtn = new wxButton(m_molPanel, BUTTON_LiquoriceModel, "Liquorice Stick");
   m_sticksnballsModelBtn = new wxButton(m_molPanel, BUTTON_SticksNBallsModel, "Sticks and Balls");
-  m_vdwModelBtn = new wxButton(m_molPanel, BUTTON_VdwModel, "Van der Waals Radii");
+  m_vdwModelBtn = new wxButton(m_molPanel, BUTTON_VdwModel, "Large Spheres");
 
   wxStaticBoxSizer* hSizer = new wxStaticBoxSizer(wxVERTICAL, m_molPanel, "Molecule Render");
   hSizer->Add(m_hideMolBtn, 0, wxEXPAND);

@@ -158,11 +158,11 @@ bool Ctrl::runCalculation(){
 
   // OUTPUT
   displayResults(data);
-  renderSurface(_current_calculation->getSurfaceData(), _current_calculation->getCellOrigin(),
-      data.grid_step, data.probe_mode, 
-      data.cavities.size(), _current_calculation->getAtomTree().getAtomList());
 
   if (data.success){
+    renderSurface(_current_calculation->getSurfaceData(), _current_calculation->getCellOrigin(),
+        data.grid_step, data.probe_mode, 
+        data.cavities.size(), _current_calculation->getAtomTree().getAtomList());
     // export if appropriate option is toggled
     if(data.make_report){exportReport();}
     if(data.make_full_map){exportSurfaceMap(false);}
