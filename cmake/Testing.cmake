@@ -19,7 +19,7 @@ set(TEST_NAMES
   cut_off_string
   struct_atom
   class_vector
-  experimental
+  class_atomtree
 )
 
 set(MOLOVOL_TEST_DIR ${CMAKE_SOURCE_DIR}/test)
