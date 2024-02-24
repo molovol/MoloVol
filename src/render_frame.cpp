@@ -132,9 +132,10 @@ void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data, const std::
 
 }
 
-void RenderFrame::UpdateMolecule(const std::vector<Atom>& all_atoms) {
+void RenderFrame::UpdateMolecule(const std::vector<Atom>& atomlist) {
   
-  AtomTree atomtree(all_atoms);
+  const AtomTree atomtree(atomlist);
+  const std::vector<Atom>& all_atoms = atomtree.getAtomList();
 
   molecule->Initialize();
 
