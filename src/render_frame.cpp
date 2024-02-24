@@ -326,11 +326,11 @@ void RenderFrame::InitRenderWindow() {
   renderWindow->AddRenderer(renderer);
 
   // Adding the actor to the renderer
-  renderer->SetBackground(colors->GetColor3d("DarkSlateGray").GetData());
+  renderer->SetBackground(0,0,0);
   renderer->AddActor(actor);
 
   // Adding the mapper to the renderer
-  actor->GetProperty()->SetColor(colors->GetColor3d("MistyRose").GetData());
+  actor->GetProperty()->SetColor(250/(double)255, 224/(double)255, 135/(double)255);
   actor->GetProperty()->SetOpacity(0.6);
   actor->SetMapper(mapper);
  
