@@ -149,8 +149,6 @@ void RenderFrame::UpdateMolecule(const std::vector<Atom>& atomlist) {
     const Atom& at = all_atoms[at_id];
     std::vector<size_t> closest = atomtree.listAllWithin(at.getPos(), 0);
 
-    std::cout << at.symbol << " " << closest.size() << std::endl;
-
     for (const size_t nb_id : closest) {
       if (nb_id != at_id) {
         molecule->AppendBond(atom_objs[at_id], atom_objs[nb_id], 1);
