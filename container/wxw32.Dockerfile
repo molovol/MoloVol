@@ -7,3 +7,4 @@ RUN tar xvf wxWidgets-${wxversion}.tar.bz2
 WORKDIR  wxWidgets-${wxversion}
 RUN ./configure --disable-shared --enable-unicode
 RUN make install
+RUN rm xvf wxWidgets-${wxversion}.tar.bz2

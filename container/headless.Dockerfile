@@ -2,7 +2,7 @@
 FROM ubuntu AS compiler
 COPY ./container/install_wxwidgets.sh ./
 RUN ./install_wxwidgets.sh
-RM install_wxwidgets.sh
+RUN rm install_wxwidgets.sh
 
 # hack to create a headless x server, does not work when set in dockerfile?
 RUN apt-get install xvfb -y
