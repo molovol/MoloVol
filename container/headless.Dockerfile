@@ -1,8 +1,6 @@
 # buidls only headless version without webapp
 FROM ubuntu AS compiler
-RUN apt-get update
-RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
-RUN apt-get install -y build-essential manpages-dev libgtk2.0-dev wget
+RUN DEBIAN_FRONTEND="noninteractive" apt-get update & apt-get -y install tzdata build-essential manpages-dev libgtk2.0-dev wget
 RUN wget https://github.com/wxWidgets/wxWidgets/releases/download/v3.1.5/wxWidgets-3.1.5.tar.bz2
 RUN tar xvf wxWidgets-3.1.5.tar.bz2
 WORKDIR  wxWidgets-3.1.5
@@ -17,7 +15,7 @@ ENV DISPLAY=:1.0
 
 #FROM compiler AS builder
 RUN apt update; apt install pip -y
-RUN apt purge --auto-remove cmake; pip install cmake --upgrade
+RUN apt purge --auto-remove cmake -y; pip install cmake --upgrade
 WORKDIR /
 COPY src/ src/
 COPY include/ include/
