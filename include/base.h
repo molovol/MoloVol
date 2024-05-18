@@ -49,6 +49,7 @@ wxDECLARE_EVENT(wxEVT_COMMAND_WORKERTHREAD_COMPLETED, wxThreadEvent);
 template <typename> class Container3D;
 class Voxel;
 class RenderFrame;
+struct Atom;
 
 class MainFrame: public wxFrame, public wxThreadHelper
 {

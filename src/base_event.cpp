@@ -55,7 +55,9 @@ void MainFrame::OnClose(wxCloseEvent& event){
   if (GetThread() && GetThread()->IsRunning()){
     GetThread()->Wait();
   }
+#ifdef MOLOVOL_RENDERER
   m_renderWin->Destroy();
+#endif
   event.Skip();
 }
 
