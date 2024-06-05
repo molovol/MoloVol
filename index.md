@@ -23,6 +23,9 @@ issue that led to crashed. With this new change the web app should be more relia
 
 ### Web Application
 
+We are currently migrating to a new server, so the web app may be unavailable at times. Thank
+you for your patience.
+
 <div class="button link" markdown="1">
 * <a class="buttons" 
     href="https://app.molovol.com">
