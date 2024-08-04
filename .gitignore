@@ -53,6 +53,6 @@ _site/
 venv*/
 
 # VTK is a large library that does not need to be part of the main repository
-external/VTK*
+external/VTK-*
 
 notforcommit/
