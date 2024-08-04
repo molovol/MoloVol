@@ -21,9 +21,15 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-out = None
 log_dir = "./logs/"
 export_dir = "./export/"
+
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
+if not os.path.exists(export_dir):
+    os.makedirs(export_dir)
+
+out = None
 
 # Cross-Origin Resource Sharing
 cors = CORS(app, resources={r"/api/*": {"origins": "http://localhost:4000"}})
@@ -310,9 +316,9 @@ def io():
                 args.append(structure_path)
 
             # read elements file
-            elements_path = "./inputfile/elements.txt"
+            elements_path = "/usr/share/molovol/elements.txt"
             args.append("-fe")
-            args.append(elements_path)
+            args.append(elements_path) # May not even be necessary
 
             # we only print it out in the end, so we can put it to quiet
             args.append("-q")
