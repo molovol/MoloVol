@@ -79,6 +79,13 @@ if(NOT MOLOVOL_ABS_RESOURCE_PATH)
   )
 endif()
 
+# RPATH STUFF
+set(CMAKE_MACOSX_RPATH 1)
+list(APPEND CMAKE_BUILD_RPATH "@executable_path/Frameworks")
+list(APPEND CMAKE_INSTALL_RPATH "@executable_path/Frameworks")
+#set(CMAKE_BUILD_RPATH "@executable_path/Frameworks")
+#set(CMAKE_INSTALL_RPATH "@executable_path/Frameworks")
+
 # Target MoloVol
 add_executable(${EXE_NAME} ${SOURCES} ${OSX_RESOURCE_FILES})
 
@@ -88,7 +95,7 @@ include(MacSpecific)
 target_link_libraries(${EXE_NAME} ${wxWidgets_LIBRARIES})
 if(MOLOVOL_RENDERER)
   target_link_libraries(${EXE_NAME} ${WXVTK_LIB})
-  target_compile_definitions(${EXE_NAME} PRIVATE MOLOVOL_RENDERER)
+  target_compile_definitions(${EXE_NAME} PRIVATE MOLOVOL_RENDERER) 
 endif()
 
   # Add custom flag
@@ -109,8 +116,6 @@ endif()
 # Installation instructions for debian package
 if (UNIX AND NOT APPLE)
   include(DebInstall)
-elseif (APPLE)
-  include(MacInstall)
 endif()
 
 include(Packing)
