@@ -116,6 +116,10 @@ endif()
 # Installation instructions for debian package
 if (UNIX AND NOT APPLE)
   include(DebInstall)
+elseif(APPLE)
+  # This is needed for generation of the dmg file
+  install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/MoloVol.app DESTINATION "." 
+    FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 endif()
 
 include(Packing)
