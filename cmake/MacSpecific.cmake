@@ -13,8 +13,3 @@ set_target_properties(${EXE_NAME} PROPERTIES
   MACOSX_BUNDLE_ICON_FILE icon
 )
 
-# Library shenanigans
-if(APPLE)
-  # This does not seem to be necessary anymore as of 2024-02-07
-  #string(REPLACE "-ltiff" "/usr/local/opt/libtiff/lib/libtiff.a" wxWidgets_LIBRARIES "${wxWidgets_LIBRARIES}")
-endif()
