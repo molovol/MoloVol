@@ -12,6 +12,10 @@ if(MOLOVOL_OSX_FAT_FILE)
   set(CMAKE_OSX_ARCHITECTURES arm64;x86_64)
 endif()
 
+# Minimum macOS version, ignored on other platforms
+# Must be set before project()
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11 CACHE STRING "Minimum macOS deployment version" FORCE)
+
 # Set name and version
 project(MoloVol VERSION 1.1.1)
 
@@ -20,10 +24,6 @@ if(NOT APPLE)
   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
 endif()
-
-# Minimum macOS version, ignored on other platforms
-# Must be set before project()
-set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11 CACHE STRING "Minimum macOS deployment version")
 
 include(ExecutableName)
 # EXE_NAME
