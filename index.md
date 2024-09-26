@@ -19,7 +19,7 @@ speed by around 50%. Other than that, this version is equivalent to the previous
 so we encourage everyone to upgrade.
 
 If you have previously experienced instability of the web app, its newest version fixes an
-issue that led to crashed. With this new change the web app should be more reliable.
+issue that led to crashes. With this new change the web app should be more reliable.
 
 ### Web Application
 
@@ -33,6 +33,7 @@ issue that led to crashed. With this new change the web app should be more relia
 You can try out the software without installation directly through your browser.
 Simply follow the link above.
 
+<a id="download">
 ### Download and Installation
 
 {% include platforms.html %}
