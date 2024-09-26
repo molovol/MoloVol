@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="{{ site.lang | default: "en-US" }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+{% seo %}
+    <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
+    <script src="{{ '/assets/js/scale.fix.js' | relative_url }}"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    {% include head-custom.html %}
+  </head>
+  <body>
+
+  <nav>
+    <ul class="nav">
+      <li><a href="{{ '/' | relative_url }}">Home</a></li>
+      <li><a href="#section1">Section 1</a></li>
+      <li><a href="#section2">Section 2</a></li>
+      <li><a href="#section3">Section 3</a></li>
+      <li class="dropdown">
+        <a href="javascript:void(0)" class="dropbtn">More</a>
+        <div class="dropdown-content">
+          <a href="{{ '/page1' | relative_url }}">Page 1</a>
+          <a href="{{ '/page2' | relative_url }}">Page 2</a>
+          <a href="{{ '/page3' | relative_url }}">Page 3</a>
+        </div>
+      </li>
+    </ul>
+  </nav>
+
+
+    <div class="wrapper">
+      <header>
+        <h1 class="header">Source Code</h1>
+        <p class="header">MoloVol is open source, meaning that its source code is publically accessible.</p>
+        <!--<p class="header">{{ site.description | default: site.github.project_tagline }}</p>-->
+
+        <ul>
+          {% if site.show_downloads %}
+            <li class="download"><a class="buttons" href="{{ site.github.zip_url }}">Download ZIP</a></li>
+            <li class="download"><a class="buttons" href="{{ site.github.tar_url }}">Download TAR</a></li>
+          {% endif %}
+          <li><a class="buttons github" href="{{ site.github.repository_url }}">View On GitHub</a></li>
+          <div class="button link">
+            <a class="buttons" href="#download">Download</a>
+          </div>
+        </ul>
+
+        {% if site.github.is_project_page %}
+        <p class="header">Developed and maintained by Jasmin B. Maglic and Roy Lavendomme.</p>
+        {% endif %}
+
+        {% if site.github.is_user_page %}
+          <ul>
+            <li><a class="buttons github" href="{{ site.github.owner_url }}">GitHub Profile</a></li>
+          </ul>
+        {% endif %}
+      </header>
+
+      <section>
+        {{ content }}
+      </section>
+
+      <footer>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+  </body>
+</html>
+
+<!--Adapted from Dinky theme in accordance to its CC0 1.0 Universal license-->
