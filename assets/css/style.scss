@@ -10,7 +10,7 @@
   --accent-bg:#f5f7ff;
   --text:#212121;
   --border:#d8dae1;
-  --dark:#333;
+  --dark:#222;
   --mlvl-blue:#2380be;
   --accent-primary:#1a96e9;
   --code:#d81b60;
@@ -249,7 +249,8 @@ td>a{
   display: block;
   color: white;
   text-align: center;
-  padding: 14px 16px;
+  padding: 14px 24px;
+  min-width:84px;
   text-decoration: none;
 }
 
