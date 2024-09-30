@@ -11,7 +11,7 @@
   --text:#212121;
   --border:#d8dae1;
   --dark:#222;
-  --mlvl-blue:#2380be;
+  --mvl-blue:#2380be;
   --accent-primary:#1a96e9;
   --code:#d81b60;
   --preformatted:#444;
@@ -81,7 +81,7 @@ h1,h2,h3{
 }
 
 a, a:visited{
-  color: var(--mlvl-blue);
+  color: var(--mvl-blue);
   font: var(--sans-font);
 }
 
@@ -123,13 +123,13 @@ blockquote>p{
 }
 
 header li, .button li{
-  background: linear-gradient(to top, var(--accent-primary) 0%, var(--mlvl-blue) 100%);
-  box-shadow: inset 0px 1px 1px 0 var(--mlvl-blue);
+  background: linear-gradient(to top, var(--accent-primary) 0%, var(--mvl-blue) 100%);
+  box-shadow: inset 0px 1px 1px 0 var(--mvl-blue);
   height: 100%;
   line-height: 1em;
   padding: 6px 6px 6px 7px;
   border-radius: 4px;
-  border: 1px solid var(--mlvl-blue);
+  border: 1px solid var(--mvl-blue);
   list-style-type: none;
 }
 
@@ -256,8 +256,21 @@ td>a{
   text-decoration: none;
 }
 
+.navbar li .highlighted {
+  color: white;
+  background-color: var(--mvl-blue);
+  padding: 3px 24px;
+  border-radius: 4px;
+  margin: 11px 10px;
+}
+
 .navbar li a:hover {
-  background-color: var(--mlvl-blue);
+  background-color: var(--mvl-blue);
+}
+
+.navbar li .highlighted:hover {
+  background-color: white;
+  color: var(--mvl-blue);
 }
 
 .dropdown-content {
