@@ -30,3 +30,23 @@ Please use the following or an equivalent citation:
 > Maglic, J.B. & Lavendomme, R. (2022). J. Appl. Cryst. 55, 1033-1044.\
 > DOI: [10.1107/S1600576722004988](https://doi.org/10.1107/S1600576722004988)
 
+<div class="card-container">
+  <div class="card">
+    <a href="page1.html">
+      <img src="/docs/assets/images/square-placeholder.jpg">
+      <div class="card-title">News</div>
+    </a>
+  </div>
+  <div class="card">
+    <a href="demo">
+      <img src="/docs/assets/images/square-placeholder.jpg">
+      <div class="card-title">Showcase</div>
+    </a>
+  </div>
+  <div class="card">
+    <a href="">
+      <img src="/docs/assets/images/square-placeholder.jpg">
+      <div class="card-title">Support</div>
+    </a>
+  </div>
+</div>
