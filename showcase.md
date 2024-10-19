@@ -7,7 +7,7 @@ cavities. Notably, MoloVol can generate surface maps to visualize the calculatio
 softwares such as [PyMOL](https://pymol.org/2/) or [ChimeraX](https://www.cgl.ucsf.edu/chimerax/).
 Images below were rendered with [PyMOL Open-Source](https://github.com/schrodinger/pymol-open-source).
 
-Check out some demonstrations below.
+Check out some examples below.
 
 <img src="/docs/assets/images/MoloVol_outputs_tr.png" style="horizontal-align:middle">
 
