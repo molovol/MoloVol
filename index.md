@@ -39,7 +39,7 @@ Please use the following or an equivalent citation:
   </div>
   <div class="card">
     <a href="showcase">
-      <img src="/docs/assets/images/square-placeholder.jpg">
+      <img src="/docs/assets/images/M48L96_tr.png">
       <div class="card-title">Showcase</div>
     </a>
   </div>
