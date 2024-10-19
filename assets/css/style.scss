@@ -24,7 +24,7 @@ body{
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-size: cover;
-  padding: 0px;
+  padding: 0px; /* needed to suppress ugly frame */
 }
 
 body>*{
@@ -37,7 +37,17 @@ body>header{
   text-align:center;
   padding:0 .5rem 2rem .5rem;
   grid-column:1/-1;
-  box-sizing:border-box
+  box-sizing:border-box;
+}
+
+section{
+  padding: 0 60px 60px 60px;
+  border-left: 1px solid var(--dark);
+  border-right: 1px solid var(--dark);
+  background: white;
+  width: 800px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 h1,h2,h3,h4,h5,h6{
@@ -77,6 +87,10 @@ h1,h2,h3{
   line-height:1.1;
 }
 
+h1,h2,h3,h4,h5,h6{
+  text-align:center;
+}
+
 a, a:visited{
   color: var(--mvl-blue);
   font: var(--sans-font);
@@ -101,7 +115,13 @@ blockquote>p{
 
 .title{
   margin-top:2rem;
+  padding-top: 40px;
+  padding-bottom: 40px;
   border: none;
+}
+
+#wordmark-container{
+  text-align:center;
 }
 
 .button{
@@ -219,6 +239,11 @@ td>a{
 
 .highlight{
   border-radius: 4px;
+}
+
+.wrapper {
+  display: flex;
+  width: auto;
 }
 
 // SIDE BAR
@@ -344,3 +369,9 @@ td>a{
   text-decoration: none;
 }
 // CARDS
+.center-img {
+  text-align:center;
+  img {
+    border-style: none;
+  }
+}

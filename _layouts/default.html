@@ -29,10 +29,9 @@
 
 
     <div class="wrapper">
-      <header>
+<!--      <header>
         <h1 class="header">Source Code</h1>
         <p class="header">MoloVol is open source, meaning that its source code is publically accessible.</p>
-        <!--<p class="header">{{ site.description | default: site.github.project_tagline }}</p>-->
 
         <ul>
           {% if site.show_downloads %}
@@ -55,9 +54,11 @@
           </ul>
         {% endif %}
       </header>
-
+-->
       <section>
-        <img class="title" src="/docs/assets/images/wordmark.png" alt="MoloVol wordmark" height="72">
+        <div id="wordmark-container">
+          <img class="title" src="/docs/assets/images/wordmark.png" alt="MoloVol wordmark" height="72">
+        </div>
         {{ content }}
       </section>
 
