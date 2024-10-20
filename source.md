@@ -1,7 +1,7 @@
 ---
 ---
 
-#### Scientific tools should be transparent.
+#### Scientific tools should be transparent
 When you use MoloVol, you should not need to
 trust us as developers. That's why MoloVol is open source, meaning its source code is
 fully accessible. You can download the code, run it yourself and verify that

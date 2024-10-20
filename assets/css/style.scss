@@ -141,22 +141,41 @@ blockquote>p{
   text-align:center;
 }
 
-.button{
-  a{
-    text-decoration: none;
-    color: var(--bg);
-  }
-  ul{
-    position: static;
-    padding: 0;
-  }
-  li{
-    width: 148px;
-    padding: 10px 0px;
-  }
+a.button {
+  display:inline-block;
+  text-align: center;
+  text-decoration: none; /* no underline */
+  background-color: var(--mvl-blue);
+  color:white;
+  padding: 5px 24px;
+  min-width:120px;
+  min-height:21px;
+  border-radius: 6px;
+  border: 1px solid transparent;
 }
 
-header li, .button li{
+a.button:hover {
+  background-color: white;
+  color: var(--mvl-blue);
+  border: 1px solid var(--mvl-blue);
+}
+
+//.button{
+//  a{
+//    text-decoration: none;
+//    color: var(--bg);
+//  }
+//  ul{
+//    position: static;
+//    padding: 0;
+//  }
+//  li{
+//    width: 148px;
+//    padding: 10px 0px;
+//  }
+//}
+
+header li {//, .button li{
   background: linear-gradient(to top, var(--off-mvl-blue) 0%, var(--mvl-blue) 100%);
   box-shadow: inset 0px 1px 1px 0 var(--mvl-blue);
   height: 100%;
@@ -167,11 +186,11 @@ header li, .button li{
   list-style-type: none;
 }
 
-.button li{
-  max-width: 80%;
-}
+//.button li{
+//  max-width: 80%;
+//}
 
-header li:hover, .button li:hover{
+header li:hover {//, .button li:hover{
   background: linear-gradient(to top, var(--off-mvl-blue) 0%, var(--off-mvl-blue) 100%);
 }
 
@@ -184,10 +203,10 @@ div.download{
 
 .link ul{ 
   text-align: center;
-  li a.buttons{
-    padding: 2px 2px 2px 2px;
-    background: none;
-  }
+  //li a.buttons{
+  //  padding: 2px 2px 2px 2px;
+  //  background: none;
+  //}
 }
 
 a.github{
@@ -195,9 +214,9 @@ a.github{
   color: var(--bg);
 }
 
-a.buttons{
-  line-height: 1.2;
-}
+//a.buttons{
+//  line-height: 1.2;
+//}
 
 h1.header{
   font-family: var(--sans-font);
@@ -225,16 +244,12 @@ table.invisible tbody tr td{
   padding: 0 0 0 0;
   margin: 0 0 0 0;
   border: none;
-  text-align: left;
+  text-align: center;
 }
 
 td{
   background: var(--accent-bg);
   text-align: center;
-}
-
-td>a{
-  font-weight: bold;
 }
 
 #changelog{
@@ -297,6 +312,15 @@ td>a{
   text-decoration: none;
 }
 
+#platform-container{
+  display: flex;
+  width:90%;
+  margin-left:auto;
+  margin-right:auto;
+  table-layout: fixed;
+}
+
+
 .navbar li .highlighted {
   color: white;
   background-color: var(--mvl-blue);
@@ -305,11 +329,8 @@ td>a{
   margin: 11px 10px;
 }
 
-.navbar li a:hover {
-  background-color: var(--mvl-blue);
-}
-
-.navbar li .navtab.active{
+.navbar li a:hover, .navbar li .navtab.active{
+  // style when hovering over a navigation tab or when a navigation tab is active
   background-color: var(--mvl-blue);
 }
 
