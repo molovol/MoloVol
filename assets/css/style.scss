@@ -346,7 +346,6 @@ td>a{
   overflow: hidden;
   box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
   transition: transform 0.3s ease;
-  background: var(--mvl-cream);
   padding: 0;
   margin: 0;
 }
@@ -357,9 +356,10 @@ td>a{
   width: 100%;
   height: 100%;
   object-fit: cover;
+  margin: 0;
+  background: white;
   filter: brightness(60%);
   transition: filter 0.5s ease;
-  margin: 0;
 }
 
 .card-title {
@@ -381,8 +381,8 @@ td>a{
   opacity: 0.0;
 }
 
-.card:hover img {
-  filter: grayscale(0%);
+.card:hover img{
+  filter: brightness(100%);
 }
 
 .card a {
