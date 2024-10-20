@@ -7,6 +7,7 @@
 {% seo %}
     <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
     <script src="{{ '/assets/js/scale.fix.js' | relative_url }}"></script>
+    <script src="/assets/js/activateTab.js" defer></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -17,11 +18,11 @@
 
     <nav>
       <ul class="navbar">
-        <li><a href="{{ '/' | relative_url }}">Home</a></li>
-        <li><a href="{{ '/source' | relative_url }}">Source Code</a></li>
-        <li><a href="{{ '/showcase' | relative_url }}">Showcase</a></li>
-        <li><a href="{{ '/contact' | relative_url }}">Contact</a></li>
-        <li><a href="{{ '/donate' | relative_url }}">Support Us</a></li>
+        <li><a class="navtab" id="nav-home" href="{{ '/' | relative_url }}">Home</a></li>
+        <li><a class="navtab" id="nav-source" href="{{ '/source' | relative_url }}">Source Code</a></li>
+        <li><a class="navtab" id="nav-showcase" href="{{ '/showcase' | relative_url }}">Showcase</a></li>
+        <li><a class="navtab" id="nav-contact" href="{{ '/contact' | relative_url }}">Contact</a></li>
+        <li><a class="navtab" id="nav-donate" href="{{ '/donate' | relative_url }}">Support Us</a></li>
         <li style="float:right"><a class="highlighted" href="{{ '/webapp' | relative_url }}">Web App</a></li>
         <li style="float:right"><a class="highlighted" href="{{ '/download' | relative_url }}">Download</a></li>
       </ul>

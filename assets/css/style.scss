@@ -309,6 +309,10 @@ td>a{
   background-color: var(--mvl-blue);
 }
 
+.navbar li .navtab.active{
+  background-color: var(--mvl-blue);
+}
+
 .navbar li .highlighted:hover {
   background-color: white;
   color: var(--mvl-blue);
