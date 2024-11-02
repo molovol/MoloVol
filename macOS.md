@@ -8,12 +8,15 @@ filename: macOS.md
 Version for macOS El Capitan (10.11) and higher. The app natively supports Macs running on
 Apple silicon, as well as older CPU architectures.
 
-<div class="button download" markdown="1">
-* <a class="buttons" 
-    href="https://github.com/molovol/MoloVol/releases/download/v1.1.1/MoloVol_macOS-10.11+_v1.1.1.dmg">
-    Download Installer
-  </a>
-</div>
+<table class="invisible">
+<tr>
+<td>
+<a class="button download" href="https://github.com/molovol/MoloVol/releases/download/v1.1.1/MoloVol_macOS-10.11+_v1.1.1.dmg">
+Download Installer</a>
+</td>
+</tr>
+</table>
+
 
 {% include manualdownload.html %}
 
