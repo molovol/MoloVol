@@ -3,16 +3,18 @@ title: Windows download
 filename: windows.md
 ---
 
-### Latest version – v1.1.1
+#### Latest version for Windows – v1.1.1
 
-Version for Windows.
-
-<div class="button download" markdown="1">
-* <a class="buttons" 
-    href="https://github.com/molovol/MoloVol/releases/download/v1.1.1/MoloVol_windows_v1.1.1.zip">
-    Download Installer
-  </a>
-</div>
+<table class="invisible">
+<tr>
+<td>
+<a class="button download" 
+  href="https://github.com/molovol/MoloVol/releases/download/v1.1.1/MoloVol_windows_v1.1.1.zip">
+  Download Installer
+</a>
+</td>
+</tr>
+</table>
 
 {% include manualdownload.html %}
 

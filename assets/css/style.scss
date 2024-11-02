@@ -154,6 +154,14 @@ a.button {
   border: 1px solid transparent;
 }
 
+a.download {
+  background: url(../images/arrow-down.png) no-repeat;
+  background-position: 9px 5px;
+  background-color: var(--mvl-blue);
+  padding-left:28px;
+  padding-right:20px;
+}
+
 a.button:hover {
   background-color: white;
   color: var(--mvl-blue);

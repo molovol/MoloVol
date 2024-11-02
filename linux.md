@@ -3,7 +3,7 @@ title: Linux download
 filename: linux.md
 ---
 
-### Latest version – v1.1.1
+#### Latest version for Linux distributions – v1.1.1
 
 Installers for Ubuntu/Debian. Download the installer that corresponds to your CPU architecture.
 If you are unsure, you can find your machine's architecture by running the following command in your Terminal.
@@ -15,19 +15,19 @@ $ dpkg-architecture -q DEB_BUILD_ARCH
 <table class="invisible">
 <tr>
 <td>
-  <a class="button" 
+  <a class="button download"
     href="https://github.com/molovol/MoloVol/releases/download/v1.1.1/MoloVol_debian_arm64_v1.1.1.deb">
     Installer for arm64
   </a>
 </td>
 <td>
-  <a class="button" 
+  <a class="button download"
     href="https://github.com/molovol/MoloVol/releases/download/v1.1.1/MoloVol_debian_amd64_v1.1.1.deb">
     Installer for x86_64
   </a>
 </td>
 <td>
-  <a class="button" 
+  <a class="button download" 
     href="https://github.com/molovol/MoloVol/releases/download/v1.1.1/MoloVol_debian_amd64_v1.1.1.deb">
     Installer for amd64
   </a>
