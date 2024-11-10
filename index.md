@@ -10,7 +10,7 @@ easily accessible on all common platforms.
 The software is being maintained and developed by Jasmin B. Maglic and Roy Lavendomme
 and is available on Windows (7, 8, 10, 11), macOS, Linux (Ubuntu, Debian), and as a web application.
 
-### Scientific Reference
+#### Scientific Reference
 MoloVol v1.0.0 features and algorithms are presented in detail in an 
 [openly accessible scientific article](https://doi.org/10.1107/S1600576722004988) 
 published in the *Journal of Applied Crystallography*.
