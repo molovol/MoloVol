@@ -34,7 +34,7 @@ Please use the following or an equivalent citation:
     </a>
   </div>
   <div class="card">
-    <a href="">
+    <a href="contact">
       <img src="/docs/assets/images/support-card-image.jpg">
       <div class="card-title">Support</div>
     </a>

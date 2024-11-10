@@ -168,21 +168,6 @@ a.button:hover {
   border: 1px solid var(--mvl-blue);
 }
 
-//.button{
-//  a{
-//    text-decoration: none;
-//    color: var(--bg);
-//  }
-//  ul{
-//    position: static;
-//    padding: 0;
-//  }
-//  li{
-//    width: 148px;
-//    padding: 10px 0px;
-//  }
-//}
-
 header li {//, .button li{
   background: linear-gradient(to top, var(--off-mvl-blue) 0%, var(--mvl-blue) 100%);
   box-shadow: inset 0px 1px 1px 0 var(--mvl-blue);
@@ -193,10 +178,6 @@ header li {//, .button li{
   border: 1px solid var(--mvl-blue);
   list-style-type: none;
 }
-
-//.button li{
-//  max-width: 80%;
-//}
 
 header li:hover {//, .button li:hover{
   background: linear-gradient(to top, var(--off-mvl-blue) 0%, var(--off-mvl-blue) 100%);
@@ -289,16 +270,6 @@ td{
     border-style: none;
   }
 }
-
-// SIDE BAR
-// .wrapper header h1{
-//   font-size:1.6rem;
-// }
-// 
-// .wrapper header p{
-//   font-size:0.9rem;
-// }
-// SIDE BAR
 
 // NAVIGATION
 .navbar {
