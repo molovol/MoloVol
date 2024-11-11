@@ -333,6 +333,36 @@ td{
 .dropdown:hover .dropdown-content {
   display: block;
 }
+
+@media only screen and (max-width: 660px) {
+  .navbar {
+    overflow-x: scroll;
+    scrollbar-width: none; /* Hide scrollbar in Firefox */
+    display: flex;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .navbar::-webkit-scrollbar {
+    display: none; /* Hide scrollbar in Chrome, Safari, and Edge */
+  }
+  
+  .navbar li {
+    flex: 0 0 auto; /* Ensures that items don't shrink */
+  }
+  
+  .navtab, .highlighted {
+    padding: 0.5em 1em;
+    text-decoration: none;
+    color: #333;
+  }
+  
+  .highlighted {
+    background-color: #f5f5f5; /* Example style for highlighted links */
+  }
+}
+
 // NAVIGATION
 
 // CARDS
@@ -420,3 +450,4 @@ footer{
   margin-right: auto;
 }
 // FOOTER
+
