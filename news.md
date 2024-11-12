@@ -10,7 +10,7 @@ In any case, I hope that the new website is more
 user-friendly and more aesthetically pleasing.
 
 We're also preparing a big update to the app. We've sent out a beta version to some testers
-and home to roll out the update as soon as possible.
+and hope to roll out the update as soon as possible.
 
 \- Jasmin
 
