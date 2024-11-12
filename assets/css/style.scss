@@ -449,5 +449,11 @@ footer{
   margin-left: auto;
   margin-right: auto;
 }
+
+@media only screen and (max-width: 660px) {
+  footer{
+    position: static;
+  }
+}
 // FOOTER
 
