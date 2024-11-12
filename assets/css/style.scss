@@ -67,6 +67,12 @@ section{
   min-height:100%;
 }
 
+@media only screen and (max-width: 920px) {
+  section {
+    width: 100%;
+  }
+}
+
 h1,h2,h3,h4,h5,h6{
   font-family: var(--sans-font);
   color:var(--text);
@@ -268,7 +274,12 @@ td{
   text-align:center;
   img {
     border-style: none;
+    max-width:100%;
   }
+}
+
+.showcase-img {
+  max-width:100%;
 }
 
 // NAVIGATION
