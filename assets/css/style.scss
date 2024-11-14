@@ -148,6 +148,8 @@ blockquote>p{
   text-align:center;
 }
 
+// BUTTONS
+
 a.button {
   display:inline-block;
   text-align: center;
@@ -159,6 +161,8 @@ a.button {
   min-height:21px;
   border-radius: 6px;
   border: 1px solid transparent;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 a.download {
@@ -174,6 +178,18 @@ a.button:hover {
   color: var(--mvl-blue);
   border: 1px solid var(--mvl-blue);
 }
+
+.button-row {
+  width: 90%;
+  padding-left: 5%;
+  padding-right: 5%;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+// BUTTONS
 
 header li {//, .button li{
   background: linear-gradient(to top, var(--off-mvl-blue) 0%, var(--mvl-blue) 100%);
@@ -221,33 +237,6 @@ h1.header{
 
 footer p, header p{
   text-align: start;
-}
-
-table{
-  table-layout: fixed;
-  width: 100%;
-}
-
-table.invisible{
-  margin: 0 0 0 0;
-  margin-top: 5px;
-  margin-bottom: 10px;
-  border: none;
-  -webkit-border-horizontal-spacing: 0px;
-  -webkit-border-vertical-spacing: 0px;
-}
-
-table.invisible tbody tr td{
-  background: none;
-  padding: 0 0 0 0;
-  margin: 0 0 0 0;
-  border: none;
-  text-align: center;
-}
-
-td{
-  background: var(--accent-bg);
-  text-align: center;
 }
 
 #changelog{
