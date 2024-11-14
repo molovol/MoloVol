@@ -189,6 +189,18 @@ a.button:hover {
   margin-bottom: 10px;
 }
 
+@media only screen and (max-width: 660px) {
+  .button-row {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  .button {
+    margin: 5px 0 10px 0;
+  }
+}
+
 // BUTTONS
 
 header li {//, .button li{
