@@ -37,3 +37,9 @@ function dropNav() {
   dropped = !dropped;
 }
 
+function collapseNav() {
+  // TODO: Can we avoid using a global variable? 
+  dropped = true;
+  dropNav();
+}
+
