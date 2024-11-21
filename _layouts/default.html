@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
     <script src="{{ '/assets/js/scale.fix.js' | relative_url }}"></script>
     <script src="/assets/js/activateTab.js" defer></script>
+    <script src="/assets/js/dropNav.js" defer></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -18,15 +19,15 @@
 
     <nav>
       <ul class="navbar">
+        <li style="float:right">
+          <a href="javascript:void(0);" class="nav-icon responsive" onclick="dropNav()">&#9776;</a></li>
         <li><a class="navtab" id="nav-home" href="{{ '/' | relative_url }}">Home</a></li>
         <li><a class="navtab" id="nav-news" href="{{ '/news' | relative_url }}">News</a></li>
         <li><a class="navtab" id="nav-source" href="{{ '/source' | relative_url }}">Source Code</a></li>
         <li><a class="navtab" id="nav-showcase" href="{{ '/showcase' | relative_url }}">Showcase</a></li>
         <li><a class="navtab" id="nav-contact" href="{{ '/contact' | relative_url }}">Support</a></li>
-        <li style="float:right"><a class="highlighted" href="{{ '/webapp' | relative_url }}">Web App</a></li>
-        <li style="float:right"><a class="highlighted" href="{{ '/download' | relative_url }}">Download</a></li>
-        <li style="float:right">
-          <a href="javascript:void(0);" class="nav-icon responsive" onclick="myFunction()">&#9776;</a></li>
+        <li style="float:right"><a class="navtab highlighted" href="{{ '/webapp' | relative_url }}">Web App</a></li>
+        <li style="float:right"><a class="navtab highlighted" href="{{ '/download' | relative_url }}">Download</a></li>
       </ul>
     </nav>
 
