@@ -201,6 +201,14 @@ a.button:hover {
   }
 }
 
+#platform-container{
+  display: flex;
+  width:90%;
+  margin-left:auto;
+  margin-right:auto;
+  table-layout: fixed;
+}
+
 // BUTTONS
 
 header li {//, .button li{
@@ -293,7 +301,7 @@ footer p, header p{
   float: left;
 }
 
-.navbar li a {
+.navbar li a, .nav-icon{
   display: block;
   color: white;
   text-align: center;
@@ -301,15 +309,6 @@ footer p, header p{
   min-width:84px;
   text-decoration: none;
 }
-
-#platform-container{
-  display: flex;
-  width:90%;
-  margin-left:auto;
-  margin-right:auto;
-  table-layout: fixed;
-}
-
 
 .navbar li .highlighted {
   color: white;
@@ -343,14 +342,50 @@ footer p, header p{
   display: block;
 }
 
+// Hide drop down button in regular view
+.navbar li a.responsive {
+  display: none;
+}
+
+.navbar li a.nav-icon {
+  float: right;
+  font-size: 21px;
+  padding: 0px;
+  padding-top: 6px;
+  padding-bottom: 12px;
+}
+
 @media only screen and (max-width: 660px) {
+//  nav {
+//    width: 100%;
+//    height: 60px;
+//    background: var(--dark);
+//    z-index: 1;
+//  }
+
+  .navbar li a{
+    display: none;
+  }
+
+  .navbar li a.responsive {
+    display: block;
+  }
+  
   .navbar {
-    overflow-x: scroll;
-    scrollbar-width: none; /* Hide scrollbar in Firefox */
-    display: flex;
-    padding: 0;
-    margin: 0;
-    list-style: none;
+    //overflow-x: scroll;
+    //scrollbar-width: none; /* Hide scrollbar in Firefox */
+    //display: flex;
+    //padding: 0;
+    //margin: 0;
+    //list-style: none;
+
+    //display: none;
+    //width: 100%;
+    //flex-direction: column;
+    //position: absolute;
+    //min-width: 160px;
+    //box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    //z-index: 1;
   }
 
   .navbar::-webkit-scrollbar {
