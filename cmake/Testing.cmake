@@ -4,6 +4,7 @@ enable_testing()
 # Create a MoloVol library for the test sources to use
 set(TEST_SOURCES
   src/atom.cpp
+  src/atomtree.cpp
   src/vector.cpp
   src/importmanager.cpp
   src/crystallographer.cpp
@@ -18,6 +19,7 @@ set(TEST_NAMES
   cut_off_string
   struct_atom
   class_vector
+  class_atomtree
 )
 
 set(MOLOVOL_TEST_DIR ${CMAKE_SOURCE_DIR}/test)

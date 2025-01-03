@@ -8,6 +8,7 @@
 #include "special_chars.h"
 #include "controller.h"
 #include "misc.h"
+
 #include <cassert>
 
 // wxWidgets macro that contains the entry point, initialised the app, and calls wxApp::OnInit()
@@ -26,13 +27,15 @@ bool MainApp::OnInit()
   }
   else {
     // initialise the GUI
-    MainFrame* MainWin = new MainFrame(_("MoloVol " + Ctrl::getVersion()), wxDefaultPosition, wxDefaultSize);
-    MainWin->Show(true);
-    SetTopWindow(MainWin);
+    m_mainWin = new MainFrame(_("MoloVol " + Ctrl::getVersion()), wxDefaultPosition, wxDefaultSize);
+    m_mainWin->Show(true);
+    SetTopWindow(m_mainWin);
+
   }
   return true;
 };
 
+// MAIN APP DEFINITIONS
 // OnRun() is called after OnInit() returns true. In order to suppress the GUI, the attribute "silent" has to
 // be toggled. this can be done by opening the app from the command line
 int MainApp::OnRun(){

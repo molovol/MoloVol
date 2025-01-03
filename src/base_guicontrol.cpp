@@ -8,6 +8,8 @@
 #include "special_chars.h"
 #include "misc.h"
 #include "flags.h"
+#include "container3d.h"
+#include "voxel.h"
 #include <string>
 #include <wx/msgdlg.h>
 
@@ -48,6 +50,17 @@ void MainFrame::extDisplayCavityList(const GridData& table){
 void MainFrame::extOpenErrorDialog(const int error_code, const std::string& error_message){
   const std::pair<int, std::string> code_message = std::make_pair(error_code, error_message);
   GetEventHandler()->CallAfter(&MainFrame::openErrorDialog, code_message);
+}
+
+void MainFrame::extRenderSurface(const Container3D<Voxel>& surf_data, const std::array<double,3> origin, 
+    const double grid_step, const bool probe_mode, const unsigned char n_cavities, const std::vector<Atom>& atomlist){
+
+  auto render = [this, surf_data, origin, grid_step, probe_mode, n_cavities, atomlist](){
+    renderMolecule(atomlist);
+    renderSurface(surf_data, origin, grid_step, std::make_pair(probe_mode, n_cavities));
+  };
+
+  GetEventHandler()->CallAfter(render);
 }
 
 // NOT THREAD SAFE
@@ -128,7 +141,7 @@ double MainFrame::getGridsize(){
   }
 }
 
-int MainFrame::getDepth(){
+int MainFrame::getDepth() const {
   return depthInput->GetValue();
 }
 
@@ -257,6 +270,26 @@ void MainFrame::setStatus(const std::string str){
 
 void MainFrame::setProgressBar(const int percentage){
   progressGauge->SetValue(percentage);
+}
+
+void MainFrame::renderMolecule(const std::vector<Atom>& atomlist){
+#ifdef MOLOVOL_RENDERER
+  m_renderWin->UpdateMolecule(atomlist);
+#endif
+}
+
+void MainFrame::renderSurface(const Container3D<Voxel>& surf_data, const std::array<double,3> origin, 
+    const double grid_step, const std::pair<bool,unsigned char> args){
+#ifdef MOLOVOL_RENDERER
+  m_renderWin->UpdateSurface(surf_data, origin, grid_step, args.first, args.second);
+  
+  // Only render if window is currently visible
+  if (m_renderWin->IsShown()) {
+    m_renderWin->Render();
+  }
+  
+  m_renderWin->Show(true);
+#endif
 }
 
 ////////////////////

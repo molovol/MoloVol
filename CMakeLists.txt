@@ -7,16 +7,23 @@ include(Options)
 # MOLOVOL_OSX_FAT_FILE
 # MOLOVOL_BUILD_TESTING
 
-# Set name and version
-project(MoloVol VERSION 1.1.1)
-
-# Strip binary for release build
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
+# Make universal binary, should be called before project()
+if(MOLOVOL_OSX_FAT_FILE)
+  set(CMAKE_OSX_ARCHITECTURES arm64;x86_64)
+endif()
 
 # Minimum macOS version, ignored on other platforms
 # Must be set before project()
-set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11 CACHE STRING "Minimum macOS deployment version")
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11 CACHE STRING "Minimum macOS deployment version" FORCE)
+
+# Set name and version
+project(MoloVol VERSION 1.1.1)
+
+if(NOT APPLE)
+  # Strip binary for release build
+  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
+endif()
 
 include(ExecutableName)
 # EXE_NAME
@@ -24,11 +31,6 @@ include(ExecutableName)
 # Specify C++ standard
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-
-# Make universal binary
-if(MOLOVOL_OSX_FAT_FILE)
-  set(CMAKE_OSX_ARCHITECTURES arm64;x86_64)
-endif()
 
 # wxWidgets
 set(wxWidgets_USE_STATIC=ON)
@@ -38,10 +40,13 @@ if (MSVC)
   set(wxWidgets_LIB_DIR C:/wxWidgets-3.1.5/lib/vc_x64_lib)
 endif()
 
-find_package(wxWidgets REQUIRED core base OPTIONAL_COMPONENTS net)
+find_package(wxWidgets REQUIRED core base gl OPTIONAL_COMPONENTS net)
 include(${wxWidgets_USE_FILE})
 
 #find_package(OpenMP)
+if(MOLOVOL_RENDERER)
+  include(VTKRenderer)
+endif()
 
 # Add include path, so that header files can be found
 include_directories(include)
@@ -60,6 +65,10 @@ endif()
 
 include(Sources)
 # SOURCES
+if(MOLOVOL_RENDERER)
+  list(APPEND SOURCES "src/render_frame.cpp")
+endif()
+
 
 include(Resources)
 # ELEM_FILE
@@ -78,6 +87,13 @@ if(NOT MOLOVOL_ABS_RESOURCE_PATH)
   )
 endif()
 
+# RPATH STUFF
+set(CMAKE_MACOSX_RPATH 1)
+list(APPEND CMAKE_BUILD_RPATH "@executable_path/Frameworks")
+list(APPEND CMAKE_INSTALL_RPATH "@executable_path/Frameworks")
+#set(CMAKE_BUILD_RPATH "@executable_path/Frameworks")
+#set(CMAKE_INSTALL_RPATH "@executable_path/Frameworks")
+
 # Target MoloVol
 if (MSVC)
   add_executable(${EXE_NAME} WIN32 ${SOURCES} ${OSX_RESOURCE_FILES})
@@ -91,6 +107,11 @@ endif()
 include(MacSpecific)
 
 target_link_libraries(${EXE_NAME} ${wxWidgets_LIBRARIES})
+if(MOLOVOL_RENDERER)
+  target_link_libraries(${EXE_NAME} ${WXVTK_LIB})
+  target_compile_definitions(${EXE_NAME} PRIVATE MOLOVOL_RENDERER) 
+endif()
+
   # Add custom flag
 if(MOLOVOL_ABS_RESOURCE_PATH)
   target_compile_definitions(${EXE_NAME} PUBLIC -DABS_PATH)
@@ -109,8 +130,10 @@ endif()
 # Installation instructions for debian package
 if (UNIX AND NOT APPLE)
   include(DebInstall)
-elseif (APPLE)
-  include(MacInstall)
+elseif(APPLE)
+  # This is needed for generation of the dmg file
+  install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/MoloVol.app DESTINATION "." 
+    FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 endif()
 
 include(Packing)
