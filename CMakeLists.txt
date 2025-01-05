@@ -97,8 +97,6 @@ list(APPEND CMAKE_INSTALL_RPATH "@executable_path/Frameworks")
 # Target MoloVol
 if (MSVC)
   add_executable(${EXE_NAME} WIN32 ${SOURCES} ${OSX_RESOURCE_FILES})
-  set_property(TARGET ${EXE_NAME} PROPERTY 
-    MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 else()
   add_executable(${EXE_NAME} ${SOURCES} ${OSX_RESOURCE_FILES})
 endif()
