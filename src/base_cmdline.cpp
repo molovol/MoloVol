@@ -44,28 +44,33 @@ private:
 
 public:
 	bool parse(int argc, char* argv[]) {
-		for (int i = 1; i < argc; i++) {
-			std::string arg = argv[i];
-			if (arg[0] != '-') continue;
+	    for (int i = 1; i < argc; i++) {
+	        std::string arg = argv[i];
+	        if (arg[0] != '-') continue;
 
-			std::string optName = arg.substr(arg[1] == '-' ? 2 : 1);
-			auto option = findOption(optName);
-			if (!option) {
-				std::cerr << "Unknown option: " << arg << std::endl;
-				return false;
-			}
+	        std::string optName = arg.substr(arg[1] == '-' ? 2 : 1);
+	        auto option = findOption(optName);
+	        if (!option) {
+	            std::cerr << "Unknown option: " << arg << std::endl;
+	            return false;
+	        }
 
-			if (option->isSwitch) {
-				parsedFlags[option->longName] = true;
-			} else if (i + 1 < argc) {
-				parsedOptions[option->longName] = argv[++i];
-			} else {
-				std::cerr << "Missing value for option: " << arg << std::endl;
-				return false;
-			}
-		}
+	        if (option->isSwitch) {
+	            parsedFlags[option->longName] = true;
+	        } else if (i + 1 < argc) {
+	            parsedOptions[option->longName] = argv[++i];
+	        } else {
+	            std::cerr << "Missing value for option: " << arg << std::endl;
+	            return false;
+	        }
+	    }
 
-		return validateRequiredOptions();
+	    // Don't validate required options for help or version flags
+	    if (parsedFlags.count("help") > 0 || parsedFlags.count("version") > 0) {
+	        return true;
+	    }
+
+	    return validateRequiredOptions();
 	}
 
 	bool found(const std::string& name) const {
