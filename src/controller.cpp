@@ -1,7 +1,5 @@
-
 #include "controller.h"
-#include "base.h"
-#include "atom.h" // i don't know why
+#include "atom.h"
 #include "model.h"
 #include "misc.h"
 #include "exception.h"
@@ -11,12 +9,18 @@
 #include <utility>
 #include <map>
 
+#ifdef MOLOVOL_GUI
+#include "base.h"
+#endif
+
 ///////////////////////
 // STATIC ATTRIBUTES //
 ///////////////////////
 
 Ctrl* Ctrl::s_instance = NULL;
+#ifdef MOLOVOL_GUI
 MainFrame* Ctrl::s_gui = NULL;
+#endif
 
 ///////////////////////////
 // STATIC MEMBERS ACCESS //
@@ -51,7 +55,11 @@ void Ctrl::disableGUI(){
 }
 
 void Ctrl::enableGUI(){
+#ifdef MOLOVOL_GUI
   _to_gui = true;
+#else
+  _to_gui = false;
+#endif
 }
 
 bool Ctrl::isGUIEnabled(){
@@ -62,10 +70,6 @@ bool Ctrl::isGUIEnabled(){
 // METHODS //
 /////////////
 
-void Ctrl::registerView(MainFrame* inp_gui){
-  s_gui = inp_gui;
-}
-
 Ctrl* Ctrl::getInstance(){
   if(s_instance == NULL){
     s_instance = new Ctrl();
@@ -73,44 +77,39 @@ Ctrl* Ctrl::getInstance(){
   return s_instance;
 }
 
+#ifdef MOLOVOL_GUI
+void Ctrl::registerView(MainFrame* inp_gui){
+  s_gui = inp_gui;
+}
+
 bool Ctrl::loadElementsFile(){
-  // create an instance of the model class
-  // ensures, that there is only ever one instance of the model class
+  // GUI-specific implementation...
   if(_current_calculation == NULL){
     _current_calculation = new Model();
   }
 
   std::string elements_filepath = s_gui->getElementsFilepath();
-  // even if there is no valid radii file, the program can be used
-  // by manually setting radii in the GUI after loading a structure
   if(!_current_calculation->importElemFile(elements_filepath)){
     displayErrorMessage(101);
   }
-  // refresh atom list using new radius map
   s_gui->displayAtomList(_current_calculation->generateAtomList());
   return true;
 }
 
 bool Ctrl::loadAtomFile(){
-  // create an instance of the model class
-  // ensures, that there is only ever one instance of the model class
+  // GUI-specific implementation...
   if(_current_calculation == NULL){
     _current_calculation = new Model();
   }
 
-  bool successful_import;
-  successful_import = _current_calculation->readAtomsFromFile(s_gui->getAtomFilepath(), s_gui->getIncludeHetatm());
-
+  bool successful_import = _current_calculation->readAtomsFromFile(
+    s_gui->getAtomFilepath(), 
+    s_gui->getIncludeHetatm()
+  );
   s_gui->displayAtomList(_current_calculation->generateAtomList());
-
   return successful_import;
 }
 
-/////////////////
-// CALCULATION //
-/////////////////
-
-// default function call: transfer data from GUI to Model
 bool Ctrl::runCalculation(){
   // reset abort flag
   setAbortFlag(false);
@@ -166,8 +165,9 @@ bool Ctrl::runCalculation(){
 
   return data.success;
 }
+#endif
 
-// for starting a calculation from the command line
+// CLI version
 bool Ctrl::runCalculation(
     const double probe_radius_s,
     const double probe_radius_l,
@@ -245,10 +245,12 @@ bool Ctrl::runCalculation(
 ////////////////////////
 
 void Ctrl::clearOutput(){
+#ifdef MOLOVOL_GUI
   if (_to_gui) {
     s_gui->extClearOutputText();
     s_gui->extClearOutputGrid();
   }
+#endif
 }
 
 void Ctrl::displayInput(CalcReportBundle& data, const unsigned display_flag){
@@ -455,8 +457,11 @@ void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag
   }
 
   // display data
+
   if (_to_gui){
+	#ifdef MOLOVOL_GUI
     s_gui->extDisplayCavityList(table);
+	#endif
   }
   else{
     table.print();
@@ -464,41 +469,47 @@ void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag
 }
 
 void Ctrl::notifyUser(std::string str){
+#ifdef MOLOVOL_GUI
   if (_to_gui){
     s_gui->extAppendOutput(str);
+    return;
   }
-  else {
-    std::cout << str;
-  }
+#endif
+  std::cout << str;
 }
 
 void Ctrl::notifyUser(std::wstring wstr){
+#ifdef MOLOVOL_GUI
   if (_to_gui){
     s_gui->extAppendOutputW(wstr);
+    return;
   }
-  else {
-    std::cout << wstr;
-  }
+#endif
+  std::wcout << wstr;
 }
 
 void Ctrl::updateStatus(const std::string str){
+#ifdef MOLOVOL_GUI
   if (_to_gui) {
     s_gui->extSetStatus(str);
+    return;
   }
-  else if(_quiet) {}
-  else{
+#endif
+  if (!_quiet) {
     std::cout << str << std::endl;
   }
 }
 
 void Ctrl::updateProgressBar(const int percentage){
   assert (percentage <= 100);
+#ifdef MOLOVOL_GUI
   if (_to_gui) {
     s_gui->extSetProgressBar(percentage);
+    return;
   }
-  else if(_quiet) {}
-  else {
-    std::cout << std::to_string(percentage) + "\%"  << std::endl;
+#endif
+  if (!_quiet) {
+    std::cout << percentage << "%" << std::endl;
   }
 }
 
@@ -565,9 +576,11 @@ bool Ctrl::getAbortFlag(){
 // checks whether worker thread has received a signal to stop the calculation and
 // updates the progress of the calculation
 void Ctrl::updateCalculationStatus(){
+#ifdef MOLOVOL_GUI
   if (_to_gui){
     setAbortFlag(s_gui->receivedAbortCommand());
   }
+  #endif
 }
 
 ////////////////////
@@ -624,14 +637,14 @@ void Ctrl::displayErrorMessage(const int error_code, const std::vector<std::stri
     ++i;
   }
 
+#ifdef MOLOVOL_GUI
   if (_to_gui){
-    // Print to GUI
     s_gui->extOpenErrorDialog(error_code, msg);
+    return;
   }
-  else{
-    // Print to console
-    std::cout << error_code << ": " << msg << std::endl;
-  }
+#endif
+  // Print to console
+  std::cout << error_code << ": " << msg << std::endl;
 }
 
 std::string Ctrl::getErrorMessage(const int error_code){
@@ -642,3 +655,4 @@ std::string Ctrl::getErrorMessage(const int error_code){
     return s_error_codes.find(error_code)->second;
   }
 }
+

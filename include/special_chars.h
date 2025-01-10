@@ -3,8 +3,9 @@
 #define SPECIAL_CHARS_H
 
 #include <string>
+#ifdef MOLOVOL_GUI
 #include <wx/wx.h>
-
+#endif
 class Symbol{
   public:
     static std::wstring angstrom();
