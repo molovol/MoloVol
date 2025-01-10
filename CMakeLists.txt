@@ -31,9 +31,11 @@ if(MOLOVOL_OSX_FAT_FILE)
 endif()
 
 # wxWidgets
-set(wxWidgets_USE_STATIC=ON)
-find_package(wxWidgets REQUIRED core base OPTIONAL_COMPONENTS net)
-include(${wxWidgets_USE_FILE})
+if(MOLOVOL_BUILD_GUI)
+  set(wxWidgets_USE_STATIC=ON)
+  find_package(wxWidgets REQUIRED core base OPTIONAL_COMPONENTS net)
+  include(${wxWidgets_USE_FILE})
+endif()
 
 #find_package(OpenMP)
 
@@ -76,7 +78,9 @@ add_executable(${EXE_NAME} ${SOURCES} ${OSX_RESOURCE_FILES})
 # XCode, app bundle and libtiff
 include(MacSpecific)
 
-target_link_libraries(${EXE_NAME} ${wxWidgets_LIBRARIES})
+if(MOLOVOL_BUILD_GUI)
+  target_link_libraries(${EXE_NAME} ${wxWidgets_LIBRARIES})
+endif()
   # Add custom flag
 if(MOLOVOL_ABS_RESOURCE_PATH)
   target_compile_definitions(${EXE_NAME} PUBLIC -DABS_PATH)
