@@ -4,7 +4,7 @@
 #include "flags.h"
 #include <iostream>
 #include <unordered_map>
-
+#include <vector>
 #ifdef MOLOVOL_GUI
 #include <wx/wx.h>
 class MainFrame;
