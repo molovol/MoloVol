@@ -15,7 +15,7 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 UPLOAD_FOLDER = './userupload/'
-EXECUTABLE_CMD = "./molovol"
+EXECUTABLE_CMD = "/build/molovol"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # check if upload folder exists and create if missing
