@@ -38,6 +38,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WASM_COMPILER_FLAGS_STR}")
 # Create WebAssembly target
 add_executable(molovol_wasm 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/wasm_bindings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/wasm_controller.cpp
     ${MOLOVOL_SOURCES}  # This should be defined in main CMakeLists.txt
 )
 

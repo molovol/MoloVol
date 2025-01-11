@@ -1,8 +1,7 @@
-# Base sources (non-GUI)
-set(BASE_SOURCES
+# Set up core sources needed by all builds
+set(CORE_SOURCES
   src/atom.cpp
   src/atomtree.cpp
-  src/base_cmdline.cpp
   src/cavity.cpp
   src/crystallographer.cpp
   src/griddata.cpp
@@ -15,7 +14,6 @@ set(BASE_SOURCES
   src/special_chars.cpp
   src/vector.cpp
   src/voxel.cpp
-  src/controller.cpp
 )
 
 # GUI-specific sources
@@ -26,13 +24,22 @@ set(GUI_SOURCES
   src/base_init.cpp
 )
 
-set(CLI_SOURCES
-    src/base_cmdline.cpp
-)
-
-if(MOLOVOL_BUILD_GUI)
-    set(SOURCES ${BASE_SOURCES} ${GUI_SOURCES})
+# Set up sources based on build type
+if(EMSCRIPTEN)
+    set(MOLOVOL_SOURCES 
+        ${CORE_SOURCES}
+        src/wasm_controller.cpp
+    )
+elseif(MOLOVOL_BUILD_GUI)
+    set(SOURCES 
+        ${CORE_SOURCES}
+        ${GUI_SOURCES}
+        src/controller.cpp
+    )
 else()
-    set(SOURCES ${BASE_SOURCES} ${CLI_SOURCES})
+    set(SOURCES
+        ${CORE_SOURCES}
+        src/base_cmdline.cpp
+        src/controller.cpp
+    )
 endif()
-
