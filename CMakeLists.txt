@@ -72,7 +72,7 @@ endif()
 
 # Target MoloVol
 if(EMSCRIPTEN)
-    include(${CMAKE_CURRENT_SOURCE_DIR}/wasm.cmake)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/wasm.cmake)
 else()
     add_executable(${EXE_NAME} ${SOURCES} ${OSX_RESOURCE_FILES})
 endif()
