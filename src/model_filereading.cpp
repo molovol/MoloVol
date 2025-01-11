@@ -52,81 +52,71 @@ ElementsFileBundle extractDataFromElemFile(const std::string& elem_path) {
     ElementsFileBundle data;
 
     #ifdef __EMSCRIPTEN__
-    // Use Emscripten's FS to read the file into a string
-    std::string fileContent;
-    fileContent = EM_ASM_INT({
-        var path = UTF8ToString($0);
-        console.log("Trying to list directory: " + path);
-        var dirContents = FS.readdir("/inputfile");
-        console.log("Directory contents:", dirContents);
-        
-        console.log("Checking file existence in WASM filesystem " + path);
+    char* content_ptr = (char*)EM_ASM_PTR({
         try {
-            var content = FS.readFile(path, { encoding: "utf8" });
-            console.log("File content loaded, length:", content.length);
-            console.log("First 100 chars:", content.substring(0, 100));
-            return content;
-        } catch (e) {
-            console.error("Error reading file with FS:", e);
-            return "";
+            var content = FS.readFile('/inputfile/elements.txt', {encoding: 'utf8'});
+            var lengthBytes = lengthBytesUTF8(content) + 1;
+            var stringOnWasmHeap = _malloc(lengthBytes);
+            stringToUTF8(content, stringOnWasmHeap, lengthBytes);
+            return stringOnWasmHeap;
+        } catch(e) {
+            return 0;
         }
-    }, elem_path.c_str());
-    
-    if (fileContent.empty()) {
-        std::cerr << "Failed to read elements file or file is empty" << std::endl;
+    });
+
+    if (!content_ptr) {
         return data;
     }
 
-    // Parse the input using stringstream
-    std::istringstream inp_stream(fileContent);
+    std::string fileContent(content_ptr);
+    free(content_ptr);
     
+    std::istringstream inp_stream(fileContent);
     #else
-    // Use std::ifstream for native builds
     std::ifstream inp_stream(elem_path);
-    if (!inp_stream.is_open()) {
-        std::cerr << "Failed to open file: " << elem_path << std::endl;
-        return data;
-    }
     #endif
 
-    // Parse the input stream
     std::string line;
-    auto hasCorrectFormat = [](std::vector<std::string> substrings) {
-        if (substrings.size() != 4) { return false; }
-        if (substrings[0].find_first_not_of("0123456789") != std::string::npos) { return false; }
-        for (char i : {2, 3}) {
-            if (substrings[i].find_first_not_of("0123456789E.+e") != std::string::npos) { return false; }
-        }
-        return true;
-    };
-
-    // Debug output at the start of parsing
-    std::cerr << "Starting to parse file content" << std::endl;
+    bool headerDone = false;
 
     while (getline(inp_stream, line)) {
-        std::vector<std::string> substrings = ImportMngr::splitLine(line);
-        if (hasCorrectFormat(substrings)) {
-            substrings[1] = ImportMngr::strToValidSymbol(substrings[1]);
-            if (!substrings[1].empty()) {
-                try { 
-                    data.rad_map[substrings[1]] = std::stod(substrings[2]); 
-                    std::cerr << "Added radius for " << substrings[1] << ": " << data.rad_map[substrings[1]] << std::endl;
-                }
-                catch (const std::invalid_argument&) { data.rad_map[substrings[1]] = 0; }
-                try { data.weight_map[substrings[1]] = std::stod(substrings[3]); }
-                catch (const std::invalid_argument&) { data.weight_map[substrings[1]] = 0; }
-                try { data.atomic_num_map[substrings[1]] = std::stoi(substrings[0]); }
-                catch (const std::invalid_argument&) { data.atomic_num_map[substrings[1]] = 0; }
+        if(line.empty()) {
+            continue;
+        }
+
+        if(!headerDone) {
+            if(line[0] >= '0' && line[0] <= '9') {
+                headerDone = true;
+            } else {
+                continue;
             }
         }
-    }
 
-    // Debug output at the end of parsing
-    std::cerr << "Finished parsing. Found " << data.rad_map.size() << " elements" << std::endl;
+        std::vector<std::string> substrings = ImportMngr::splitLine(line);
+        
+        if(substrings.size() != 4) {
+            continue;
+        }
+
+        try {
+            int atomic_num = std::stoi(substrings[0]);
+            std::string symbol = ImportMngr::strToValidSymbol(substrings[1]);
+            double radius = std::stod(substrings[2]);
+            double weight = std::stod(substrings[3]);
+
+            if(!symbol.empty()) {
+                data.rad_map[symbol] = radius;
+                data.weight_map[symbol] = weight;
+                data.atomic_num_map[symbol] = atomic_num;
+            }
+        }
+        catch(const std::exception&) {
+            continue;
+        }
+    }
 
     return data;
 }
-
 //////////////////////
 // ATOM FILE IMPORT //
 //////////////////////

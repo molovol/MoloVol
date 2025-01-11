@@ -16,7 +16,6 @@ set(WASM_COMPILER_FLAGS
     -s EXPORTED_FUNCTIONS=['_malloc','_free']
     -fexceptions
     -s FORCE_FILESYSTEM=1
-    -s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=['$allocate','$ALLOC_NORMAL']  # Added this line
 )
 
 function(require_file FILE_PATH)
@@ -39,8 +38,7 @@ set(WASM_LINK_FLAGS
     --bind
     -s EXPORT_ES6=1
     -s USE_ES6_IMPORT_META=0
-    -s EXPORTED_RUNTIME_METHODS=['ccall','cwrap','FS','allocate']  # Added 'allocate' here too
-    -s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE=['$allocate','$ALLOC_NORMAL']  # And here
+    -s EXPORTED_RUNTIME_METHODS=['ccall','cwrap','FS']  # Added 'allocate' here too
     
     # Preload resource files
     --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/inputfile/elements.txt@/inputfile/elements.txt
