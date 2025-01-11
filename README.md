@@ -49,7 +49,11 @@ software for your own purposes or propose changes to the developers and take par
 Dependencies needed for compilation:
 
 - Any C++ compiler
-- [wxWidgets 3.1.5](https://www.wxwidgets.org)
+- cmake
+- Optional: [wxWidgets 3.1.5](https://www.wxwidgets.org)
+
+You can build without the desktop native GUI by setting
+`cmake -DMOLOVOL_BUILD_GUI=0`
 
 ### MoloVol Web
 
