@@ -37,8 +37,6 @@ if(MOLOVOL_BUILD_GUI)
   include(${wxWidgets_USE_FILE})
 endif()
 
-#find_package(OpenMP)
-
 # Add include path, so that header files can be found
 include_directories(include)
 
@@ -73,7 +71,11 @@ if(NOT MOLOVOL_ABS_RESOURCE_PATH)
 endif()
 
 # Target MoloVol
-add_executable(${EXE_NAME} ${SOURCES} ${OSX_RESOURCE_FILES})
+if(EMSCRIPTEN)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/wasm.cmake)
+else()
+    add_executable(${EXE_NAME} ${SOURCES} ${OSX_RESOURCE_FILES})
+endif()
 
 # XCode, app bundle and libtiff
 include(MacSpecific)
@@ -86,6 +88,7 @@ if(MOLOVOL_ABS_RESOURCE_PATH)
   target_compile_definitions(${EXE_NAME} PUBLIC -DABS_PATH)
 endif()
 
+#find_package(OpenMP)
 # Keeping this around just so I don't forget the syntax
 #  if(OpenMP_CXX_FOUND)
 #    target_link_libraries(target PUBLIC OpenMP::OpenMP_CXX)
