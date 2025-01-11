@@ -3,6 +3,7 @@ set(CORE_SOURCES
   src/atom.cpp
   src/atomtree.cpp
   src/cavity.cpp
+  src/controller.cpp
   src/crystallographer.cpp
   src/griddata.cpp
   src/importmanager.cpp
@@ -28,7 +29,6 @@ set(GUI_SOURCES
 if(EMSCRIPTEN)
     set(MOLOVOL_SOURCES 
         ${CORE_SOURCES}
-        src/wasm_controller.cpp
     )
 elseif(MOLOVOL_BUILD_GUI)
     set(SOURCES 
