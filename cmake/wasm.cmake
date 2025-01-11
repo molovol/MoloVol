@@ -6,8 +6,8 @@ if(NOT EMSCRIPTEN)
 endif()
 
 # Set C++ standard for WASM build
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+#set(CMAKE_CXX_STANDARD 20) #inherit
+#set(CMAKE_CXX_STANDARD_REQUIRED ON) #inherit
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Emscripten compiler flags
@@ -51,8 +51,8 @@ set_target_properties(molovol_wasm PROPERTIES
 add_custom_command(TARGET molovol_wasm POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_BINARY_DIR}/molovol_wasm.js
-        ${CMAKE_CURRENT_SOURCE_DIR}/web/js/molovol_wasm.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/webserver/molovol_wasm.js
     COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_BINARY_DIR}/molovol_wasm.wasm
-        ${CMAKE_CURRENT_SOURCE_DIR}/web/js/molovol_wasm.wasm
+        ${CMAKE_CURRENT_SOURCE_DIR}/webserver/molovol_wasm.wasm
 )

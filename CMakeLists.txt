@@ -8,7 +8,7 @@ include(Options)
 # MOLOVOL_BUILD_TESTING
 
 # Set name and version
-project(MoloVol VERSION 1.1.1)
+project(MoloVol VERSION 1.2)
 
 # Strip binary for release build
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
