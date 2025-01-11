@@ -90,48 +90,7 @@ val calculate_volumes_direct(const CalculationParams& params) {
         return val::null();
     }
     
-    // Write structure file with extension based on content
-    std::string temp_filename;
-    if (params.structure_content.find("HETATM") != std::string::npos || 
-        params.structure_content.find("ATOM") != std::string::npos) {
-        temp_filename = "/structure.pdb";
-        printf("Detected PDB format\n");
-    } else if (params.structure_content.find("data_") != std::string::npos) {
-        temp_filename = "/structure.cif";
-        printf("Detected CIF format\n");
-    } else {
-        // Assume XYZ format
-        temp_filename = "/structure.xyz";
-        printf("Assuming XYZ format\n");
-    }
 
-    printf("Structure content preview (first 200 chars):\n%s\n", 
-           params.structure_content.substr(0, 200).c_str());
-
-    if (!writeAndVerifyFile(temp_filename, params.structure_content)) {
-        val::global("Error").new_(std::string("Failed to write structure file")).throw_();
-        return val::null();
-    }
-
-    printf("Successfully wrote structure file to: %s\n", temp_filename.c_str());
-    
-    // Write elements file
-    std::string elements_content = R"(# Atom	Symb	Name	VdW-Radius
-1	H	Hydrogen	1.200
-6	C	Carbon	1.700
-7	N	Nitrogen	1.550
-8	O	Oxygen	1.520
-9	F	Fluorine	1.470
-15	P	Phosphorus	1.800
-16	S	Sulfur	1.800
-17	Cl	Chlorine	1.750)";
-    
-    std::string elements_filename = "/elements.txt";
-    if (!writeAndVerifyFile(elements_filename, elements_content)) {
-        printf("Failed to write elements file\n");
-        val::global("Error").new_(std::string("Failed to write elements file")).throw_();
-        return val::null();
-    }
     
     // Set output flags for all relevant information
     unsigned output_flags = mvOUT_RESOLUTION | mvOUT_DEPTH | mvOUT_RADIUS_S | mvOUT_RADIUS_L | 
@@ -146,6 +105,12 @@ val calculate_volumes_direct(const CalculationParams& params) {
     printf("- Unit cell: %s\n", params.unit_cell ? "true" : "false");
     printf("- Surface area: %s\n", params.surface_area ? "true" : "false");
     
+ // Write structure content to temporary file
+    std::string input_filepath = "/tmp/structure_input.pdb"; // or appropriate extension
+    if (!writeAndVerifyFile(input_filepath, params.structure_content)) {
+        val::global("Error").new_(std::string("Failed to write structure file")).throw_();
+        return val::null();
+    }
     // Run calculation
     bool success = false;
     try {
@@ -153,8 +118,8 @@ val calculate_volumes_direct(const CalculationParams& params) {
             params.probe_radius_small,
             params.probe_radius_large,
             params.grid_resolution,
-            temp_filename,
-            elements_filename,
+            input_filepath,//strucutre input file
+            "inputfile/elements.txt",//elements
             "/tmp",  // Temporary directory for any exports
             params.tree_depth,
             params.include_hetatm,
