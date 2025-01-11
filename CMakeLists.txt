@@ -100,10 +100,12 @@ if (MOLOVOL_BUILD_TESTING AND BUILD_TESTING)
 endif()
 
 # Installation instructions for debian package
-if (UNIX AND NOT APPLE)
-  include(DebInstall)
-elseif (APPLE)
-  include(MacInstall)
+if (NOT EMSCRIPTEN)  # Only do native installations
+    if (UNIX AND NOT APPLE)
+        include(DebInstall)
+    elseif (APPLE)
+        include(MacInstall)
+    endif()
 endif()
 
 include(Packing)

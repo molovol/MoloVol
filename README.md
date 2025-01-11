@@ -55,6 +55,9 @@ Dependencies needed for compilation:
 You can build without the desktop native GUI by setting
 `cmake -DMOLOVOL_BUILD_GUI=0`
 
+You can build for wasm with
+`emcmake cmake -DCMAKE_VERBOSE_MAKEFILE=ON -DMOLOVOL_BUILD_GUI=0 ..`
+
 ### MoloVol Web
 
 Instead of using the desktop front-end, you can also use a web interface. MoloVol server provides a REST-API with a web
@@ -62,7 +65,7 @@ front-end wrapping the MoloVol CLI interface. To launch, first change the FLASK_
 the command `export FLASK_APP=./webserver/app.py` from the project's root directory. Then execute `flask run`.
 For hosting on a web server check out the next section.
 
-### Containerized application
+### Containerized cli application
 
 Instead of compiling or running the binaries you can also use a containerized version (for instance using docker or 
 podman) to access the CLI or web interface.
