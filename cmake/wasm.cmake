@@ -17,6 +17,16 @@ set(WASM_COMPILER_FLAGS
     -fexceptions
 )
 
+function(require_file FILE_PATH)
+    if(NOT EXISTS "${FILE_PATH}")
+        message(FATAL_ERROR "Required file not found: ${FILE_PATH}")
+    endif()
+endfunction()
+
+# Usage
+require_file("${CMAKE_CURRENT_SOURCE_DIR}/inputfile/elements.txt")
+require_file("${CMAKE_CURRENT_SOURCE_DIR}/inputfile/space_groups.txt")
+
 # Link flags specific to WASM
 set(WASM_LINK_FLAGS
     -s ENVIRONMENT=web

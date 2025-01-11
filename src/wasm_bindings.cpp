@@ -94,14 +94,14 @@ val calculate_volumes_direct(const CalculationParams& params) {
     std::string temp_filename;
     if (params.structure_content.find("HETATM") != std::string::npos || 
         params.structure_content.find("ATOM") != std::string::npos) {
-        temp_filename = "/tmp/structure.pdb";
+        temp_filename = "/structure.pdb";
         printf("Detected PDB format\n");
     } else if (params.structure_content.find("data_") != std::string::npos) {
-        temp_filename = "/tmp/structure.cif";
+        temp_filename = "/structure.cif";
         printf("Detected CIF format\n");
     } else {
         // Assume XYZ format
-        temp_filename = "/tmp/structure.xyz";
+        temp_filename = "/structure.xyz";
         printf("Assuming XYZ format\n");
     }
 
@@ -126,7 +126,7 @@ val calculate_volumes_direct(const CalculationParams& params) {
 16	S	Sulfur	1.800
 17	Cl	Chlorine	1.750)";
     
-    std::string elements_filename = "/tmp/elements.txt";
+    std::string elements_filename = "/elements.txt";
     if (!writeAndVerifyFile(elements_filename, elements_content)) {
         printf("Failed to write elements file\n");
         val::global("Error").new_(std::string("Failed to write elements file")).throw_();

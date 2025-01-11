@@ -13,7 +13,9 @@
 #include <exception>
 #include <iterator>
 #include <algorithm>
-
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 ///////////////////
 // IMPORT STRUCT //
 ///////////////////
@@ -33,6 +35,27 @@ ElementsFileBundle extractDataFromElemFile(const std::string& elem_path);
 // generates three maps for assigning a radius, weight and atomic number respectively, to an element symbol
 // sets the maps to members of the model class
 bool Model::importElemFile(const std::string& elem_path){
+	#ifdef __EMSCRIPTEN__
+	EM_ASM({
+	    console.log('Attempted elements file path: ' + UTF8ToString($0));
+	    console.log('Current working directory: ' + FS.cwd());
+	    console.log('Root directory contents:');
+	    try {
+	      var contents = FS.analyzePath('/');
+	      console.log(contents);
+	    } catch (e) {
+	      console.error('Error analyzing root directory:', e);
+	    }
+
+	    console.log('Trying to list /inputfile directory:');
+	    try {
+	      var dirContents = FS.readdir('/inputfile');
+	      console.log(dirContents);
+	    } catch (e) {
+	      console.error('Error reading /inputfile directory:', e);
+	    }
+	  }, elem_path.c_str());
+	  #endif
   ElementsFileBundle data = extractDataFromElemFile(elem_path);
   setRadiusMap(data.rad_map);
   _elem_weight = data.weight_map;
