@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MoloVol WASM Test</title>
+    <style>
+        body {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: system-ui, sans-serif;
+        }
+        .parameters input[type="number"] {
+            width: 100px;
+            margin-right: 10px;
+        }
+        .output {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>MoloVol WASM Test</h1>
+    
+    <form id="molovolForm">
+        <div class="file-upload">
+            <label for="structure">Upload structure file (XYZ, PDB, or CIF)</label><br>
+            <input type="file" id="structure" accept=".xyz,.cif,.pdb" required>
+        </div>
+
+        <div class="parameters">
+            <input type="number" id="radius" name="radius" step="any" required value="1.2">
+            <label for="radius">Small probe radius (Å)</label><br>
+
+            <input type="number" id="radius2" name="radius2" step="any">
+            <label for="radius2">Large probe radius (Å) - Optional</label><br>
+
+            <input type="number" id="grid" name="grid" step="any" required value="0.2">
+            <label for="grid">Grid spacing (Å)</label><br>
+            
+            <input type="number" id="depth" name="depth" step="1" value="4">
+            <label for="depth">Tree depth</label><br>
+        </div>
+
+        <div class="options">
+            <input type="checkbox" id="hetatm" name="hetatm">
+            <label for="hetatm">Include HETATM</label><br>
+
+            <input type="checkbox" id="unitcell" name="unitcell">
+            <label for="unitcell">Analyze unit cell</label><br>
+
+            <input type="checkbox" id="surface" name="surface">
+            <label for="surface">Calculate surface areas</label><br>
+        </div>
+
+        <button type="submit">Calculate</button>
+    </form>
+
+    <div id="output" class="output"></div>
+
+    <script type="module">
+        // Import the WASM module
+        import createMoloVolModule from './molovol_wasm.js';
+        
+        let wasmModule;
+        
+        // Initialize the WASM module
+        createMoloVolModule().then(module => {
+            wasmModule = module;
+            console.log('WASM module loaded');
+        }).catch(err => {
+            console.error('Failed to load WASM module:', err);
+        });
+
+        // Convert form data to command line arguments
+        function formDataToArgs(formData, fileContent) {
+            const args = [];
+            
+            // Add file content as base64 string
+            args.push('--file-structure');
+            args.push(fileContent);
+            
+            // Add required parameters
+            args.push('--radius');
+            args.push(formData.get('radius'));
+            
+            args.push('--grid');
+            args.push(formData.get('grid'));
+            
+            // Add optional parameters
+            if (formData.get('radius2')) {
+                args.push('--radius2');
+                args.push(formData.get('radius2'));
+            }
+            
+            if (formData.get('depth')) {
+                args.push('--depth');
+                args.push(formData.get('depth'));
+            }
+            
+            // Add boolean flags
+            if (formData.get('hetatm')) args.push('--hetatm');
+            if (formData.get('unitcell')) args.push('--unitcell');
+            if (formData.get('surface')) args.push('--surface');
+            
+            return args;
+        }
+
+        document.getElementById('molovolForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!wasmModule) {
+                alert('WASM module not yet loaded');
+                return;
+            }
+
+            const outputDiv = document.getElementById('output');
+            try {
+                const structureFile = document.getElementById('structure').files[0];
+                const fileContent = await structureFile.text(); // Get file content as text
+                
+                // Convert form data to command line arguments
+                const formData = new FormData(e.target);
+                const args = formDataToArgs(formData, fileContent);
+                
+                // Create a vector of strings for the WASM call
+                const argsVector = new wasmModule.VectorString();
+                args.forEach(arg => argsVector.push_back(arg));
+                
+                // Call the WASM function
+                const result = wasmModule.calculate_volumes(argsVector);
+                
+                // Clean up the vector
+                argsVector.delete();
+                
+                outputDiv.textContent = result.success ? 
+                    `Calculation completed successfully!\nVersion: ${result.version}` :
+                    'Calculation failed';
+                    
+            } catch (err) {
+                outputDiv.textContent = `Error: ${err.message}`;
+                console.error(err);
+            }
+        });
+    </script>
+</body>
+</html>

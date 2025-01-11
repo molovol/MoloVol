@@ -7,23 +7,9 @@
 #include "controller.h"
 #include "flags.h"
 #include "misc.h"
+#include "base_cmdline.h"
 
 using namespace emscripten;
-
-// Input options structure for JavaScript
-struct MoloVolOptions {
-    double probe_radius_s;       // Required: small probe radius
-    double grid_resolution;      // Required: grid resolution
-    double probe_radius_l;       // Optional: large probe radius (for two-probe mode)
-    int tree_depth;             // Optional: octree depth (default: 4)
-    bool include_hetatm;        // Optional: include HETATM from PDB
-    bool unit_cell;             // Optional: analyze unit cell
-    bool surface_area;          // Optional: calculate surfaces
-    bool export_report;         // Optional: export report
-    bool export_total_map;      // Optional: export cavity maps
-    bool export_cavity_maps;    // Optional: export cavity maps
-    unsigned output_flags;      // Output control flags
-};
 
 // Initialize Controller for WASM environment
 void init_controller() {
@@ -37,10 +23,33 @@ std::string get_version() {
     return Ctrl::getVersion();
 }
 
-// Main calculation function
-val calculate_volumes(std::string structure_data, const MoloVolOptions& options) {
+// Main calculation function using CommandLineParser
+val calculate_volumes(const std::vector<std::string>& args) {
     // Initialize controller
     init_controller();
+    
+    // Parse command line arguments using CommandLineParser
+    CommandLineParser parser;
+    // Debug print arguments
+    std::string debug_args;
+    for (const auto& arg : args) {
+        debug_args += arg + " ";
+    }
+    printf("Parsing arguments: %s\n", debug_args.c_str());
+
+    if (!parser.parse(args)) {
+        val::global("Error").new_(std::string("Failed to parse arguments: " + debug_args)).throw_();
+        return val::null();
+    }
+
+    // Check for required options
+    if (!parser.found("radius") || !parser.found("grid") || !parser.found("file-structure")) {
+        val::global("Error").new_(std::string("Missing required arguments")).throw_();
+        return val::null();
+    }
+
+    // Get structure data from the file-structure argument
+    auto structure_file = parser.getValue("file-structure").value();
     
     // Create temporary file for structure data
     std::string temp_filename = "/tmp/structure.tmp";
@@ -49,26 +58,45 @@ val calculate_volumes(std::string structure_data, const MoloVolOptions& options)
         val::global("Error").new_(std::string("Failed to create temporary file")).throw_();
         return val::null();
     }
-    fwrite(structure_data.c_str(), 1, structure_data.length(), fp);
+    fwrite(structure_file.c_str(), 1, structure_file.length(), fp);
     fclose(fp);
+
+    // Extract values from parser
+    double probe_radius_s = std::stod(parser.getValue("radius").value());
+    double probe_radius_l = parser.found("radius2") ? std::stod(parser.getValue("radius2").value()) : 0.0;
+    double grid_resolution = std::stod(parser.getValue("grid").value());
+    int tree_depth = parser.found("depth") ? std::stoi(parser.getValue("depth").value()) : 4;
+    
+    // Get boolean flags
+    bool include_hetatm = parser.found("hetatm");
+    bool unit_cell = parser.found("unitcell");
+    bool surface_area = parser.found("surface");
+    bool export_report = parser.found("export-report");
+    bool export_total_map = parser.found("export-total");
+    bool export_cavity_maps = parser.found("export-cavities");
+
+    // Get output flags
+    unsigned output_flags = parser.found("output") ? 
+        evalDisplayOptions(parser.getValue("output").value()) : 
+        mvOUT_ALL;
 
     // Run calculation
     bool success = Ctrl::getInstance()->runCalculation(
-        options.probe_radius_s,
-        options.probe_radius_l,
-        options.grid_resolution,
+        probe_radius_s,
+        probe_radius_l,
+        grid_resolution,
         temp_filename,
         Ctrl::getDefaultElemPath(),
         "/tmp",  // Temporary directory for any exports
-        options.tree_depth,
-        options.include_hetatm,
-        options.unit_cell,
-        options.surface_area,
-        options.probe_radius_l > 0,  // probe mode
-        options.export_report,
-        options.export_total_map,
-        options.export_cavity_maps,
-        options.output_flags
+        tree_depth,
+        include_hetatm,
+        unit_cell,
+        surface_area,
+        probe_radius_l > 0,  // probe mode
+        export_report,
+        export_total_map,
+        export_cavity_maps,
+        output_flags
     );
 
     if (!success) {
@@ -87,53 +115,32 @@ val calculate_volumes(std::string structure_data, const MoloVolOptions& options)
     result.set("success", true);
     result.set("version", Ctrl::getVersion());
     
-    // Note: Additional result data would need to be exposed through the Controller class
-    // For now, we return success status and version
-    
     return result;
-}
-
-// Convert output format string to flags
-unsigned parse_output_format(const std::string& format) {
-    if (format.empty() || format == "all") {
-        return mvOUT_ALL;
-    }
-    
-    unsigned flags = mvOUT_NONE;
-    std::istringstream ss(format);
-    std::string token;
-    
-    while (std::getline(ss, token, ',')) {
-        if (token == "inputfile") flags |= mvOUT_STRUCTURE;
-        else if (token == "resolution") flags |= mvOUT_RESOLUTION;
-        else if (token == "depth") flags |= mvOUT_DEPTH;
-        else if (token == "radius_small") flags |= mvOUT_RADIUS_S;
-        else if (token == "radius_large") flags |= mvOUT_RADIUS_L;
-        else if (token == "vol") flags |= mvOUT_VOL;
-        else if (token == "surf") flags |= mvOUT_SURF;
-        else if (token == "cavities") flags |= mvOUT_CAVITIES;
-    }
-    
-    return flags;
 }
 
 // Bind everything to JavaScript
 EMSCRIPTEN_BINDINGS(molovol_module) {
-    value_object<MoloVolOptions>("MoloVolOptions")
-        .field("probe_radius_s", &MoloVolOptions::probe_radius_s)
-        .field("grid_resolution", &MoloVolOptions::grid_resolution)
-        .field("probe_radius_l", &MoloVolOptions::probe_radius_l)
-        .field("tree_depth", &MoloVolOptions::tree_depth)
-        .field("include_hetatm", &MoloVolOptions::include_hetatm)
-        .field("unit_cell", &MoloVolOptions::unit_cell)
-        .field("surface_area", &MoloVolOptions::surface_area)
-        .field("export_report", &MoloVolOptions::export_report)
-        .field("export_total_map", &MoloVolOptions::export_total_map)
-        .field("export_cavity_maps", &MoloVolOptions::export_cavity_maps)
-        .field("output_flags", &MoloVolOptions::output_flags)
-        ;
+    register_vector<std::string>("VectorString");
     
+    value_object<CommandLineOption>("CommandLineOption")
+        .field("shortName", &CommandLineOption::shortName)
+        .field("longName", &CommandLineOption::longName)
+        .field("description", &CommandLineOption::description)
+        .field("isSwitch", &CommandLineOption::isSwitch)
+        .field("isRequired", &CommandLineOption::isRequired)
+        ;
+
+    register_vector<CommandLineOption>("VectorCommandLineOption");
+
+    class_<CommandLineParser>("CommandLineParser")
+        .constructor<>()
+        .function("parse", select_overload<bool(const std::vector<std::string>&)>(&CommandLineParser::parse))
+        .function("found", &CommandLineParser::found)
+        .function("getValue", &CommandLineParser::getValue)
+        .function("displayHelp", &CommandLineParser::displayHelp)
+        .function("getOptions", &CommandLineParser::getOptions)
+        ;
+
     function("get_version", &get_version);
     function("calculate_volumes", &calculate_volumes);
-    function("parse_output_format", &parse_output_format);
 }

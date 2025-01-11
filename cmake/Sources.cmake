@@ -29,17 +29,16 @@ set(GUI_SOURCES
 if(EMSCRIPTEN)
     set(MOLOVOL_SOURCES 
         ${CORE_SOURCES}
+		src/base_cmdline.cpp
     )
 elseif(MOLOVOL_BUILD_GUI)
     set(SOURCES 
         ${CORE_SOURCES}
         ${GUI_SOURCES}
-        src/controller.cpp
     )
 else()
     set(SOURCES
         ${CORE_SOURCES}
         src/base_cmdline.cpp
-        src/controller.cpp
     )
 endif()
