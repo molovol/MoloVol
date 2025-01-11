@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include <sstream>
+#include <fstream>
 #include "controller.h"
 #include "flags.h"
 #include "misc.h"
@@ -11,10 +12,30 @@
 
 using namespace emscripten;
 
+// Structure to hold calculation parameters
+struct CalculationParams {
+    // Required parameters
+    double probe_radius_small;
+    double grid_resolution;
+    std::string structure_content;
+    
+    // Optional parameters
+    double probe_radius_large = 0.0;
+    int tree_depth = 4;
+    
+    // Boolean flags
+    bool include_hetatm = false;
+    bool unit_cell = false;
+    bool surface_area = false;
+    bool export_report = false;
+    bool export_total_map = false;
+    bool export_cavity_maps = false;
+};
+
 // Initialize Controller for WASM environment
 void init_controller() {
     Ctrl::getInstance()->disableGUI();
-    Ctrl::getInstance()->hush(true);
+    Ctrl::getInstance()->hush(false);  // Enable output for debugging
 }
 
 // Get version information
@@ -23,93 +44,152 @@ std::string get_version() {
     return Ctrl::getVersion();
 }
 
-// Main calculation function using CommandLineParser
-val calculate_volumes(const std::vector<std::string>& args) {
+// Helper function to write file content and verify it
+bool writeAndVerifyFile(const std::string& filename, const std::string& content) {
+    printf("Writing file: %s with content length: %zu\n", filename.c_str(), content.length());
+    
+    std::ofstream file(filename);
+    if (!file) {
+        printf("Failed to open file for writing: %s\n", filename.c_str());
+        return false;
+    }
+    
+    file << content;
+    file.close();
+    
+    // Verify file was written
+    std::ifstream verify(filename);
+    if (!verify) {
+        printf("Failed to verify file existence: %s\n", filename.c_str());
+        return false;
+    }
+    
+    return true;
+}
+
+// Main calculation function using direct parameter passing
+val calculate_volumes_direct(const CalculationParams& params) {
+    printf("\n=== Starting calculation with direct parameter binding ===\n");
+    
     // Initialize controller
     init_controller();
     
-    // Parse command line arguments using CommandLineParser
-    CommandLineParser parser;
-    // Debug print arguments
-    std::string debug_args;
-    for (const auto& arg : args) {
-        debug_args += arg + " ";
-    }
-    printf("Parsing arguments: %s\n", debug_args.c_str());
-
-    if (!parser.parse(args)) {
-        val::global("Error").new_(std::string("Failed to parse arguments: " + debug_args)).throw_();
+    // Validate parameters
+    if (params.probe_radius_small <= 0) {
+        val::global("Error").new_(std::string("Invalid probe radius")).throw_();
         return val::null();
     }
-
-    // Check for required options
-    if (!parser.found("radius") || !parser.found("grid") || !parser.found("file-structure")) {
-        val::global("Error").new_(std::string("Missing required arguments")).throw_();
-        return val::null();
-    }
-
-    // Get structure data from the file-structure argument
-    auto structure_file = parser.getValue("file-structure").value();
     
-    // Create temporary file for structure data
-    std::string temp_filename = "/tmp/structure.tmp";
-    FILE* fp = fopen(temp_filename.c_str(), "wb");
-    if (!fp) {
-        val::global("Error").new_(std::string("Failed to create temporary file")).throw_();
+    if (params.grid_resolution <= 0 || params.grid_resolution < 0.1) {
+        val::global("Error").new_(std::string("Invalid grid resolution")).throw_();
         return val::null();
     }
-    fwrite(structure_file.c_str(), 1, structure_file.length(), fp);
-    fclose(fp);
-
-    // Extract values from parser
-    double probe_radius_s = std::stod(parser.getValue("radius").value());
-    double probe_radius_l = parser.found("radius2") ? std::stod(parser.getValue("radius2").value()) : 0.0;
-    double grid_resolution = std::stod(parser.getValue("grid").value());
-    int tree_depth = parser.found("depth") ? std::stoi(parser.getValue("depth").value()) : 4;
     
-    // Get boolean flags
-    bool include_hetatm = parser.found("hetatm");
-    bool unit_cell = parser.found("unitcell");
-    bool surface_area = parser.found("surface");
-    bool export_report = parser.found("export-report");
-    bool export_total_map = parser.found("export-total");
-    bool export_cavity_maps = parser.found("export-cavities");
+    if (params.structure_content.empty()) {
+        val::global("Error").new_(std::string("No structure content provided")).throw_();
+        return val::null();
+    }
+    
+    // Write structure file with extension based on content
+    std::string temp_filename;
+    if (params.structure_content.find("HETATM") != std::string::npos || 
+        params.structure_content.find("ATOM") != std::string::npos) {
+        temp_filename = "/tmp/structure.pdb";
+        printf("Detected PDB format\n");
+    } else if (params.structure_content.find("data_") != std::string::npos) {
+        temp_filename = "/tmp/structure.cif";
+        printf("Detected CIF format\n");
+    } else {
+        // Assume XYZ format
+        temp_filename = "/tmp/structure.xyz";
+        printf("Assuming XYZ format\n");
+    }
 
-    // Get output flags
-    unsigned output_flags = parser.found("output") ? 
-        evalDisplayOptions(parser.getValue("output").value()) : 
-        mvOUT_ALL;
+    printf("Structure content preview (first 200 chars):\n%s\n", 
+           params.structure_content.substr(0, 200).c_str());
 
+    if (!writeAndVerifyFile(temp_filename, params.structure_content)) {
+        val::global("Error").new_(std::string("Failed to write structure file")).throw_();
+        return val::null();
+    }
+
+    printf("Successfully wrote structure file to: %s\n", temp_filename.c_str());
+    
+    // Write elements file
+    std::string elements_content = R"(# Atom	Symb	Name	VdW-Radius
+1	H	Hydrogen	1.200
+6	C	Carbon	1.700
+7	N	Nitrogen	1.550
+8	O	Oxygen	1.520
+9	F	Fluorine	1.470
+15	P	Phosphorus	1.800
+16	S	Sulfur	1.800
+17	Cl	Chlorine	1.750)";
+    
+    std::string elements_filename = "/tmp/elements.txt";
+    if (!writeAndVerifyFile(elements_filename, elements_content)) {
+        printf("Failed to write elements file\n");
+        val::global("Error").new_(std::string("Failed to write elements file")).throw_();
+        return val::null();
+    }
+    
+    // Set output flags for all relevant information
+    unsigned output_flags = mvOUT_RESOLUTION | mvOUT_DEPTH | mvOUT_RADIUS_S | mvOUT_RADIUS_L | 
+                          mvOUT_OPT | mvOUT_VOL | mvOUT_SURF | mvOUT_CAVITIES;
+    
+    printf("\nRunning calculation with parameters:\n");
+    printf("- Small probe radius: %f\n", params.probe_radius_small);
+    printf("- Large probe radius: %f\n", params.probe_radius_large);
+    printf("- Grid resolution: %f\n", params.grid_resolution);
+    printf("- Tree depth: %d\n", params.tree_depth);
+    printf("- Include HETATM: %s\n", params.include_hetatm ? "true" : "false");
+    printf("- Unit cell: %s\n", params.unit_cell ? "true" : "false");
+    printf("- Surface area: %s\n", params.surface_area ? "true" : "false");
+    
     // Run calculation
-    bool success = Ctrl::getInstance()->runCalculation(
-        probe_radius_s,
-        probe_radius_l,
-        grid_resolution,
-        temp_filename,
-        Ctrl::getDefaultElemPath(),
-        "/tmp",  // Temporary directory for any exports
-        tree_depth,
-        include_hetatm,
-        unit_cell,
-        surface_area,
-        probe_radius_l > 0,  // probe mode
-        export_report,
-        export_total_map,
-        export_cavity_maps,
-        output_flags
-    );
-
+    bool success = false;
+    try {
+        success = Ctrl::getInstance()->runCalculation(
+            params.probe_radius_small,
+            params.probe_radius_large,
+            params.grid_resolution,
+            temp_filename,
+            elements_filename,
+            "/tmp",  // Temporary directory for any exports
+            params.tree_depth,
+            params.include_hetatm,
+            params.unit_cell,
+            params.surface_area,
+            params.probe_radius_large > 0,  // probe mode
+            params.export_report,
+            params.export_total_map,
+            params.export_cavity_maps,
+            output_flags
+        );
+        
+        printf("Calculation %s\n", success ? "succeeded" : "failed");
+        
+    } catch (const std::exception& e) {
+        printf("Calculation failed with exception: %s\n", e.what());
+        val::global("Error").new_(std::string("Calculation failed with exception: ") + e.what()).throw_();
+        return val::null();
+    } catch (...) {
+        printf("Calculation failed with unknown exception\n");
+        val::global("Error").new_(std::string("Calculation failed with unknown exception")).throw_();
+        return val::null();
+    }
+    
     if (!success) {
-        val::global("Error").new_(std::string("Calculation failed")).throw_();
+        printf("Calculation failed - checking completion status\n");
+        if (!Ctrl::getInstance()->isCalculationDone()) {
+            printf("Calculation was not completed\n");
+        }
+        val::global("Error").new_(std::string("Calculation failed - Check input file format and parameters")).throw_();
         return val::null();
     }
-
-    // Check if calculation was completed
-    if (!Ctrl::getInstance()->isCalculationDone()) {
-        val::global("Error").new_(std::string("Calculation was aborted")).throw_();
-        return val::null();
-    }
-
+    
+    printf("Calculation completed successfully\n");
+    
     // Return success
     val result = val::object();
     result.set("success", true);
@@ -120,27 +200,19 @@ val calculate_volumes(const std::vector<std::string>& args) {
 
 // Bind everything to JavaScript
 EMSCRIPTEN_BINDINGS(molovol_module) {
-    register_vector<std::string>("VectorString");
-    
-    value_object<CommandLineOption>("CommandLineOption")
-        .field("shortName", &CommandLineOption::shortName)
-        .field("longName", &CommandLineOption::longName)
-        .field("description", &CommandLineOption::description)
-        .field("isSwitch", &CommandLineOption::isSwitch)
-        .field("isRequired", &CommandLineOption::isRequired)
-        ;
-
-    register_vector<CommandLineOption>("VectorCommandLineOption");
-
-    class_<CommandLineParser>("CommandLineParser")
-        .constructor<>()
-        .function("parse", select_overload<bool(const std::vector<std::string>&)>(&CommandLineParser::parse))
-        .function("found", &CommandLineParser::found)
-        .function("getValue", &CommandLineParser::getValue)
-        .function("displayHelp", &CommandLineParser::displayHelp)
-        .function("getOptions", &CommandLineParser::getOptions)
-        ;
+    value_object<CalculationParams>("CalculationParams")
+        .field("probe_radius_small", &CalculationParams::probe_radius_small)
+        .field("grid_resolution", &CalculationParams::grid_resolution)
+        .field("structure_content", &CalculationParams::structure_content)
+        .field("probe_radius_large", &CalculationParams::probe_radius_large)
+        .field("tree_depth", &CalculationParams::tree_depth)
+        .field("include_hetatm", &CalculationParams::include_hetatm)
+        .field("unit_cell", &CalculationParams::unit_cell)
+        .field("surface_area", &CalculationParams::surface_area)
+        .field("export_report", &CalculationParams::export_report)
+        .field("export_total_map", &CalculationParams::export_total_map)
+        .field("export_cavity_maps", &CalculationParams::export_cavity_maps);
 
     function("get_version", &get_version);
-    function("calculate_volumes", &calculate_volumes);
+    function("calculate_volumes", &calculate_volumes_direct);
 }

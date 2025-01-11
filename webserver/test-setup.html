@@ -34,28 +34,28 @@
         </div>
 
         <div class="parameters">
-            <input type="number" id="radius" name="radius" step="any" required value="1.2">
-            <label for="radius">Small probe radius (Å)</label><br>
+            <input type="number" id="probe_radius_small" name="probe_radius_small" step="0.1" required value="1.2" min="0.1">
+            <label for="probe_radius_small">Small probe radius (Å)</label><br>
 
-            <input type="number" id="radius2" name="radius2" step="any">
-            <label for="radius2">Large probe radius (Å) - Optional</label><br>
+            <input type="number" id="grid_resolution" name="grid_resolution" step="0.1" required value="0.2" min="0.1">
+            <label for="grid_resolution">Grid spacing (Å)</label><br>
 
-            <input type="number" id="grid" name="grid" step="any" required value="0.2">
-            <label for="grid">Grid spacing (Å)</label><br>
+            <input type="number" id="probe_radius_large" name="probe_radius_large" step="0.1" min="0">
+            <label for="probe_radius_large">Large probe radius (Å) - Optional</label><br>
             
-            <input type="number" id="depth" name="depth" step="1" value="4">
-            <label for="depth">Tree depth</label><br>
+            <input type="number" id="tree_depth" name="tree_depth" step="1" value="4" min="1">
+            <label for="tree_depth">Tree depth</label><br>
         </div>
 
         <div class="options">
-            <input type="checkbox" id="hetatm" name="hetatm">
-            <label for="hetatm">Include HETATM</label><br>
+            <input type="checkbox" id="include_hetatm" name="include_hetatm" checked>
+            <label for="include_hetatm">Include HETATM</label><br>
 
-            <input type="checkbox" id="unitcell" name="unitcell">
-            <label for="unitcell">Analyze unit cell</label><br>
+            <input type="checkbox" id="unit_cell" name="unit_cell">
+            <label for="unit_cell">Analyze unit cell</label><br>
 
-            <input type="checkbox" id="surface" name="surface">
-            <label for="surface">Calculate surface areas</label><br>
+            <input type="checkbox" id="surface_area" name="surface_area">
+            <label for="surface_area">Calculate surface areas</label><br>
         </div>
 
         <button type="submit">Calculate</button>
@@ -77,40 +77,6 @@
             console.error('Failed to load WASM module:', err);
         });
 
-        // Convert form data to command line arguments
-        function formDataToArgs(formData, fileContent) {
-            const args = [];
-            
-            // Add file content as base64 string
-            args.push('--file-structure');
-            args.push(fileContent);
-            
-            // Add required parameters
-            args.push('--radius');
-            args.push(formData.get('radius'));
-            
-            args.push('--grid');
-            args.push(formData.get('grid'));
-            
-            // Add optional parameters
-            if (formData.get('radius2')) {
-                args.push('--radius2');
-                args.push(formData.get('radius2'));
-            }
-            
-            if (formData.get('depth')) {
-                args.push('--depth');
-                args.push(formData.get('depth'));
-            }
-            
-            // Add boolean flags
-            if (formData.get('hetatm')) args.push('--hetatm');
-            if (formData.get('unitcell')) args.push('--unitcell');
-            if (formData.get('surface')) args.push('--surface');
-            
-            return args;
-        }
-
         document.getElementById('molovolForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -121,27 +87,66 @@
 
             const outputDiv = document.getElementById('output');
             try {
+                // Validate the file
                 const structureFile = document.getElementById('structure').files[0];
-                const fileContent = await structureFile.text(); // Get file content as text
+                const validExtensions = ['.xyz', '.cif', '.pdb'];
+                const fileExtension = '.' + structureFile.name.split('.').pop().toLowerCase();
+                if (!validExtensions.includes(fileExtension)) {
+                    throw new Error(`Invalid file type. Please use one of: ${validExtensions.join(', ')}`);
+                }
                 
-                // Convert form data to command line arguments
-                const formData = new FormData(e.target);
-                const args = formDataToArgs(formData, fileContent);
+                // Get file content
+                const fileContent = await structureFile.text();
+                console.log('File details:', {
+                    name: structureFile.name,
+                    type: structureFile.type,
+                    size: structureFile.size,
+                    contentLength: fileContent.length
+                });
+                console.log('File content preview:', fileContent.substring(0, 200));
                 
-                // Create a vector of strings for the WASM call
-                const argsVector = new wasmModule.VectorString();
-                args.forEach(arg => argsVector.push_back(arg));
+                // Basic content validation based on file type
+                if (fileExtension === '.pdb' && !fileContent.includes('HETATM') && !fileContent.includes('ATOM')) {
+                    throw new Error('Invalid PDB file: no ATOM or HETATM records found');
+                } else if (fileExtension === '.cif' && !fileContent.includes('data_')) {
+                    throw new Error('Invalid CIF file: no data_ block found');
+                }
                 
-                // Call the WASM function
-                const result = wasmModule.calculate_volumes(argsVector);
-                
-                // Clean up the vector
-                argsVector.delete();
+                if (!fileContent || fileContent.length === 0) {
+                    throw new Error('File appears to be empty');
+                }
+
+                // Create calculation parameters object
+                const params = {
+                    probe_radius_small: parseFloat(document.getElementById('probe_radius_small').value),
+                    grid_resolution: parseFloat(document.getElementById('grid_resolution').value),
+                    structure_content: fileContent,
+                    probe_radius_large: parseFloat(document.getElementById('probe_radius_large').value || "0"),
+                    tree_depth: parseInt(document.getElementById('tree_depth').value),
+                    include_hetatm: document.getElementById('include_hetatm').checked,
+                    unit_cell: document.getElementById('unit_cell').checked,
+                    surface_area: document.getElementById('surface_area').checked,
+                    export_report: false,
+                    export_total_map: false,
+                    export_cavity_maps: false
+                };
+
+                // Validate required parameters
+                if (params.probe_radius_small <= 0) {
+                    throw new Error('Small probe radius must be positive');
+                }
+                if (params.grid_resolution < 0.1) {
+                    throw new Error('Grid spacing must be at least 0.1');
+                }
+
+                console.log('Calling calculate_volumes with params:', params);
+                const result = wasmModule.calculate_volumes(params);
+                console.log('Calculation result:', result);
                 
                 outputDiv.textContent = result.success ? 
                     `Calculation completed successfully!\nVersion: ${result.version}` :
                     'Calculation failed';
-                    
+                
             } catch (err) {
                 outputDiv.textContent = `Error: ${err.message}`;
                 console.error(err);
