@@ -20,6 +20,9 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11 CACHE STRING "Minimum macOS deployment ver
 
 include(ExecutableName)
 # EXE_NAME
+if(EMSCRIPTEN)
+    set(EXE_NAME molovol_wasm)
+endif()
 
 # Specify C++ standard
 set(CMAKE_CXX_STANDARD 20)
