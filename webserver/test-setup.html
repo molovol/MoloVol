@@ -65,17 +65,43 @@
 
     <script type="module">
         // Import the WASM module
-        import createMoloVolModule from './molovol_wasm.js';
+		import createMoloVolModule from './molovol_wasm.js';
+
+		let wasmModule;
+
+		// Initialize the WASM module
+		const moduleConfig = {
+		    // Pre-configure the module before it loads
+		    preRun: [],
+		    postRun: [],
+		    print: (text) => console.log(text),
+		    printErr: (text) => console.error(text),
+		    locateFile: (path) => './' + path,
+		    // This is crucial - must match emscripten's requirements
+		    EXPORTED_RUNTIME_METHODS: ['FS', 'callMain']
+		};
+
+		// Create a global Module object that will be used by the WASM code
+		window.Module = moduleConfig;
+
+		createMoloVolModule(moduleConfig).then(module => {
+		    wasmModule = module;
+		    console.log('WASM module loaded');
+
+		    // Debug: List contents of inputfile directory
+		    try {
+		        const files = wasmModule.FS.readdir('/inputfile');
+		        console.log('Contents of /inputfile:', files);
         
-        let wasmModule;
-        
-        // Initialize the WASM module
-        createMoloVolModule().then(module => {
-            wasmModule = module;
-            console.log('WASM module loaded');
-        }).catch(err => {
-            console.error('Failed to load WASM module:', err);
-        });
+		        // Debug: Try to read elements.txt
+		        const elementsContent = wasmModule.FS.readFile('/inputfile/elements.txt', { encoding: 'utf8' });
+		        console.log('Elements file first 100 chars:', elementsContent.substring(0, 100));
+		    } catch (e) {
+		        console.error('Error checking preloaded files:', e);
+		    }
+		}).catch(err => {
+		    console.error('Failed to load WASM module:', err);
+		});
 
         document.getElementById('molovolForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -115,7 +141,10 @@
                 if (!fileContent || fileContent.length === 0) {
                     throw new Error('File appears to be empty');
                 }
-
+				
+			    const elementsFile = wasmModule.FS.readFile('inputfile/elements.txt', { encoding: 'utf8' });
+			    console.log('Elements file content preview:', elementsFile.substring(0, 200));
+				
                 // Create calculation parameters object
                 const params = {
                     probe_radius_small: parseFloat(document.getElementById('probe_radius_small').value),
