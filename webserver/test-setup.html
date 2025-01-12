@@ -65,43 +65,43 @@
 
     <script type="module">
         // Import the WASM module
-		import createMoloVolModule from './molovol_wasm.js';
+        import createMoloVolModule from './molovol_wasm.js';
 
-		let wasmModule;
+        let wasmModule;
+        let calculationOutput = [];
 
-		// Initialize the WASM module
-		const moduleConfig = {
-		    // Pre-configure the module before it loads
-		    preRun: [],
-		    postRun: [],
-		    print: (text) => console.log(text),
-		    printErr: (text) => console.error(text),
-		    locateFile: (path) => './' + path,
-		    // This is crucial - must match emscripten's requirements
-		    EXPORTED_RUNTIME_METHODS: ['FS', 'callMain']
-		};
+        // Initialize the WASM module
+        const moduleConfig = {
+            preRun: [],
+            postRun: [],
+            print: (text) => {
+                console.log(text);
+                calculationOutput.push(text);
+                updateOutput();
+            },
+            printErr: (text) => {
+                console.error(text);
+                calculationOutput.push(`Error: ${text}`);
+                updateOutput();
+            },
+            locateFile: (path) => './' + path,
+            EXPORTED_RUNTIME_METHODS: ['FS', 'callMain']
+        };
 
-		// Create a global Module object that will be used by the WASM code
-		window.Module = moduleConfig;
+        function updateOutput() {
+            const outputDiv = document.getElementById('output');
+            outputDiv.textContent = calculationOutput.join('\n');
+        }
 
-		createMoloVolModule(moduleConfig).then(module => {
-		    wasmModule = module;
-		    console.log('WASM module loaded');
+        // Create a global Module object that will be used by the WASM code
+        window.Module = moduleConfig;
 
-		    // Debug: List contents of inputfile directory
-		    try {
-		        const files = wasmModule.FS.readdir('/inputfile');
-		        console.log('Contents of /inputfile:', files);
-        
-		        // Debug: Try to read elements.txt
-		        const elementsContent = wasmModule.FS.readFile('/inputfile/elements.txt', { encoding: 'utf8' });
-		        console.log('Elements file first 100 chars:', elementsContent.substring(0, 100));
-		    } catch (e) {
-		        console.error('Error checking preloaded files:', e);
-		    }
-		}).catch(err => {
-		    console.error('Failed to load WASM module:', err);
-		});
+        createMoloVolModule(moduleConfig).then(module => {
+            wasmModule = module;
+            console.log('WASM module loaded');
+        }).catch(err => {
+            console.error('Failed to load WASM module:', err);
+        });
 
         document.getElementById('molovolForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -112,6 +112,9 @@
             }
 
             const outputDiv = document.getElementById('output');
+            // Clear previous output
+            outputDiv.textContent = '';
+
             try {
                 // Validate the file
                 const structureFile = document.getElementById('structure').files[0];
@@ -123,28 +126,7 @@
                 
                 // Get file content
                 const fileContent = await structureFile.text();
-                console.log('File details:', {
-                    name: structureFile.name,
-                    type: structureFile.type,
-                    size: structureFile.size,
-                    contentLength: fileContent.length
-                });
-                console.log('File content preview:', fileContent.substring(0, 200));
                 
-                // Basic content validation based on file type
-                if (fileExtension === '.pdb' && !fileContent.includes('HETATM') && !fileContent.includes('ATOM')) {
-                    throw new Error('Invalid PDB file: no ATOM or HETATM records found');
-                } else if (fileExtension === '.cif' && !fileContent.includes('data_')) {
-                    throw new Error('Invalid CIF file: no data_ block found');
-                }
-                
-                if (!fileContent || fileContent.length === 0) {
-                    throw new Error('File appears to be empty');
-                }
-				
-			    const elementsFile = wasmModule.FS.readFile('inputfile/elements.txt', { encoding: 'utf8' });
-			    console.log('Elements file content preview:', elementsFile.substring(0, 200));
-				
                 // Create calculation parameters object
                 const params = {
                     probe_radius_small: parseFloat(document.getElementById('probe_radius_small').value),
@@ -168,16 +150,15 @@
                     throw new Error('Grid spacing must be at least 0.1');
                 }
 
-                console.log('Calling calculate_volumes with params:', params);
                 const result = wasmModule.calculate_volumes(params);
-                console.log('Calculation result:', result);
                 
-                outputDiv.textContent = result.success ? 
-                    `Calculation completed successfully!\nVersion: ${result.version}` :
-                    'Calculation failed';
+                // Only add failure message if needed - success details are already in the output
+                if (!result.success) {
+                    outputDiv.textContent += '\nCalculation failed';
+                }
                 
             } catch (err) {
-                outputDiv.textContent = `Error: ${err.message}`;
+                outputDiv.textContent += `Error: ${err.message}\n`;
                 console.error(err);
             }
         });
