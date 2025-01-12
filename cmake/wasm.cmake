@@ -11,7 +11,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Emscripten compiler flags
 set(WASM_COMPILER_FLAGS
     -s WASM=1
-    -s EXPORTED_RUNTIME_METHODS=['ccall','cwrap','FS','allocate']  # Added 'allocate'
+    -s EXPORTED_RUNTIME_METHODS=['ccall','cwrap','FS','allocate']
     -s ALLOW_MEMORY_GROWTH=1
     -s EXPORTED_FUNCTIONS=['_malloc','_free']
     -fexceptions
@@ -24,7 +24,7 @@ function(require_file FILE_PATH)
     endif()
 endfunction()
 
-# Usage
+# Verify required files exist
 require_file("${CMAKE_CURRENT_SOURCE_DIR}/inputfile/elements.txt")
 require_file("${CMAKE_CURRENT_SOURCE_DIR}/inputfile/space_groups.txt")
 
@@ -38,7 +38,7 @@ set(WASM_LINK_FLAGS
     --bind
     -s EXPORT_ES6=1
     -s USE_ES6_IMPORT_META=0
-    -s EXPORTED_RUNTIME_METHODS=['ccall','cwrap','FS']  # Added 'allocate' here too
+    -s EXPORTED_RUNTIME_METHODS=['ccall','cwrap','FS']
     
     # Preload resource files
     --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/inputfile/elements.txt@/inputfile/elements.txt
@@ -49,10 +49,10 @@ set(WASM_LINK_FLAGS
 string(REPLACE ";" " " WASM_COMPILER_FLAGS_STR "${WASM_COMPILER_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WASM_COMPILER_FLAGS_STR}")
 
-# Create WebAssembly target
+# Create WebAssembly target with all sources including bindings
 add_executable(molovol_wasm 
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/wasm_bindings.cpp
-    ${MOLOVOL_SOURCES}  # This should be defined in main CMakeLists.txt
+    ${SOURCES}
+    src/wasm_bindings.cpp
 )
 
 # Apply link flags

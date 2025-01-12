@@ -9,7 +9,7 @@ bool CommandLineParser::parse(const std::vector<std::string>& args) {
     try {
         // Check for empty arguments
         if (args.empty()) {
-            Ctrl::getInstance()->displayErrorMessage(901); // Assuming 901 is appropriate error code
+            Ctrl::getInstance()->displayErrorMessage(901);
             return false;
         }
 
@@ -17,7 +17,7 @@ bool CommandLineParser::parse(const std::vector<std::string>& args) {
         for (size_t i = 1; i < args.size(); i++) {
             const std::string& arg = args[i];
             if (arg.empty()) {
-                Ctrl::getInstance()->displayErrorMessage(901); // Empty argument
+                Ctrl::getInstance()->displayErrorMessage(901);
                 return false;
             }
 
@@ -25,7 +25,7 @@ bool CommandLineParser::parse(const std::vector<std::string>& args) {
 
             std::string optName = arg.substr(arg[1] == '-' ? 2 : 1);
             if (optName.empty()) {
-                Ctrl::getInstance()->displayErrorMessage(901); // Invalid option format
+                Ctrl::getInstance()->displayErrorMessage(901);
                 return false;
             }
 
@@ -58,9 +58,17 @@ bool CommandLineParser::parse(const std::vector<std::string>& args) {
         return validateRequiredOptions();
     } catch (const std::exception& e) {
         std::cerr << "Error parsing arguments: " << e.what() << std::endl;
-        Ctrl::getInstance()->displayErrorMessage(901); // General parsing error
+        Ctrl::getInstance()->displayErrorMessage(901);
         return false;
     }
+}
+
+bool CommandLineParser::parse(int argc, char* argv[]) {
+    std::vector<std::string> args;
+    for (int i = 0; i < argc; ++i) {
+        args.push_back(argv[i]);
+    }
+    return parse(args);
 }
 
 bool CommandLineParser::found(const std::string& name) const {
@@ -69,7 +77,10 @@ bool CommandLineParser::found(const std::string& name) const {
 
 std::optional<std::string> CommandLineParser::getValue(const std::string& name) const {
     auto it = parsedOptions.find(name);
-    return it != parsedOptions.end() ? std::optional<std::string>(it->second) : std::nullopt;
+    if (it != parsedOptions.end()) {
+        return it->second;
+    }
+    return std::nullopt;
 }
 
 void CommandLineParser::displayHelp() const {
@@ -105,35 +116,6 @@ bool CommandLineParser::validateRequiredOptions() const {
     return true;
 }
 
-// Validation functions
-bool validateProbes(double r1, double r2, bool pm) {
-    return !(pm && r2 < r1 && (Ctrl::getInstance()->displayErrorMessage(104), true));
-}
-
-bool validateExport(const std::string& out_dir, const std::vector<bool>& exp_options) {
-    return !(isIncluded(true, exp_options) && out_dir.empty() && (Ctrl::getInstance()->displayErrorMessage(302), true));
-}
-
-bool validatePdb(const std::string& file, bool hetatm, bool unitcell) {
-    return !((fileExtension(file) != "pdb" && fileExtension(file) != "cif") && (hetatm || unitcell) &&
-            (Ctrl::getInstance()->displayErrorMessage(115), true));
-}
-
-// Define display options map
-const std::map<std::string, unsigned> DISPLAY_OPTIONS = {
-    {"none", mvOUT_NONE}, {"inputfile", mvOUT_STRUCTURE}, {"resolution", mvOUT_RESOLUTION},
-    {"depth", mvOUT_DEPTH}, {"radius_small", mvOUT_RADIUS_S}, {"radius_large", mvOUT_RADIUS_L},
-    {"input", mvOUT_INP}, {"hetatm", mvOUT_OPT_HETATM}, {"unitcell", mvOUT_OPT_UNITCELL},
-    {"probemode", mvOUT_OPT_PROBEMODE}, {"surface", mvOUT_OPT_SURFACE}, {"options", mvOUT_OPT},
-    {"formula", mvOUT_FORMULA}, {"time", mvOUT_TIME}, {"vol_vdw", mvOUT_VOL_VDW},
-    {"vol_inaccessible", mvOUT_VOL_INACCESSIBLE}, {"vol_core_s", mvOUT_VOL_CORE_S},
-    {"vol_shell_s", mvOUT_VOL_SHELL_S}, {"vol_core_l", mvOUT_VOL_CORE_L},
-    {"vol_shell_l", mvOUT_VOL_SHELL_L}, {"vol_mol", mvOUT_VOL_MOL}, {"vol", mvOUT_VOL},
-    {"surf_vdw", mvOUT_SURF_VDW}, {"surf_mol", mvOUT_SURF_MOL},
-    {"surf_excluded_s", mvOUT_SURF_EXCLUDED_S}, {"surf_accessible_s", mvOUT_SURF_ACCESSIBLE_S},
-    {"surf", mvOUT_SURF}, {"cavities", mvOUT_CAVITIES}, {"all", mvOUT_ALL}
-};
-
 unsigned evalDisplayOptions(const std::string& output) {
     std::stringstream ss(output);
     std::string option;
@@ -154,3 +136,105 @@ unsigned evalDisplayOptions(const std::string& output) {
     }
     return display_flag;
 }
+
+#ifndef EMSCRIPTEN
+int main(int argc, char* argv[]) {
+    auto ctrl = Ctrl::getInstance();
+    ctrl->disableGUI(); // Ensure we're in CLI mode
+    
+    CommandLineParser parser;
+    if (!parser.parse(argc, argv)) {
+        return 1;
+    }
+
+    if (parser.found("help")) {
+        parser.displayHelp();
+        return 0;
+    }
+
+    if (parser.found("version")) {
+        ctrl->version();
+        return 0;
+    }
+
+    // Get required parameters with validation
+    auto probe_radius = parser.getValue("radius");
+    if (!probe_radius) {
+        ctrl->displayErrorMessage(109);
+        return 1;
+    }
+    double probe_radius_s = std::stod(*probe_radius);
+
+    auto grid = parser.getValue("grid");
+    if (!grid) {
+        ctrl->displayErrorMessage(109);
+        return 1;
+    }
+    double grid_resolution = std::stod(*grid);
+
+    auto structure_file = parser.getValue("file-structure");
+    if (!structure_file) {
+        ctrl->displayErrorMessage(102);
+        return 1;
+    }
+
+    // Optional parameters
+    std::string elements_file_path = parser.getValue("file-elements").value_or(Ctrl::getDefaultElemPath());
+    std::string output_dir_path = parser.getValue("dir-output").value_or("");
+    
+    double probe_radius_l = 0.0;
+    if (auto radius2 = parser.getValue("radius2")) {
+        probe_radius_l = std::stod(*radius2);
+        if (probe_radius_l < probe_radius_s) {
+            ctrl->displayErrorMessage(104);
+            return 1;
+        }
+    }
+    
+    int tree_depth = 3; // Default value
+    if (auto depth = parser.getValue("depth")) {
+        tree_depth = std::stoi(*depth);
+    }
+
+    // Boolean flags
+    bool opt_include_hetatm = parser.found("hetatm");
+    bool opt_unit_cell = parser.found("unitcell");
+    bool opt_surface_area = parser.found("surface");
+    bool opt_probe_mode = parser.getValue("radius2").has_value();
+    bool exp_report = parser.found("export-report");
+    bool exp_total_map = parser.found("export-total");
+    bool exp_cavity_maps = parser.found("export-cavities");
+
+    // Set display options
+    unsigned display_flag = mvOUT_ALL;
+    if (auto output = parser.getValue("output")) {
+        display_flag = evalDisplayOptions(*output);
+    }
+
+    // Handle quiet mode
+    if (parser.found("quiet")) {
+        ctrl->hush(true);
+    }
+
+    // Run the calculation
+    bool success = ctrl->runCalculation(
+        probe_radius_s,
+        probe_radius_l,
+        grid_resolution,
+        *structure_file,
+        elements_file_path,
+        output_dir_path,
+        tree_depth,
+        opt_include_hetatm,
+        opt_unit_cell,
+        opt_surface_area,
+        opt_probe_mode,
+        exp_report,
+        exp_total_map,
+        exp_cavity_maps,
+        display_flag
+    );
+
+    return success ? 0 : 1;
+}
+#endif

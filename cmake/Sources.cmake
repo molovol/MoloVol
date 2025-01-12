@@ -19,18 +19,19 @@ set(CORE_SOURCES
 
 # Set up sources based on build type
 if(MOLOVOL_BUILD_GUI)
-	# GUI-specific sources
-	set(GUI_SOURCES
-	  src/base_guicontrol.cpp
-	  src/base_constr.cpp
-	  src/base_event.cpp
-	  src/base_init.cpp
-	)
+    # GUI-specific sources
+    set(GUI_SOURCES
+      src/base_guicontrol.cpp
+      src/base_constr.cpp
+      src/base_event.cpp
+      src/base_init.cpp
+    )
     set(SOURCES 
         ${CORE_SOURCES}
         ${GUI_SOURCES}
     )
 else()
+    # CLI build
     set(SOURCES
         ${CORE_SOURCES}
         src/base_cmdline.cpp

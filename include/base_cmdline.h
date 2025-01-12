@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <optional>
+#include "flags.h"
 
 struct CommandLineOption {
     std::string shortName;
@@ -57,8 +58,20 @@ bool validateProbes(double r1, double r2, bool pm);
 bool validateExport(const std::string& out_dir, const std::vector<bool>& exp_options);
 bool validatePdb(const std::string& file, bool hetatm, bool unitcell);
 
-// Display options constants
-extern const std::map<std::string, unsigned> DISPLAY_OPTIONS;
+// Display options constants - declare as extern
+inline const std::map<std::string, unsigned> DISPLAY_OPTIONS = {
+    {"none", mvOUT_NONE}, {"inputfile", mvOUT_STRUCTURE}, {"resolution", mvOUT_RESOLUTION},
+    {"depth", mvOUT_DEPTH}, {"radius_small", mvOUT_RADIUS_S}, {"radius_large", mvOUT_RADIUS_L},
+    {"input", mvOUT_INP}, {"hetatm", mvOUT_OPT_HETATM}, {"unitcell", mvOUT_OPT_UNITCELL},
+    {"probemode", mvOUT_OPT_PROBEMODE}, {"surface", mvOUT_OPT_SURFACE}, {"options", mvOUT_OPT},
+    {"formula", mvOUT_FORMULA}, {"time", mvOUT_TIME}, {"vol_vdw", mvOUT_VOL_VDW},
+    {"vol_inaccessible", mvOUT_VOL_INACCESSIBLE}, {"vol_core_s", mvOUT_VOL_CORE_S},
+    {"vol_shell_s", mvOUT_VOL_SHELL_S}, {"vol_core_l", mvOUT_VOL_CORE_L},
+    {"vol_shell_l", mvOUT_VOL_SHELL_L}, {"vol_mol", mvOUT_VOL_MOL}, {"vol", mvOUT_VOL},
+    {"surf_vdw", mvOUT_SURF_VDW}, {"surf_mol", mvOUT_SURF_MOL},
+    {"surf_excluded_s", mvOUT_SURF_EXCLUDED_S}, {"surf_accessible_s", mvOUT_SURF_ACCESSIBLE_S},
+    {"surf", mvOUT_SURF}, {"cavities", mvOUT_CAVITIES}, {"all", mvOUT_ALL}
+};
 
 // Display options evaluation function
 unsigned evalDisplayOptions(const std::string& output);
