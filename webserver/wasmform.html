@@ -22,8 +22,6 @@
 
 <div id="disclaimer">
   <p class="infotext">
-    MoloVol Web allows you to conveniently use <a href="https://molovol.com">MoloVol</a>
-    directly through your browser. 
     An equivalent desktop version that offers slightly more options is available for download 
     <a href="https://github.com/molovol/MoloVol/releases" id="download-link">here</a>
     along with the user manual. 
@@ -32,7 +30,7 @@
   </p>
 </div>
   
-<form id="inputs" onsubmit="handleSubmit(event)">
+<form id="inputs">
   <div id="file-upload">
     <label for="structure">
       Upload a structure – 
@@ -77,11 +75,6 @@
   </div>
 
   <div id="consent">
-    <p class="infotext">
-      By clicking "Submit" you consent that your structure file may be processed locally in your browser
-      using WebAssembly. No data is sent to any server. If you prefer using a desktop application, you can 
-      <a href="https://github.com/molovol/MoloVol/releases" id="download-link2">download it here</a>.
-    </p>
     <input type="submit" id="submit" value="Calculate"/>
   </div>
 </form>
@@ -93,31 +86,58 @@
   </div>
 </div>
 
-<script>
+<script type="module">
 // Initialize the WebAssembly module
-let wasmModule;
+let wasmInstance;
+let calculationOutput = [];
+
+// Module configuration
+const moduleConfig = {
+    preRun: [],
+    postRun: [],
+    print: (text) => {
+        console.log(text);
+        calculationOutput.push(text);
+        updateOutput();
+    },
+    printErr: (text) => {
+        console.error(text);
+        calculationOutput.push(`Error: ${text}`);
+        updateOutput();
+    },
+    locateFile: (path) => './' + path
+};
+
+function updateOutput() {
+    const outputElement = document.getElementById('calculation-result');
+    if (outputElement) {
+        outputElement.style.whiteSpace = 'pre-wrap';
+        outputElement.textContent = calculationOutput.join('\n');
+    }
+}
+
+// Create global Module object
+window.Module = moduleConfig;
 
 async function initWasm() {
     try {
-        wasmModule = await import('./molovol_wasm.js');
-        await wasmModule.default(); // Initialize the module
-        const version = wasmModule.get_version();
+        const module = await import('./molovol_wasm.js');
+        wasmInstance = await module.default(moduleConfig);
+        
+        // Update version information
+        const version = wasmInstance.get_version();
         document.getElementById('version').textContent = version;
         document.getElementById('download-link').href += '/tag/v' + version;
-        document.getElementById('download-link2').href += '/tag/v' + version;
     } catch (error) {
         console.error('Failed to initialize WASM module:', error);
         alert('Failed to initialize calculation engine. Please try reloading the page.');
     }
 }
 
-// Call initWasm when the page loads
-initWasm();
-
 async function handleSubmit(event) {
     event.preventDefault();
     
-    if (!wasmModule) {
+    if (!wasmInstance) {
         alert('Calculation engine not ready. Please try again in a moment.');
         return;
     }
@@ -130,16 +150,20 @@ async function handleSubmit(event) {
     }
 
     try {
+        // Clear previous output
+        calculationOutput = [];
+        updateOutput();
+        
         // Read file content
         const fileContent = await file.text();
         
-        // Create calculation parameters object matching the C++ struct
+        // Create calculation parameters object
         const params = {
             probe_radius_small: parseFloat(document.getElementById('radius').value),
             probe_radius_large: document.getElementById('radius2').value ? 
                                parseFloat(document.getElementById('radius2').value) : 0.0,
             grid_resolution: parseFloat(document.getElementById('grid').value),
-            tree_depth: parseInt(document.getElementById('tree_depth').value),
+            tree_depth: 4,
             structure_content: fileContent,
             include_hetatm: document.getElementById('hetatm').checked,
             unit_cell: document.getElementById('unitcell').checked,
@@ -149,26 +173,36 @@ async function handleSubmit(event) {
             export_cavity_maps: document.getElementById('export-cavities').checked
         };
 
-        // Call WASM calculation function
-        const result = wasmModule.calculate_volumes(params);
+        // Run calculation
+        const result = wasmInstance.calculate_volumes(params);
         
-        // Display results
-        document.getElementById('calculation-result').textContent = result;
+        // Show results section
         document.getElementById('results').style.display = 'block';
         window.location.hash = 'output';
         
     } catch (error) {
         console.error('Calculation failed:', error);
-        alert('Calculation failed: ' + error.message);
+        calculationOutput.push(`Error: ${error.message}`);
+        updateOutput();
     }
 }
 
-// File type handling logic
-document.getElementById('structure').onchange = function(e) {
-    const filename = this.value;
-    evalFilename(filename, true);
-};
+// Initialize everything when the DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Attach submit handler
+    const form = document.getElementById('inputs');
+    form.addEventListener('submit', handleSubmit);
+    
+    // Initialize other event handlers
+    document.getElementById('structure').addEventListener('change', function(e) {
+        evalFilename(this.value, true);
+    });
 
+    // Initialize WASM
+    initWasm();
+});
+
+// File handling functions
 function evalFilename(filename, newFile) {
     const extension = filename.match(/\.\w+$/gm);
     if (!extension) {
@@ -202,20 +236,22 @@ function lockCheckboxes(htDisable, ucDisable) {
 }
 
 // Probe radius validation
-const radius = document.getElementById("radius");
-const radius2 = document.getElementById("radius2");
-radius2.addEventListener("input", (event) => {
-    if (radius2.value !== "" && parseFloat(radius2.value) < parseFloat(radius.value)) {
-        radius2.setCustomValidity("Must be larger than small probe radius");
-        radius2.reportValidity();
-    } else {
-        radius2.setCustomValidity("");
-    }
+document.addEventListener('DOMContentLoaded', () => {
+    const radius = document.getElementById("radius");
+    const radius2 = document.getElementById("radius2");
+    radius2.addEventListener("input", (event) => {
+        if (radius2.value !== "" && parseFloat(radius2.value) < parseFloat(radius.value)) {
+            radius2.setCustomValidity("Must be larger than small probe radius");
+            radius2.reportValidity();
+        } else {
+            radius2.setCustomValidity("");
+        }
+    });
 });
 </script>
 
 <footer>
-  &copy; 2023-2024 Molovol Web is brought to you by 
+  &copy; 2023-2025 Molovol Web is brought to you by 
     <a href="https://benediktsvogler.com">Benedikt&nbsp;S.&nbsp;Vogler</a> and Jasmin&nbsp;B.&nbsp;Maglic based on
     <a href="https://molovol.com">Molovol&nbsp;Desktop</a> by J.&nbsp;B.&nbsp;Maglic and Roy&nbsp;Lavendomme.
   <br>
