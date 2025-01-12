@@ -17,21 +17,15 @@ set(CORE_SOURCES
   src/voxel.cpp
 )
 
-# GUI-specific sources
-set(GUI_SOURCES
-  src/base_guicontrol.cpp
-  src/base_constr.cpp
-  src/base_event.cpp
-  src/base_init.cpp
-)
-
 # Set up sources based on build type
-if(EMSCRIPTEN)
-    set(MOLOVOL_SOURCES 
-        ${CORE_SOURCES}
-		src/base_cmdline.cpp
-    )
-elseif(MOLOVOL_BUILD_GUI)
+if(MOLOVOL_BUILD_GUI)
+	# GUI-specific sources
+	set(GUI_SOURCES
+	  src/base_guicontrol.cpp
+	  src/base_constr.cpp
+	  src/base_event.cpp
+	  src/base_init.cpp
+	)
     set(SOURCES 
         ${CORE_SOURCES}
         ${GUI_SOURCES}
