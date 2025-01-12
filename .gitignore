@@ -48,3 +48,4 @@ _site/
 
 .idea/
 *.pyc
+webserver/molovol_wasm.*
