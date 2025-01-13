@@ -20,6 +20,9 @@ inputfile/*
 *.dSYM
 !res/macOS/DS_Store/.DS_store
 
+# VS Code
+.vs
+
 # XCode
 xcuserdata/
 
@@ -52,7 +55,8 @@ _site/
 # Virtual python environment
 venv*/
 
-# VTK is a large library that does not need to be part of the main repository
-external/VTK-*
+# VTK build files
+external/VTK/build*
+external/VTK/out/build*
 
 notforcommit/

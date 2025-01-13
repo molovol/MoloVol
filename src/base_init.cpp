@@ -10,6 +10,7 @@
 #include "misc.h"
 
 #include <cassert>
+#include <stdio.h>
 
 // wxWidgets macro that contains the entry point, initialised the app, and calls wxApp::OnInit()
 IMPLEMENT_APP(MainApp)
@@ -21,6 +22,11 @@ IMPLEMENT_APP(MainApp)
 // first custom code that is run
 bool MainApp::OnInit()
 {
+  //AllocConsole();
+  //freopen("conin$", "r", stdin);
+  //freopen("conout$", "w", stdout);
+  //freopen("conout$", "w", stderr);
+  //printf("Debugging Window:\n");
   if (argc != 1){
     // command line interface
     evalCmdLine();

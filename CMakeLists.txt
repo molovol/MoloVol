@@ -34,6 +34,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # wxWidgets
 set(wxWidgets_USE_STATIC=ON)
+# Not ideal to use these absolute paths here
+if (MSVC)
+  set(wxWidgets_ROOT_DIR C:/wxWidgets-3.1.5)
+  set(wxWidgets_LIB_DIR C:/wxWidgets-3.1.5/lib/vc_x64_lib)
+endif()
+
 find_package(wxWidgets REQUIRED core base gl OPTIONAL_COMPONENTS net)
 include(${wxWidgets_USE_FILE})
 
@@ -47,7 +53,9 @@ include_directories(include)
 
 # Compiler flag for development build
 add_compile_options("$<$<NOT:$<CONFIG:RELEASE,MINSIZEREL,RELWITHDEBINFO>>:-DDEBUG>")
-add_compile_options(-Wall -Werror -Wno-unused-command-line-argument -Wno-invalid-source-encoding)
+if (UNIX)
+  add_compile_options(-Wall -Werror -Wno-unused-command-line-argument -Wno-invalid-source-encoding)
+endif()
 
 include(CheckIPOSupported)
 check_ipo_supported(RESULT IPO_SUPPORTED OUTPUT IPO_ERROR)
@@ -87,7 +95,11 @@ list(APPEND CMAKE_INSTALL_RPATH "@executable_path/Frameworks")
 #set(CMAKE_INSTALL_RPATH "@executable_path/Frameworks")
 
 # Target MoloVol
-add_executable(${EXE_NAME} ${SOURCES} ${OSX_RESOURCE_FILES})
+if (MSVC)
+  add_executable(${EXE_NAME} WIN32 ${SOURCES} ${OSX_RESOURCE_FILES})
+else()
+  add_executable(${EXE_NAME} ${SOURCES} ${OSX_RESOURCE_FILES})
+endif()
 
 # XCode, app bundle and libtiff
 include(MacSpecific)

@@ -52,7 +52,7 @@ RenderFrame::RenderFrame(const MainFrame* parent, const wxString& title, const w
 
   // Create wxVTK window interactor
   m_pVTKWindow = new wxVTKRenderWindowInteractor(this, WXVTK_Render, wxDefaultPosition, wxSize(400,400));
-  m_pVTKWindow->UseCaptureMouseOn(); // TODO: Not sure what this does
+  m_pVTKWindow->UseCaptureMouseOn(); // Mouse motion is captured outside of window
   
   InitControlPanel();
 
@@ -81,7 +81,7 @@ RenderFrame::~RenderFrame()
 void RenderFrame::UpdateSurface(const Container3D<Voxel>& surf_data, const std::array<double,3> origin, 
     const double grid_step, const bool probe_mode, const unsigned char n_cavities){
   // Set up image
-  std::array<size_t,3> dims = surf_data.getNumElements();
+  std::array<unsigned long,3> dims = surf_data.getNumElements();
 
   imagedata->PrepareForNewData();
   imagedata->SetDimensions(dims[0],dims[1],dims[2]);
@@ -447,7 +447,7 @@ void RenderFrame::OnCavitySelect(wxCommandEvent& event) {
   }
   else {
     // Get size of image data
-    std::array<size_t,3> dims = surf_data.getNumElements();
+    std::array<unsigned long,3> dims = surf_data.getNumElements();
     maskdata->SetDimensions(dims[0],dims[1],dims[2]);
     maskdata->AllocateScalars(VTK_UNSIGNED_CHAR,1);
 
