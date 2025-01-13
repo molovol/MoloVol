@@ -62,27 +62,36 @@
     <label for="surface">Calculate surface areas</label><br>
   </div>
 
-  <div id="export">
-    <h4>Generate files for download</h4>
-    <input type="checkbox" id="export-report" name="cli_export-report">
-    <label for="export-report">Generate report</label><br>
-
-    <input type="checkbox" id="export-total" name="cli_export-total">
-    <label for="export-total">Generate total surface map</label><br>
-    
-    <input type="checkbox" id="export-cavities" name="cli_export-cavities">
-    <label for="export-cavities">Generate surface map for each cavity</label><br>
+<div id="export">
+  <h4>Export options</h4>
+  <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+    <div>
+      <input type="checkbox" id="export-total" name="cli_export-total">
+      <label for="export-total">Generate total surface map</label>
+    </div>
+    <a href="#" id="download-total-map" class="download-button" style="display: none; padding: 4px 12px; background-color: #2380be; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9em;">Download</a>
   </div>
-
-  <div id="consent">
-    <input type="submit" id="submit" value="Calculate"/>
+  
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <div>
+      <input type="checkbox" id="export-cavities" name="cli_export-cavities">
+      <label for="export-cavities">Generate surface map for each cavity</label>
+    </div>
+    <a href="#" id="download-cavities" class="download-button" style="display: none; padding: 4px 12px; background-color: #2380be; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9em;">Download</a>
   </div>
-</form>
+</div>
+
+<div id="consent">
+  <input type="submit" id="submit" value="Calculate"/>
+</div>
 
 <div id="results" style="display: none;">
   <h4 id="output">Output</h4>
   <div id="outputbox">
     <output id="calculation-result"></output>
+  </div>
+  <div style="margin-top: 12px;">
+    <a href="#" id="download-output" class="download-button" style="display: inline-block; padding: 4px 12px; background-color: #2380be; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9em;">Save output</a>
   </div>
 </div>
 
@@ -123,7 +132,7 @@ async function initWasm() {
     try {
         const module = await import('./molovol_wasm.js');
         wasmInstance = await module.default(moduleConfig);
-        
+    
         // Update version information
         const version = wasmInstance.get_version();
         document.getElementById('version').textContent = version;
@@ -132,6 +141,23 @@ async function initWasm() {
         console.error('Failed to initialize WASM module:', error);
         alert('Failed to initialize calculation engine. Please try reloading the page.');
     }
+}
+
+// Function to trigger file download
+function downloadFile(content, filename) {
+    if (!content) {
+        console.error('No content to download');
+        return;
+    }
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
 
 async function handleSubmit(event) {
@@ -168,16 +194,57 @@ async function handleSubmit(event) {
             include_hetatm: document.getElementById('hetatm').checked,
             unit_cell: document.getElementById('unitcell').checked,
             surface_area: document.getElementById('surface').checked,
-            export_report: document.getElementById('export-report').checked,
+            export_report: true,  // Always true since we always want the report
             export_total_map: document.getElementById('export-total').checked,
             export_cavity_maps: document.getElementById('export-cavities').checked
         };
 
         // Run calculation
         const result = wasmInstance.calculate_volumes(params);
+        console.log('WASM calculation result:', result);  // Debug log
         
         // Show results section
         document.getElementById('results').style.display = 'block';
+        
+        // Show download buttons based on export options
+        const showTotalMap = document.getElementById('export-total').checked;
+        const showCavities = document.getElementById('export-cavities').checked;
+        
+        // Set up total surface map download
+        const totalMapButton = document.getElementById('download-total-map');
+        if (showTotalMap) {  // Removed result.totalSurfaceMap check since it might be named differently
+            totalMapButton.style.display = 'inline-block';
+            totalMapButton.onclick = (e) => {
+                e.preventDefault();
+                // Use appropriate data from result
+                const mapData = result.surfaceMap || result.totalMap || result.surface_map || calculationOutput.join('\n');
+                downloadFile(mapData, 'total_surface_map.txt');
+            };
+        } else {
+            totalMapButton.style.display = 'none';
+        }
+        
+        // Set up cavity maps download
+        const cavitiesButton = document.getElementById('download-cavities');
+        if (showCavities) {  // Removed result.cavityMaps check
+            cavitiesButton.style.display = 'inline-block';
+            cavitiesButton.onclick = (e) => {
+                e.preventDefault();
+                // Use appropriate data from result
+                const mapData = result.cavityMaps || result.cavityMap || result.cavity_maps || calculationOutput.join('\n');
+                downloadFile(mapData, 'cavity_maps.txt');
+            };
+        } else {
+            cavitiesButton.style.display = 'none';
+        }
+
+        // Set up output download
+        const outputButton = document.getElementById('download-output');
+        outputButton.onclick = (e) => {
+            e.preventDefault();
+            downloadFile(calculationOutput.join('\n'), 'molovol_output.txt');
+        };
+        
         window.location.hash = 'output';
         
     } catch (error) {
@@ -192,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Attach submit handler
     const form = document.getElementById('inputs');
     form.addEventListener('submit', handleSubmit);
-    
+
     // Initialize other event handlers
     document.getElementById('structure').addEventListener('change', function(e) {
         evalFilename(this.value, true);
@@ -210,7 +277,7 @@ function evalFilename(filename, newFile) {
         alert('File extension unknown.');
         return;
     }
-    
+
     switch (extension[0].toLowerCase()) {
         case '.pdb':
             if (newFile) {
