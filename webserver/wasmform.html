@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" type="text/css" href="static/style.css">
   <!-- Favicon -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <link rel="apple-touch-icon" sizes="180x180" href="static/apple-touch-icon.png">
   <link rel="shortcut icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="shortcut icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
@@ -280,36 +281,80 @@ async function handleSubmit(event) {
         document.getElementById('results').style.display = 'block';
         
         // Show download buttons based on export options
-        const showTotalMap = document.getElementById('export-total').checked;
-        const showCavities = document.getElementById('export-cavities').checked;
+		const totalMapButton = document.getElementById('download-total-map');
+		        if (params.export_total_map) {
+		            try {
+		                // Get list of files in /tmp
+		                const files = wasmInstance.FS.readdir('/tmp');
+                
+		                // Find the surface map file (ends with full-structure.dx)
+		                const mapFile = files.find(f => f.endsWith('full-structure.dx'));
+                
+		                if (!mapFile) {
+		                    throw new Error('Surface map file not found');
+		                }
+
+		                // Read the file directly from WASM's filesystem
+		                const mapData = new TextDecoder().decode(
+		                    wasmInstance.FS.readFile(`/tmp/${mapFile}`)
+		                );
+                
+		                totalMapButton.style.display = 'inline-block';
+		                totalMapButton.onclick = (e) => {
+		                    e.preventDefault();
+		                    downloadFile(mapData, mapFile);
+		                };
+		            } catch (error) {
+		                console.error('Could not read total surface map:', error);
+		                totalMapButton.style.display = 'none';
+		            }
+		        } else {
+		            totalMapButton.style.display = 'none';
+		        }
         
-        // Set up total surface map download
-        const totalMapButton = document.getElementById('download-total-map');
-        if (showTotalMap) {  // Removed result.totalSurfaceMap check since it might be named differently
-            totalMapButton.style.display = 'inline-block';
-            totalMapButton.onclick = (e) => {
-                e.preventDefault();
-                // Use appropriate data from result
-                const mapData = result.surfaceMap || result.totalMap || result.surface_map || calculationOutput.join('\n');
-                downloadFile(mapData, 'total_surface_map.txt');
-            };
-        } else {
-            totalMapButton.style.display = 'none';
-        }
-        
-        // Set up cavity maps download
-        const cavitiesButton = document.getElementById('download-cavities');
-        if (showCavities) {  // Removed result.cavityMaps check
-            cavitiesButton.style.display = 'inline-block';
-            cavitiesButton.onclick = (e) => {
-                e.preventDefault();
-                // Use appropriate data from result
-                const mapData = result.cavityMaps || result.cavityMap || result.cavity_maps || calculationOutput.join('\n');
-                downloadFile(mapData, 'cavity_maps.txt');
-            };
-        } else {
-            cavitiesButton.style.display = 'none';
-        }
+		        // Set up cavity maps download
+		        const cavitiesButton = document.getElementById('download-cavities');
+		        if (params.export_cavity_maps) {
+		            // Get list of files in /tmp
+		            const files = wasmInstance.FS.readdir('/tmp');
+            
+		            // Find all cavity map files (contain _cav in filename)
+		            const cavityFiles = files.filter(f => f.includes('_cav') && f.endsWith('.dx'));
+            
+		            if (cavityFiles.length > 0) {
+		                const cavityMaps = cavityFiles.map(filename => ({
+		                    name: filename,
+		                    content: new TextDecoder().decode(
+		                        wasmInstance.FS.readFile(`/tmp/${filename}`)
+		                    )
+		                }));
+
+		                cavitiesButton.style.display = 'inline-block';
+		                cavitiesButton.onclick = (e) => {
+		                    e.preventDefault();
+		                    const zip = new JSZip();
+		                    cavityMaps.forEach(map => {
+		                        zip.file(map.name, map.content);
+		                    });
+                    
+		                    zip.generateAsync({type: "blob"})
+		                        .then(function(content) {
+		                            const url = URL.createObjectURL(content);
+		                            const a = document.createElement('a');
+		                            a.href = url;
+		                            a.download = 'cavity_maps.zip';
+		                            document.body.appendChild(a);
+		                            a.click();
+		                            document.body.removeChild(a);
+		                            URL.revokeObjectURL(url);
+		                        });
+		                };
+		            } else {
+		                cavitiesButton.style.display = 'none';
+		            }
+		        } else {
+		            cavitiesButton.style.display = 'none';
+		        }
 
         // Set up output download
         const outputButton = document.getElementById('download-output');
