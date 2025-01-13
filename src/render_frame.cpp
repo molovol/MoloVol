@@ -52,7 +52,7 @@ RenderFrame::RenderFrame(const MainFrame* parent, const wxString& title, const w
 
   // Create wxVTK window interactor
   m_pVTKWindow = new wxVTKRenderWindowInteractor(this, WXVTK_Render, wxDefaultPosition, wxSize(400,400));
-  m_pVTKWindow->UseCaptureMouseOn(); // TODO: Not sure what this does
+  m_pVTKWindow->UseCaptureMouseOn(); // Mouse motion is captured outside of window
   
   InitControlPanel();
 
