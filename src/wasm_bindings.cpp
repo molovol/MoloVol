@@ -18,7 +18,7 @@ struct CalculationParams {
     double probe_radius_small;
     double grid_resolution;
     std::string structure_content;
-    
+    std::string filename;
     // Optional parameters
     double probe_radius_large = 0.0;
     int tree_depth = 4;
@@ -106,7 +106,7 @@ val calculate_volumes_direct(const CalculationParams& params) {
     printf("- Surface area: %s\n", params.surface_area ? "true" : "false");
     
  // Write structure content to temporary file
-    std::string input_filepath = "/tmp/structure_input.pdb"; // or appropriate extension
+    std::string input_filepath = "/tmp/" + params.filename;
     if (!writeAndVerifyFile(input_filepath, params.structure_content)) {
         val::global("Error").new_(std::string("Failed to write structure file")).throw_();
         return val::null();
@@ -169,6 +169,7 @@ EMSCRIPTEN_BINDINGS(molovol_module) {
         .field("probe_radius_small", &CalculationParams::probe_radius_small)
         .field("grid_resolution", &CalculationParams::grid_resolution)
         .field("structure_content", &CalculationParams::structure_content)
+        .field("filename", &CalculationParams::filename)
         .field("probe_radius_large", &CalculationParams::probe_radius_large)
         .field("tree_depth", &CalculationParams::tree_depth)
         .field("include_hetatm", &CalculationParams::include_hetatm)

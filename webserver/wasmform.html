@@ -265,6 +265,7 @@ async function handleSubmit(event) {
             grid_resolution: parseFloat(document.getElementById('grid').value),
             tree_depth: 4,
             structure_content: fileContent,
+            filename: file.name,  // Pass the actual filename
             include_hetatm: document.getElementById('hetatm').checked,
             unit_cell: document.getElementById('unitcell').checked,
             surface_area: document.getElementById('surface').checked,
