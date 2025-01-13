@@ -32,11 +32,20 @@
   
 <form id="inputs">
   <div id="file-upload">
-    <label for="structure">
-      Upload a structure – 
-      <i><small>Accepted formats: XYZ, PDB, or CIF file</small></i>
-    </label><br>
-    <input type="file" name="structure" id="structure" accept=".xyz,.cif,.pdb" required><br>
+    <div class="dropzone" id="dropzone">
+      <label class="dropzone-label">
+        Upload a structure – 
+        <i><small>Accepted formats: XYZ, PDB, or CIF file</small></i>
+      </label>
+      <div class="dropzone-content">
+        <div class="dropzone-icon">📄</div>
+        <p>Drag and drop your file here or click to select</p>
+      </div>
+      <div class="file-info">
+        Selected file: <span id="file-name">No file selected</span>
+      </div>
+      <input type="file" class="dropzone-input" name="structure" id="structure" accept=".xyz,.cif,.pdb" required>
+    </div>
   </div>
 
   <div id="parameters">
@@ -96,6 +105,70 @@
 </div>
 
 <script type="module">
+	document.addEventListener('DOMContentLoaded', function() {
+	  const dropzone = document.getElementById('dropzone');
+	  const input = document.getElementById('structure');
+	  const fileNameDisplay = document.getElementById('file-name');
+
+	  // Handle file selection display
+	  function handleFileSelect(file) {
+	    if (file) {
+	      fileNameDisplay.textContent = file.name;
+	      dropzone.classList.add('has-file');
+	      evalFilename(file.name, true);
+	    } else {
+	      fileNameDisplay.textContent = 'No file selected';
+	      dropzone.classList.remove('has-file');
+	    }
+	  }
+
+	  // Handle input change
+	  input.addEventListener('change', function(e) {
+	    handleFileSelect(this.files[0]);
+	  });
+
+	  // Handle click
+	  dropzone.addEventListener('click', function(e) {
+	    if (e.target !== input) {
+	      e.preventDefault();
+	      input.click();
+	    }
+	  });
+
+	  // Prevent default drag behaviors
+	  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+	    dropzone.addEventListener(eventName, preventDefaults, false);
+	    document.body.addEventListener(eventName, preventDefaults, false);
+	  });
+
+	  function preventDefaults(e) {
+	    e.preventDefault();
+	    e.stopPropagation();
+	  }
+
+	  // Handle drag and drop visual feedback
+	  ['dragenter', 'dragover'].forEach(eventName => {
+	    dropzone.addEventListener(eventName, function() {
+	      dropzone.classList.add('drag-over');
+	    }, false);
+	  });
+
+	  ['dragleave', 'drop'].forEach(eventName => {
+	    dropzone.addEventListener(eventName, function() {
+	      dropzone.classList.remove('drag-over');
+	    }, false);
+	  });
+
+	  // Handle drop
+	  dropzone.addEventListener('drop', function(e) {
+	    const file = e.dataTransfer.files[0];
+	    if (file) {
+	      input.files = e.dataTransfer.files;
+	      handleFileSelect(file);
+	    }
+	  }, false);
+	});
+	
 // Initialize the WebAssembly module
 let wasmInstance;
 let calculationOutput = [];

@@ -426,3 +426,53 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
 input[type=number] {
   -moz-appearance: textfield;
 }
+.dropzone {
+  border: 2px dashed #2380be;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  background: #f8fafc;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.dropzone.drag-over {
+  background: #e8f4ff;
+  border-color: #1d6697;
+}
+
+.dropzone.has-file {
+  background: #e8f4ff;
+  border-style: solid;
+}
+
+.dropzone-input {
+  display: none;
+}
+
+.dropzone-label {
+  display: block;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.dropzone-content {
+  color: #666;
+}
+
+.file-info {
+  margin-top: 10px;
+  color: #2380be;
+  display: none;
+}
+
+.dropzone.has-file .file-info {
+  display: block;
+}
+
+.dropzone-icon {
+  font-size: 24px;
+  color: #2380be;
+  margin-bottom: 10px;
+}
