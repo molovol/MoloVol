@@ -46,8 +46,6 @@ std::string get_version() {
 
 // Helper function to write file content and verify it
 bool writeAndVerifyFile(const std::string& filename, const std::string& content) {
-    printf("Writing file: %s with content length: %zu\n", filename.c_str(), content.length());
-    
     std::ofstream file(filename);
     if (!file) {
         printf("Failed to open file for writing: %s\n", filename.c_str());
@@ -95,16 +93,7 @@ val calculate_volumes_direct(const CalculationParams& params) {
     // Set output flags for all relevant information
     unsigned output_flags = mvOUT_RESOLUTION | mvOUT_DEPTH | mvOUT_RADIUS_S | mvOUT_RADIUS_L | 
                           mvOUT_OPT | mvOUT_VOL | mvOUT_SURF | mvOUT_CAVITIES;
-    
-    printf("\nRunning calculation with parameters:\n");
-    printf("- Small probe radius: %f\n", params.probe_radius_small);
-    printf("- Large probe radius: %f\n", params.probe_radius_large);
-    printf("- Grid resolution: %f\n", params.grid_resolution);
-    printf("- Tree depth: %d\n", params.tree_depth);
-    printf("- Include HETATM: %s\n", params.include_hetatm ? "true" : "false");
-    printf("- Unit cell: %s\n", params.unit_cell ? "true" : "false");
-    printf("- Surface area: %s\n", params.surface_area ? "true" : "false");
-    
+        
  // Write structure content to temporary file
     std::string input_filepath = "/tmp/" + params.filename;
     if (!writeAndVerifyFile(input_filepath, params.structure_content)) {
