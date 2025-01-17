@@ -12,6 +12,13 @@ worker.onmessage = function(e) {
         case 'ready':
             console.log('WASM worker ready');
             break;
+        case 'version':
+            // Update version display
+            const versionElement = document.getElementById('version');
+            if (versionElement) {
+                versionElement.textContent = 'v' + data;
+            }
+            break;
         case 'output':
             // More precise detection of progress messages
             const isProgress = 

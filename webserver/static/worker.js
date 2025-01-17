@@ -15,6 +15,18 @@ const moduleConfig = {
 let wasmModule;
 createMoloVolModule(moduleConfig).then(module => {
     wasmModule = module;
+    
+    // Get and send version to main thread
+    try {
+        const version = wasmModule.get_version();
+        self.postMessage({ 
+            type: 'version', 
+            data: version 
+        });
+    } catch (error) {
+        console.error('Failed to get version:', error);
+    }
+    
     self.postMessage({ type: 'ready' });
 }).catch(error => {
     self.postMessage({ type: 'error', data: `Failed to initialize WASM: ${error}` });
