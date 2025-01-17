@@ -30,15 +30,16 @@ require_file("${CMAKE_CURRENT_SOURCE_DIR}/inputfile/space_groups.txt")
 
 # Link flags specific to WASM
 set(WASM_LINK_FLAGS
-    -s ENVIRONMENT=web
+    -s ENVIRONMENT='web'
     -s MODULARIZE=1
     -s EXPORT_NAME='createMoloVolModule'
     -s NO_EXIT_RUNTIME=1
     -s ASSERTIONS=1
     --bind
-    -s EXPORT_ES6=1
+    -s EXPORT_ES6=0#disabled for safari
     -s USE_ES6_IMPORT_META=0
     -s EXPORTED_RUNTIME_METHODS=['ccall','cwrap','FS']
+	-s SINGLE_FILE=1          # Added to combine WASM into JS
     
     # Preload resource files
     --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/inputfile/elements.txt@/inputfile/elements.txt
@@ -65,11 +66,11 @@ set_target_properties(molovol_wasm PROPERTIES
 add_custom_command(TARGET molovol_wasm POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_BINARY_DIR}/molovol_wasm.js
-        ${CMAKE_CURRENT_SOURCE_DIR}/webserver/molovol_wasm.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/webserver/static/molovol_wasm.js
     COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_BINARY_DIR}/molovol_wasm.wasm
-        ${CMAKE_CURRENT_SOURCE_DIR}/webserver/molovol_wasm.wasm
+        ${CMAKE_CURRENT_SOURCE_DIR}/webserver/static/molovol_wasm.wasm
     COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_BINARY_DIR}/molovol_wasm.data
-        ${CMAKE_CURRENT_SOURCE_DIR}/webserver/molovol_wasm.data
+        ${CMAKE_CURRENT_SOURCE_DIR}/webserver/static/molovol_wasm.data
 )

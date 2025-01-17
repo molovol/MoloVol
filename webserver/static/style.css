@@ -476,3 +476,34 @@ input[type=number] {
   color: #2380be;
   margin-bottom: 10px;
 }
+
+#calculation-result {
+    white-space: pre-wrap;
+    height: 400px;
+    overflow-y: auto;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+    font-family: monospace;
+}
+
+.output-box {
+    white-space: pre-wrap;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+    font-family: monospace;
+}
+
+#progress-output {
+    margin-bottom: 12px;
+    max-height: 100px;
+    overflow-y: auto;
+}
+
+#calculation-result {
+    height: 400px;
+    overflow-y: auto;
+}
