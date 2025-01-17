@@ -1,7 +1,8 @@
 // Initialize output and worker
-let pendingProgressUpdates = [];
-let pendingCalcUpdates = [];
+let currentActivity = '';
+let currentProgress = 0;
 let animationFrameId = null;
+let pendingCalcUpdates = [];
 
 // Create and initialize web worker
 const worker = new Worker('static/worker.js');
@@ -14,9 +15,7 @@ worker.onmessage = function(e) {
         case 'output':
             // More precise detection of progress messages
             const isProgress = 
-                // Progress percentage lines
                 /^\d+%$/.test(data) || 
-                // Status messages during calculation
                 data.includes('Searching inaccessible areas') ||
                 data.includes('Probing space') ||
                 data.includes('Blocking off cavities') ||
@@ -33,20 +32,47 @@ worker.onmessage = function(e) {
     }
 };
 
-// Output handling functions
-function detectTableContent(text) {
-    return text.includes('Cavity ID') || 
-           (text.match(/^\d+\s+\d+\.\d+\s+/) && text.includes('Isolated'));
+function updateProgressBar(activity, progress) {
+    const progressOutput = document.getElementById('progress-output');
+    if (!progressOutput) return;
+
+    // Create or update progress elements
+    if (!progressOutput.querySelector('.progress-activity')) {
+        progressOutput.innerHTML = `
+            <span class="progress-activity"></span>
+            <span class="progress-percentage"></span>
+        `;
+    }
+
+    // Update progress content
+    const activityLabel = progressOutput.querySelector('.progress-activity');
+    const percentageLabel = progressOutput.querySelector('.progress-percentage');
+
+    if (activity) {
+        currentActivity = activity;
+        currentProgress = 0;
+        activityLabel.textContent = activity;
+        percentageLabel.textContent = '0%';
+    }
+
+    if (progress !== undefined) {
+        currentProgress = progress;
+        percentageLabel.textContent = `${progress}%`;
+    }
 }
 
 function appendOutput(text, isProgress = false) {
     if (isProgress) {
-        const progressElement = document.getElementById('progress-output');
-        if (progressElement) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            progressElement.appendChild(div);
-            progressElement.scrollTop = progressElement.scrollHeight;
+        // Check if text contains an activity name
+        const activityMatch = text.match(/(Probing space|Identifying cavities|Searching inaccessible areas|Blocking off cavities)\.{3}/);
+        if (activityMatch) {
+            updateProgressBar(activityMatch[1], 0);
+        } else {
+            // Check if text contains a percentage
+            const percentMatch = text.match(/(\d+)%/);
+            if (percentMatch) {
+                updateProgressBar(null, parseInt(percentMatch[1]));
+            }
         }
     } else {
         const calcResultElement = document.getElementById('calculation-result');
@@ -123,54 +149,19 @@ function appendOutput(text, isProgress = false) {
 }
 
 function detectTableContent(text) {
-    // Improved detection of table content
-    const isHeader = text.includes('Cavity ID');
-    const isDataRow = text.trim().match(/^\d+\s+(\d+\.\d+|Outside)\s+\w+\s+\([^)]+\)$/);
-    return isHeader || isDataRow;
+    return text.includes('Cavity ID') || 
+           (text.match(/^\d+\s+\d+\.\d+\s+/) && text.includes('Isolated'));
 }
 
-function scheduleUpdate() {
-    if (!animationFrameId) {
-        animationFrameId = requestAnimationFrame(updateOutput);
+function handleCalculationComplete(result) {
+    // Hide progress bar when calculation is complete
+    const progressOutput = document.getElementById('progress-output');
+    if (progressOutput) {
+        progressOutput.style.display = 'none';
     }
-}
-
-function updateOutput() {
-    animationFrameId = null;
     
-    // Update progress output
-    const progressElement = document.getElementById('progress-output');
-    if (progressElement && pendingProgressUpdates.length > 0) {
-        const fragment = document.createDocumentFragment();
-        
-        pendingProgressUpdates.forEach(text => {
-            const div = document.createElement('div');
-            div.textContent = text;
-            fragment.appendChild(div);
-        });
-        
-        progressElement.appendChild(fragment);
-        pendingProgressUpdates = [];
-        
-        progressElement.scrollTop = progressElement.scrollHeight;
-    }
-
-    // Update calculation output
-    const calcElement = document.getElementById('calculation-result');
-    if (calcElement && pendingCalcUpdates.length > 0) {
-        const fragment = document.createDocumentFragment();
-        
-        pendingCalcUpdates.forEach(text => {
-            const div = document.createElement('div');
-            div.textContent = text;
-            fragment.appendChild(div);
-        });
-        
-        calcElement.appendChild(fragment);
-        pendingCalcUpdates = [];
-        
-        calcElement.scrollTop = calcElement.scrollHeight;
-    }
+    setupDownloadButtons(result);
+    window.location.hash = 'output';
 }
 
 // Form submission handler
@@ -188,6 +179,12 @@ async function handleSubmit(event) {
         // Clear previous output and show results section
         const outputElement = document.getElementById('calculation-result');
         outputElement.textContent = '';
+        
+        // Show and reset progress output
+        const progressOutput = document.getElementById('progress-output');
+        progressOutput.style.display = 'block';
+        progressOutput.innerHTML = '';
+        
         document.getElementById('results').style.display = 'block';
     
         // Read file content
