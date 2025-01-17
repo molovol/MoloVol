@@ -507,3 +507,100 @@ input[type=number] {
     height: 400px;
     overflow-y: auto;
 }
+
+table.cavities {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 1em;
+}
+
+table.cavities th,
+table.cavities td {
+    padding: 8px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+table.cavities th {
+    background-color: #f8f9fa;
+}
+
+table.cavities tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+table.cavities tr:hover {
+    background-color: #f2f2f2;
+}
+
+.calculation-text {
+    white-space: pre-wrap;
+}
+
+.cavities-container {
+    margin-top: 20px;
+}
+
+.calculation-text {
+    white-space: pre-wrap;
+    font-family: var(--mono-font);
+}
+
+/* Update/enhance existing table.cavities styles */
+table.cavities {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+    font-family: var(--mono-font);
+}
+
+table.cavities th,
+table.cavities td {
+    padding: 8px;
+    text-align: left;
+    border: 1px solid var(--border);
+}
+
+table.cavities th {
+    background-color: var(--accent-bg);
+    font-weight: bold;
+}
+
+.progress-container {
+    margin: 10px 0;
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+    font-size: 0.9em;
+    color: var(--text);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background-color: var(--accent-bg);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: var(--accent);
+    transition: width 0.3s ease;
+    border-radius: 4px;
+}
+
+.progress-step {
+    padding: 8px;
+    margin: 4px 0;
+    background-color: var(--accent-bg);
+    border-radius: 4px;
+}
+
+.progress-step.active {
+    border-left: 3px solid var(--accent);
+    padding-left: 5px;
+}

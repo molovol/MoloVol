@@ -99,9 +99,21 @@
 
 <div id="results" style="display: none;">
     <h4 id="output">Output</h4>
+    <!-- Progress updates box -->
     <div id="progress-output" class="output-box"></div>
+    <!-- Main calculation output -->
     <div id="outputbox">
-        <div id="calculation-result" class="output-box"></div>
+        <div id="calculation-result" class="output-box">
+            <div class="calculation-text"></div>
+            <table class="cavities" style="display: none">
+                <thead>
+                    <tr id="table-header"></tr>
+                    <tr id="table-subheader"></tr>
+                </thead>
+                <tbody id="table-body">
+                </tbody>
+            </table>
+        </div>
     </div>
     <div style="margin-top: 12px;">
         <a href="#" id="download-output" class="download-button" style="display: inline-block; padding: 4px 12px; background-color: #2380be; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9em;">Save output</a>
