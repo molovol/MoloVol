@@ -77,7 +77,7 @@ class Ctrl{
     void displayCavityList(CalcReportBundle&, const unsigned=mvOUT_ALL);
     std::string getErrorMessage(const int);
 
-    inline static const std::string s_version = "1.1.1";
+    inline static const std::string s_version = "1.2.0";
     inline static const std::string s_elem_file = "elements.txt";
 };
 

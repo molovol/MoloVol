@@ -1,4 +1,9 @@
-molovol (1.1.1) stable; urgency=low
+molovol (1.2.0) stable; urgency=low
+
+  * Added a 3D renderer for displaying molecules and their
+    cavities.
+
+  (1.1.1)
 
   * Enabled link time optimisation which reduces calculation
     time by at least 30 %.

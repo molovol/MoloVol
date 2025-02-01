@@ -10,8 +10,8 @@ You are welcome to visit [the project's website](https://molovol.com)
 With MoloVol we aim to combine an intuitive and easy-to-use user interface with powerful computing algorithms. We want
 the software to serve a broad range of scientist by being easily accessible on all common platforms.
 
-Version 1.1.1 of MoloVol has now been released. The software will continue to be maintained and actively developed on
-Windows 10, macOS, Ubuntu, and web.
+Version 1.2 of MoloVol has now been released. The software will continue to be maintained and actively developed on
+Windows, macOS, Ubuntu, and web.
 
 ## Getting Started
 

@@ -17,7 +17,7 @@ endif()
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11 CACHE STRING "Minimum macOS deployment version" FORCE)
 
 # Set name and version
-project(MoloVol VERSION 1.1.1)
+project(MoloVol VERSION 1.2.0)
 
 if(NOT APPLE)
   # Strip binary for release build
