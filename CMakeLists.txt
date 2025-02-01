@@ -74,6 +74,7 @@ include(Resources)
 # ELEM_FILE
 # SPACEGROUP_FILE
 # OSX_RESOURCE_FILES
+# WIN_RESOURCE_FILES
 
 if(NOT MOLOVOL_ABS_RESOURCE_PATH)
   add_custom_target(copy-resource-files ALL
@@ -96,7 +97,8 @@ list(APPEND CMAKE_INSTALL_RPATH "@executable_path/Frameworks")
 
 # Target MoloVol
 if (MSVC)
-  add_executable(${EXE_NAME} WIN32 ${SOURCES} ${OSX_RESOURCE_FILES})
+  #target_sources(${EXE_NAME} PRIVATE ${WIN_RESOURCE_FILES})
+  add_executable(${EXE_NAME} WIN32 ${SOURCES} ${WIN_RESOURCE_FILES})
 else()
   add_executable(${EXE_NAME} ${SOURCES} ${OSX_RESOURCE_FILES})
 endif()

@@ -6,7 +6,6 @@
             "configurationType": "RelWithDebInfo",
             "buildRoot": "${projectDir}\\out\\build\\${name}",
             "installRoot": "${projectDir}\\out\\install\\${name}",
-            "cmakeCommandArgs": "",
             "buildCommandArgs": "",
             "ctestCommandArgs": "",
             "inheritEnvironments": [ "msvc_x64_x64" ],
@@ -19,6 +18,11 @@
                 {
                     "name": "BUILD_SHARED_LIBS",
                     "value": "False",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "MOLOVOL_ABS_RESOURCE_PATH",
+                    "value": "True",
                     "type": "BOOL"
                 }
             ]
