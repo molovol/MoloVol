@@ -27,8 +27,10 @@ set(DEB_MAN_FILE ${DEB_RES_DIR}/molovol.1)
 set(DEB_ICON ${DEB_RES_DIR}/molovol.png) 
 
 # Resource files for Windows
-set(WIN_RESOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/windows/resource.rc")
+set(WIN_RES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res/windows")
+set(WIN_RESOURCE_FILES "${WIN_RES_DIR}/resource.rc")
 set(WIN_ICON_FILE "${CMAKE_CURRENT_SOURCE_DIR}/res/windows/icon.ico")
+set(WIN_LICENSE_RTF "${WIN_RES_DIR}/LICENSE.rtf")
 
 # Third party licenses and copyright notices
 if(MOLOVOL_RENDERER)
