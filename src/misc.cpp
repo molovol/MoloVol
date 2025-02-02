@@ -36,7 +36,7 @@ std::string getResourcesDir(){
   if (pos != std::wstring::npos) {
     std::wstring executableDir = executablePath.substr(0, pos);
     std::string executableDirStr(executableDir.begin(), executableDir.end());
-    return executableDirStr + "\\inputfile";
+    return executableDirStr + "\\..\\shared\\inputfile";
   }
   else {
     return "";

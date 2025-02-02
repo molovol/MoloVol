@@ -24,8 +24,13 @@ set(DEB_CHANGELOG_FILE "${DEB_RES_DIR}/changelog")
 file(STRINGS ${DEB_RES_DIR}/MoloVol.desktop DEB_DESKTOP_FILE)
 set(DEB_DESKTOP_FILE ${DEB_RES_DIR}/MoloVol.desktop)
 set(DEB_MAN_FILE ${DEB_RES_DIR}/molovol.1)
-set(DEB_ICON ${DEB_RES_DIR}/molovol.png)
+set(DEB_ICON ${DEB_RES_DIR}/molovol.png) 
 
 # Resource files for Windows
 set(WIN_RESOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/windows/resource.rc")
 set(WIN_ICON_FILE "${CMAKE_CURRENT_SOURCE_DIR}/res/windows/icon.ico")
+
+# Third party licenses and copyright notices
+if(MOLOVOL_RENDERER)
+  set(TPL_VTK "${CMAKE_CURRENT_SOURCE_DIR}/external/VTK/Copyright.txt")
+endif()
