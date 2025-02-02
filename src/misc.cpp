@@ -21,7 +21,7 @@ std::string getResourcesDir(){
   return "";
 #elif defined(__linux__) && defined(ABS_PATH)
   return "/usr/share/molovol";
-#elif defined _WIN32 && defined(ABS_PATH)
+#elif defined(_WIN32) && defined(ABS_PATH)
 
   wchar_t buffer[MAX_PATH];
   DWORD length = GetModuleFileNameW(NULL, buffer, MAX_PATH);

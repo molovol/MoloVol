@@ -14,6 +14,10 @@
 MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &size)
   : wxFrame((wxFrame*) NULL, -1, title, pos, size)
 {
+#if defined(_WIN32)
+  SetIcon(wxICON(aaaa));
+#endif
+  
   Ctrl::getInstance()->registerView(this);
   InitMessageQueue();
   InitTopLevel();

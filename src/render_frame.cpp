@@ -50,6 +50,10 @@ END_EVENT_TABLE()
 RenderFrame::RenderFrame(const MainFrame* parent, const wxString& title, const wxPoint& pos, const wxSize& size) 
   : wxFrame((wxFrame *)NULL, -1, title, pos, size), m_parentWindow(parent) {
 
+#if defined(_WIN32)
+  SetIcon(wxICON(aaaa));
+#endif
+
   // Create wxVTK window interactor
   m_pVTKWindow = new wxVTKRenderWindowInteractor(this, WXVTK_Render, wxDefaultPosition, wxSize(400,400));
   m_pVTKWindow->UseCaptureMouseOn(); // Mouse motion is captured outside of window
