@@ -3,6 +3,10 @@
 #include <iomanip>
 #include <filesystem>
 
+#if defined _WIN32
+#include <windows.h>
+#endif
+
 // access the resource folder containing elements.txt and space_groups.txt
 std::string getResourcesDir(){
 #if defined(__APPLE__) && defined(ABS_PATH)
@@ -17,6 +21,27 @@ std::string getResourcesDir(){
   return "";
 #elif defined(__linux__) && defined(ABS_PATH)
   return "/usr/share/molovol";
+#elif defined _WIN32 && defined(ABS_PATH)
+
+  wchar_t buffer[MAX_PATH];
+  DWORD length = GetModuleFileNameW(NULL, buffer, MAX_PATH);
+
+  if (length == 0) {
+    return "";
+  }
+
+  std::wstring executablePath(buffer);
+  size_t pos = executablePath.find_last_of(L"\\");
+
+  if (pos != std::wstring::npos) {
+    std::wstring executableDir = executablePath.substr(0, pos);
+    std::string executableDirStr(executableDir.begin(), executableDir.end());
+    return executableDirStr + "\\inputfile";
+  }
+  else {
+    return "";
+  }
+    
 #else
   return "./inputfile";
 #endif

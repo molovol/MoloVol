@@ -28,3 +28,4 @@ set(DEB_ICON ${DEB_RES_DIR}/molovol.png)
 
 # Resource files for Windows
 set(WIN_RESOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/windows/resource.rc")
+set(WIN_ICON_FILE "${CMAKE_CURRENT_SOURCE_DIR}/res/windows/icon.ico")
