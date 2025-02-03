@@ -8,6 +8,7 @@
 
 // access the resource folder containing elements.txt and space_groups.txt
 std::filesystem::path getResourcesDir() {
+  std::filesystem::path resDir = "";
 #if defined(__APPLE__) && defined(ABS_PATH)
     CFURLRef resource_url = CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle());
     char resource_path[PATH_MAX];
@@ -15,34 +16,31 @@ std::filesystem::path getResourcesDir() {
         if (resource_url != NULL) {
             CFRelease(resource_url);
         }
-        return std::filesystem::path(resource_path);
+        resDir = std::filesystem::path(resource_path);
     }
-    return "";
+
 #elif defined(__linux__) && defined(ABS_PATH)
-    return std::filesystem::path("/usr/share/molovol");
+    resDir = std::filesystem::path("/usr/share/molovol");
+
 #elif defined(_WIN32) && defined(ABS_PATH)
     wchar_t buffer[MAX_PATH];
     DWORD length = GetModuleFileNameW(NULL, buffer, MAX_PATH);
 
-    if (length == 0) {
-        return "";
-    }
+    if (length) {
+      std::wstring executablePath(buffer);
+      size_t pos = executablePath.find_last_of(L"\\");
 
-    std::wstring executablePath(buffer);
-    size_t pos = executablePath.find_last_of(L"\\");
-
-    if (pos != std::wstring::npos) {
-        std::wstring executableDir = executablePath.substr(0, pos);
-        std::filesystem::path executableDirPath(executableDir.begin(), executableDir.end());
-        return executableDirPath / ".." / "shared" / "inputfile";
-    }
-    else {
-        return "";
+      if (pos != std::wstring::npos) {
+          std::wstring executableDir = executablePath.substr(0, pos);
+          std::filesystem::path executableDirPath(executableDir.begin(), executableDir.end());
+          resDir = executableDirPath / ".." / "shared" / "inputfile";
+      }
     }
 
 #else
-    return std::filesystem::path("./inputfile");
+    resDir = std::filesystem::path("./inputfile");
 #endif
+    return resDir.lexically_normal();
 }
 
 std::string fileExtension(const std::string& path){
