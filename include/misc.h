@@ -11,12 +11,13 @@
 #include <bitset>
 #include <ctime>
 #include <iostream>
+#include <filesystem>
 
 #ifdef __APPLE__
 #include <CoreFoundation/CFBundle.h>
 #endif
 
-std::string getResourcesDir();
+std::filesystem::path getResourcesDir();
 
 template <typename T>
 inline bool isIncluded(const T& elem, const std::vector<T>& list) {

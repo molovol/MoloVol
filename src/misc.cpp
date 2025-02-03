@@ -1,49 +1,47 @@
 #include "misc.h"
 #include <sstream>
 #include <iomanip>
-#include <filesystem>
 
 #if defined _WIN32
 #include <windows.h>
 #endif
 
 // access the resource folder containing elements.txt and space_groups.txt
-std::string getResourcesDir(){
+std::filesystem::path getResourcesDir() {
 #if defined(__APPLE__) && defined(ABS_PATH)
-  CFURLRef resource_url = CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle());
-  char resource_path[PATH_MAX];
-  if (CFURLGetFileSystemRepresentation(resource_url, true, (UInt8 *)resource_path, PATH_MAX)){
-    if (resource_url != NULL){
-      CFRelease(resource_url);
+    CFURLRef resource_url = CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle());
+    char resource_path[PATH_MAX];
+    if (CFURLGetFileSystemRepresentation(resource_url, true, (UInt8*)resource_path, PATH_MAX)) {
+        if (resource_url != NULL) {
+            CFRelease(resource_url);
+        }
+        return std::filesystem::path(resource_path);
     }
-    return resource_path;
-  }
-  return "";
+    return "";
 #elif defined(__linux__) && defined(ABS_PATH)
-  return "/usr/share/molovol";
+    return std::filesystem::path("/usr/share/molovol");
 #elif defined(_WIN32) && defined(ABS_PATH)
+    wchar_t buffer[MAX_PATH];
+    DWORD length = GetModuleFileNameW(NULL, buffer, MAX_PATH);
 
-  wchar_t buffer[MAX_PATH];
-  DWORD length = GetModuleFileNameW(NULL, buffer, MAX_PATH);
+    if (length == 0) {
+        return "";
+    }
 
-  if (length == 0) {
-    return "";
-  }
+    std::wstring executablePath(buffer);
+    size_t pos = executablePath.find_last_of(L"\\");
 
-  std::wstring executablePath(buffer);
-  size_t pos = executablePath.find_last_of(L"\\");
+    if (pos != std::wstring::npos) {
+        std::wstring executableDir = executablePath.substr(0, pos);
+        std::filesystem::path executableDirPath(executableDir.begin(), executableDir.end());
+        return executableDirPath / ".." / "shared" / "inputfile";
+    }
+    else {
+        return "";
+    }
 
-  if (pos != std::wstring::npos) {
-    std::wstring executableDir = executablePath.substr(0, pos);
-    std::string executableDirStr(executableDir.begin(), executableDir.end());
-    return executableDirStr + "\\..\\shared\\inputfile";
-  }
-  else {
-    return "";
-  }
-    
 #else
-  return "./inputfile";
+    return std::filesystem::path("./inputfile");
 #endif
 }
 
