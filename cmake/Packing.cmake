@@ -42,6 +42,8 @@ if (MSVC)
   install(FILES ${ELEM_FILE} ${SPACEGROUP_FILE} DESTINATION shared/inputfile)
   install(FILES ${TPL_VTK} DESTINATION legal RENAME VTK.txt)
 
+  install(FILES ${EXAMPLE_FILES} DESTINATION shared/example)
+
 endif()
 
 include(CPack)

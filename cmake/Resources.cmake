@@ -36,3 +36,7 @@ set(WIN_LICENSE_RTF "${WIN_RES_DIR}/LICENSE.rtf")
 if(MOLOVOL_RENDERER)
   set(TPL_VTK "${CMAKE_CURRENT_SOURCE_DIR}/external/VTK/Copyright.txt")
 endif()
+
+# Example files
+set(INPUTDIR inputfile)
+set(EXAMPLE_FILES ${INPUTDIR}/example_C60.cif ${INPUTDIR}/example_C60.xyz ${INPUTDIR}/example_C60.pdb)

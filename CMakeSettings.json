@@ -22,7 +22,7 @@
                 },
                 {
                     "name": "MOLOVOL_ABS_RESOURCE_PATH",
-                    "value": "False",
+                    "value": "True",
                     "type": "BOOL"
                 }
             ]
