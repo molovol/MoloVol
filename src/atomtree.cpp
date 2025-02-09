@@ -183,7 +183,7 @@ void AtomTree::print() const {
 
 // ACCESS
 
-const double AtomTree::getMaxRad() const {
+double AtomTree::getMaxRad() const {
   return _max_rad;
 }
 
