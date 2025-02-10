@@ -48,7 +48,9 @@ add_test(NAME vector_test COMMAND vector_test)
 add_test(NAME atom_test COMMAND atom_test)
 add_test(NAME string_test COMMAND string_test)
 add_test(NAME benchmark_tests COMMAND benchmark_tests)
-
+target_compile_definitions(benchmark_tests PRIVATE 
+    SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+)
 # Add compiler warnings
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang|GNU")
     foreach(TEST_TARGET vector_test atom_test string_test benchmark_tests)
@@ -58,3 +60,4 @@ endif()
 
 add_custom_target(build_tests ALL 
     DEPENDS vector_test atom_test string_test benchmark_tests)
+	
