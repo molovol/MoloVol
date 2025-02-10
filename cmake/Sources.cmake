@@ -1,8 +1,7 @@
 # Base sources (non-GUI)
-set(BASE_SOURCES
+set(LIB_SOURCES
   src/atom.cpp
   src/atomtree.cpp
-  src/base_cmdline.cpp
   src/cavity.cpp
   src/crystallographer.cpp
   src/griddata.cpp
@@ -29,10 +28,16 @@ set(GUI_SOURCES
 set(CLI_SOURCES
     src/base_cmdline.cpp
 )
+# Create the static library
+add_library(molovol_lib STATIC ${LIB_SOURCES})
+target_include_directories(molovol_lib PUBLIC include)
+
+# Set the same compiler options for the library
+target_compile_options(molovol_lib PRIVATE -Wall -Werror -Wno-unused-command-line-argument -Wno-invalid-source-encoding)
+target_compile_options(molovol_lib PRIVATE "$<$<NOT:$<CONFIG:RELEASE,MINSIZEREL,RELWITHDEBINFO>>:-DDEBUG>")
 
 if(MOLOVOL_BUILD_GUI)
-    set(SOURCES ${BASE_SOURCES} ${GUI_SOURCES})
+    set(SOURCES ${GUI_SOURCES})
 else()
-    set(SOURCES ${BASE_SOURCES} ${CLI_SOURCES})
+    set(SOURCES ${CLI_SOURCES})
 endif()
-

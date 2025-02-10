@@ -136,12 +136,14 @@ void Space::assignAtomVsCore(){
   const double vxl_dist = _grid_size * pow(2,_max_depth);
   std::array<double,3> vxl_pos;
   std::array<unsigned,3> top_lvl_index;
-  for(top_lvl_index[0] = 0; top_lvl_index[0] < getGridsteps()[0]; top_lvl_index[0]++){
+  const auto steps = getGridsteps();
+  #pragma omp parallel for collapse(2)
+  for(top_lvl_index[0] = 0; top_lvl_index[0] < steps[0]; top_lvl_index[0]++){
     Ctrl::getInstance()->updateCalculationStatus();
     vxl_pos[0] = vxl_origin[0] + vxl_dist * (0.5 + top_lvl_index[0]);
-    for(top_lvl_index[1] = 0; top_lvl_index[1] < getGridsteps()[1]; top_lvl_index[1]++){
+    for(top_lvl_index[1] = 0; top_lvl_index[1] < steps[1]; top_lvl_index[1]++){
       vxl_pos[1] = vxl_origin[1] + vxl_dist * (0.5 + top_lvl_index[1]);
-      for(top_lvl_index[2] = 0; top_lvl_index[2] < getGridsteps()[2]; top_lvl_index[2]++){
+      for(top_lvl_index[2] = 0; top_lvl_index[2] < steps[2]; top_lvl_index[2]++){
         vxl_pos[2] = vxl_origin[2] + vxl_dist * (0.5 + top_lvl_index[2]);
         // voxel position is deliberately not stored in voxel object to reduce memory cost
         if (Ctrl::getInstance()->getAbortFlag()){return;}
