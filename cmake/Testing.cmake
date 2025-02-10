@@ -42,6 +42,17 @@ find_package(benchmark REQUIRED)
 target_link_libraries(benchmark_tests PRIVATE 
     benchmark::benchmark_main # Use only benchmark_main which includes benchmark
 )
+add_custom_command(TARGET benchmark_tests POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+        $<TARGET_FILE_DIR:benchmark_tests>/inputfile
+    COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_SOURCE_DIR}/inputfile/elements.txt
+        $<TARGET_FILE_DIR:benchmark_tests>/inputfile/
+    COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_SOURCE_DIR}/inputfile/example_C60.xyz
+        $<TARGET_FILE_DIR:benchmark_tests>/inputfile/
+    COMMENT "Copying input files for benchmark tests"
+)
 
 # Add all tests
 add_test(NAME vector_test COMMAND vector_test)
