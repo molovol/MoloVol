@@ -425,7 +425,7 @@ void Ctrl::displayResults(CalcReportBundle& data, const unsigned display_flag){
   }
 }
 
-void Ctrl::displayCavityList(CalcReportBundle& data, const unsigned display_flag){
+void Ctrl::displayCavityList(CalcReportBundle& data, [[maybe_unused]] const unsigned display_flag){
   // store headers and units
   const std::wstring vol_unit = Symbol::angstrom() + Symbol::cubed();
   const std::wstring surf_unit = Symbol::angstrom() + Symbol::squared();

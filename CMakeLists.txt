@@ -11,8 +11,8 @@ include(Options)
 project(MoloVol VERSION 1.2)
 
 # Strip binary for release build
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
 
 # Minimum macOS version, ignored on other platforms
 # Must be set before project()
@@ -91,17 +91,6 @@ if(MOLOVOL_ABS_RESOURCE_PATH)
   target_compile_definitions(${EXE_NAME} PUBLIC -DABS_PATH)
 endif()
 
-#find_package(OpenMP)
-# Keeping this around just so I don't forget the syntax
-#  if(OpenMP_CXX_FOUND)
-#    target_link_libraries(target PUBLIC OpenMP::OpenMP_CXX)
-#  endif()
-
-# Tests
-if (MOLOVOL_BUILD_TESTING AND BUILD_TESTING)
-  include(Testing)
-endif()
-
 # Installation instructions for debian package
 if (NOT EMSCRIPTEN)  # Only do native installations
     if (UNIX AND NOT APPLE)
@@ -113,3 +102,7 @@ endif()
 
 include(Packing)
 
+# Ensure molovol_test is built if MOLOVOL_BUILD_TESTING is ON
+if(MOLOVOL_BUILD_TESTING)
+    include(Testing) # Include Testing.cmake here
+endif()
