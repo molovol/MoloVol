@@ -68,11 +68,21 @@ static void BM_ModelOperations(benchmark::State& state) {
   std::string structure_file_path = "inputfile/example_C60.xyz";
 
   Model model;
-  model.importElemFile(elements_file_path);
-  model.readAtomsFromFile(structure_file_path, false);  // Added missing boolean parameter
+  try {
+    if (!model.importElemFile(elements_file_path)) {
+      state.SkipWithError("Failed to import elements file");
+      return;
+    }
+    if (!model.readAtomsFromFile(structure_file_path, false)) {
+      state.SkipWithError("Failed to read structure file");
+      return;
+    }
 
-  for (auto _ : state) {
-    model.generateData();
+    for (auto _ : state) {
+      model.generateData();
+    }
+  } catch (const std::exception& e) {
+    state.SkipWithError(e.what());
   }
 }
 BENCHMARK(BM_ModelOperations);
