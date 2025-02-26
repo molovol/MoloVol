@@ -50,12 +50,12 @@ Dependencies needed for compilation:
 
 - Any C++ compiler
 - cmake
-- Optional: [wxWidgets 3.1.5](https://www.wxwidgets.org)
+- Optional for native GUI: [wxWidgets 3.1.5](https://www.wxwidgets.org)
 
 You can build without the desktop native GUI by setting it up with
 `cmake -DMOLOVOL_BUILD_GUI=0`
 
-You can build for wasm with set up
+You can build for wasm with set-up
 `emcmake cmake -DCMAKE_VERBOSE_MAKEFILE=ON -DMOLOVOL_BUILD_GUI=0 ..`
 then compile with
 `emmake make`
