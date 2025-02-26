@@ -11,8 +11,8 @@ include(Options)
 project(MoloVol VERSION 1.1.1)
 
 # Strip binary for release build
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
 
 # Minimum macOS version, ignored on other platforms
 # Must be set before project()
@@ -23,7 +23,28 @@ include(ExecutableName)
 
 # Specify C++ standard
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+endif()
+
+if(APPLE)
+    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+        set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp")
+        set(OpenMP_C_LIB_NAMES "omp")
+        set(OpenMP_omp_LIBRARY /opt/homebrew/opt/libomp/lib/libomp.dylib)
+    endif()
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp")
+        set(OpenMP_CXX_LIB_NAMES "omp")
+        set(OpenMP_omp_LIBRARY /opt/homebrew/opt/libomp/lib/libomp.dylib)
+    endif()
+endif()
+
 
 # Make universal binary
 if(MOLOVOL_OSX_FAT_FILE)
@@ -31,11 +52,11 @@ if(MOLOVOL_OSX_FAT_FILE)
 endif()
 
 # wxWidgets
-set(wxWidgets_USE_STATIC=ON)
-find_package(wxWidgets REQUIRED core base OPTIONAL_COMPONENTS net)
-include(${wxWidgets_USE_FILE})
-
-#find_package(OpenMP)
+if(MOLOVOL_BUILD_GUI)
+  set(wxWidgets_USE_STATIC=ON)
+  find_package(wxWidgets REQUIRED core base OPTIONAL_COMPONENTS net)
+  include(${wxWidgets_USE_FILE})
+endif()
 
 # Add include path, so that header files can be found
 include_directories(include)
@@ -51,8 +72,6 @@ if(IPO_SUPPORTED AND CMAKE_BUILD_TYPE STREQUAL "RELEASE")
 endif()
 
 include(Sources)
-# SOURCES
-
 include(Resources)
 # ELEM_FILE
 # SPACEGROUP_FILE
@@ -72,24 +91,16 @@ endif()
 
 # Target MoloVol
 add_executable(${EXE_NAME} ${SOURCES} ${OSX_RESOURCE_FILES})
-
 # XCode, app bundle and libtiff
 include(MacSpecific)
+target_link_libraries(${EXE_NAME} PRIVATE molovol_lib)
 
-target_link_libraries(${EXE_NAME} ${wxWidgets_LIBRARIES})
+if(MOLOVOL_BUILD_GUI)
+  target_link_libraries(${EXE_NAME} ${wxWidgets_LIBRARIES})
+endif()
   # Add custom flag
 if(MOLOVOL_ABS_RESOURCE_PATH)
   target_compile_definitions(${EXE_NAME} PUBLIC -DABS_PATH)
-endif()
-
-# Keeping this around just so I don't forget the syntax
-#  if(OpenMP_CXX_FOUND)
-#    target_link_libraries(target PUBLIC OpenMP::OpenMP_CXX)
-#  endif()
-
-# Tests
-if (MOLOVOL_BUILD_TESTING AND BUILD_TESTING)
-  include(Testing)
 endif()
 
 # Installation instructions for debian package
@@ -101,3 +112,16 @@ endif()
 
 include(Packing)
 
+
+#this openMP section is currently commented out as it leads to runtime crashed because of some memory issue
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(${EXE_NAME} PUBLIC OpenMP::OpenMP_CXX)
+    target_compile_definitions(${EXE_NAME} PUBLIC HAVE_OPENMP)
+endif()
+
+
+# Ensure molovol_test is built if MOLOVOL_BUILD_TESTING is ON
+if(MOLOVOL_BUILD_TESTING)
+    include(Testing) # Include Testing.cmake here
+endif()

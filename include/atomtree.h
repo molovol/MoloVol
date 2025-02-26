@@ -36,7 +36,7 @@ class AtomTree{
     ~AtomTree();
     
     const AtomNode* getRoot() const;
-    const double getMaxRad() const;
+    double getMaxRad() const;
     void print() const;
   private:
     AtomNode* _root;
