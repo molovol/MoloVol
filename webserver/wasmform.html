@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>MoloVol Web</title>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" type="text/css" href="static/style.css">
+  <!-- Favicon -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <link rel="apple-touch-icon" sizes="180x180" href="static/apple-touch-icon.png">
+  <link rel="shortcut icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="shortcut icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="manifest" href="static/site.webmanifest">
+  <meta name="msapplication-TileColor" content="#2380be">
+  <meta name="theme-color" content="#2380be">
+  <script src="static/ui.js"></script>
+  <script src="static/main.js"></script>
+</head>
+<body>
+<div id="wordmark">
+  <img src="static/images/wordmark.png" alt="MoloVol wordmark" height="72">
+  <p id="version"></p>
+</div>
+
+<div id="disclaimer">
+  <p class="infotext">
+    An equivalent desktop version that offers slightly more options is available for download 
+    <a href="https://github.com/molovol/MoloVol/releases" id="download-link">here</a>
+    along with the user manual. 
+    You can find a detailed ex&shy;pla&shy;na&shy;tion of the underlying algorithms in 
+    <a href="https://doi.org/10.1107/S1600576722004988">this publication</a>.
+  </p>
+</div>
+  
+<form id="inputs">
+  <div id="file-upload">
+    <div class="dropzone" id="dropzone">
+      <label class="dropzone-label">
+        Upload a structure – 
+        <i><small>Accepted formats: XYZ, PDB, or CIF file</small></i>
+      </label>
+      <div class="dropzone-content">
+        <div class="dropzone-icon">📄</div>
+        <p>Drag and drop your file here or click to select</p>
+      </div>
+      <div class="file-info">
+        Selected file: <span id="file-name">No file selected</span>
+      </div>
+      <input type="file" class="dropzone-input" name="structure" id="structure" accept=".xyz,.cif,.pdb" required>
+    </div>
+  </div>
+
+  <div id="parameters">
+    <input type="number" id="radius" name="cli_radius" size="2" style="width: 10%" min="0" step="any" required value="1.2"/>
+    <label for="radius">Small probe radius in &Aring;ngstr&ouml;m </label><br>
+
+    <input type="number" id="radius2" name="cli_radius2" size="2" style="width: 10%" min="0" step="any" value=""/>
+    <label for="radius2">Large probe radius in &Aring;ngstr&ouml;m &ndash; 
+      <i><small>Leave empty for single-probe mode</small></i></label><br>
+
+    <input type="number" id="grid" name="cli_grid" size="2" style="width: 10%" min="0" step="any" required value="0.2">
+    <label for="grid">Spatial resolution of the underlying grid in &Aring;ngstr&ouml;m</label><br>
+  </div>
+
+  <div id="options">
+    <input type="checkbox" id="hetatm" name="cli_hetatm" disabled checked>
+    <label for="hetatm">Include HETATM &ndash; <i><small>PDB file option</small></i></label><br>
+    
+    <input type="checkbox" id="unitcell" name="cli_unitcell" disabled>
+    <label for="unitcell">Analyze unit cell &ndash; <i><small>requires PDB or CIF file with crystallographic information</small></i></label><br>
+    
+    <input type="checkbox" id="surface" name="cli_surface">
+    <label for="surface">Calculate surface areas</label><br>
+  </div>
+
+<div id="export">
+  <h4>Export options</h4>
+  <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+    <div>
+      <input type="checkbox" id="export-total" name="cli_export-total">
+      <label for="export-total">Generate total surface map</label>
+    </div>
+    <a href="#" id="download-total-map" class="download-button" style="display: none; padding: 4px 12px; background-color: #2380be; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9em;">Download</a>
+  </div>
+  
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <div>
+      <input type="checkbox" id="export-cavities" name="cli_export-cavities">
+      <label for="export-cavities">Generate surface map for each cavity</label>
+    </div>
+    <a href="#" id="download-cavities" class="download-button" style="display: none; padding: 4px 12px; background-color: #2380be; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9em;">Download</a>
+  </div>
+</div>
+
+<div id="consent">
+  <input type="submit" id="submit" value="Calculate"/>
+</div>
+
+<div id="results" style="display: none;">
+    <h4 id="output">Output</h4>
+    <!-- Progress updates box -->
+    <div id="progress-output"></div>
+    <!-- Main calculation output -->
+    <div id="outputbox">
+        <div id="calculation-result" class="output-box">
+            <div class="calculation-text"></div>
+            <table class="cavities" style="display: none">
+                <thead>
+                    <tr id="table-header"></tr>
+                    <tr id="table-subheader"></tr>
+                </thead>
+                <tbody id="table-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div style="margin-top: 12px;">
+        <a href="#" id="download-output" class="download-button" style="display: inline-block; padding: 4px 12px; background-color: #2380be; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9em;">Save output</a>
+    </div>
+</div>
+
+<footer>
+  &copy; 2023-2025 Molovol Web is brought to you by 
+    <a href="https://benediktsvogler.com">Benedikt&nbsp;S.&nbsp;Vogler</a> and Jasmin&nbsp;B.&nbsp;Maglic based on
+    <a href="https://molovol.com">Molovol&nbsp;Desktop</a> by J.&nbsp;B.&nbsp;Maglic and Roy&nbsp;Lavendomme.
+  <br>
+  &copy; 2020-2024 The MoloVol logo and wordmark were designed by Jasmin B. Maglic
+</footer>
+</body>
+</html>

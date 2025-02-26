@@ -8,11 +8,11 @@ include(Options)
 # MOLOVOL_BUILD_TESTING
 
 # Set name and version
-project(MoloVol VERSION 1.1.1)
+project(MoloVol VERSION 1.2)
 
 # Strip binary for release build
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
 
 # Minimum macOS version, ignored on other platforms
 # Must be set before project()
@@ -20,6 +20,9 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11 CACHE STRING "Minimum macOS deployment ver
 
 include(ExecutableName)
 # EXE_NAME
+if(EMSCRIPTEN)
+    set(EXE_NAME molovol_wasm)
+endif()
 
 # Specify C++ standard
 set(CMAKE_CXX_STANDARD 20)
@@ -31,11 +34,11 @@ if(MOLOVOL_OSX_FAT_FILE)
 endif()
 
 # wxWidgets
-set(wxWidgets_USE_STATIC=ON)
-find_package(wxWidgets REQUIRED core base OPTIONAL_COMPONENTS net)
-include(${wxWidgets_USE_FILE})
-
-#find_package(OpenMP)
+if(MOLOVOL_BUILD_GUI)
+  set(wxWidgets_USE_STATIC=ON)
+  find_package(wxWidgets REQUIRED core base OPTIONAL_COMPONENTS net)
+  include(${wxWidgets_USE_FILE})
+endif()
 
 # Add include path, so that header files can be found
 include_directories(include)
@@ -71,33 +74,35 @@ if(NOT MOLOVOL_ABS_RESOURCE_PATH)
 endif()
 
 # Target MoloVol
-add_executable(${EXE_NAME} ${SOURCES} ${OSX_RESOURCE_FILES})
+if(EMSCRIPTEN)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/wasm.cmake)
+else()
+    add_executable(${EXE_NAME} ${SOURCES} ${OSX_RESOURCE_FILES})
+endif()
 
 # XCode, app bundle and libtiff
 include(MacSpecific)
 
-target_link_libraries(${EXE_NAME} ${wxWidgets_LIBRARIES})
+if(MOLOVOL_BUILD_GUI)
+  target_link_libraries(${EXE_NAME} ${wxWidgets_LIBRARIES})
+endif()
   # Add custom flag
 if(MOLOVOL_ABS_RESOURCE_PATH)
   target_compile_definitions(${EXE_NAME} PUBLIC -DABS_PATH)
 endif()
 
-# Keeping this around just so I don't forget the syntax
-#  if(OpenMP_CXX_FOUND)
-#    target_link_libraries(target PUBLIC OpenMP::OpenMP_CXX)
-#  endif()
-
-# Tests
-if (MOLOVOL_BUILD_TESTING AND BUILD_TESTING)
-  include(Testing)
-endif()
-
 # Installation instructions for debian package
-if (UNIX AND NOT APPLE)
-  include(DebInstall)
-elseif (APPLE)
-  include(MacInstall)
+if (NOT EMSCRIPTEN)  # Only do native installations
+    if (UNIX AND NOT APPLE)
+        include(DebInstall)
+    elseif (APPLE)
+        include(MacInstall)
+    endif()
 endif()
 
 include(Packing)
 
+# Ensure molovol_test is built if MOLOVOL_BUILD_TESTING is ON
+if(MOLOVOL_BUILD_TESTING)
+    include(Testing) # Include Testing.cmake here
+endif()

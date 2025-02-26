@@ -1,14 +1,7 @@
-
-# List of source files
-set(SOURCES
+# Set up core sources needed by all builds
+set(CORE_SOURCES
   src/atom.cpp
   src/atomtree.cpp
-  src/base_guicontrol.cpp
-  src/base_cmdline.cpp
-  src/base_constr.cpp
-  src/base_event.cpp
-  src/base_guicontrol.cpp
-  src/base_init.cpp
   src/cavity.cpp
   src/controller.cpp
   src/crystallographer.cpp
@@ -23,3 +16,24 @@ set(SOURCES
   src/vector.cpp
   src/voxel.cpp
 )
+
+# Set up sources based on build type
+if(MOLOVOL_BUILD_GUI)
+    # GUI-specific sources
+    set(GUI_SOURCES
+      src/base_guicontrol.cpp
+      src/base_constr.cpp
+      src/base_event.cpp
+      src/base_init.cpp
+    )
+    set(SOURCES 
+        ${CORE_SOURCES}
+        ${GUI_SOURCES}
+    )
+else()
+    # CLI build
+    set(SOURCES
+        ${CORE_SOURCES}
+        src/base_cmdline.cpp
+    )
+endif()

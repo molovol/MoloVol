@@ -13,7 +13,9 @@
 #include <exception>
 #include <iterator>
 #include <algorithm>
-
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 ///////////////////
 // IMPORT STRUCT //
 ///////////////////
@@ -37,8 +39,7 @@ bool Model::importElemFile(const std::string& elem_path){
   setRadiusMap(data.rad_map);
   _elem_weight = data.weight_map;
   _elem_Z = data.atomic_num_map;
-  
-  return (data.rad_map.size());
+  return data.rad_map.size();
 }
 
 // used for importing only the radius map from the radius file
@@ -47,73 +48,92 @@ std::unordered_map<std::string, double> Model::extractRadiusMap(const std::strin
   return extractDataFromElemFile(elem_path).rad_map;
 }
 
-ElementsFileBundle extractDataFromElemFile(const std::string& elem_path){
-  ElementsFileBundle data;
+ElementsFileBundle extractDataFromElemFile(const std::string& elem_path) {
+    ElementsFileBundle data;
 
-  auto hasCorrectFormat = [](std::vector<std::string> substrings){
-    if (substrings.size() != 4){return false;}
-    if (substrings[0].find_first_not_of("0123456789") != std::string::npos){return false;}
-    for (char i : {2,3}){
-      if (substrings[i].find_first_not_of("0123456789E.+e") != std::string::npos){return false;}
-    }
-    return true;
-  };
+    #ifdef __EMSCRIPTEN__
+    char* content_ptr = (char*)EM_ASM_PTR({
+        try {
+            var content = FS.readFile('/inputfile/elements.txt', {encoding: 'utf8'});
+            var lengthBytes = lengthBytesUTF8(content) + 1;
+            var stringOnWasmHeap = _malloc(lengthBytes);
+            stringToUTF8(content, stringOnWasmHeap, lengthBytes);
+            return stringOnWasmHeap;
+        } catch(e) {
+            return 0;
+        }
+    });
 
-  std::string line;
-  std::ifstream inp_file(elem_path);
-  bool invalid_symbol_detected = false;
-  bool invalid_radius_value = false;
-  bool invalid_weight_value = false;
-  while(getline(inp_file,line)){
-    std::vector<std::string> substrings = ImportMngr::splitLine(line);
-    // substrings[0]: Atomic Number
-    // substrings[1]: Element Symbol
-    // substrings[2]: Radius
-    // substrings[3]: Weight
-    if(hasCorrectFormat(substrings)){
-      substrings[1] = ImportMngr::strToValidSymbol(substrings[1]);
-      // skip entry if element symbol invalid
-      if (substrings[1].empty()){
-        invalid_symbol_detected = true;
-      }
-      else {
-        try{data.rad_map[substrings[1]] = std::stod(substrings[2]);}
-        catch (const std::invalid_argument& e){
-          data.rad_map[substrings[1]] = 0;
-          invalid_radius_value = true;
-        }
-        try{data.weight_map[substrings[1]] = std::stod(substrings[3]);}
-        catch (const std::invalid_argument& e){
-          data.weight_map[substrings[1]] = 0;
-          invalid_weight_value = true;
-        }
-        try{data.atomic_num_map[substrings[1]] = std::stoi(substrings[0]);}
-        catch (const std::invalid_argument& e){
-          data.atomic_num_map[substrings[1]] = 0;
-        }
-      }
+    if (!content_ptr) {
+        return data;
     }
-  }
-  if (invalid_symbol_detected) {Ctrl::getInstance()->displayErrorMessage(106);}
-  if (invalid_radius_value) {Ctrl::getInstance()->displayErrorMessage(107);}
-  if (invalid_weight_value) {Ctrl::getInstance()->displayErrorMessage(108);}
-  return data;
+
+    std::string fileContent(content_ptr);
+    free(content_ptr);
+    
+    std::istringstream inp_stream(fileContent);
+    #else
+    std::ifstream inp_stream(elem_path);
+    #endif
+
+    std::string line;
+    bool headerDone = false;
+
+    while (getline(inp_stream, line)) {
+        if(line.empty()) {
+            continue;
+        }
+
+        if(!headerDone) {
+            if(line[0] >= '0' && line[0] <= '9') {
+                headerDone = true;
+            } else {
+                continue;
+            }
+        }
+
+        std::vector<std::string> substrings = ImportMngr::splitLine(line);
+        
+        if(substrings.size() != 4) {
+            continue;
+        }
+
+        try {
+            int atomic_num = std::stoi(substrings[0]);
+            std::string symbol = ImportMngr::strToValidSymbol(substrings[1]);
+            double radius = std::stod(substrings[2]);
+            double weight = std::stod(substrings[3]);
+
+            if(!symbol.empty()) {
+                data.rad_map[symbol] = radius;
+                data.weight_map[symbol] = weight;
+                data.atomic_num_map[symbol] = atomic_num;
+            }
+        }
+        catch(const std::exception&) {
+            continue;
+        }
+    }
+
+    return data;
 }
-
 //////////////////////
 // ATOM FILE IMPORT //
 //////////////////////
 
 bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
   clearAtomData();
-
+  
+  // Debug output for filename and extension
+  std::string extension = fileExtension(filepath);
   std::vector<Atom> atom_list;
+  
   // XYZ file import
-  if (fileExtension(filepath) == "xyz"){
+  if (extension == "xyz"){
     atom_list = ImportMngr::readFileXYZ(filepath);
   }  
   // PDB file import
-  else if (fileExtension(filepath) == "pdb"){
+  else if (extension == "pdb"){
     const std::pair<std::vector<Atom>,UnitCell> import_data = ImportMngr::readFilePDB(filepath, include_hetatm);
     atom_list = import_data.first;
     
@@ -123,7 +143,7 @@ bool Model::readAtomsFromFile(const std::string& filepath, bool include_hetatm){
     }
   }
   // CIF file import
-  else if (fileExtension(filepath) == "cif"){
+  else if (extension == "cif"){
     try{
       const std::pair<std::vector<Atom>,UnitCell> import_data = ImportMngr::readFileCIF(filepath);
       atom_list = import_data.first;
