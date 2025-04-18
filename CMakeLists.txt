@@ -36,8 +36,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(wxWidgets_USE_STATIC=ON)
 # Not ideal to use these absolute paths here
 if (MSVC)
-  set(wxWidgets_ROOT_DIR C:/wxWidgets-3.1.5)
-  set(wxWidgets_LIB_DIR C:/wxWidgets-3.1.5/lib/vc_x64_lib)
+  set(wxWidgets_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/wxWidgets")
+  set(wxWidgets_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/wxWidgets/lib/vc_x64_lib-x64-Release-MT")
 endif()
 
 find_package(wxWidgets REQUIRED core base gl OPTIONAL_COMPONENTS net)

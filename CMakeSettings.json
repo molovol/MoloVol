@@ -1,7 +1,7 @@
 ﻿{
     "configurations": [
         {
-            "name": "x64-Release",
+            "name": "x64-Release-MD",
             "generator": "Ninja",
             "configurationType": "Release",
             "buildRoot": "${projectDir}\\out\\build\\${name}",
@@ -28,15 +28,32 @@
             ]
         },
         {
-            "name": "x86-Release",
+            "name": "x64-Release-MT",
             "generator": "Ninja",
-            "configurationType": "RelWithDebInfo",
+            "configurationType": "Release",
             "buildRoot": "${projectDir}\\out\\build\\${name}",
             "installRoot": "${projectDir}\\out\\install\\${name}",
-            "cmakeCommandArgs": "",
+            "cmakeCommandArgs": "-DCMAKE_MSVC_RUNTIME_LIBRARY=\"MultiThreaded$<$<CONFIG:Debug>:Debug>\"",
             "buildCommandArgs": "",
             "ctestCommandArgs": "",
-            "inheritEnvironments": [ "msvc_x86" ]
+            "inheritEnvironments": [ "clang_cl_x64_x64" ],
+            "variables": [
+                {
+                    "name": "MOLOVOL_RENDERER",
+                    "value": "True",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "BUILD_SHARED_LIBS",
+                    "value": "False",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "MOLOVOL_ABS_RESOURCE_PATH",
+                    "value": "True",
+                    "type": "BOOL"
+                }
+            ]
         }
     ]
 }
