@@ -4,3 +4,6 @@
 [submodule "external/VTK"]
 	path = external/VTK
 	url = https://github.com/molovol/VTK.git
+[submodule "external/wxWidgets"]
+	path = external/wxWidgets
+	url = https://github.com/molovol/wxWidgets.git

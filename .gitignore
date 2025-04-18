@@ -1,5 +1,6 @@
 # Build directories and files
 build*/
+out/
 bin/
 *.o
 
