@@ -44,7 +44,6 @@ std::string getResourcesDir() {
       }
     }
     res_dir = res_dir_path.string();
-    std::replace(res_dir.begin(), res_dir.end(), '\\', '/');
 
 #else
     //res_dir = std::filesystem::path("./inputfile");
