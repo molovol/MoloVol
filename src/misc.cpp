@@ -7,8 +7,12 @@
 #endif
 
 // access the resource folder containing elements.txt and space_groups.txt
-std::filesystem::path getResourcesDir() {
-  std::filesystem::path resDir = "";
+// Because std::filesystem was only introduced to macOS in 10.15 (released 2020) I have
+// decided to reimplement the method using std::string as return type. Consider reverting
+// this change once backwards compatibility to pre-10.15 macOS is no longer needed.
+std::string getResourcesDir() {
+  //std::filesystem::path res_dir = "";
+  std::string res_dir = "";
 #if defined(__APPLE__) && defined(ABS_PATH)
     CFURLRef resource_url = CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle());
     char resource_path[PATH_MAX];
@@ -16,13 +20,16 @@ std::filesystem::path getResourcesDir() {
         if (resource_url != NULL) {
             CFRelease(resource_url);
         }
-        resDir = std::filesystem::path(resource_path);
+        //res_dir = std::filesystem::path(resource_path);
+        res_dir = resource_path;
     }
 
 #elif defined(__linux__) && defined(ABS_PATH)
-    resDir = std::filesystem::path("/usr/share/molovol");
+    //res_dir = std::filesystem::path("/usr/share/molovol");
+    res_dir = "/usr/share/molovol";
 
 #elif defined(_WIN32) && defined(ABS_PATH)
+    std::filesystem::path res_dir_path = "";
     wchar_t buffer[MAX_PATH];
     DWORD length = GetModuleFileNameW(NULL, buffer, MAX_PATH);
 
@@ -33,14 +40,18 @@ std::filesystem::path getResourcesDir() {
       if (pos != std::wstring::npos) {
           std::wstring executableDir = executablePath.substr(0, pos);
           std::filesystem::path executableDirPath(executableDir.begin(), executableDir.end());
-          resDir = executableDirPath / ".." / "shared" / "inputfile";
+          res_dir_path = executableDirPath / ".." / "shared" / "inputfile";
       }
     }
+    res_dir = res_dir_path.string();
+    std::replace(res_dir.begin(), res_dir.end(), '\\', '/');
 
 #else
-    resDir = std::filesystem::path("./inputfile");
+    //res_dir = std::filesystem::path("./inputfile");
+    res_dir = "./inputfile";
 #endif
-    return resDir.lexically_normal();
+    //return res_dir.lexically_normal();
+    return res_dir;
 }
 
 std::string fileExtension(const std::string& path){

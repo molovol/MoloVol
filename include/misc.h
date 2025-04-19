@@ -17,7 +17,7 @@
 #include <CoreFoundation/CFBundle.h>
 #endif
 
-std::filesystem::path getResourcesDir();
+std::string getResourcesDir();
 
 template <typename T>
 inline bool isIncluded(const T& elem, const std::vector<T>& list) {

@@ -25,7 +25,7 @@ MainFrame* Ctrl::s_gui = NULL;
 ///////////////////////////
 
 std::string Ctrl::getDefaultElemPath(){
-  return (getResourcesDir() / s_elem_file).string();
+  return getResourcesDir() + "/" + s_elem_file;
 }
 
 std::string Ctrl::getVersion(){
