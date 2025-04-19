@@ -77,16 +77,13 @@ std::string fileName(const std::string& path){
 
 // find the current time and convert to a string in format year-month-day_hour-min-sec
 std::string timeNow(){
-    time_t rawtime;
-    struct tm * timeinfo;
-    char buffer[80];
+    std::time_t now = std::time(nullptr);
+    std::tm localTime{};
+    localtime_s(&localTime, &now);
 
-    time (&rawtime);
-    timeinfo = localtime (&rawtime);
-
-    strftime (buffer,80,"%Y-%m-%d_%Hh%Mm%Ss",timeinfo);
-
-    return buffer;
+    std::ostringstream oss;
+    oss << std::put_time(&localTime, "%Y-%m-%d_%Hh%Mm%Ss");
+    return oss.str();
 }
 
 int pow2(int exp){
