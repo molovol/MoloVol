@@ -1,5 +1,5 @@
 if (MSVC)
-    set(VTK_DIR ${CMAKE_SOURCE_DIR}/external/VTK/build-static-runtime)
+    set(VTK_DIR ${CMAKE_SOURCE_DIR}/external/VTK/out/build/x64-Release-MT)
 else()
     set(VTK_DIR ${CMAKE_SOURCE_DIR}/external/VTK/build-static)
 endif()
