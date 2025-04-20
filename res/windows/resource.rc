@@ -6,23 +6,23 @@ aaaa ICON "icon.ico"
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 VS_VERSION_INFO    VERSIONINFO
-  FILEVERSION      1,1,1,0
-  PRODUCTVERSION   1,1,1,0
+  FILEVERSION      1,2,0,0
+  PRODUCTVERSION   1,2,0,0
   FILETYPE         VFT_APP
 {
   BLOCK "StringFileInfo"
   {
     BLOCK "040904E4" // Lang=US English, CharSet=Windows Multilingual
     {
-      VALUE "Build",            "July 2023\0"
+      VALUE "Build",            "February 2025\0"
       VALUE "CompanyName",      "MoloVol Development\0"
       VALUE "FileDescription",  "Calculate volumes and surface areas of chemical structures\0"
-      VALUE "FileVersion",      "1.1.1.0\0"
+      VALUE "FileVersion",      "1.2.0.0\0"
       VALUE "InternalName",     "MoloVol\0"
-      VALUE "LegalCopyright",   "Copyright (c) 2020-2023 Jasmin B. Maglic, Roy Lavendomme\0"
+      VALUE "LegalCopyright",   "Copyright (c) 2020-2025 Jasmin B. Maglic, Roy Lavendomme\0"
       VALUE "OriginalFilename", "MoloVol.exe\0"
       VALUE "ProductName",      "MoloVol\0"
-      VALUE "ProductVersion",   "1.1.1.0\0"
+      VALUE "ProductVersion",   "1.2.0.0\0"
       VALUE "Support",          "molovol@outlook.com, https://molovol.com, https://github.com/molovol/MoloVol\0"
     }
   }

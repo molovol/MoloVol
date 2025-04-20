@@ -2,6 +2,10 @@
 
 This changelog keeps track of changes in a user-friendly way. It is based on [keep a changelog](https://keepachangelog.com/en/1.0.0/) by Olivier Lacan.
 
+## v1.2.0 - 2025-02-01
+### Added
+* Added a 3D renderer, that displays the molecule and its cavities after calculation. 
+
 ## [v1.1.1](https://github.com/molovol/MoloVol/releases/tag/v1.1.1) - 2023-07-11
 ### Improved
 * Enabled link time optimisation which reduces calculation time by at least 30 %.

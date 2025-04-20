@@ -1,5 +1,4 @@
 #include "atom.h"
-#include <cassert>
 #include <utility>
 #include <iostream>
 #include <chrono>
@@ -11,27 +10,30 @@ int main(int argc, char* argv[]){
   // Default constructor
   Atom at;
 
-  validateAtom(at, 0, 0, 0, "", -1, 0, 0);
-  assert(!at.isValid()); // Default constructed atom is always invalid
+  if (!validateAtom(at, 0, 0, 0, "", -1, 0, 0)) return -1;
+  if (at.isValid()) return -1; // Default constructed atom is always invalid
   at.rad = 1; 
-  assert(at.isValid());
+  if (!at.isValid()) return -1;
 
   // Construct with position and symbol
   at = Atom(std::make_pair("Gh", Atom::pos_type({1, 2, 3})));
-  validateAtom(at, 1, 2, 3, "Gh", -1, 0, 0);
+  if (!validateAtom(at, 1, 2, 3, "Gh", -1, 0, 0)) return -1;
 
   // Construct with position, symbol and charge
   at = Atom(std::make_pair("Gh", Atom::pos_type({1, 2, 3})), -2);
-  validateAtom(at, 1, 2, 3, "Gh", -1, 0, -2);
+  if (!validateAtom(at, 1, 2, 3, "Gh", -1, 0, -2)) return -1;
 
   // Construct with position, symbol, radius and number
   at = Atom(1, 2, 3, "Gh", 1.2, 34);
-  validateAtom(at, 1, 2, 3, "Gh", 1.2, 34, 0);
+  if (!validateAtom(at, 1, 2, 3, "Gh", 1.2, 34, 0)) return -1;
 
   // Construct with position, symbol, radius, number and charge
   at = Atom(1, 2, 3, "Gh", 1.2, 34, -2);
-  validateAtom(at, 1, 2, 3, "Gh", 1.2, 34, -2);
-  assert(at.isValid());
+  if (!validateAtom(at, 1, 2, 3, "Gh", 1.2, 34, -2)) return -1;
+  if (!at.isValid()) return -1;
+
+  // Comparison operator
+  if (at != at) return -1;
 
   // Benchmark
   if (argc > 1 && !strcmp(argv[1], "benchmark")){
@@ -58,7 +60,6 @@ int main(int argc, char* argv[]){
     std::cout << "Number-based constructor: " 
       << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
   }
-
 }
 
 bool validateAtom(
@@ -73,29 +74,29 @@ bool validateAtom(
   
   bool valid = true;
 
-  assert(at.pos_x == x);
-  assert(at.pos_y == y);
-  assert(at.pos_z == z);
-  assert(at.symbol == sym);
-  assert(at.rad == radius);
-  assert(at.charge == charge);
-  assert(at.number == at_num);
+  valid &= (at.pos_x == x);
+  valid &= (at.pos_y == y);
+  valid &= (at.pos_z == z);
+  valid &= (at.symbol == sym);
+  valid &= (at.rad == radius);
+  valid &= (at.charge == charge);
+  valid &= (at.number == at_num);
 
   [[maybe_unused]] auto pos_array = at.getPos();
-  assert(pos_array[0] == x);
-  assert(pos_array[1] == y);
-  assert(pos_array[2] == z);
+  valid &= (pos_array[0] == x);
+  valid &= (pos_array[1] == y);
+  valid &= (pos_array[2] == z);
 
   [[maybe_unused]] auto pos_vec = at.getPosVec();
-  assert(pos_vec[0] == x);
-  assert(pos_vec[1] == y);
-  assert(pos_vec[2] == z);
+  valid &= (pos_vec[0] == x);
+  valid &= (pos_vec[1] == y);
+  valid &= (pos_vec[2] == z);
 
-  assert(at.getCoordinate(0) == x);
-  assert(at.getCoordinate(1) == y);
-  assert(at.getCoordinate(2) == z);
+  valid &= (at.getCoordinate(0) == x);
+  valid &= (at.getCoordinate(1) == y);
+  valid &= (at.getCoordinate(2) == z);
 
-  assert(at.getRad() == radius);
+  valid &= (at.getRad() == radius);
 
   return valid;
 }

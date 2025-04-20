@@ -1,0 +1,59 @@
+﻿{
+    "configurations": [
+        {
+            "name": "x64-Release-MD",
+            "generator": "Ninja",
+            "configurationType": "Release",
+            "buildRoot": "${projectDir}\\out\\build\\${name}",
+            "installRoot": "${projectDir}\\out\\install\\${name}",
+            "buildCommandArgs": "",
+            "ctestCommandArgs": "",
+            "inheritEnvironments": [ "clang_cl_x64_x64" ],
+            "variables": [
+                {
+                    "name": "MOLOVOL_RENDERER",
+                    "value": "True",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "BUILD_SHARED_LIBS",
+                    "value": "False",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "MOLOVOL_ABS_RESOURCE_PATH",
+                    "value": "True",
+                    "type": "BOOL"
+                }
+            ]
+        },
+        {
+            "name": "x64-Release-MT",
+            "generator": "Ninja",
+            "configurationType": "Release",
+            "buildRoot": "${projectDir}\\out\\build\\${name}",
+            "installRoot": "${projectDir}\\out\\install\\${name}",
+            "cmakeCommandArgs": "-DCMAKE_MSVC_RUNTIME_LIBRARY=\"MultiThreaded$<$<CONFIG:Debug>:Debug>\"",
+            "buildCommandArgs": "",
+            "ctestCommandArgs": "",
+            "inheritEnvironments": [ "clang_cl_x64_x64" ],
+            "variables": [
+                {
+                    "name": "MOLOVOL_RENDERER",
+                    "value": "True",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "BUILD_SHARED_LIBS",
+                    "value": "False",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "MOLOVOL_ABS_RESOURCE_PATH",
+                    "value": "True",
+                    "type": "BOOL"
+                }
+            ]
+        }
+    ]
+}

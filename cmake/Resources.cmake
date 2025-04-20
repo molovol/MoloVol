@@ -11,6 +11,7 @@ set(OSX_ICON_FILE "${OSX_RES_DIR}/icon.icns")
 set(OSX_LICENSE_RTF "${OSX_RES_DIR}/LICENSE.rtf")
 set(OSX_DMG_BACKGROUND "${OSX_RES_DIR}/background.png")
 set(OSX_DMG_DSSTORE "${OSX_RES_DIR}/DS_Store/.DS_Store")
+# TODO: Why is icon file moved to app bundle like this?
 set_source_files_properties(${OSX_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 set_source_files_properties(${ELEM_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 set_source_files_properties(${SPACEGROUP_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
@@ -23,4 +24,19 @@ set(DEB_CHANGELOG_FILE "${DEB_RES_DIR}/changelog")
 file(STRINGS ${DEB_RES_DIR}/MoloVol.desktop DEB_DESKTOP_FILE)
 set(DEB_DESKTOP_FILE ${DEB_RES_DIR}/MoloVol.desktop)
 set(DEB_MAN_FILE ${DEB_RES_DIR}/molovol.1)
-set(DEB_ICON ${DEB_RES_DIR}/molovol.png)
+set(DEB_ICON ${DEB_RES_DIR}/molovol.png) 
+
+# Resource files for Windows
+set(WIN_RES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res/windows")
+set(WIN_RESOURCE_FILES "${WIN_RES_DIR}/resource.rc")
+set(WIN_ICON_FILE "${CMAKE_CURRENT_SOURCE_DIR}/res/windows/icon.ico")
+set(WIN_LICENSE_RTF "${WIN_RES_DIR}/LICENSE.rtf")
+
+# Third party licenses and copyright notices
+if(MOLOVOL_RENDERER)
+  set(TPL_VTK "${CMAKE_CURRENT_SOURCE_DIR}/external/VTK/Copyright.txt")
+endif()
+
+# Example files
+set(INPUTDIR inputfile)
+set(EXAMPLE_FILES ${INPUTDIR}/example_C60.cif ${INPUTDIR}/example_C60.xyz ${INPUTDIR}/example_C60.pdb)

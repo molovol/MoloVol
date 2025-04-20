@@ -7,6 +7,8 @@
 #include "exception.h"
 #include "special_chars.h"
 #include "griddata.h"
+#include "container3d.h"
+#include "voxel.h"
 #include <chrono>
 #include <utility>
 #include <map>
@@ -23,7 +25,13 @@ MainFrame* Ctrl::s_gui = NULL;
 ///////////////////////////
 
 std::string Ctrl::getDefaultElemPath(){
-  return getResourcesDir() + "/" + s_elem_file;
+#if defined(_WIN32)
+    std::string sep = "\\";
+#else
+    std::string sep = "/";
+#endif
+
+  return getResourcesDir() + sep + s_elem_file;
 }
 
 std::string Ctrl::getVersion(){
@@ -158,6 +166,9 @@ bool Ctrl::runCalculation(){
   displayResults(data);
 
   if (data.success){
+    renderSurface(_current_calculation->getSurfaceData(), _current_calculation->getCellOrigin(),
+        data.grid_step, data.probe_mode, 
+        data.cavities.size(), _current_calculation->getAtomTree().getAtomList());
     // export if appropriate option is toggled
     if(data.make_report){exportReport();}
     if(data.make_full_map){exportSurfaceMap(false);}
@@ -501,6 +512,17 @@ void Ctrl::updateProgressBar(const int percentage){
     std::cout << std::to_string(percentage) + "\%"  << std::endl;
   }
 }
+
+void Ctrl::renderSurface(const Container3D<Voxel>& surf_data, const std::array<double,3> origin, 
+    const double grid_step, const bool probe_mode, const unsigned char n_cavities, const std::vector<Atom>& atomlist) {
+  if (_to_gui) {
+    s_gui->extRenderSurface(surf_data, origin, grid_step, probe_mode, n_cavities, atomlist);
+  }
+}
+
+const Container3D<Voxel>& Ctrl::getSurfaceData() const {
+  return _current_calculation->getSurfaceData();
+};
 
 ////////////
 // EXPORT //

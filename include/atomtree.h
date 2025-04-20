@@ -2,50 +2,64 @@
 
 #define ATOMTREE_H
 
-#include <vector>
 #include "atom.h"
+#include <vector>
+#include <string>
 
-struct Atom;
 class AtomTree;
 class AtomNode{
   public:
-    AtomNode(int, AtomNode* left_node, AtomNode* right_node);
+    AtomNode(AtomTree*, size_t, AtomNode* left_node, AtomNode* right_node);
     ~AtomNode();
  
-    AtomNode* getLeftChild() const;
-    AtomNode* getRightChild() const;
+    const AtomNode* getLeftChild() const;
+    const AtomNode* getRightChild() const;
+    AtomNode* getLeftChild();
+    AtomNode* getRightChild();
     Atom& getAtom() const;
-    int getAtomId() const;
-    void print();
+    size_t getAtomId() const;
 
-    static Atom& getAtom(const int);
-    static void setAtomList(const std::vector<Atom>&);
-    static std::vector<Atom>& getAtomList();
+    void print();
   private:
+    // TODO: Reevaluate whether each node needs to know their parent tree. This
+    // is only used for accessing atoms from nodes directly which is only used
+    // by the voxel class. Atom access could go through atom tree directly
+    AtomTree* _parent_tree;
     AtomNode* _left_child;
     AtomNode* _right_child;
-    int _atom_id;
-    static inline std::vector<Atom> s_atom_list;
+    size_t _atom_id;
 };
 
-class AtomNode;
 class AtomTree{
   public:
+    friend AtomNode;
+
+    typedef Atom::num_type num_type;  
+    typedef Atom::pos_type pos_type;
+
     AtomTree();
     AtomTree(const std::vector<Atom>& list_of_atoms);
     ~AtomTree();
+    // TODO: Move and copy operators
     
     const AtomNode* getRoot() const;
+
     const double getMaxRad() const;
+    const std::vector<Atom>& getAtomList() const;
+
+    std::vector<size_t> listAllWithin(Atom::pos_type, const double) const;
+
     void print() const;
   private:
     AtomNode* _root;
     double _max_rad;
+    std::vector<Atom> _atom_list;
     
-    AtomNode* buildTree(int, int, char);
+    AtomNode* buildTree(size_t, size_t, char);
   
-    void quicksort(std::vector<Atom>& list_of_atoms, const int& vec_first, const int& vec_end, const char& dim);
-    void swap(Atom& a, Atom& b);
+    std::vector<Atom>& getAtomList();
+    void quicksort(const size_t, const size_t, const char);
+    void swap(Atom&, Atom&);
 };
 
 #endif

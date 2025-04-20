@@ -183,7 +183,14 @@ bool Model::getSymmetryElements(std::string group, std::vector<int> &sym_matrix_
     group[i] = toupper(group[i]);
   }
   group = "'" + group + "'";
-  std::ifstream sym_file(getResourcesDir() + "/space_groups.txt");
+
+#if defined(_WIN32)
+  std::string sep = "\\";
+#else
+  std::string sep = "/";
+#endif
+
+  std::ifstream sym_file(getResourcesDir() + sep + "space_groups.txt");
   std::string sym_line;
   bool group_found = 0;
   bool sym_matrix = 0;

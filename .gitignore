@@ -1,5 +1,6 @@
 # Build directories and files
 build*/
+out/
 bin/
 *.o
 
@@ -19,6 +20,9 @@ inputfile/*
 *.dSYM/Contents/Info.plist
 *.dSYM
 !res/macOS/DS_Store/.DS_store
+
+# VS Code
+.vs
 
 # XCode
 xcuserdata/
@@ -48,3 +52,12 @@ _site/
 
 .idea/
 *.pyc
+
+# Virtual python environment
+venv*/
+
+# VTK build files
+external/VTK/build*
+external/VTK/out/build*
+
+notforcommit/
