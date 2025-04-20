@@ -79,7 +79,11 @@ std::string fileName(const std::string& path){
 std::string timeNow(){
     std::time_t now = std::time(nullptr);
     std::tm localTime{};
+#if defined(_WIN32)
     localtime_s(&localTime, &now);
+#else
+    localtime_r(&now, &localTime);
+#endif
 
     std::ostringstream oss;
     oss << std::put_time(&localTime, "%Y-%m-%d_%Hh%Mm%Ss");
