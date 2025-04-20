@@ -2,7 +2,7 @@
 
 This changelog keeps track of changes in a user-friendly way. It is based on [keep a changelog](https://keepachangelog.com/en/1.0.0/) by Olivier Lacan.
 
-## v1.2.0 - 2025-02-01
+## [v1.2.0](https://github.com/molovol/MoloVol/releases/tag/v1.2.0) - 2025-04-20
 ### Added
 * Added a 3D renderer, that displays the molecule and its cavities after calculation. 
 

@@ -33,4 +33,4 @@ molovol (1.2.0) stable; urgency=low
   * Changed default grid resolution from 0.1 to 0.2
   * Changed output to hide unnecessary columns in cavity list
   * Added molecular volume to report
- -- Jasmin B. Maglic <jmaglic@outlook.de>  Tue, 11 Jul 2023 17:59:00 +0200
+ -- Jasmin B. Maglic <jmaglic@outlook.de>  Tue, 20 Apr 2025 14:35:00 +0200
