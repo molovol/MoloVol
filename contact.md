@@ -11,7 +11,7 @@ submit an issue to the project's [Issues](https://github.com/jmaglic/MoloVol/iss
 
 #### Support Us
 MoloVol is and will always be free. If you have found MoloVol useful and want to support 
-this project consider donating via the link below.
+this project consider buing us a coffee via the link below.
 
 <div class="button-row">
 <a class="button" href="https://www.paypal.com/donate?hosted_button_id=SZXAR7PEZKW6C" target="_blank">Donate via PayPal</a>

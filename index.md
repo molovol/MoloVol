@@ -20,6 +20,12 @@ Please use the following or an equivalent citation:
 > Maglic, J.B. & Lavendomme, R. (2022). J. Appl. Cryst. 55, 1033-1044.\
 > DOI: [10.1107/S1600576722004988](https://doi.org/10.1107/S1600576722004988)
 
+#### Renderer Update Out Now!
+
+Our new [version 1.2.0](download) now comes with a built-in renderer, so you can visually inspect
+your volumes and surfaces directly after the calculation. 
+
+
 <div class="card-container">
   <div class="card">
     <a href="news">

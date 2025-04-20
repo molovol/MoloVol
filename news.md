@@ -1,6 +1,18 @@
 ---
 ---
 
+### April 2025
+
+We are proud to release a new update to MoloVol. Version 1.2 now comes with an in-built 
+renderer, meaning that users can finally see and inspect the results of their calculations
+without the need of any third-party programs.
+
+I think this will be a huge quality-of-life improvement for all our users. Spread the word!
+
+\- Jasmin
+
+<img src="/docs/assets/images/2025-04_render-window.png" width="60%">
+
 ### October 2024
 
 The website is getting a major facelift. We've gotten to a point where it's just not feasible

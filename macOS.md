@@ -3,13 +3,13 @@ title: macOS Download
 filename: macOS.md
 ---
 
-#### Latest version for MacOS – v1.1.1
+#### Latest version for MacOS – v1.2.0
 
 Version for macOS El Capitan (10.11) and higher. The app natively supports Macs running on
 Apple silicon, as well as older CPU architectures.
 
 <div class="button-row">
-<a class="button download" href="https://github.com/molovol/MoloVol/releases/download/v1.1.1/MoloVol_macOS-10.11+_v1.1.1.dmg">
+<a class="button download" href="https://github.com/molovol/MoloVol/releases/download/v1.2.0.1/MoloVol_macOS-10.11+_v1.2.0.dmg">
 Download Installer</a>
 </div>
 
