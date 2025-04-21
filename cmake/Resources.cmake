@@ -8,6 +8,8 @@ set(README_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 # Third party licenses and copyright notices
 if(MOLOVOL_RENDERER)
   set(TPL_VTK "${CMAKE_CURRENT_SOURCE_DIR}/external/VTK/Copyright.txt")
+  set(TPL_VTK_COPY "${CMAKE_BINARY_DIR}/VTK.txt")
+  configure_file(${TPL_VTK} ${TPL_VTK_COPY} COPYONLY)
 endif()
 
 # Resource files for macOS Bundle
@@ -21,11 +23,12 @@ set_source_files_properties(${OSX_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION 
 set_source_files_properties(${ELEM_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 set_source_files_properties(${SPACEGROUP_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 
-set(TPL_VTK_COPY "${CMAKE_BINARY_DIR}/VTK.txt")
-configure_file(${TPL_VTK} ${TPL_VTK_COPY} COPYONLY)
-set_source_files_properties(${TPL_VTK_COPY} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources/licenses")
-
-set(OSX_RESOURCE_FILES ${OSX_ICON_FILE} ${ELEM_FILE} ${SPACEGROUP_FILE} ${TPL_VTK_COPY})
+if(MOLOVOL_RENDERER)
+  set_source_files_properties(${TPL_VTK_COPY} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources/licenses")
+  set(OSX_RESOURCE_FILES ${OSX_ICON_FILE} ${ELEM_FILE} ${SPACEGROUP_FILE} ${TPL_VTK_COPY})
+else()
+  set(OSX_RESOURCE_FILES ${OSX_ICON_FILE} ${ELEM_FILE} ${SPACEGROUP_FILE})
+endif()
 
 # Resource files for Debian package
 set(DEB_RES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res/linux")

@@ -92,9 +92,9 @@ if(NOT MOLOVOL_ABS_RESOURCE_PATH)
 endif()
 
 # RPATH STUFF
-set(CMAKE_MACOSX_RPATH 1)
-list(APPEND CMAKE_BUILD_RPATH "@executable_path/Frameworks")
-list(APPEND CMAKE_INSTALL_RPATH "@executable_path/Frameworks")
+#set(CMAKE_MACOSX_RPATH 1)
+#list(APPEND CMAKE_BUILD_RPATH "@executable_path/Frameworks")
+#list(APPEND CMAKE_INSTALL_RPATH "@executable_path/Frameworks")
 #set(CMAKE_BUILD_RPATH "@executable_path/Frameworks")
 #set(CMAKE_INSTALL_RPATH "@executable_path/Frameworks")
 
