@@ -16,6 +16,8 @@
 #include <vtkImageMask.h>
 #include <vtkMolecule.h>
 #include <vtkMoleculeMapper.h>
+#include <vtkFloatArray.h>
+#include <vtkPointData.h>
 
 // wxWidgets
 #include <wx/spinctrl.h>
@@ -144,9 +146,16 @@ void RenderFrame::UpdateMolecule(const std::vector<Atom>& atomlist) {
 
   molecule->Initialize();
 
+  vtkSmartPointer<vtkFloatArray> radii = vtkSmartPointer<vtkFloatArray>::New();
+  radii->SetName("radii");
+  radii->SetNumberOfComponents(1);
+  radii->SetNumberOfTuples(all_atoms.size());
+
   std::vector<vtkAtom> atom_objs;
-  for (const Atom& at : all_atoms) {
+  for (size_t i = 0; i < all_atoms.size(); ++i) {
+    const Atom& at = all_atoms[i];
     atom_objs.push_back(molecule->AppendAtom(at.number, at.pos_x, at.pos_y, at.pos_z));
+    radii->SetValue(i, at.rad);
   }
 
   for (size_t at_id = 0; at_id < all_atoms.size(); ++at_id) {
@@ -159,6 +168,8 @@ void RenderFrame::UpdateMolecule(const std::vector<Atom>& atomlist) {
       }
     }
   }
+  
+  molecule->GetVertexData()->AddArray(radii);
 
   molactor->SetVisibility(true);
   m_hideMolBtn->SetLabel(HIDEMOLLABEL);
@@ -414,7 +425,7 @@ void RenderFrame::OnButtonClick(wxCommandEvent& event) {
       Render();
       break;
     case BUTTON_VdwModel:
-      molmapper->UseVDWSpheresSettings ();
+      molmapper->SetAtomicRadiusTypeToCustomArrayRadius();
       molactor->SetVisibility(true);
       m_hideMolBtn->SetLabel(HIDEMOLLABEL);
       Render();
