@@ -2,6 +2,10 @@
 
 This changelog keeps track of changes in a user-friendly way. It is based on [keep a changelog](https://keepachangelog.com/en/1.0.0/) by Olivier Lacan.
 
+## v1.2.1
+### Improved
+* The renderer now allows rendering atoms with their van der Waals-radius. This is also compatible with custom radii.
+
 ## [v1.2.0.1](https://github.com/molovol/MoloVol/releases/tag/v1.2.0.1) - 2025-04-20
 ### Fixed
 * Replaced localtime\_s for platforms other than Windows. 
