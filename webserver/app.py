@@ -15,6 +15,7 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 UPLOAD_FOLDER = './userupload/'
+EXECUTABLE_CMD = "/build/molovol"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # check if upload folder exists and create if missing
@@ -334,7 +335,7 @@ def io():
             print(f"Starting process with args: {args}\n")
             
             try:
-                mlvl_out = subprocess.check_output(["./launch_headless.sh"] + args, stderr=subprocess.STDOUT).decode(
+                mlvl_out = subprocess.check_output([EXECUTABLE_CMD] + args, stderr=subprocess.STDOUT).decode(
                     "utf-8")
             except Exception as e:
                 out = "Exception: " + str(e)
@@ -422,7 +423,7 @@ def get_entry_size(entry_path):
 
 # Request the executable's version. If the executable is not found, then the web page crashes
 def app_version():
-    return subprocess.check_output(["./launch_headless.sh", "-v"], stderr=subprocess.STDOUT).decode("utf-8")
+    return subprocess.check_output([EXECUTABLE_CMD, "-v"], stderr=subprocess.STDOUT).decode("utf-8")
 
 
 def is_nonzero_numeric(value):

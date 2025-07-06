@@ -85,7 +85,7 @@ int main() {
     for (size_t at_id = 0; at_id < all_atoms.size(); ++at_id) {
       const Atom& at = all_atoms[at_id];
       std::vector<size_t> closest = atomtree.listAllWithin(at.getPos(), 0);
-      if (!(closest.size()-1 == valence.at(at.symbol))) return -1;
+      if (!(closest.size()-1 == static_cast<size_t>(valence.at(at.symbol)))) return -1;
     }
   }
 }

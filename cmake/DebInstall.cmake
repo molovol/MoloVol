@@ -1,10 +1,8 @@
-
 include(GNUInstallDirs)
 
-# Compress changelog
+# Compress changelog and man pages (needed for both GUI and non-GUI)
 set(DEB_CHANGELOG_COMPRESSED "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz")
 set(DEB_MAN_COMPRESSED "${CMAKE_CURRENT_BINARY_DIR}/molovol.1.gz")
-set(HICOLOR_DIR "${CMAKE_CURRENT_BINARY_DIR}/hicolor")
 
 add_custom_command(
   OUTPUT ${DEB_CHANGELOG_COMPRESSED} ${DEB_MAN_COMPRESSED}
@@ -15,23 +13,24 @@ add_custom_command(
   COMMENT "Compressing changelog and manual file"
 )
 
-add_custom_command(
-  OUTPUT ${HICOLOR_DIR}
-  COMMAND bash ${DEB_RES_DIR}/shell/resize_icon ${DEB_ICON} ./
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-  DEPENDS ${DEB_ICON}
-  COMMENT "Resizing icon to supported sizes"
-)
-
 add_custom_target(compress ALL DEPENDS ${DEB_CHANGELOG_COMPRESSED} ${DEB_MAN_COMPRESSED})
 
-add_custom_target(resize_icon ALL DEPENDS ${HICOLOR_DIR})
+if(MOLOVOL_BUILD_GUI)
+  # GUI-specific icon processing
+  set(HICOLOR_DIR "${CMAKE_CURRENT_BINARY_DIR}/hicolor")
+  
+  add_custom_command(
+    OUTPUT ${HICOLOR_DIR}
+    COMMAND bash ${DEB_RES_DIR}/shell/resize_icon ${DEB_ICON} ./
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    DEPENDS ${DEB_ICON}
+    COMMENT "Resizing icon to supported sizes"
+  )
 
-# 
-execute_process(COMMAND dpkg --print-architecture COMMAND tr -d '\n' OUTPUT_VARIABLE LINUX_ARCHITECTURE)
+  add_custom_target(resize_icon ALL DEPENDS ${HICOLOR_DIR})
+endif()
 
 # Set directory permissions to 0755
-# Must come before install commands
 set(
   CPACK_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS
   OWNER_READ OWNER_WRITE OWNER_EXECUTE
@@ -39,15 +38,21 @@ set(
   WORLD_READ WORLD_EXECUTE
 )
 
-# Install commands so that these files get added to the deb file
+# Install commands for both GUI and non-GUI
 install(TARGETS ${EXE_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES ${ELEM_FILE} ${SPACEGROUP_FILE} 
   DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${EXE_NAME})
 install(FILES ${DEB_COPYRIGHT_FILE} ${DEB_CHANGELOG_COMPRESSED} 
   DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/${EXE_NAME})
-install(FILES ${DEB_DESKTOP_FILE} 
-  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
-install(FILES ${DEB_MAN_COMPRESSED} DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
-install(FILES ${DEB_ICON} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pixmaps)
-install(DIRECTORY ${HICOLOR_DIR} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons)
+install(FILES ${DEB_MAN_COMPRESSED} 
+  DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
+# GUI-specific install commands
+if(MOLOVOL_BUILD_GUI)
+  install(FILES ${DEB_DESKTOP_FILE} 
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
+  install(FILES ${DEB_ICON} 
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pixmaps)
+  install(DIRECTORY ${HICOLOR_DIR} 
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons)
+endif()

@@ -187,7 +187,7 @@ std::vector<Atom>& AtomTree::getAtomList() {
   return _atom_list;
 }
 
-const double AtomTree::getMaxRad() const {
+double AtomTree::getMaxRad() const {
   return _max_rad;
 }
 
