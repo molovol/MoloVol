@@ -29,8 +29,8 @@ struct Atom {
 
   const pos_type getPos() const;
   const Vector getPosVec() const;
-  const num_type getRad() const;
-  const num_type getCoordinate(const char) const;
+  num_type getRad() const;
+  num_type getCoordinate(const char) const;
   void print() const;
   bool isValid() const;
 

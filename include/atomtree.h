@@ -43,8 +43,7 @@ class AtomTree{
     // TODO: Move and copy operators
     
     const AtomNode* getRoot() const;
-
-    const double getMaxRad() const;
+    double getMaxRad() const;
     const std::vector<Atom>& getAtomList() const;
 
     std::vector<size_t> listAllWithin(Atom::pos_type, const double) const;

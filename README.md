@@ -49,7 +49,16 @@ software for your own purposes or propose changes to the developers and take par
 Dependencies needed for compilation:
 
 - Any C++ compiler
-- [wxWidgets 3.1.5](https://www.wxwidgets.org)
+- cmake
+- Optional for native GUI: [wxWidgets 3.1.5](https://www.wxwidgets.org)
+
+You can build without the desktop native GUI by setting it up with
+`cmake -DMOLOVOL_BUILD_GUI=0`
+
+You can build for wasm with set-up
+`emcmake cmake -DCMAKE_VERBOSE_MAKEFILE=ON -DMOLOVOL_BUILD_GUI=0 ..`
+then compile with
+`emmake make`
 
 ### MoloVol Web
 
@@ -58,7 +67,7 @@ front-end wrapping the MoloVol CLI interface. To launch, first change the FLASK_
 the command `export FLASK_APP=./webserver/app.py` from the project's root directory. Then execute `flask run`.
 For hosting on a web server check out the next section.
 
-### Containerized application
+### Containerized cli application
 
 Instead of compiling or running the binaries you can also use a containerized version (for instance using docker or 
 podman) to access the CLI or web interface.
@@ -72,7 +81,7 @@ below with your local image name.
 Running a container:
 - For a short-lived container: Pass the CLI arguments in the run command:
   `docker run -it bsvogler/molovol ./launch_headless.sh <yourMolovolArguments>`
-- To run web application http://localhost:80: run 
+- To run web application http://localhost:5000: run 
   `docker run -dt --restart=always -p 5000:5000 --name molovol bsvogler/molovol`. 
   When not otherwise specified the default port of a flask instance is 5000.
 

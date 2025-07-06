@@ -17,7 +17,7 @@ endif()
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11 CACHE STRING "Minimum macOS deployment version" FORCE)
 
 # Set name and version
-project(MoloVol VERSION 1.2.0)
+project(MoloVol VERSION 1.2.1)
 
 if(NOT APPLE)
   # Strip binary for release build
@@ -27,25 +27,54 @@ endif()
 
 include(ExecutableName)
 # EXE_NAME
+if(EMSCRIPTEN)
+    set(EXE_NAME molovol_wasm)
+endif()
 
 # Specify C++ standard
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# wxWidgets
-set(wxWidgets_USE_STATIC=ON)
-# Not ideal to use these absolute paths here
-if (MSVC)
-  set(wxWidgets_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/wxWidgets")
-  set(wxWidgets_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/wxWidgets/lib/vc_x64_lib-x64-Release-MT")
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
 endif()
 
-find_package(wxWidgets REQUIRED core base gl OPTIONAL_COMPONENTS net)
-include(${wxWidgets_USE_FILE})
+if(APPLE)
+    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+        set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp")
+        set(OpenMP_C_LIB_NAMES "omp")
+        set(OpenMP_omp_LIBRARY /opt/homebrew/opt/libomp/lib/libomp.dylib)
+    endif()
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp")
+        set(OpenMP_CXX_LIB_NAMES "omp")
+        set(OpenMP_omp_LIBRARY /opt/homebrew/opt/libomp/lib/libomp.dylib)
+    endif()
+endif()
 
-#find_package(OpenMP)
-if(MOLOVOL_RENDERER)
-  include(VTKRenderer)
+
+# wxWidgets
+if(MOLOVOL_BUILD_GUI)
+  set(wxWidgets_USE_STATIC=ON)
+  # Not ideal to use these absolute paths here
+  if (MSVC)
+    set(wxWidgets_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/wxWidgets")
+    set(wxWidgets_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/wxWidgets/lib/vc_x64_lib-x64-Release-MT")
+  endif()
+  
+  if(MOLOVOL_RENDERER)
+    find_package(wxWidgets REQUIRED core base gl OPTIONAL_COMPONENTS net)
+  else()
+    find_package(wxWidgets REQUIRED core base OPTIONAL_COMPONENTS net)
+  endif()
+  include(${wxWidgets_USE_FILE})
+  
+  if(MOLOVOL_RENDERER)
+    include(VTKRenderer)
+  endif()
 endif()
 
 # Add include path, so that header files can be found
@@ -68,10 +97,9 @@ endif()
 
 include(Sources)
 # SOURCES
-if(MOLOVOL_RENDERER)
+if(MOLOVOL_RENDERER AND MOLOVOL_BUILD_GUI)
   list(APPEND SOURCES "src/render_frame.cpp")
 endif()
-
 
 include(Resources)
 # ELEM_FILE
@@ -99,45 +127,54 @@ endif()
 #set(CMAKE_INSTALL_RPATH "@executable_path/Frameworks")
 
 # Target MoloVol
-if (MSVC)
-  #target_sources(${EXE_NAME} PRIVATE ${WIN_RESOURCE_FILES})
-  add_executable(${EXE_NAME} WIN32 ${SOURCES} ${WIN_RESOURCE_FILES})
+if(EMSCRIPTEN)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/wasm.cmake)
+elseif(MSVC)
+    #target_sources(${EXE_NAME} PRIVATE ${WIN_RESOURCE_FILES})
+    add_executable(${EXE_NAME} WIN32 ${SOURCES} ${WIN_RESOURCE_FILES})
 else()
-  add_executable(${EXE_NAME} ${SOURCES} ${OSX_RESOURCE_FILES})
+    add_executable(${EXE_NAME} ${SOURCES} ${OSX_RESOURCE_FILES})
 endif()
-
 # XCode, app bundle and libtiff
 include(MacSpecific)
+target_link_libraries(${EXE_NAME} PRIVATE molovol_lib)
 
-target_link_libraries(${EXE_NAME} ${wxWidgets_LIBRARIES})
-if(MOLOVOL_RENDERER)
-  target_link_libraries(${EXE_NAME} ${WXVTK_LIB})
-  target_compile_definitions(${EXE_NAME} PRIVATE MOLOVOL_RENDERER) 
+if(MOLOVOL_BUILD_GUI)
+  target_link_libraries(${EXE_NAME} ${wxWidgets_LIBRARIES})
+  target_compile_definitions(${EXE_NAME} PRIVATE MOLOVOL_GUI)
+  if(MOLOVOL_RENDERER)
+    target_link_libraries(${EXE_NAME} ${WXVTK_LIB})
+    target_compile_definitions(${EXE_NAME} PRIVATE MOLOVOL_RENDERER) 
+  endif()
 endif()
-
   # Add custom flag
 if(MOLOVOL_ABS_RESOURCE_PATH)
   target_compile_definitions(${EXE_NAME} PUBLIC -DABS_PATH)
 endif()
 
-# Keeping this around just so I don't forget the syntax
-#  if(OpenMP_CXX_FOUND)
-#    target_link_libraries(target PUBLIC OpenMP::OpenMP_CXX)
-#  endif()
-
-# Tests
-if (MOLOVOL_BUILD_TESTING AND BUILD_TESTING)
-  include(Testing)
-endif()
-
 # Installation instructions for debian package
-if (UNIX AND NOT APPLE)
-  include(DebInstall)
-elseif(APPLE)
-  # This is needed for generation of the dmg file
-  install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/MoloVol.app DESTINATION "." 
-    FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+if (NOT EMSCRIPTEN)  # Only do native installations
+    if (UNIX AND NOT APPLE)
+        include(DebInstall)
+    elseif(APPLE)
+        # This is needed for generation of the dmg file
+        install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/MoloVol.app DESTINATION "." 
+            FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+    endif()
 endif()
 
 include(Packing)
 
+
+#this openMP section is currently commented out as it leads to runtime crashed because of some memory issue
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(${EXE_NAME} PUBLIC OpenMP::OpenMP_CXX)
+    target_compile_definitions(${EXE_NAME} PUBLIC HAVE_OPENMP)
+endif()
+
+
+# Ensure molovol_test is built if MOLOVOL_BUILD_TESTING is ON
+if(MOLOVOL_BUILD_TESTING)
+    include(Testing) # Include Testing.cmake here
+endif()

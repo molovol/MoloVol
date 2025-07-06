@@ -1,7 +1,7 @@
 #include "importmanager.h"
 #include "crystallographer.h"
 #include "misc.h"
-
+#include <iterator>
 // This is a temporary fix so that we can wite unit tests for sections of the code
 #ifndef LIBRARY_BUILD
 #include "controller.h"
