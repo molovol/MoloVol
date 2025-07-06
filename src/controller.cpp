@@ -526,9 +526,19 @@ void Ctrl::updateProgressBar(const int percentage){
 
 void Ctrl::renderSurface(const Container3D<Voxel>& surf_data, const std::array<double,3> origin, 
     const double grid_step, const bool probe_mode, const unsigned char n_cavities, const std::vector<Atom>& atomlist) {
+#ifdef MOLOVOL_GUI
   if (_to_gui) {
     s_gui->extRenderSurface(surf_data, origin, grid_step, probe_mode, n_cavities, atomlist);
   }
+#else
+  // In non-GUI mode, this function does nothing
+  (void)surf_data;
+  (void)origin;
+  (void)grid_step;
+  (void)probe_mode;
+  (void)n_cavities;
+  (void)atomlist;
+#endif
 }
 
 const Container3D<Voxel>& Ctrl::getSurfaceData() const {

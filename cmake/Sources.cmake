@@ -36,6 +36,11 @@ target_include_directories(molovol_lib PUBLIC include)
 target_compile_options(molovol_lib PRIVATE -Wall -Werror -Wno-unused-command-line-argument -Wno-invalid-source-encoding)
 target_compile_options(molovol_lib PRIVATE "$<$<NOT:$<CONFIG:RELEASE,MINSIZEREL,RELWITHDEBINFO>>:-DDEBUG>")
 
+# Define MOLOVOL_GUI for the library when building with GUI
+if(MOLOVOL_BUILD_GUI)
+    target_compile_definitions(molovol_lib PRIVATE MOLOVOL_GUI)
+endif()
+
 if(MOLOVOL_BUILD_GUI)
     set(SOURCES ${GUI_SOURCES})
 else()

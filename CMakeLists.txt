@@ -136,6 +136,7 @@ target_link_libraries(${EXE_NAME} PRIVATE molovol_lib)
 
 if(MOLOVOL_BUILD_GUI)
   target_link_libraries(${EXE_NAME} ${wxWidgets_LIBRARIES})
+  target_compile_definitions(${EXE_NAME} PRIVATE MOLOVOL_GUI)
   if(MOLOVOL_RENDERER)
     target_link_libraries(${EXE_NAME} ${WXVTK_LIB})
     target_compile_definitions(${EXE_NAME} PRIVATE MOLOVOL_RENDERER) 
