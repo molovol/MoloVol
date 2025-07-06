@@ -52,7 +52,6 @@ _site/
 
 .idea/
 *.pyc
-.aider*
 
 # Virtual python environment
 venv*/
