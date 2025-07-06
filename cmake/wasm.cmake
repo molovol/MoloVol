@@ -37,9 +37,7 @@ set(WASM_LINK_FLAGS
     -s ASSERTIONS=1
     --bind
     -s EXPORT_ES6=0#disabled for safari
-    -s USE_ES6_IMPORT_META=0
     -s EXPORTED_RUNTIME_METHODS=['ccall','cwrap','FS']
-	-s SINGLE_FILE=1          # Added to combine WASM into JS
     
     # Preload resource files
     --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/inputfile/elements.txt@/inputfile/elements.txt

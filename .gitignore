@@ -62,3 +62,6 @@ external/VTK/build*
 external/VTK/out/build*
 
 notforcommit/
+webserver/static/molovol_wasm.data
+webserver/static/molovol_wasm.js
+webserver/static/molovol_wasm.wasm
