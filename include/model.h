@@ -91,7 +91,9 @@ class Model{
     void writeTotalSurfaceMap(const std::string);
     void writeCavitiesMaps();
     void writeCavitiesMaps(const std::string);
-    void writeSurfaceMap(const std::string, double, std::array<unsigned long int,3>, std::array<double,3>, std::array<unsigned int,3>, std::array<unsigned int,3>, const bool=false, const unsigned char=0);
+    void writeSurfaceMap(const std::string, double, std::array<unsigned long int,3>, 
+        std::array<double,3>, std::array<unsigned int,3>, std::array<unsigned int,3>, 
+        const bool=false, const unsigned char=0);
 
     std::vector<std::string> listElementsInStructure();
 
@@ -105,12 +107,19 @@ class Model{
     CalcReportBundle generateData();
     CalcReportBundle generateVolumeData();
     CalcReportBundle generateSurfaceData();
+    const Container3D<Voxel>& getSurfaceData() const;
+    std::array<double,3> getCellOrigin() const;
+    const AtomTree& getAtomTree() const;
+
     // calls the Space constructor and creates a cell containing all atoms. Cell size is defined by atom positions
     void defineCell();
     std::vector<Atom> convertAtomCoordinates(const RawAtomData&, const std::vector<std::string>&);
     void linkAtomsToAdjacentAtoms(const double&);
     void linkToAdjacentAtoms(const double&, Atom&);
-    bool setParameters(const std::string, const std::string, const bool, const bool, const bool, const bool, const double, const double, const double, const int, const bool, const bool, const bool, const std::unordered_map<std::string, double>, const std::vector<std::string>);
+    bool setParameters(const std::string, const std::string, const bool, const bool, 
+        const bool, const bool, const double, const double, const double, const int, 
+        const bool, const bool, const bool, const std::unordered_map<std::string, double>, 
+        const std::vector<std::string>);
     std::vector<std::tuple<std::string, int, double>> generateAtomList();
     void setRadiusMap(std::unordered_map<std::string, double> map);
     std::unordered_map<std::string,double> getRadiusMap();

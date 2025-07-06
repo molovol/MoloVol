@@ -11,6 +11,7 @@
 #include <bitset>
 #include <ctime>
 #include <iostream>
+#include <filesystem>
 
 #ifdef __APPLE__
 #include <CoreFoundation/CFBundle.h>

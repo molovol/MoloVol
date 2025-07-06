@@ -315,7 +315,7 @@ void Voxel::traverseTree
     if(isAtom(atom, pos_vxl, rad_vxl, rad_probe)){return;}
 
     // continue with both children
-    for (AtomNode* child : {node->getLeftChild(), node->getRightChild()}){
+    for (const AtomNode* child : {node->getLeftChild(), node->getRightChild()}){
       traverseTree(child, rad_max, pos_vxl, rad_vxl, rad_probe, max_depth, exit_type, (dim+1)%3);
     }
   }
@@ -344,6 +344,7 @@ bool Voxel::isAtom(const Atom& atom, const Vector& pos_vxl, const double rad_vxl
   return false;
 }
 
+// TODO: Remove, instead use AtomTree::listAllWithin()
 // go through a tree, starting from node. return a list of atoms that are a specified max distance
 // from a point with radius rad_point.
 void Voxel::listFromTree(
@@ -370,7 +371,7 @@ void Voxel::listFromTree(
     }
 
     // continue with both children
-    for (AtomNode* child : {node->getLeftChild(), node->getRightChild()}){
+    for (const AtomNode* child : {node->getLeftChild(), node->getRightChild()}){
       listFromTree(atom_id_list, child, pos_point, rad_point, rad_max, max_dist, (dim+1)%3);
     }
   }
@@ -681,7 +682,8 @@ void Voxel::tallyVoxelsOfType(std::map<char,double>& type_tally,
         sub_index[1] = index[1]*2 + y;
         for(char z = 0; z < 2; ++z){
           sub_index[2] = index[2]*2 + z;
-          getSubvoxel(sub_index, lvl).tallyVoxelsOfType(type_tally, id_core_tally, id_shell_tally, id_min, id_max, sub_index, lvl-1, vxl_fraction);
+          getSubvoxel(sub_index, lvl).tallyVoxelsOfType(
+              type_tally, id_core_tally, id_shell_tally, id_min, id_max, sub_index, lvl-1, vxl_fraction);
         }
       }
     }

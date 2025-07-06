@@ -26,3 +26,8 @@ option(
   "Build MoloVol with GUI support (requires wxWidgets)" 
   ON
 )
+option(
+  MOLOVOL_RENDERER
+  "Enable compilation and linking to wxVTK24" 
+  ON
+)

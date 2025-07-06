@@ -28,9 +28,7 @@ struct SearchIndex{
 };
 
 class Space;
-class AtomTree;
 class FloodStack;
-class AtomNode;
 struct Atom;
 struct VoxelLoc;
 class Voxel{
@@ -80,7 +78,11 @@ class Voxel{
         const double=1);
 
     // unused but could become useful
-    static void listFromTree(std::vector<int>&, const AtomNode*, const Vector&, const double&, const double&, const double&, const char=0);
+    static void listFromTree(std::vector<int>&, const AtomNode*, const Vector&, 
+        const double&, const double&, const double&, const char=0);
+    static const AtomTree& getAtomTree() {
+      return *s_atomtree;
+    }
   private:
     char _type;
     unsigned char _identity;
@@ -101,8 +103,10 @@ class Voxel{
     bool isInterfaceVxl(const VoxelLoc&);
     std::vector<VoxelLoc> findPureNeighbours(const VoxelLoc&, const unsigned char=mvTYPE_ALL, const bool=false);
     std::vector<VoxelLoc> findPureNeighbors(const VoxelLoc&, const unsigned char=mvTYPE_ALL, const bool=false);
-    void descend(std::vector<VoxelLoc>&, const std::array<unsigned,3>&, const int, const std::array<int,3>&, const unsigned char);
-    void ascend(std::vector<VoxelLoc>&, const std::array<unsigned,3>, const int, std::array<unsigned,3>, const std::array<int,3>&);
+    void descend(std::vector<VoxelLoc>&, const std::array<unsigned,3>&, 
+        const int, const std::array<int,3>&, const unsigned char);
+    void ascend(std::vector<VoxelLoc>&, const std::array<unsigned,3>, 
+        const int, std::array<unsigned,3>, const std::array<int,3>&);
     void passIDtoChildren(const std::array<unsigned,3>&, const int);
     // shell vs void
     bool searchForCore(const std::array<unsigned int,3>&, const unsigned, bool=false);

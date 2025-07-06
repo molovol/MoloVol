@@ -9,7 +9,6 @@
 #include <array>
 #include <map>
 
-class AtomTree;
 struct Atom;
 class Voxel;
 class Space{
@@ -19,14 +18,14 @@ class Space{
     Space(std::vector<Atom>&, const double, const int, const double, const bool, const std::array<double,3>);
 
     // access
-    std::array <double,3> getMin();
-    std::array <double,3> getOrigin(); // same as getMin();
-    std::array <double,3> getMax();
-    std::array <double,3> getSize();
+    std::array<double,3> getMin() const;
+    std::array<double,3> getOrigin() const; // same as getMin();
+    std::array<double,3> getMax() const;
+    std::array<double,3> getSize();
     bool isInBounds(const std::array<int,3>&, const unsigned);
     bool isInBounds(const std::array<unsigned,3>&, const unsigned);
     double getVxlSize() const;
-    Container3D<Voxel>& getGrid(const unsigned);
+    const Container3D<Voxel>& getGrid(const unsigned) const;
 
     // get voxel
     Voxel& getVxlFromGrid(const unsigned int, unsigned);
@@ -58,9 +57,12 @@ class Space{
     std::array <double,3> _cart_min; // this is also the "origin" of the space
     std::array <double,3> _cart_max;
     std::vector<Container3D<Voxel>> _grid;
-    std::array<unsigned int,3> _unit_cell_start_index; // bottom level voxels indexes for the start of the unit cell in x,y,z direction
-    std::array<unsigned int,3> _unit_cell_end_index; // bottom level voxels indexes for the end of the unit cell in x,y,z direction
-    std::array<double,3> _unit_cell_mod_index; // bottom level voxels fractional indexes for the end of the unit cell in x,y,z direction
+    // bottom level voxels indexes for the start of the unit cell in x,y,z direction
+    std::array<unsigned int,3> _unit_cell_start_index; 
+    // bottom level voxels indexes for the end of the unit cell in x,y,z direction
+    std::array<unsigned int,3> _unit_cell_end_index; 
+    // bottom level voxels fractional indexes for the end of the unit cell in x,y,z direction
+    std::array<double,3> _unit_cell_mod_index; 
     double _grid_size;
     int _max_depth; // for voxels
     std::array<double,3> _unit_cell_limits; // cartesian coordinates of the unit cell orthogonal axes

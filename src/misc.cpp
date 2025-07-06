@@ -1,25 +1,56 @@
 #include "misc.h"
 #include <sstream>
 #include <iomanip>
-#include <filesystem>
+
+#if defined _WIN32
+#include <windows.h>
+#endif
 
 // access the resource folder containing elements.txt and space_groups.txt
-std::string getResourcesDir(){
+// Because std::filesystem was only introduced to macOS in 10.15 (released 2020) I have
+// decided to reimplement the method using std::string as return type. Consider reverting
+// this change once backwards compatibility to pre-10.15 macOS is no longer needed.
+std::string getResourcesDir() {
+  //std::filesystem::path res_dir = "";
+  std::string res_dir = "";
 #if defined(__APPLE__) && defined(ABS_PATH)
-  CFURLRef resource_url = CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle());
-  char resource_path[PATH_MAX];
-  if (CFURLGetFileSystemRepresentation(resource_url, true, (UInt8 *)resource_path, PATH_MAX)){
-    if (resource_url != NULL){
-      CFRelease(resource_url);
+    CFURLRef resource_url = CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle());
+    char resource_path[PATH_MAX];
+    if (CFURLGetFileSystemRepresentation(resource_url, true, (UInt8*)resource_path, PATH_MAX)) {
+        if (resource_url != NULL) {
+            CFRelease(resource_url);
+        }
+        //res_dir = std::filesystem::path(resource_path);
+        res_dir = resource_path;
     }
-    return resource_path;
-  }
-  return "";
+
 #elif defined(__linux__) && defined(ABS_PATH)
-  return "/usr/share/molovol";
+    //res_dir = std::filesystem::path("/usr/share/molovol");
+    res_dir = "/usr/share/molovol";
+
+#elif defined(_WIN32) && defined(ABS_PATH)
+    std::filesystem::path res_dir_path = "";
+    wchar_t buffer[MAX_PATH];
+    DWORD length = GetModuleFileNameW(NULL, buffer, MAX_PATH);
+
+    if (length) {
+      std::wstring executablePath(buffer);
+      size_t pos = executablePath.find_last_of(L"\\");
+
+      if (pos != std::wstring::npos) {
+          std::wstring executableDir = executablePath.substr(0, pos);
+          std::filesystem::path executableDirPath(executableDir.begin(), executableDir.end());
+          res_dir_path = executableDirPath / ".." / "shared" / "inputfile";
+      }
+    }
+    res_dir = res_dir_path.string();
+
 #else
-  return "./inputfile";
+    //res_dir = std::filesystem::path("./inputfile");
+    res_dir = "./inputfile";
 #endif
+    //return res_dir.lexically_normal();
+    return res_dir;
 }
 
 std::string fileExtension(const std::string& path){
@@ -46,16 +77,17 @@ std::string fileName(const std::string& path){
 
 // find the current time and convert to a string in format year-month-day_hour-min-sec
 std::string timeNow(){
-    time_t rawtime;
-    struct tm * timeinfo;
-    char buffer[80];
+    std::time_t now = std::time(nullptr);
+    std::tm localTime{};
+#if defined(_WIN32)
+    localtime_s(&localTime, &now);
+#else
+    localtime_r(&now, &localTime);
+#endif
 
-    time (&rawtime);
-    timeinfo = localtime (&rawtime);
-
-    strftime (buffer,80,"%Y-%m-%d_%Hh%Mm%Ss",timeinfo);
-
-    return buffer;
+    std::ostringstream oss;
+    oss << std::put_time(&localTime, "%Y-%m-%d_%Hh%Mm%Ss");
+    return oss.str();
 }
 
 int pow2(int exp){
