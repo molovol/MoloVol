@@ -16,7 +16,7 @@ COPY include/ include/
 COPY LICENSE ./
 COPY README.md ./
 COPY inputfile/ inputfile/
-RUN cmake . -DCMAKE_BUILD_TYPE=RELEASE -DMOLOVOL_ABS_RESOURCE_PATH=ON -DMOLOVOL_BUILD_GUI=OFF && make
+RUN cmake . -DCMAKE_BUILD_TYPE=RELEASE -DMOLOVOL_ABS_RESOURCE_PATH=ON -DMOLOVOL_BUILD_GUI=OFF -DCMAKE_C_FLAGS="-fopenmp" -DCMAKE_CXX_FLAGS="-fopenmp" && make
 RUN apk add --no-cache \
     file \
     dpkg

@@ -1,9 +1,8 @@
-# Set up core sources needed by all builds
-set(CORE_SOURCES
+# Base sources (non-GUI)
+set(LIB_SOURCES
   src/atom.cpp
   src/atomtree.cpp
   src/cavity.cpp
-  src/controller.cpp
   src/crystallographer.cpp
   src/griddata.cpp
   src/importmanager.cpp
@@ -15,25 +14,35 @@ set(CORE_SOURCES
   src/special_chars.cpp
   src/vector.cpp
   src/voxel.cpp
+  src/controller.cpp
+)
+# Create the static library
+add_library(molovol_lib STATIC ${LIB_SOURCES})
+target_include_directories(molovol_lib PUBLIC include)
+
+# Set the same compiler options for the library
+target_compile_options(molovol_lib PRIVATE -Wall -Werror -Wno-unused-command-line-argument -Wno-invalid-source-encoding)
+target_compile_options(molovol_lib PRIVATE "$<$<NOT:$<CONFIG:RELEASE,MINSIZEREL,RELWITHDEBINFO>>:-DDEBUG>")
+
+# Define MOLOVOL_GUI for the library when building with GUI
+if(MOLOVOL_BUILD_GUI)
+    target_compile_definitions(molovol_lib PRIVATE MOLOVOL_GUI)
+endif()
+
+# GUI-specific sources
+set(GUI_SOURCES
+  src/base_guicontrol.cpp
+  src/base_constr.cpp
+  src/base_event.cpp
+  src/base_init.cpp
 )
 
-# Set up sources based on build type
+set(CLI_SOURCES
+    src/base_cmdline.cpp
+)
+
 if(MOLOVOL_BUILD_GUI)
-    # GUI-specific sources
-    set(GUI_SOURCES
-      src/base_guicontrol.cpp
-      src/base_constr.cpp
-      src/base_event.cpp
-      src/base_init.cpp
-    )
-    set(SOURCES 
-        ${CORE_SOURCES}
-        ${GUI_SOURCES}
-    )
+    set(SOURCES ${GUI_SOURCES})
 else()
-    # CLI build
-    set(SOURCES
-        ${CORE_SOURCES}
-        src/base_cmdline.cpp
-    )
+    set(SOURCES ${CLI_SOURCES})
 endif()

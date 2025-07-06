@@ -4,6 +4,7 @@
 #include "misc.h"
 #include "container3d.h"
 #include "griddata.h"
+#include "voxel.h"
 #include <string>
 #include <sstream>
 #include <vector>
@@ -41,7 +42,7 @@ void Model::createReport(std::string path){
   output_report << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n";
   output_report << "Website: https://molovol.com\n";
   output_report << "Source code available at https://github.com/molovol/MoloVol under the MIT licence\n";
-  output_report << "Copyright © 2020-2022 Jasmin B. Maglic, Roy Lavendomme\n\n";
+  output_report << "Copyright © 2020-2025 Jasmin B. Maglic, Roy Lavendomme\n\n";
   output_report << "MoloVol program: calculation results report\n";
   output_report << "version: " + Ctrl::getVersion() + "\n\n";
   output_report << "Time of the calculation: " << _time_stamp << "\n";
@@ -455,7 +456,7 @@ void Model::writeSurfaceMap(const std::string file_path,
                             const unsigned char id){
   bool issue_encountered = false;
   // assemble data
-  Container3D<Voxel>* surface_map = &_cell.getGrid(0);
+  const Container3D<Voxel>* surface_map = &_cell.getGrid(0);
 
   // create map for assigning numbers to types
   const std::map<char,int> typeToNum =
@@ -536,6 +537,18 @@ void Model::writeSurfaceMap(const std::string file_path,
   // close the file
   output_file.close();
   if (issue_encountered) {Ctrl::getInstance()->displayErrorMessage(303);}
+}
+
+const Container3D<Voxel>& Model::getSurfaceData() const {
+  return _cell.getGrid(0);
+}
+
+std::array<double,3> Model::getCellOrigin() const {
+  return _cell.getOrigin();
+}
+
+const AtomTree& Model::getAtomTree() const {
+  return Voxel::getAtomTree();
 }
 
 ///////////////

@@ -1,0 +1,9 @@
+[submodule "external/wxVTK24"]
+	path = external/wxVTK24
+	url = https://github.com/jmaglic/wxVTK24
+[submodule "external/VTK"]
+	path = external/VTK
+	url = https://github.com/molovol/VTK.git
+[submodule "external/wxWidgets"]
+	path = external/wxWidgets
+	url = https://github.com/molovol/wxWidgets.git

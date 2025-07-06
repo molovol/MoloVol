@@ -4,6 +4,11 @@
 
 #include "cavity.h"
 #include "griddata.h"
+
+#ifdef MOLOVOL_RENDERER
+#include "render_frame.h"
+#endif
+ 
 #include <wx/filectrl.h>
 #include <wx/filepicker.h>
 #include <wx/wfstream.h>
@@ -22,6 +27,8 @@
 #include <map>
 #include <utility>
 
+class MainFrame;
+// Application
 class MainApp: public wxApp
 {
   public:
@@ -30,12 +37,19 @@ class MainApp: public wxApp
     virtual int OnExit();
 
   private:
+    MainFrame* m_mainWin;
+
     void evalCmdLine();
     void silenceGUI(bool);
     bool isSilent();
 };
 
 wxDECLARE_EVENT(wxEVT_COMMAND_WORKERTHREAD_COMPLETED, wxThreadEvent);
+
+template <typename> class Container3D;
+class Voxel;
+class RenderFrame;
+struct Atom;
 
 class MainFrame: public wxFrame, public wxThreadHelper
 {
@@ -52,6 +66,9 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void extSetStatus(const std::string);
     void extSetProgressBar(const int);
     void extDisplayCavityList(const GridData&);
+    void extRenderSurface(const Container3D<Voxel>&, const std::array<double,3>, const double, 
+        const bool, const unsigned char, const std::vector<Atom>&);
+
     bool receivedAbortCommand();
 
     void extOpenErrorDialog(const int, const std::string&);
@@ -66,11 +83,12 @@ class MainFrame: public wxFrame, public wxThreadHelper
     double getProbe1Radius();
     double getProbe2Radius();
     double getGridsize();
-    int getDepth();
+    int getDepth() const;
     bool getMakeReport();
     bool getMakeSurfaceMap();
     bool getMakeCavityMaps();
     std::string getOutputDir();
+    const Container3D<Voxel>& getSurfaceData() const;
     void enableGuiElements(bool inp); // method to turn interactable gui elements on or off
 
     void displayAtomList(std::vector<std::tuple<std::string, int, double>> symbol_number_radius);
@@ -92,8 +110,17 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void setStatus(const std::string);
     void setProgressBar(const int);
     void displayCavityList(const GridData&);
+    void renderSurface(const Container3D<Voxel>&, const std::array<double,3>, 
+      const double, const std::pair<bool,unsigned char>);
+    void renderMolecule(const std::vector<Atom>&);
 
     void openErrorDialog(const std::pair<int,std::string>&);
+
+#ifdef MOLOVOL_RENDERER
+    // The main frame should contain the render window, so that the Model class
+    // can transfer image information to the render frame
+    RenderFrame* m_renderWin;
+#endif
 
     wxMessageQueue<bool>* _abort_q;
     wxStatusBar* statusBar;

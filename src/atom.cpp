@@ -44,3 +44,14 @@ void Atom::print() const {
 
 bool Atom::isValid() const {return (rad >= 0);}
 
+bool Atom::operator==(const Atom& at) const {
+  return 
+    pos_x  == at.pos_x  &&
+    pos_y  == at.pos_y  &&
+    pos_z  == at.pos_z  &&
+    rad    == at.rad    &&
+    number == at.number &&
+    charge == at.charge &&
+    symbol == at.symbol;
+}
+

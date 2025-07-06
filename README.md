@@ -10,8 +10,8 @@ You are welcome to visit [the project's website](https://molovol.com)
 With MoloVol we aim to combine an intuitive and easy-to-use user interface with powerful computing algorithms. We want
 the software to serve a broad range of scientist by being easily accessible on all common platforms.
 
-Version 1.1.1 of MoloVol has now been released. The software will continue to be maintained and actively developed on
-Windows 10, macOS, Ubuntu, and web.
+Version 1.2 of MoloVol has now been released. The software will continue to be maintained and actively developed on
+Windows, macOS, Ubuntu, and web.
 
 ## Getting Started
 
@@ -81,7 +81,7 @@ below with your local image name.
 Running a container:
 - For a short-lived container: Pass the CLI arguments in the run command:
   `docker run -it bsvogler/molovol ./launch_headless.sh <yourMolovolArguments>`
-- To run web application http://localhost:80: run 
+- To run web application http://localhost:5000: run 
   `docker run -dt --restart=always -p 5000:5000 --name molovol bsvogler/molovol`. 
   When not otherwise specified the default port of a flask instance is 5000.
 

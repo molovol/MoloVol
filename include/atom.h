@@ -34,6 +34,8 @@ struct Atom {
   void print() const;
   bool isValid() const;
 
+  bool operator==(const Atom&) const;
+
 };
 
 #endif

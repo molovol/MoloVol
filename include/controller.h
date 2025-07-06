@@ -12,6 +12,11 @@ class MainFrame;
 
 struct CalcReportBundle;
 class Model;
+class AtomTree;
+struct Atom;
+
+template <typename> class Container3D;
+class Voxel;
 
 class Ctrl {
   public:
@@ -50,6 +55,9 @@ class Ctrl {
     void exportReport(std::string);
     void exportSurfaceMap(bool);
     void exportSurfaceMap(const std::string, bool);
+    void renderSurface(const Container3D<Voxel>&, const std::array<double,3>, 
+        const double, const bool, const unsigned char, const std::vector<Atom>&);
+    const Container3D<Voxel>& getSurfaceData() const;
 
     void newCalculation();
     void calculationDone(const bool=true);
@@ -77,7 +85,7 @@ class Ctrl {
     void displayCavityList(CalcReportBundle&, const unsigned=mvOUT_ALL);
     std::string getErrorMessage(const int);
 
-    inline static const std::string s_version = "1.2";
+    inline static const std::string s_version = "1.2.1";
     inline static const std::string s_elem_file = "elements.txt";
 };
 

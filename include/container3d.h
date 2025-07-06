@@ -10,7 +10,6 @@
 template <class T>
 class Container3D{
   public:
-    // constructors
     Container3D() = default;
 
     Container3D(const unsigned long int x, const unsigned long int y, const unsigned long int z){
@@ -28,30 +27,29 @@ class Container3D{
     Container3D(const std::array<unsigned int,3> steps) 
       : Container3D((unsigned long) steps[0], (unsigned long) steps[1], (unsigned long) steps[2]){}
     
-    // get element
-    // single integer
+    /////////////
+    // GETTERS //
+    /////////////
+    // Single index getter
     T& getElement(const unsigned long int i){return _data[i];}
-    // three integers
-    T& getElement(const unsigned long int x, const unsigned long int y, const unsigned long int z){
-      // check if element is out of bounds
-//      assert(x < _n_elements[0]);
-//      assert(y < _n_elements[1]);
-//      assert(z < _n_elements[2]);
+
+    // XYZ index getter
+    template<std::integral INT>
+    T& getElement(const INT x, const INT y, const INT z){
       return _data[z * _n_elements[0] * _n_elements[1] + y * _n_elements[0] + x];
     }
-    // arrays
-    T& getElement(const std::array<unsigned long int,3> coord){
-      return _data[coord[2] * _n_elements[0] * _n_elements[1] + coord[1] * _n_elements[0] + coord[0]];}
-    
-    T& getElement(const std::array<unsigned int,3> coord){
-      return _data[coord[2] * _n_elements[0] * _n_elements[1] + coord[1] * _n_elements[0] + coord[0]];}
-    
-    T& getElement(const std::array<long int,3> coord){
-      return _data[coord[2] * _n_elements[0] * _n_elements[1] + coord[1] * _n_elements[0] + coord[0]];}
-    
-    T& getElement(const std::array<int,3> coord){
-      return _data[coord[2] * _n_elements[0] * _n_elements[1] + coord[1] * _n_elements[0] + coord[0]];}
-    // get boundaries
+
+    template<std::integral INT>
+    const T& getElement(const INT x, const INT y, const INT z) const {
+      return _data[z * _n_elements[0] * _n_elements[1] + y * _n_elements[0] + x];
+    }
+
+    // These functions should be a template function
+    template<std::integral INT>
+    T& getElement(const std::array<INT,3> coord){
+      return _data[coord[2] * _n_elements[0] * _n_elements[1] + coord[1] * _n_elements[0] + coord[0]];
+    }
+
     template <typename Q = unsigned long>
     std::array<Q,3> getNumElements() const {
       std::array<Q,3> arr;
