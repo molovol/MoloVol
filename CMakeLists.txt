@@ -106,7 +106,7 @@ else()
   add_executable(${EXE_NAME} ${SOURCES} ${OSX_RESOURCE_FILES})
 endif()
 
-# XCode, app bundle and libtiff
+# XCode, app bundle
 include(MacSpecific)
 
 target_link_libraries(${EXE_NAME} ${wxWidgets_LIBRARIES})
