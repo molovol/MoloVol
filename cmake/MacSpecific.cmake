@@ -7,6 +7,7 @@ set_target_properties(${EXE_NAME} PROPERTIES
 
 # macOS Bundle
 set(APP_DEPLOYMENT_TARGET "${CMAKE_OSX_DEPLOYMENT_TARGET}")
+message(STATUS "Generating Info.plist from template")
 configure_file(${OSX_INFO_PLIST_IN} "${CMAKE_BINARY_DIR}/Info.plist" @ONLY)
 
 set_target_properties(${EXE_NAME} PROPERTIES
