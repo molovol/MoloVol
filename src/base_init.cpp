@@ -244,7 +244,17 @@ void MainFrame::InitElementsfilePanel(){
   elementsButton = new wxButton(elementsfilePanel, BUTTON_Elements, "Browse");
 
   std::string default_path = Ctrl::getDefaultElemPath();
-  elementspathText = new wxTextCtrl(elementsfilePanel, TEXT_Elementspath, default_path, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+  // Setting the default width of the text field to 0 is necessary to keep the GUI to
+  // the desired width. When the text control is initialised it attempts to fit the
+  // entire initial file path. This path tends to be long and as a result the entire
+  // GUI becomes unmanagably wide.
+  elementspathText = new wxTextCtrl(
+      elementsfilePanel, 
+      TEXT_Elementspath, 
+      default_path, 
+      wxDefaultPosition, 
+      wxSize(0,-1), 
+      wxTE_PROCESS_ENTER);
   SetSizerFilePanel(elementsfilePanel, elementsText, elementsButton, elementspathText);
 }
 
