@@ -488,7 +488,7 @@ void Ctrl::notifyUser(std::wstring wstr){
     s_gui->extAppendOutputW(wstr);
   }
   else {
-    std::cout << wstr;
+    std::wcout << wstr;
   }
 }
 

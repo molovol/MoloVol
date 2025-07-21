@@ -163,11 +163,14 @@ void MainFrame::OnElementsBrowse(wxCommandEvent& event){
 
 // browse (can only be called by another method function)
 void MainFrame::OnBrowse(wxCommandEvent& event, std::string& filetype, wxTextCtrl* textbox){
+  
   wxFileDialog openFileDialog(this,_("Select file"),textbox->GetValue(),"",filetype,wxFD_OPEN|wxFD_FILE_MUST_EXIST);
 
   // if user closes dialog
-  if (openFileDialog.ShowModal() == wxID_CANCEL)
-    return;
+  if (openFileDialog.ShowModal() == wxID_CANCEL) {
+    std::cout << "?" << std::endl;
+    //return;
+  }
 
   // proceed loading the file chosen by the user;
   wxFileInputStream input_stream(openFileDialog.GetPath());
@@ -247,7 +250,8 @@ const Container3D<Voxel>& MainFrame::getSurfaceData() const {
 
 std::string MainFrame::OpenExportFileDialog(const std::string file_type, const std::string file_extension){
   // open file dialog
-  wxFileDialog save_dialog(this, _("Export " + file_type + " as..."), "", "", file_extension, wxFD_SAVE);
+  wxFileDialog save_dialog(this, wxString::Format(_("Export %s as..."), file_type), 
+      "", "", file_extension, wxFD_SAVE);
 
   // if user closes dialog
   if (save_dialog.ShowModal() == wxID_CANCEL) {return "";}
