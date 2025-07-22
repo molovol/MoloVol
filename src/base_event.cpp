@@ -168,8 +168,7 @@ void MainFrame::OnBrowse(wxCommandEvent& event, std::string& filetype, wxTextCtr
 
   // if user closes dialog
   if (openFileDialog.ShowModal() == wxID_CANCEL) {
-    std::cout << "?" << std::endl;
-    //return;
+    return;
   }
 
   // proceed loading the file chosen by the user;
