@@ -10,6 +10,8 @@
 #include <vector>
 #include <chrono>
 #include <thread>
+#include <wx/stdpaths.h>
+#include <wx/textfile.h>
 
 /////////////////
 // EVENT TABLE //
@@ -247,8 +249,41 @@ const Container3D<Voxel>& MainFrame::getSurfaceData() const {
 
 void MainFrame::OnMenuAbout(wxCommandEvent& event){
   wxMessageBox( 
-      wxString::Format(_("MoloVol Version %s\nDeveloped and maintained by Roy Lavendomme and Jasmin B. Maglic."), Ctrl::getVersion()), "About", wxOK | wxICON_INFORMATION);
-  
+      wxString::Format(_("MoloVol Version %s\nDeveloped and maintained by Roy Lavendomme and Jasmin B. Maglic."), Ctrl::getVersion()), "About", wxOK | wxICON_INFORMATION); 
+}
+
+void openModalDialog(wxWindow*, wxString, wxString&);
+void MainFrame::OnMenuVTKLicense(wxCommandEvent& event){
+  wxString license_path = wxStandardPaths::Get().GetResourcesDir() + "/licenses/VTK.txt";
+
+  wxTextFile license_file;
+  if (!license_file.Open(license_path))
+  {
+    wxMessageBox("Could not open the VTK license file.", "Error", wxOK | wxICON_ERROR);
+    return;
+  }
+
+  wxString license_text;
+  for ( wxString str = license_file.GetFirstLine(); !license_file.Eof(); str = license_file.GetNextLine() )
+  {
+    license_text += str + "\n";
+  }
+
+  openModalDialog(this, wxString("VTK License"), license_text);
+}
+
+void openModalDialog(wxWindow* parent, wxString title_string, wxString& license_text){
+  wxDialog* dlg = new wxDialog(parent, wxID_ANY, title_string, wxDefaultPosition, wxSize(600, 400));
+  wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+
+  wxTextCtrl* textCtrl = new wxTextCtrl(dlg, wxID_ANY, license_text,
+    wxDefaultPosition, wxDefaultSize,
+    wxTE_MULTILINE | wxTE_READONLY | wxTE_RICH2 | wxHSCROLL);
+
+  sizer->Add(textCtrl, 1, wxEXPAND | wxALL, 10);
+  dlg->SetSizer(sizer);
+  dlg->ShowModal();
+  dlg->Destroy();
 }
 
 ///////////////
@@ -338,8 +373,6 @@ void MainFrame::OnBrowseOutput(wxCommandEvent& event){
 
   dirpickerText->SetValue(openDirDialog.GetPath());
 }
-
-
 
 ////////////////////////////////
 // GUI enabling and disabling //

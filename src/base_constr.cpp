@@ -40,5 +40,7 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 
   SetMenuBar(menuBar);
 
+  Bind(wxEVT_MENU, &MainFrame::OnMenuVTKLicense, this, 1001);
+
 };
 

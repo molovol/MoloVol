@@ -251,7 +251,8 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void GridChange(wxGridEvent& event);
 
     // Menu bar events
-    void OnMenuAbout(wxCommandEvent& event);
+    void OnMenuAbout(wxCommandEvent&);
+    void OnMenuVTKLicense(wxCommandEvent&);
     ////////////////////
     // EVENT HANDLERS //
     ////////////////////
