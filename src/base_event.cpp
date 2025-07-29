@@ -37,11 +37,12 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_CHECKBOX(CHECKBOX_CavityMaps, MainFrame::OnToggleAutoExport)
   EVT_GRID_CELL_CHANGING(MainFrame::GridChange)
   EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_WORKERTHREAD_COMPLETED, MainFrame::OnCalculationFinished)
+  EVT_MENU(wxID_ABOUT, MainFrame::OnMenuAbout)
 END_EVENT_TABLE()
 
-////////////////////////////////
-// METHODS FOR EVENT HANDLING //
-////////////////////////////////
+///////////////////
+// EVENT HANDLERS//
+///////////////////
 
 int MainApp::OnExit(){
   return 0;
@@ -239,8 +240,15 @@ void MainFrame::OnTextInput(wxCommandEvent& event){
   }
 }
 
+// TODO: Why is this getter function here? -JBM
 const Container3D<Voxel>& MainFrame::getSurfaceData() const {
   return Ctrl::getInstance()->getSurfaceData();
+}
+
+void MainFrame::OnMenuAbout(wxCommandEvent& event){
+  wxMessageBox( 
+      wxString::Format(_("MoloVol Version %s\nDeveloped and maintained by Roy Lavendomme and Jasmin B. Maglic."), Ctrl::getVersion()), "About", wxOK | wxICON_INFORMATION);
+  
 }
 
 ///////////////
@@ -330,6 +338,8 @@ void MainFrame::OnBrowseOutput(wxCommandEvent& event){
 
   dirpickerText->SetValue(openDirDialog.GetPath());
 }
+
+
 
 ////////////////////////////////
 // GUI enabling and disabling //

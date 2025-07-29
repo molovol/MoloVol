@@ -28,10 +28,15 @@ MainFrame::MainFrame(const wxString &title, const wxPoint &pos, const wxSize &si
 #endif
 
   // Create a menu bar
+  wxMenu *menuHelp = new wxMenu;
+  menuHelp->Append(1001, "VTK License", "View VTK License Agreement");
+  menuHelp->Append(wxID_ABOUT, "About");
+
   wxMenu *menuFile = new wxMenu;
   menuFile->Append(wxID_EXIT, "Exit\tCmd-Q", "Quit MoloVol");
 
   wxMenuBar *menuBar = new wxMenuBar;
+  menuBar->Append(menuHelp, "&Help");
 
   SetMenuBar(menuBar);
 

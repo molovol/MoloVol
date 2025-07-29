@@ -227,7 +227,9 @@ class MainFrame: public wxFrame, public wxThreadHelper
     void InitAutoExportPanel();
     void SetSizerExportSubPanel(wxPanel*, wxButton*, wxCheckBox*);
 
-    // methods to handle events
+    ////////////////////
+    // EVENT HANDLERS //
+    ////////////////////
     void OnClose(wxCloseEvent& event);
     void OnCalc(wxCommandEvent& event);
     void OnAbort(wxCommandEvent& event);
@@ -247,6 +249,12 @@ class MainFrame: public wxFrame, public wxThreadHelper
 
     void ProbeModeChange(wxCommandEvent& event);
     void GridChange(wxGridEvent& event);
+
+    // Menu bar events
+    void OnMenuAbout(wxCommandEvent& event);
+    ////////////////////
+    // EVENT HANDLERS //
+    ////////////////////
 
     // access functions
     std::vector<wxCheckBox*> getAutoExportCheckBoxes(){return {reportCheckbox, surfaceMapCheckbox, cavityMapsCheckbox};}
