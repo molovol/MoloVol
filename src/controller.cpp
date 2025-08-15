@@ -91,12 +91,15 @@ void Ctrl::registerView(MainFrame* inp_gui){
 }
 
 bool Ctrl::loadElementsFile(){
-  // GUI-specific implementation...
+  // create an instance of the model class
+  // ensures, that there is only ever one instance of the model class
   if(_current_calculation == NULL){
     _current_calculation = new Model();
   }
 
   std::string elements_filepath = s_gui->getElementsFilepath();
+  // even if there is no valid radii file, the program can be used
+  // by manually setting radii in the GUI after loading a structure
   if(!_current_calculation->importElemFile(elements_filepath)){
     displayErrorMessage(101);
   }
@@ -105,7 +108,8 @@ bool Ctrl::loadElementsFile(){
 }
 
 bool Ctrl::loadAtomFile(){
-  // GUI-specific implementation...
+  // create an instance of the model class
+  // ensures, that there is only ever one instance of the model class
   if(_current_calculation == NULL){
     _current_calculation = new Model();
   }
@@ -118,6 +122,7 @@ bool Ctrl::loadAtomFile(){
   return successful_import;
 }
 
+// default function call: transfer data from GUI to Model
 bool Ctrl::runCalculation(){
   // reset abort flag
   setAbortFlag(false);
@@ -177,6 +182,10 @@ bool Ctrl::runCalculation(){
   return data.success;
 }
 #endif
+
+/////////////////
+// CALCULATION //
+/////////////////
 
 // CLI version
 bool Ctrl::runCalculation(
