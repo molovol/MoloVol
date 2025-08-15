@@ -470,9 +470,9 @@ void Ctrl::displayCavityList(CalcReportBundle& data, [[maybe_unused]] const unsi
   // display data
 
   if (_to_gui){
-	#ifdef MOLOVOL_GUI
+#ifdef MOLOVOL_GUI
     s_gui->extDisplayCavityList(table);
-	#endif
+#endif
   }
   else{
     table.print();
