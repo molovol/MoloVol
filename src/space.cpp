@@ -134,35 +134,21 @@ void Space::assignAtomVsCore(){
   const std::array<double,3> vxl_origin = getOrigin();
   // calculate side length of top level voxel
   const double vxl_dist = _grid_size * pow(2,_max_depth);
-  const auto steps = getGridsteps();
-  bool should_abort = false;
-
-  #pragma omp parallel
-  {
-    std::array<double,3> vxl_pos;
-    std::array<unsigned,3> top_lvl_index;
-
-    #pragma omp for collapse(2)
-    for(unsigned int i = 0; i < steps[0]; i++){
-      Ctrl::getInstance()->updateCalculationStatus();
-      vxl_pos[0] = vxl_origin[0] + vxl_dist * (0.5 + i);
-      for(unsigned int j = 0; j < steps[1]; j++){
-        vxl_pos[1] = vxl_origin[1] + vxl_dist * (0.5 + j);
-        for(unsigned int k = 0; k < steps[2]; k++){
-          if (!should_abort) {
-            vxl_pos[2] = vxl_origin[2] + vxl_dist * (0.5 + k);
-            top_lvl_index = {i, j, k};
-            // voxel position is deliberately not stored in voxel object to reduce memory cost
-            if (Ctrl::getInstance()->getAbortFlag()){
-              should_abort = true;
-            } else {
-              getTopVxl(top_lvl_index).evalRelationToAtoms(top_lvl_index, vxl_pos, _max_depth);
-            }
-          }
-        }
+  std::array<double,3> vxl_pos;
+  std::array<unsigned,3> top_lvl_index;
+  for(top_lvl_index[0] = 0; top_lvl_index[0] < getGridsteps()[0]; top_lvl_index[0]++){
+    Ctrl::getInstance()->updateCalculationStatus();
+    vxl_pos[0] = vxl_origin[0] + vxl_dist * (0.5 + top_lvl_index[0]);
+    for(top_lvl_index[1] = 0; top_lvl_index[1] < getGridsteps()[1]; top_lvl_index[1]++){
+      vxl_pos[1] = vxl_origin[1] + vxl_dist * (0.5 + top_lvl_index[1]);
+      for(top_lvl_index[2] = 0; top_lvl_index[2] < getGridsteps()[2]; top_lvl_index[2]++){
+        vxl_pos[2] = vxl_origin[2] + vxl_dist * (0.5 + top_lvl_index[2]);
+        // voxel position is deliberately not stored in voxel object to reduce memory cost
+        if (Ctrl::getInstance()->getAbortFlag()){return;}
+        getTopVxl(top_lvl_index).evalRelationToAtoms(top_lvl_index, vxl_pos, _max_depth);
       }
-      Ctrl::getInstance()->updateProgressBar(int(100*(double(i)+1)/double(getGridsteps()[0])));
     }
+    Ctrl::getInstance()->updateProgressBar(int(100*(double(top_lvl_index[0])+1)/double(getGridsteps()[0])));
   }
 }
 

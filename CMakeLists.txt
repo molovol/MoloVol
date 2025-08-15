@@ -34,11 +34,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-find_program(CCACHE_PROGRAM ccache)
-if(CCACHE_PROGRAM)
-    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
-endif()
-
 if(APPLE)
     if(CMAKE_C_COMPILER_ID MATCHES "Clang")
         set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp")
@@ -160,11 +155,11 @@ include(Packing)
 
 
 #this openMP section is currently commented out as it leads to runtime crashed because of some memory issue
-find_package(OpenMP)
-if(OpenMP_CXX_FOUND)
-  target_link_libraries(${EXE_NAME} PUBLIC OpenMP::OpenMP_CXX)
-  target_compile_definitions(${EXE_NAME} PUBLIC HAVE_OPENMP)
-endif()
+#find_package(OpenMP)
+#if(OpenMP_CXX_FOUND)
+#    target_link_libraries(${EXE_NAME} PUBLIC OpenMP::OpenMP_CXX)
+#    target_compile_definitions(${EXE_NAME} PUBLIC HAVE_OPENMP)
+#endif()
 
 
 # Ensure molovol_test is built if MOLOVOL_BUILD_TESTING is ON
