@@ -39,7 +39,6 @@ class MainApp: public wxApp
   private:
     MainFrame* m_mainWin;
 
-    void evalCmdLine();
     void silenceGUI(bool);
     bool isSilent();
 };

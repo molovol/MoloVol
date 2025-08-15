@@ -135,10 +135,10 @@ include(MacSpecific)
 target_link_libraries(${EXE_NAME} PRIVATE molovol_lib)
 
 if(MOLOVOL_BUILD_GUI)
-  target_link_libraries(${EXE_NAME} ${wxWidgets_LIBRARIES})
+  target_link_libraries(${EXE_NAME} PRIVATE ${wxWidgets_LIBRARIES})
   target_compile_definitions(${EXE_NAME} PRIVATE MOLOVOL_GUI)
   if(MOLOVOL_RENDERER)
-    target_link_libraries(${EXE_NAME} ${WXVTK_LIB})
+    target_link_libraries(${EXE_NAME} PRIVATE ${WXVTK_LIB})
     target_compile_definitions(${EXE_NAME} PRIVATE MOLOVOL_RENDERER) 
   endif()
 endif()
@@ -162,12 +162,12 @@ include(Packing)
 #this openMP section is currently commented out as it leads to runtime crashed because of some memory issue
 find_package(OpenMP)
 if(OpenMP_CXX_FOUND)
-    target_link_libraries(${EXE_NAME} PUBLIC OpenMP::OpenMP_CXX)
-    target_compile_definitions(${EXE_NAME} PUBLIC HAVE_OPENMP)
+  target_link_libraries(${EXE_NAME} PUBLIC OpenMP::OpenMP_CXX)
+  target_compile_definitions(${EXE_NAME} PUBLIC HAVE_OPENMP)
 endif()
 
 
 # Ensure molovol_test is built if MOLOVOL_BUILD_TESTING is ON
 if(MOLOVOL_BUILD_TESTING)
-    include(Testing) # Include Testing.cmake here
+  include(Testing)
 endif()

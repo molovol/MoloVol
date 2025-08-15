@@ -247,7 +247,7 @@ const Container3D<Voxel>& MainFrame::getSurfaceData() const {
 
 std::string MainFrame::OpenExportFileDialog(const std::string file_type, const std::string file_extension){
   // open file dialog
-  wxFileDialog save_dialog(this, _("Export " + file_type + " as..."), "", "", file_extension, wxFD_SAVE);
+  wxFileDialog save_dialog(this, wxString::Format(_("Export %s as..."), file_type), "", "", file_extension, wxFD_SAVE);
 
   // if user closes dialog
   if (save_dialog.ShowModal() == wxID_CANCEL) {return "";}

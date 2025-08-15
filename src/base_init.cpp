@@ -29,11 +29,11 @@ bool MainApp::OnInit()
   //printf("Debugging Window:\n");
   if (argc != 1){
     // command line interface
-    evalCmdLine();
+    //evalCmdLine(argc, argv);
   }
   else {
     // initialise the GUI
-    m_mainWin = new MainFrame(_("MoloVol " + Ctrl::getVersion()), wxDefaultPosition, wxDefaultSize);
+    m_mainWin = new MainFrame(wxString::Format(_("MoloVol %s"), Ctrl::getVersion()), wxDefaultPosition, wxDefaultSize);
     m_mainWin->Show(true);
     SetTopWindow(m_mainWin);
 
