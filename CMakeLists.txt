@@ -153,15 +153,6 @@ endif()
 
 include(Packing)
 
-
-#this openMP section is currently commented out as it leads to runtime crashed because of some memory issue
-#find_package(OpenMP)
-#if(OpenMP_CXX_FOUND)
-#    target_link_libraries(${EXE_NAME} PUBLIC OpenMP::OpenMP_CXX)
-#    target_compile_definitions(${EXE_NAME} PUBLIC HAVE_OPENMP)
-#endif()
-
-
 # Ensure molovol_test is built if MOLOVOL_BUILD_TESTING is ON
 if(MOLOVOL_BUILD_TESTING)
   include(Testing)
