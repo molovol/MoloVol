@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Required -->
+    <key>CFBundleName</key>
+    <string>${MACOSX_BUNDLE_BUNDLE_NAME}</string>
+
+    <key>CFBundleExecutable</key>
+    <string>${MACOSX_BUNDLE_EXECUTABLE_NAME}</string>
+
+    <key>CFBundleIdentifier</key>
+    <string>com.molovol.MoloVol</string>
+
+    <key>CFBundleVersion</key>
+    <string>${MACOSX_BUNDLE_BUNDLE_VERSION}</string>
+
+    <key>CFBundleShortVersionString</key>
+    <string>${MACOSX_BUNDLE_SHORT_VERSION_STRING}</string>
+
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+
+    <key>CFBundleSignature</key>
+    <string>????</string>
+
+    <!-- Required for GUI apps -->
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+
+    <!-- Optional but recommended -->
+    <key>NSHighResolutionCapable</key>
+    <true/>
+
+    <!-- Minimum supported macOS version -->
+    <key>LSMinimumSystemVersion</key>
+    <string>@APP_DEPLOYMENT_TARGET@</string>
+
+    <!-- App category (required for Mac App Store) -->
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.education</string>
+
+    <!-- App icon (must be added to Resources and passed to RESOURCE property) -->
+    <key>CFBundleIconFile</key>
+    <string>icon.icns</string>
+
+    <!-- Localizations (optional) -->
+    <key>CFBundleLocalizations</key>
+    <array>
+        <string>en</string>
+    </array>
+</dict>
+</plist>
+
