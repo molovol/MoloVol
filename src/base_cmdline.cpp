@@ -173,6 +173,7 @@ static const std::map<std::string, unsigned> DISPLAY_OPTIONS = {
   {"surf", mvOUT_SURF},
   {"cavities", mvOUT_CAVITIES},
   {"all", mvOUT_ALL}
+};
 
 unsigned evalDisplayOptions(const std::string& output) {
   std::stringstream ss(output);
