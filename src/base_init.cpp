@@ -28,8 +28,10 @@ bool MainApp::OnInit()
   //freopen("conout$", "w", stderr);
   //printf("Debugging Window:\n");
   if (argc != 1){
-    // command line interface
-    //evalCmdLine(argc, argv);
+    // command line interface - disable GUI and run CLI mode
+    Ctrl::getInstance()->disableGUI();
+    m_is_cli_mode = true;
+    m_cli_success = evalCmdLine(argc, argv);
   }
   else {
     // initialise the GUI
@@ -37,7 +39,6 @@ bool MainApp::OnInit()
         wxDefaultPosition, wxDefaultSize);
     m_mainWin->Show(true);
     SetTopWindow(m_mainWin);
-
   }
   return true;
 };
@@ -46,8 +47,14 @@ bool MainApp::OnInit()
 // OnRun() is called after OnInit() returns true. In order to suppress the GUI, the attribute "silent" has to
 // be toggled. this can be done by opening the app from the command line
 int MainApp::OnRun(){
-  if (isSilent()){return 0;} // end application if GUI is silenced
-  else {return wxApp::OnRun();} // proceed normally
+  if (m_is_cli_mode) {
+    // CLI mode: return appropriate exit code
+    return m_cli_success ? 0 : 1;
+  } else if (isSilent()) {
+    return 0; // end application if GUI is silenced
+  } else {
+    return wxApp::OnRun(); // proceed normally
+  }
 }
 
 // set default states of GUI elements here

@@ -1,4 +1,4 @@
-# Base sources (non-GUI)
+# Base sources (includes CLI parsing for both GUI and non-GUI)
 set(LIB_SOURCES
   src/atom.cpp
   src/atomtree.cpp
@@ -15,6 +15,7 @@ set(LIB_SOURCES
   src/vector.cpp
   src/voxel.cpp
   src/controller.cpp
+  src/base_cmdline.cpp
 )
 
 # GUI-specific sources
@@ -25,9 +26,7 @@ set(GUI_SOURCES
   src/base_init.cpp
 )
 
-set(CLI_SOURCES
-    src/base_cmdline.cpp
-)
+# CLI builds use LIB_SOURCES directly (no separate CLI_SOURCES needed)
 # Create the static library
 add_library(molovol_lib STATIC ${LIB_SOURCES})
 target_include_directories(molovol_lib PUBLIC include)
@@ -44,5 +43,6 @@ endif()
 if(MOLOVOL_BUILD_GUI)
     set(SOURCES ${GUI_SOURCES})
 else()
-    set(SOURCES ${CLI_SOURCES})
+    # For CLI builds, use the library sources directly (includes main function)
+    set(SOURCES ${LIB_SOURCES})
 endif()

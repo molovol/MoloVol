@@ -48,96 +48,118 @@ public:
       std::string arg = argv[i];
       if (arg[0] != '-') continue;
 
-      std::string opt_name = arg.substr(arg[1] == '-' ? 2 : 1);
-      auto option = findOption(opt_name);
-      if (!option) {
-        std::cerr << "Unknown option: " << arg << std::endl;
-        return false;
-      }
+      if (arg[1] == '-') {
+        // Long option
+        auto eq_pos = arg.find('=');
+        std::string name = (eq_pos != std::string::npos) ? arg.substr(2, eq_pos - 2) : arg.substr(2);
+        
+        auto opt_it = std::find_if(options.begin(), options.end(),
+          [&name](const CommandLineOption& opt) { return opt.long_name == name; });
+        
+        if (opt_it == options.end()) {
+          std::cerr << "Unknown option: " << arg << std::endl;
+          return false;
+        }
 
-      if (option->is_switch) {
-        _parsed_flags[option->long_name] = true;
-      } else if (i + 1 < argc) {
-        _parsed_options[option->long_name] = argv[++i];
+        if (opt_it->is_switch) {
+          _parsed_flags[name] = true;
+        } else {
+          std::string value;
+          if (eq_pos != std::string::npos) {
+            value = arg.substr(eq_pos + 1);
+          } else if (i + 1 < argc) {
+            value = argv[++i];
+          } else {
+            std::cerr << "Option " << arg << " requires a value" << std::endl;
+            return false;
+          }
+          _parsed_options[name] = value;
+        }
       } else {
-        std::cerr << "Missing value for option: " << arg << std::endl;
-        return false;
+        // Short option
+        std::string name = arg.substr(1);
+        
+        auto opt_it = std::find_if(options.begin(), options.end(),
+          [&name](const CommandLineOption& opt) { return opt.short_name == name; });
+        
+        if (opt_it == options.end()) {
+          std::cerr << "Unknown option: " << arg << std::endl;
+          return false;
+        }
+
+        if (opt_it->is_switch) {
+          _parsed_flags[opt_it->long_name] = true;
+        } else {
+          if (i + 1 < argc) {
+            _parsed_options[opt_it->long_name] = argv[++i];
+          } else {
+            std::cerr << "Option " << arg << " requires a value" << std::endl;
+            return false;
+          }
+        }
       }
     }
 
-    // Don't validate required options for help or version flags
-    if (_parsed_flags.count("help") > 0 || _parsed_flags.count("version") > 0) {
-      return true;
+    // Check required options (skip if help or version is requested)
+    if (_parsed_flags.find("help") == _parsed_flags.end() && _parsed_flags.find("version") == _parsed_flags.end()) {
+      for (const auto& opt : options) {
+        if (opt.is_required && !opt.is_switch && _parsed_options.find(opt.long_name) == _parsed_options.end()) {
+          std::cerr << "Missing required option: --" << opt.long_name << " (-" << opt.short_name << ")" << std::endl;
+          return false;
+        }
+      }
     }
 
-    return validateRequiredOptions();
+    return true;
   }
 
   bool found(const std::string& name) const {
-    return _parsed_flags.count(name) > 0 || _parsed_options.count(name) > 0;
+    return _parsed_flags.find(name) != _parsed_flags.end();
   }
 
   std::optional<std::string> getValue(const std::string& name) const {
     auto it = _parsed_options.find(name);
-    return it != _parsed_options.end() ? std::optional<std::string>(it->second) : std::nullopt;
+    return (it != _parsed_options.end()) ? std::make_optional(it->second) : std::nullopt;
   }
 
   void displayHelp() const {
     std::cout << "Usage:\n";
     for (const auto& opt : options) {
-      std::cout << "  -" << opt.short_name << ", --" << opt.long_name
-               << (opt.is_required ? " (required)" : "") << "\n    "
-               << opt.description << "\n";
+      std::cout << "  -" << opt.short_name << ", --" << opt.long_name;
+      if (opt.is_required) std::cout << " (required)";
+      std::cout << "\n    " << opt.description << std::endl;
     }
-  }
-
-private:
-  std::optional<CommandLineOption> findOption(const std::string& name) const {
-    for (const auto& opt : options) {
-      if (opt.short_name == name || opt.long_name == name) {
-        return opt;
-      }
-    }
-    return std::nullopt;
-  }
-
-  bool validateRequiredOptions() const {
-    std::vector<std::string> missing;
-    for (const auto& opt : options) {
-      if (opt.is_required && !found(opt.long_name)) {
-        missing.push_back(opt.long_name);
-      }
-    }
-
-    if (!missing.empty()) {
-      Ctrl::getInstance()->displayErrorMessage(910 + missing.size(), missing);
-      return false;
-    }
-    return true;
   }
 };
 
-bool validateProbes(double r1, double r2, bool pm) {
-  if (pm && r2 < r1) {
-    Ctrl::getInstance()->displayErrorMessage(104);
+bool validateProbes(double radius_s, double radius_l, bool two_probe_mode) {
+  if (radius_s <= 0) {
+    Ctrl::getInstance()->displayErrorMessage(900);
+    return false;
+  }
+  if (two_probe_mode && radius_l <= radius_s) {
+    Ctrl::getInstance()->displayErrorMessage(901);
     return false;
   }
   return true;
 }
 
-bool validateExport(const std::string& out_dir, const std::vector<bool>& exp_options) {
-  if (isIncluded(true, exp_options) && out_dir.empty()) {
-    Ctrl::getInstance()->displayErrorMessage(302);
+bool validateExport(const std::string& output_dir, const std::vector<bool>& export_flags) {
+  bool any_export = std::any_of(export_flags.begin(), export_flags.end(), [](bool flag) { return flag; });
+  if (any_export && output_dir.empty()) {
+    std::cerr << "Export options require an output directory (-do/--dir-output)" << std::endl;
     return false;
   }
   return true;
 }
 
-bool validatePdb(const std::string& file, bool hetatm, bool unitcell) {
-  std::string extension = fileExtension(file);
-  if (extension != "pdb" && extension != "cif" && (hetatm || unitcell)) {
-    Ctrl::getInstance()->displayErrorMessage(115);
-    return false;
+bool validatePdb(const std::string& file_path, bool include_hetatm, bool unit_cell) {
+  if (unit_cell) {
+    std::string ext = file_path.substr(file_path.find_last_of('.') + 1);
+    if (ext != "pdb" && ext != "cif") {
+      std::cerr << "Unit cell analysis requires PDB or CIF file format" << std::endl;
+      return false;
+    }
   }
   return true;
 }
@@ -249,7 +271,7 @@ bool evalCmdLine(int argc, char* argv[]) {
       exp_total_map, exp_cavity_maps, display_flag);
 }
 
-
+#ifndef MOLOVOL_GUI
 int main(int argc, char* argv[]) {
   Ctrl::getInstance()->disableGUI();
   if (argc < 2) {
@@ -258,3 +280,4 @@ int main(int argc, char* argv[]) {
   }
   return evalCmdLine(argc, argv) ? 0 : 1;
 }
+#endif

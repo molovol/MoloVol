@@ -120,14 +120,18 @@ endif()
 
 # Target MoloVol
 if (MSVC)
-  #target_sources(${EXE_NAME} PRIVATE ${WIN_RESOURCE_FILES})
   add_executable(${EXE_NAME} WIN32 ${SOURCES} ${WIN_RESOURCE_FILES})
 else()
   add_executable(${EXE_NAME} ${SOURCES} ${OSX_RESOURCE_FILES})
 endif()
 # XCode, app bundle and libtiff
 include(MacSpecific)
-target_link_libraries(${EXE_NAME} PRIVATE molovol_lib)
+if(MOLOVOL_BUILD_GUI)
+  # GUI builds link to the library (since GUI sources are separate)
+  target_link_libraries(${EXE_NAME} PRIVATE molovol_lib)
+else()
+  # CLI builds contain all library code directly, no additional linking needed
+endif()
 
 if(MOLOVOL_BUILD_GUI)
   target_link_libraries(${EXE_NAME} PRIVATE ${wxWidgets_LIBRARIES})
