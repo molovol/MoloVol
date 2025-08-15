@@ -117,18 +117,29 @@ private:
   }
 };
 
-// Validation functions combined into single-line expressions
 bool validateProbes(double r1, double r2, bool pm) {
-  return !(pm && r2 < r1 && (Ctrl::getInstance()->displayErrorMessage(104), true));
+  if (pm && r2 < r1) {
+    Ctrl::getInstance()->displayErrorMessage(104);
+    return false;
+  }
+  return true;
 }
 
 bool validateExport(const std::string& out_dir, const std::vector<bool>& exp_options) {
-  return !(isIncluded(true, exp_options) && out_dir.empty() && (Ctrl::getInstance()->displayErrorMessage(302), true));
+  if (isIncluded(true, exp_options) && out_dir.empty()) {
+    Ctrl::getInstance()->displayErrorMessage(302);
+    return false;
+  }
+  return true;
 }
 
 bool validatePdb(const std::string& file, bool hetatm, bool unitcell) {
-  return !((fileExtension(file) != "pdb" && fileExtension(file) != "cif") && (hetatm || unitcell) &&
-          (Ctrl::getInstance()->displayErrorMessage(115), true));
+  std::string extension = fileExtension(file);
+  if (extension != "pdb" && extension != "cif" && (hetatm || unitcell)) {
+    Ctrl::getInstance()->displayErrorMessage(115);
+    return false;
+  }
+  return true;
 }
 
 // Display options map
