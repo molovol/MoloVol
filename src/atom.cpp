@@ -25,11 +25,11 @@ const Vector Atom::getPosVec() const {
 }
 
 // Not needed for struct member access
-const double Atom::getRad() const {
+double Atom::getRad() const {
   return rad;
 }
 
-const double Atom::getCoordinate(const char dim) const {
+double Atom::getCoordinate(const char dim) const {
   switch(dim){
     case 0: return pos_x;
     case 1: return pos_y;
