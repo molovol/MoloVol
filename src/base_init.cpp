@@ -22,14 +22,31 @@ IMPLEMENT_APP(MainApp)
 // first custom code that is run
 bool MainApp::OnInit()
 {
-  //AllocConsole();
   //freopen("conin$", "r", stdin);
   //freopen("conout$", "w", stdout);
   //freopen("conout$", "w", stderr);
-  //printf("Debugging Window:\n");
   if (argc != 1){
     // command line interface
+    if (AttachConsole(ATTACH_PARENT_PROCESS)) {
+      FILE* f;
+      freopen_s(&f, "CONOUT$", "w", stdout);
+      freopen_s(&f, "CONOUT$", "w", stderr);
+      freopen_s(&f, "CONIN$", "r", stdin);
+      std::cout.clear();
+    }
+
     evalCmdLine();
+
+    fflush(stdout);
+    fflush(stderr);
+
+    // Close redirected files (if needed)
+    fclose(stdout);
+    fclose(stderr);
+    fclose(stdin);
+
+    FreeConsole();  // Detach from the console
+
   }
   else {
     // initialise the GUI
