@@ -19,14 +19,16 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11 CACHE STRING "Minimum macOS deployment ver
 # Set name and version
 project(MoloVol VERSION 1.2.1)
 
+# TODO: Handle stripping through cpack -- set(CPACK_STRIP_FILES TRUE)
 if(NOT APPLE)
   # Strip binary for release build
   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
 endif()
 
-include(ExecutableName)
+include(Names)
 # EXE_NAME
+# LIB_NAME
 
 # Specify C++ standard
 set(CMAKE_CXX_STANDARD 20)
@@ -34,24 +36,24 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# TODO: This is not within this PR's scope
 if(APPLE)
-    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
-        set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp")
-        set(OpenMP_C_LIB_NAMES "omp")
-        set(OpenMP_omp_LIBRARY /opt/homebrew/opt/libomp/lib/libomp.dylib)
-    endif()
-    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp")
-        set(OpenMP_CXX_LIB_NAMES "omp")
-        set(OpenMP_omp_LIBRARY /opt/homebrew/opt/libomp/lib/libomp.dylib)
-    endif()
+  if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+    set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp")
+    set(OpenMP_C_LIB_NAMES "omp")
+    set(OpenMP_omp_LIBRARY /opt/homebrew/opt/libomp/lib/libomp.dylib)
+  endif()
+  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp")
+    set(OpenMP_CXX_LIB_NAMES "omp")
+    set(OpenMP_omp_LIBRARY /opt/homebrew/opt/libomp/lib/libomp.dylib)
+  endif()
 endif()
-
 
 # wxWidgets
 if(MOLOVOL_BUILD_GUI)
   set(wxWidgets_USE_STATIC=ON)
-  # Not ideal to use these absolute paths here
+  # TODO: Not ideal to use these absolute paths here
   if (MSVC)
     set(wxWidgets_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/wxWidgets")
     set(wxWidgets_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/wxWidgets/lib/vc_x64_lib-x64-Release-MT")
@@ -88,9 +90,37 @@ elseif(NOT IPO_SUPPORTED)
 endif()
 
 include(Sources)
+# LIB_SOURCES
 # SOURCES
-if(MOLOVOL_RENDERER AND MOLOVOL_BUILD_GUI)
-  list(APPEND SOURCES "src/render_frame.cpp")
+
+if(MOLOVOL_BUILD_GUI)
+  # Create the static library
+  add_library(${LIB_NAME} STATIC ${LIB_SOURCES})
+  target_include_directories(${LIB_NAME} PUBLIC include)
+  
+  # Set the same compiler options for the library
+  target_compile_options(${LIB_NAME} PRIVATE -Wall -Werror -Wno-unused-command-line-argument -Wno-invalid-source-encoding)
+  target_compile_options(${LIB_NAME} PRIVATE "$<$<NOT:$<CONFIG:RELEASE,MINSIZEREL,RELWITHDEBINFO>>:-DDEBUG>")
+    
+  # Compile definitions
+  # All compile definitions are added with the PUBLIC keyword, so that they are
+  # automatically passed on to the executable. This way they only need to be added
+  # to the library.
+  target_compile_definitions(${LIB_NAME} PUBLIC MOLOVOL_GUI)
+  
+  if(MOLOVOL_RENDERER)
+    target_compile_definitions(${LIB_NAME} PUBLIC MOLOVOL_RENDERER) 
+  endif()
+  
+  if(MOLOVOL_ABS_RESOURCE_PATH)
+    target_compile_definitions(${LIB_NAME} PUBLIC ABS_PATH)
+  endif()
+  
+else()
+  # TODO: Avoid code duplication
+  if(MOLOVOL_ABS_RESOURCE_PATH)
+    target_compile_definitions(${EXE_NAME} PUBLIC ABS_PATH)
+  endif()
 endif()
 
 include(Resources)
@@ -111,13 +141,6 @@ if(NOT MOLOVOL_ABS_RESOURCE_PATH)
   )
 endif()
 
-# RPATH STUFF
-#set(CMAKE_MACOSX_RPATH 1)
-#list(APPEND CMAKE_BUILD_RPATH "@executable_path/Frameworks")
-#list(APPEND CMAKE_INSTALL_RPATH "@executable_path/Frameworks")
-#set(CMAKE_BUILD_RPATH "@executable_path/Frameworks")
-#set(CMAKE_INSTALL_RPATH "@executable_path/Frameworks")
-
 # Target MoloVol
 if (MSVC)
   add_executable(${EXE_NAME} WIN32 ${SOURCES} ${WIN_RESOURCE_FILES})
@@ -126,24 +149,16 @@ else()
 endif()
 # XCode, app bundle and libtiff
 include(MacSpecific)
-if(MOLOVOL_BUILD_GUI)
-  # GUI builds link to the library (since GUI sources are separate)
-  target_link_libraries(${EXE_NAME} PRIVATE molovol_lib)
-else()
-  # CLI builds contain all library code directly, no additional linking needed
-endif()
 
 if(MOLOVOL_BUILD_GUI)
+  # GUI builds link to the library (since GUI sources are separate)
+  target_link_libraries(${EXE_NAME} PRIVATE ${LIB_NAME})
   target_link_libraries(${EXE_NAME} PRIVATE ${wxWidgets_LIBRARIES})
-  target_compile_definitions(${EXE_NAME} PRIVATE MOLOVOL_GUI)
   if(MOLOVOL_RENDERER)
     target_link_libraries(${EXE_NAME} PRIVATE ${WXVTK_LIB})
-    target_compile_definitions(${EXE_NAME} PRIVATE MOLOVOL_RENDERER) 
   endif()
-endif()
-  # Add custom flag
-if(MOLOVOL_ABS_RESOURCE_PATH)
-  target_compile_definitions(${EXE_NAME} PUBLIC -DABS_PATH)
+else()
+  # CLI builds contain all library code directly, no additional linking needed
 endif()
 
 # Installation instructions for debian package

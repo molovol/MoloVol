@@ -26,23 +26,14 @@ set(GUI_SOURCES
   src/base_init.cpp
 )
 
-# CLI builds use LIB_SOURCES directly (no separate CLI_SOURCES needed)
-# Create the static library
-add_library(molovol_lib STATIC ${LIB_SOURCES})
-target_include_directories(molovol_lib PUBLIC include)
-
-# Set the same compiler options for the library
-target_compile_options(molovol_lib PRIVATE -Wall -Werror -Wno-unused-command-line-argument -Wno-invalid-source-encoding)
-target_compile_options(molovol_lib PRIVATE "$<$<NOT:$<CONFIG:RELEASE,MINSIZEREL,RELWITHDEBINFO>>:-DDEBUG>")
-
-# Define MOLOVOL_GUI for the library when building with GUI
-if(MOLOVOL_BUILD_GUI)
-    target_compile_definitions(molovol_lib PRIVATE MOLOVOL_GUI)
+if(MOLOVOL_RENDERER AND MOLOVOL_BUILD_GUI)
+  list(APPEND LIB_SOURCES "src/render_frame.cpp")
 endif()
 
 if(MOLOVOL_BUILD_GUI)
-    set(SOURCES ${GUI_SOURCES})
+  set(SOURCES ${GUI_SOURCES})
 else()
-    # For CLI builds, use the library sources directly (includes main function)
-    set(SOURCES ${LIB_SOURCES})
+  # For CLI builds, use the library sources directly (includes main function)
+  set(SOURCES ${LIB_SOURCES})
 endif()
+
