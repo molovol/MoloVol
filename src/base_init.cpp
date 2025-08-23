@@ -31,7 +31,11 @@ bool MainApp::OnInit()
     m_is_cli_mode = true;
     
 #ifdef _WIN32
-    // Windows-specific console attachment for proper output
+    // Windows-specific console attachment for proper CLI output
+    // On Windows, GUI applications (like those built with wxWidgets) don't have a console
+    // attached by default. When run from cmd.exe or PowerShell, stdout/stderr output is lost.
+    // This code attaches to the parent console and redirects I/O streams so CLI output is visible.
+    // Not needed on Unix/macOS where all programs can output to the terminal by default.
     if (AttachConsole(ATTACH_PARENT_PROCESS)) {
       FILE* f;
       freopen_s(&f, "CONOUT$", "w", stdout);
