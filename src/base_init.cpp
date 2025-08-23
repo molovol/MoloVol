@@ -22,11 +22,17 @@ IMPLEMENT_APP(MainApp)
 // first custom code that is run
 bool MainApp::OnInit()
 {
-  //freopen("conin$", "r", stdin);
-  //freopen("conout$", "w", stdout);
-  //freopen("conout$", "w", stderr);
   if (argc != 1){
-    // command line interface
+    // command line interface - disable GUI and run CLI mode
+    Ctrl::getInstance()->disableGUI();
+    m_is_cli_mode = true;
+    
+#ifdef _WIN32
+    // Windows-specific console attachment for proper CLI output
+    // On Windows, GUI applications (like those built with wxWidgets) don't have a console
+    // attached by default. When run from cmd.exe or PowerShell, stdout/stderr output is lost.
+    // This code attaches to the parent console and redirects I/O streams so CLI output is visible.
+    // Not needed on Unix/macOS where all programs can output to the terminal by default.
     if (AttachConsole(ATTACH_PARENT_PROCESS)) {
       FILE* f;
       freopen_s(&f, "CONOUT$", "w", stdout);
@@ -34,19 +40,26 @@ bool MainApp::OnInit()
       freopen_s(&f, "CONIN$", "r", stdin);
       std::cout.clear();
     }
+#endif
 
-    evalCmdLine();
+    m_cli_success = evalCmdLine(argc, argv);
 
+#ifdef _WIN32
+    // Ensure all output is written before we close the console connection
+    // Without fflush, buffered output might be lost when we detach from console
     fflush(stdout);
     fflush(stderr);
 
-    // Close redirected files (if needed)
+    // Close the redirected file handles
+    // These were opened by freopen_s above and need to be closed before detaching
     fclose(stdout);
     fclose(stderr);
     fclose(stdin);
 
-    FreeConsole();  // Detach from the console
-
+    // Detach from the console so the parent terminal can continue
+    // Without this, the console would remain attached to our process
+    FreeConsole();
+#endif
   }
   else {
     // initialise the GUI
@@ -54,7 +67,6 @@ bool MainApp::OnInit()
         wxDefaultPosition, wxDefaultSize);
     m_mainWin->Show(true);
     SetTopWindow(m_mainWin);
-
   }
   return true;
 };
@@ -63,8 +75,14 @@ bool MainApp::OnInit()
 // OnRun() is called after OnInit() returns true. In order to suppress the GUI, the attribute "silent" has to
 // be toggled. this can be done by opening the app from the command line
 int MainApp::OnRun(){
-  if (isSilent()){return 0;} // end application if GUI is silenced
-  else {return wxApp::OnRun();} // proceed normally
+  if (m_is_cli_mode) {
+    // CLI mode: return appropriate exit code
+    return m_cli_success ? 0 : 1;
+  } else if (isSilent()) {
+    return 0; // end application if GUI is silenced
+  } else {
+    return wxApp::OnRun(); // proceed normally
+  }
 }
 
 // set default states of GUI elements here

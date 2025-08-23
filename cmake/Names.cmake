@@ -5,3 +5,5 @@ if (UNIX AND NOT APPLE)
 else()
   set(EXE_NAME ${PROJECT_NAME})
 endif()
+
+set(LIB_NAME core)

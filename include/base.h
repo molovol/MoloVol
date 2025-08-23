@@ -38,8 +38,9 @@ class MainApp: public wxApp
 
   private:
     MainFrame* m_mainWin;
+    bool m_cli_success = true;
+    bool m_is_cli_mode = false;
 
-    void evalCmdLine();
     void silenceGUI(bool);
     bool isSilent();
 };
@@ -335,5 +336,8 @@ enum
 };
 
 //DECLARE_APP(MainApp)
+
+// Command line interface function
+bool evalCmdLine(int argc, char* argv[]);
 
 #endif
