@@ -22,9 +22,6 @@ IMPLEMENT_APP(MainApp)
 // first custom code that is run
 bool MainApp::OnInit()
 {
-  //freopen("conin$", "r", stdin);
-  //freopen("conout$", "w", stdout);
-  //freopen("conout$", "w", stderr);
   if (argc != 1){
     // command line interface - disable GUI and run CLI mode
     Ctrl::getInstance()->disableGUI();
@@ -48,15 +45,20 @@ bool MainApp::OnInit()
     m_cli_success = evalCmdLine(argc, argv);
 
 #ifdef _WIN32
+    // Ensure all output is written before we close the console connection
+    // Without fflush, buffered output might be lost when we detach from console
     fflush(stdout);
     fflush(stderr);
 
-    // Close redirected files (if needed)
+    // Close the redirected file handles
+    // These were opened by freopen_s above and need to be closed before detaching
     fclose(stdout);
     fclose(stderr);
     fclose(stdin);
 
-    FreeConsole();  // Detach from the console
+    // Detach from the console so the parent terminal can continue
+    // Without this, the console would remain attached to our process
+    FreeConsole();
 #endif
   }
   else {
